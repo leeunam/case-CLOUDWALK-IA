@@ -23,6 +23,9 @@
     "previous_case_id": null,
     "human_queue_since": null,
     "blocking_reason": null,
-    "handoff": null
+    "handoff": {
+      "summary": "Encaminhamento de contingência após falha do atendente simulado. Cliente relata dificuldade de leitura de cartão após reiniciar a maquininha.",
+      "message_ids": []
+    }
   }
 }

@@ -48,6 +48,13 @@
           "category": "payouts",
           "limit": 1
         }
+      ],
+      [
+        {
+          "priority": "advanced",
+          "category": "terminal",
+          "limit": 1
+        }
       ]
     ]
   }
