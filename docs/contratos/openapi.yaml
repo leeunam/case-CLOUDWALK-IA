@@ -135,7 +135,7 @@ paths:
     get:
       operationId: getSession
       summary: Consultar sessão e obter token CSRF
-      x-implementation-phase: F05
+      x-implementation-phase: F02
       security: []
       tags:
       - API da aplicação
@@ -150,7 +150,7 @@ paths:
     post:
       operationId: createSession
       summary: Autenticar usuário
-      x-implementation-phase: F05
+      x-implementation-phase: F02
       security:
       - SessionCookie: []
         CsrfToken: []
@@ -178,7 +178,7 @@ paths:
     delete:
       operationId: deleteSession
       summary: Encerrar sessão
-      x-implementation-phase: F05
+      x-implementation-phase: F02
       security:
       - SessionCookie: []
         CsrfToken: []
@@ -224,6 +224,31 @@ paths:
           $ref: '#/components/responses/Error409'
         '422':
           $ref: '#/components/responses/Error422'
+  /api/v1/case-filters:
+    get:
+      operationId: listCaseFilters
+      summary: Consultar marcas e filas dos filtros de atendimento
+      x-implementation-phase: F02
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      description: Para analistas, Rails devolve marcas e filas visíveis pelo vínculo de equipe que dá acesso aos casos,
+        inclusive fora da marca em operação. Para supervisores, devolve as marcas autorizadas e suas filas. A consulta
+        inclui filas inativas quando podem conter histórico visível.
+      responses:
+        '200':
+          description: Consulta concluída.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/CaseFilters
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '422':
+          $ref: '#/components/responses/Error422'
   /api/v1/cases:
     get:
       operationId: listCases
@@ -234,6 +259,7 @@ paths:
       tags:
       - API da aplicação
       description: Rails filtra por marca, fila e vínculos efetivos. Integrações com falha podem ser filtradas pelo supervisor.
+        Consulte /api/v1/case-filters para obter os nomes e IDs dos filtros visíveis.
       parameters:
       - name: brand_id
         in: query
@@ -950,6 +976,53 @@ paths:
           $ref: '#/components/responses/Error409'
         '422':
           $ref: '#/components/responses/Error422'
+  /api/v1/brands/{brand_id}/configuration-audit:
+    parameters:
+    - name: brand_id
+      in: path
+      required: true
+      description: ID da marca do recurso.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    get:
+      operationId: listConfigurationAudit
+      summary: Consultar auditoria de configuração da marca
+      x-implementation-phase: F06
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      description: Supervisor consulta alterações administrativas da marca, inclusive sem atendimentos. Ordenação por
+        ocorrido mais recente, com ID como desempate. A consulta por resource_id exige resource_type. O servidor filtra
+        as fotografias pelos campos operacionais visíveis à marca autorizada.
+      parameters:
+      - name: resource_type
+        in: query
+        description: Filtrar pelo tipo de recurso.
+        schema:
+          $ref: ./schemas/v1.json#/$defs/ConfigurationResourceType
+      - name: resource_id
+        in: query
+        description: Filtrar pelo ID do recurso.
+        schema:
+          $ref: ./schemas/v1.json#/$defs/Uuid
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Consulta concluída.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/ConfigurationAuditList
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '422':
+          $ref: '#/components/responses/Error422'
   /api/v1/brands/{brand_id}/catalog:
     parameters:
     - name: brand_id
@@ -1013,12 +1086,45 @@ paths:
           $ref: '#/components/responses/Error409'
         '422':
           $ref: '#/components/responses/Error422'
+  /api/v1/analysts:
+    get:
+      operationId: listAnalysts
+      summary: Listar analistas elegíveis para edição de perfil
+      x-implementation-phase: F06
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      description: Supervisor consulta apenas analistas cujo perfil está em seu escopo de edição. Como o perfil vale
+        em todas as marcas do analista, Rails exige autorização em todas as marcas em que ele atua. O filtro por marca
+        restringe a lista dentro desse escopo. Use user_id no caminho do perfil.
+      parameters:
+      - name: brand_id
+        in: query
+        description: Restringir a analistas autorizados a atuar nesta marca.
+        schema:
+          $ref: ./schemas/v1.json#/$defs/Uuid
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Consulta concluída.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/AnalystList
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '422':
+          $ref: '#/components/responses/Error422'
   /api/v1/analysts/{analyst_id}/capacity-profile:
     parameters:
     - name: analyst_id
       in: path
       required: true
-      description: ID do analista.
+      description: ID de User obtido em user_id de GET /api/v1/analysts.
       schema:
         $ref: ./schemas/v1.json#/$defs/Uuid
     get:
@@ -1155,6 +1261,8 @@ paths:
           $ref: '#/components/responses/Error403'
         '422':
           $ref: '#/components/responses/Error422'
+      description: A sessão do simulador recebe apenas conversas próprias. A resposta inclui o canal e a identidade da
+        conversa necessários para continuar após recarregar.
   /api/v1/simulator/cases/{id}:
     parameters:
     - name: id
@@ -1184,6 +1292,8 @@ paths:
           $ref: '#/components/responses/Error403'
         '404':
           $ref: '#/components/responses/Error404'
+      description: A sessão do simulador recebe apenas conversas próprias. A resposta inclui o canal e a identidade da
+        conversa necessários para continuar após recarregar.
   /api/v1/simulator/cases/{id}/messages:
     parameters:
     - name: id
@@ -1243,7 +1353,8 @@ paths:
       tags:
       - API da aplicação
       description: Rails identifica a sessão, gera IDs externos e passa pela mesma fronteira de entrada por meio da simulação
-        no servidor. Conversa existente deve pertencer à sessão.
+        no servidor. Na continuação, Rails exige que canal e conversa pertençam à sessão e que a conversa use o canal
+        da rota.
       parameters:
       - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:

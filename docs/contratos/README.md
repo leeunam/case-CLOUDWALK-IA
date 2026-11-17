@@ -64,17 +64,36 @@ atualização dos exemplos e coordenação com os consumidores.
 Rails aplica autorização em toda leitura, mutação e assinatura de atualização.
 React usa a mesma origem, cookie de sessão e token `X-CSRF-Token` para escritas.
 A resposta de sessão também expõe a marca em operação, disponibilidade e
-contagem de casos do analista. Consultas de caso e histórico usam cursor opaco
-ou sequência conforme a operação. Após um sinal de atualização do Action Cable,
-o cliente consulta o recurso novamente. Também recarrega na reconexão e pode
-intercalar consultas periódicas enquanto a conversa estiver aberta.
+contagem de casos do analista. A F02 implementa a sessão no Rails para que as
+leituras protegidas possam ser exercitadas. A F05 implementa a tela de login.
+Consultas de caso e histórico usam cursor opaco ou sequência conforme a
+operação. Após um sinal de atualização do Action Cable, o cliente consulta o
+recurso novamente. Também recarrega na reconexão e pode intercalar consultas
+periódicas enquanto a conversa estiver aberta.
 
 Supervisores têm autorização explícita por marca. Analistas ganham visibilidade
 pelo caminho equipe → autorização na marca → vínculo de responsabilidade da
-fila. Para escrever uma resposta, o analista também precisa ser o responsável
-em atendimento ativo e operar na marca. O simulador usa sessão segregada e
-consulta apenas sua própria conversa. Seus endpoints retornam estados e
-mensagens públicas. Os IDs e papéis nos dados de sessão são atribuídos pelo Rails.
+fila. `GET /api/v1/case-filters` fornece nomes e IDs para os filtros dessa
+visibilidade, inclusive em marcas em que o analista pode consultar sem atuar.
+O Rails aplica o mesmo escopo quando a interface usa esses IDs na caixa.
+
+O UUID em `session.user.id` identifica o usuário. Para analistas,
+`session.user.attendant_id` identifica o atendente humano usado em
+`case.assignee.id`. Supervisores e simuladores têm `attendant_id` nulo.
+O React pode habilitar ações de resposta, espera e resolução quando o caso
+está em `human_active`, o responsável é humano, o ID do atendente coincide
+com o da sessão e o caso pertence à marca em operação. O Rails revalida a
+autorização a cada comando. A supervisão encontra os analistas cujo perfil
+ela pode editar em `GET /api/v1/analysts` e usa o `user_id` na rota de perfil.
+Como o perfil vale em todas as marcas de atuação do analista, a edição
+exige autorização explícita para cada uma delas.
+
+O simulador usa sessão segregada e consulta apenas suas conversas.
+Após recarregar, a listagem e o detalhe recuperam `channel_id` para a rota
+de envio e `external_conversation_id` para o corpo da continuação. O Rails
+verifica se o canal e a conversa pertencem à sessão e se a conversa usa
+esse canal. O recibo devolve os dois IDs. As leituras do simulador expõem
+estados e mensagens públicas.
 
 Nas mutações de atendimento, o Rails verifica `Idempotency-Key` e
 `expected_version`. A chave é vinculada ao ator, operação e recurso. Repetir o
@@ -92,6 +111,16 @@ transferência. Para um perfil, cada alternativa contém pares exatos e únicos 
 categoria e prioridade com limites positivos. A carteira deve comportar a maior
 alternativa. O conjunto ativo precisa caber inteiro em uma única alternativa.
 O Rails valida os pares e o teto ao publicar a versão.
+
+Supervisores consultam criação e edição de configurações em
+`GET /api/v1/brands/{brand_id}/configuration-audit`, com filtros de tipo
+e ID de recurso. O Rails grava a auditoria junto à mudança,
+associa o evento às marcas afetadas e retorna apenas o escopo autorizado.
+Cada evento informa ator, versão publicada e fotografias `before` e `after`
+dos campos operacionais autorizados. Em criação, `before` é nulo.
+O `resource_id` do catálogo identifica a marca. O do perfil identifica o
+usuário analista, mantendo a identidade ao publicar outra versão.
+As fotografias omitem credenciais e dados de marcas fora da consulta.
 
 ## Transições do atendimento
 
@@ -155,8 +184,19 @@ determinísticos dentro dos exemplos e podem ser usados no mock da interface.
 | `case-resolved-messages.json` | `MessageList` | Histórico completo da conversa resolvida em dois turnos. |
 | `case-correct-classification.json` | `CaseClassificationCorrection` | Supervisor corrige a classificação com motivo. |
 | `analyst-session.json` | `Session` | Analista com acesso de consulta a duas marcas e operação em uma. |
+| `supervisor-session.json` | `Session` | Supervisor autorizado nas duas marcas, sem identidade de atendente. |
+| `case-human-owned.json` | `Case` | O atendente da sessão é responsável e pode agir na marca em operação. |
+| `case-human-coworker.json` | `Case` | Caso visível na mesma marca, com outro responsável. |
+| `case-filters.json` | `CaseFilters` | Nomes e IDs de duas marcas e suas filas visíveis ao analista. |
+| `analyst-list.json` | `AnalystList` | A supervisão relaciona usuários a atendentes e obtém o ID para editar o perfil. |
+| `simulator-accepted.json` | `SimulatorReceipt` | A abertura por WhatsApp devolve os identificadores da conversa. |
+| `simulator-recovered-list.json` | `SimulatorCaseList` | A sessão reencontra a conversa no histórico após recarregar. |
+| `simulator-recovered-case.json` | `SimulatorCase` | O detalhe recupera o canal da rota e a identidade externa para o envio. |
+| `simulator-followup.json` | `SimulatorMessage` | O cliente envia outra mensagem à conversa recuperada. |
+| `simulator-followup-accepted.json` | `SimulatorReceipt` | O Rails confirma o mesmo caso, conversa e correlação. |
 | `case-wait-for-customer.json` | `CaseAction` | Responsável ativo solicita informação usando a versão do caso. |
 | `routing-rule-brand.json` | `RoutingRule` | Encaminha a categoria para uma fila da mesma marca. |
+| `configuration-audit.json` | `ConfigurationAuditList` | Criação e edição da regra são consultáveis por marca e recurso. |
 | `capacity-profile.json` | `CapacityProfile` | Perfil com teto de carteira e alternativas de simultaneidade. |
 | `error-403.json` | `Error` | Escrita negada a ator autenticado sem permissão. |
 | `error-409.json` | `Error` | Versão defasada em uma ação. |
@@ -167,8 +207,10 @@ determinísticos dentro dos exemplos e podem ser usados no mock da interface.
 A partir de `backend/`, com as dependências instaladas, execute
 `bundle exec ruby ../script/check_contracts.rb`. O verificador confere a
 estrutura OpenAPI 3.1, as referências locais, o JSON Schema 2020-12 e as
-fixtures. Os efeitos que dependem de autorização, persistência, concorrência
-ou estado continuam sendo critérios de teste das implementações seguintes.
+fixtures. Ele também confere se os dados dos exemplos permitem retomar uma
+conversa, distinguir o responsável e acompanhar versões de configuração.
+Autorização, persistência, concorrência e transições serão testadas nas
+implementações seguintes.
 
 Exercício curto. Abra o segundo pedido da IA, localize a resposta da primeira
 rodada no histórico e confira quais campos ligam a proposta de resolução ao

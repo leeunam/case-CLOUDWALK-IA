@@ -15,6 +15,7 @@ de marca, equipe, fila e responsável para distribuição e retomada.
 | Pessoas e acesso | `team_memberships` vincula analistas a equipes. `supervisor_brands` autoriza supervisores em marcas explícitas. Atendente humano referencia o usuário. O mock tem identidade de atendente própria. |
 | Capacidade | Uma versão ativa de perfil por analista. A versão guarda limite de carteira e alternativas, cada qual um conjunto de pares de prioridade e categoria com limites inteiros. |
 | Encaminhamento futuro F06 | Regra versionada tem `brand_id`, posição, filtros opcionais e fila de destino na mesma marca por vínculo composto. O Rails registra a regra e versão aplicadas ao caso. |
+| Auditoria de configuração futura F06 | Evento administrativo é persistido na transação da mudança e indexado por marca, tipo, ID do recurso e data. Registra ator, versão e fotografias autorizadas antes e depois. Pode existir antes da abertura de qualquer atendimento. |
 
 ## Atendimento e integração previstos para F02–F04
 

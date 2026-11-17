@@ -1,0 +1,18 @@
+{
+  "schema": "../schemas/v1.json#/$defs/AnalystList",
+  "data": {
+    "items": [
+      {
+        "name": "Renata Souza",
+        "user_id": "00000000-0000-4000-8000-000000000100",
+        "attendant_id": "00000000-0000-4000-8000-000000000104"
+      },
+      {
+        "name": "João Lima",
+        "user_id": "00000000-0000-4000-8000-000000000105",
+        "attendant_id": "00000000-0000-4000-8000-000000000106"
+      }
+    ],
+    "next_cursor": null
+  }
+}

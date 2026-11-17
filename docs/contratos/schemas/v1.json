@@ -99,7 +99,8 @@
           ],
           "properties": {
             "id": {
-              "$ref": "#/$defs/Uuid"
+              "$ref": "#/$defs/Uuid",
+              "description": "UUID de Attendant, seja humano ou IA."
             },
             "type": {
               "type": "string",
@@ -610,11 +611,13 @@
                 "id",
                 "name",
                 "role",
-                "brand_ids"
+                "brand_ids",
+                "attendant_id"
               ],
               "properties": {
                 "id": {
-                  "$ref": "#/$defs/Uuid"
+                  "$ref": "#/$defs/Uuid",
+                  "description": "UUID de User para analista e supervisor. Para o simulador, UUID da identidade sintética da sessão."
                 },
                 "name": {
                   "$ref": "#/$defs/NonEmptyString"
@@ -633,9 +636,41 @@
                     "$ref": "#/$defs/Uuid"
                   },
                   "uniqueItems": true
+                },
+                "attendant_id": {
+                  "description": "UUID de Attendant que aparece em Case.assignee.id para um analista.",
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/Uuid"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
-              "additionalProperties": false
+              "additionalProperties": false,
+              "if": {
+                "properties": {
+                  "role": {
+                    "const": "analyst"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "attendant_id": {
+                    "$ref": "#/$defs/Uuid"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "attendant_id": {
+                    "type": "null"
+                  }
+                }
+              }
             },
             {
               "type": "null"
@@ -1192,7 +1227,8 @@
       "required": [
         "case_id",
         "correlation_id",
-        "external_conversation_id"
+        "external_conversation_id",
+        "channel_id"
       ],
       "properties": {
         "case_id": {
@@ -1203,6 +1239,9 @@
         },
         "external_conversation_id": {
           "$ref": "#/$defs/NonEmptyString"
+        },
+        "channel_id": {
+          "$ref": "#/$defs/Uuid"
         }
       },
       "additionalProperties": false
@@ -1643,7 +1682,8 @@
               "$ref": "#/$defs/Uuid"
             },
             "analyst_id": {
-              "$ref": "#/$defs/Uuid"
+              "$ref": "#/$defs/Uuid",
+              "description": "UUID de User retornado em Analyst.user_id."
             },
             "version": {
               "type": "integer",
@@ -1774,7 +1814,9 @@
         "id",
         "previous_case_id",
         "status",
-        "updated_at"
+        "updated_at",
+        "channel_id",
+        "external_conversation_id"
       ],
       "properties": {
         "id": {
@@ -1795,6 +1837,12 @@
         },
         "updated_at": {
           "$ref": "#/$defs/Timestamp"
+        },
+        "channel_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "external_conversation_id": {
+          "$ref": "#/$defs/NonEmptyString"
         }
       },
       "additionalProperties": false
@@ -1943,6 +1991,204 @@
         "default_queue_id",
         "team_ids"
       ]
+    },
+    "Analyst": {
+      "type": "object",
+      "required": [
+        "user_id",
+        "attendant_id",
+        "name"
+      ],
+      "properties": {
+        "user_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "attendant_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AnalystList": {
+      "type": "object",
+      "required": [
+        "items",
+        "next_cursor"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Analyst"
+          }
+        },
+        "next_cursor": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NonEmptyString"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CaseFilterBrand": {
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CaseFilterQueue": {
+      "type": "object",
+      "required": [
+        "id",
+        "brand_id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "brand_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CaseFilters": {
+      "type": "object",
+      "required": [
+        "brands",
+        "queues"
+      ],
+      "properties": {
+        "brands": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CaseFilterBrand"
+          }
+        },
+        "queues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CaseFilterQueue"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ConfigurationResourceType": {
+      "type": "string",
+      "enum": [
+        "brand",
+        "team",
+        "queue",
+        "routing_rule",
+        "catalog",
+        "capacity_profile"
+      ]
+    },
+    "ConfigurationAuditEvent": {
+      "type": "object",
+      "required": [
+        "id",
+        "brand_id",
+        "correlation_id",
+        "actor",
+        "resource_type",
+        "resource_id",
+        "version",
+        "occurred_at",
+        "before",
+        "after"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "brand_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "actor": {
+          "$ref": "#/$defs/Actor",
+          "description": "A identidade de um supervisor usa seu UUID de User."
+        },
+        "resource_type": {
+          "$ref": "#/$defs/ConfigurationResourceType"
+        },
+        "resource_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "occurred_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "before": {
+          "oneOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "after": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ConfigurationAuditList": {
+      "type": "object",
+      "required": [
+        "items",
+        "next_cursor"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConfigurationAuditEvent"
+          }
+        },
+        "next_cursor": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NonEmptyString"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
     }
   }
 }
