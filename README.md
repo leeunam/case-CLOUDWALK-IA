@@ -11,6 +11,12 @@ de saúde, React verifica essa consulta, PostgreSQL contém a operação sintét
 e RabbitMQ fica pronto para a integração de F02. As rotas de atendimento e
 administração descritas nos contratos serão implementadas nas próximas tarefas.
 
+Verificação local da F01 em 2026-11-17 passou com cinco testes Rails e quatorze
+asserções, OpenAPI e 43 fixtures, build React/TypeScript, execução de um job
+pelo worker e instalação com bancos vazios. O teste de reinício preservou uma
+autorização removida. O aviso de dependência de desenvolvimento está descrito
+ao fim deste README.
+
 - [Escopo e arquitetura](docs/planejamento/especificacao-mvp.md)
 - [Backlog e critérios de aceite](docs/planejamento/plano-de-execucao.md)
 - [Decisões confirmadas](docs/planejamento/decisoes.md)

@@ -2,6 +2,11 @@
 
 Este backlog usa a [especificação](especificacao-mvp.md) como contrato de produto. O horizonte de quatro semanas segue a estimativa do TAPI. Datas e dedicação semanal serão ajustadas à agenda real. Os checkpoints semanais são internos. A primeira entrega apresentável inclui atendente simulado via broker, complemento pelo Jev, experimento e resultados documentados.
 
+Em 2026-11-17, a F01 foi implementada e verificada localmente. O README contém
+os comandos para subir o ambiente e repetir as verificações. F02 e a preparação
+das telas F05 com fixtures podem começar a partir dessa base. As rotas futuras
+dos contratos ainda serão implementadas nas respectivas tarefas.
+
 ## 1. Ordem de trabalho
 
 | Etapa | Entregas internas | Evidência para avançar |
