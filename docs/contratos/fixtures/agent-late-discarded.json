@@ -1,0 +1,7 @@
+{
+  "schema": "../schemas/v1.json#/$defs/AgentReceipt",
+  "data": {
+    "event_id": "00000000-0000-4000-8000-000000000614",
+    "disposition": "discarded"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "schema": "../schemas/v1.json#/$defs/ChannelReceipt",
+  "data": {
+    "case_id": "00000000-0000-4000-8000-000000000300",
+    "correlation_id": "00000000-0000-4000-8000-000000000200"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "schema": "../schemas/v1.json#/$defs/CaseClassificationCorrection",
+  "data": {
+    "expected_version": 1,
+    "reason": "A descrição corresponde a Pix, com impacto moderado.",
+    "category": "pix",
+    "priority": "intermediate"
+  }
+}

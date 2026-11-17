@@ -1,0 +1,10 @@
+{
+  "schema": "../schemas/v1.json#/$defs/ChannelMessage",
+  "data": {
+    "source_event_id": "whatsapp-horizonte-01",
+    "external_conversation_id": "whatsapp-conversation-01",
+    "external_customer_id": "customer-horizonte-01",
+    "text": "O visor da maquininha está apagado desde a troca de bateria.",
+    "category": "terminal"
+  }
+}

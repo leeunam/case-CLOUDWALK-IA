@@ -1,0 +1,7 @@
+{
+  "schema": "../schemas/v1.json#/$defs/HealthSuccess",
+  "data": {
+    "status": "ok",
+    "database": "ok"
+  }
+}

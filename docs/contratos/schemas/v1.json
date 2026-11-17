@@ -1,0 +1,1948 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Contratos Help Desk CloudWalk v1",
+  "$defs": {
+    "Uuid": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "NonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Priority": {
+      "type": "string",
+      "enum": [
+        "basic",
+        "intermediate",
+        "advanced",
+        "urgent"
+      ]
+    },
+    "CategoryKey": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "examples": [
+        "pix",
+        "payouts",
+        "terminal"
+      ],
+      "description": "Identificador do catálogo ativo. Os exemplos são categorias do seed."
+    },
+    "CaseStatus": {
+      "type": "string",
+      "enum": [
+        "classification_pending",
+        "classification_review",
+        "ai_active",
+        "waiting_human",
+        "human_active",
+        "waiting_customer",
+        "waiting_resumption",
+        "resolved"
+      ]
+    },
+    "IntegrationStatus": {
+      "type": "string",
+      "enum": [
+        "idle",
+        "pending_delivery",
+        "awaiting_result",
+        "failed"
+      ]
+    },
+    "ActorType": {
+      "type": "string",
+      "enum": [
+        "system",
+        "customer",
+        "ai",
+        "human",
+        "supervisor"
+      ]
+    },
+    "Actor": {
+      "type": "object",
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/ActorType"
+        },
+        "id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "description": "Identidade interna quando aplicável."
+    },
+    "Assignee": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "id",
+            "type"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/Uuid"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "ai",
+                "human"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "ClassificationSource": {
+      "type": "string",
+      "enum": [
+        "channel",
+        "jev",
+        "supervisor"
+      ]
+    },
+    "Classification": {
+      "type": "object",
+      "required": [
+        "category",
+        "category_source",
+        "priority",
+        "priority_source"
+      ],
+      "properties": {
+        "category": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/CategoryKey"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "category_source": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ClassificationSource"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "priority": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Priority"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "priority_source": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ClassificationSource"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "description": "Cada origem é nula quando seu campo está ausente. Campo preenchido tem origem.",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "category": {
+                "type": "null"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "category_source": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "category_source": {
+                "$ref": "#/$defs/ClassificationSource"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "priority": {
+                "type": "null"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "priority_source": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "priority_source": {
+                "$ref": "#/$defs/ClassificationSource"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ValidatedClassification": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Classification"
+        },
+        {
+          "properties": {
+            "category": {
+              "$ref": "#/$defs/CategoryKey"
+            },
+            "priority": {
+              "$ref": "#/$defs/Priority"
+            }
+          }
+        }
+      ]
+    },
+    "ChannelMessage": {
+      "type": "object",
+      "required": [
+        "source_event_id",
+        "external_conversation_id",
+        "external_customer_id",
+        "text"
+      ],
+      "properties": {
+        "source_event_id": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "external_conversation_id": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "external_customer_id": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "text": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "category": {
+          "description": "Ausência, null e string vazia acionam complemento. Qualquer outro valor é avaliado na triagem."
+        },
+        "priority": {
+          "description": "Ausência, null e string vazia acionam complemento. Qualquer outro valor é avaliado na triagem."
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChannelReceipt": {
+      "type": "object",
+      "required": [
+        "case_id",
+        "correlation_id"
+      ],
+      "properties": {
+        "case_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/Uuid"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AgentReceipt": {
+      "type": "object",
+      "required": [
+        "event_id",
+        "disposition"
+      ],
+      "properties": {
+        "event_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "disposition": {
+          "type": "string",
+          "enum": [
+            "applied",
+            "duplicate",
+            "discarded"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "Message": {
+      "type": "object",
+      "required": [
+        "id",
+        "sequence",
+        "author",
+        "text",
+        "created_at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "author": {
+          "$ref": "#/$defs/Actor"
+        },
+        "text": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AgentRequestPayload": {
+      "type": "object",
+      "required": [
+        "classification",
+        "history"
+      ],
+      "properties": {
+        "classification": {
+          "$ref": "#/$defs/ValidatedClassification"
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Message"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "description": "Histórico em sequence crescente. A aplicação verifica a ordem e IDs únicos."
+    },
+    "AgentHandoffPayload": {
+      "type": "object",
+      "required": [
+        "request_event_id",
+        "summary",
+        "message_ids"
+      ],
+      "properties": {
+        "request_event_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "summary": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "message_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Uuid"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "text": {
+          "$ref": "#/$defs/NonEmptyString"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AgentEnvelope": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "event_id",
+        "event_type",
+        "occurred_at",
+        "correlation_id",
+        "case_id",
+        "brand_id",
+        "assignment_generation",
+        "turn_id",
+        "payload"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "event_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "event_type": {
+          "type": "string"
+        },
+        "occurred_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "case_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "brand_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "assignment_generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "turn_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "payload": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AgentTurnRequested": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/AgentEnvelope"
+        },
+        {
+          "properties": {
+            "event_type": {
+              "const": "agent.turn.requested"
+            },
+            "payload": {
+              "$ref": "#/$defs/AgentRequestPayload"
+            }
+          }
+        }
+      ]
+    },
+    "AgentReplyProposed": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/AgentEnvelope"
+        },
+        {
+          "properties": {
+            "event_type": {
+              "const": "agent.reply.proposed"
+            },
+            "payload": {
+              "$ref": "#/$defs/AgentMessagePayload"
+            }
+          }
+        }
+      ]
+    },
+    "AgentResolveProposed": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/AgentEnvelope"
+        },
+        {
+          "properties": {
+            "event_type": {
+              "const": "agent.resolve.proposed"
+            },
+            "payload": {
+              "$ref": "#/$defs/AgentMessagePayload"
+            }
+          }
+        }
+      ]
+    },
+    "AgentHandoffProposed": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/AgentEnvelope"
+        },
+        {
+          "properties": {
+            "event_type": {
+              "const": "agent.handoff.proposed"
+            },
+            "payload": {
+              "$ref": "#/$defs/AgentHandoffPayload"
+            }
+          }
+        }
+      ]
+    },
+    "AgentResult": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/AgentReplyProposed"
+        },
+        {
+          "$ref": "#/$defs/AgentResolveProposed"
+        },
+        {
+          "$ref": "#/$defs/AgentHandoffProposed"
+        }
+      ]
+    },
+    "Error": {
+      "type": "object",
+      "required": [
+        "error"
+      ],
+      "properties": {
+        "error": {
+          "type": "object",
+          "required": [
+            "code",
+            "message"
+          ],
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/NonEmptyString"
+            },
+            "message": {
+              "$ref": "#/$defs/NonEmptyString"
+            },
+            "details": {
+              "type": "object"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "HealthSuccess": {
+      "type": "object",
+      "required": [
+        "status",
+        "database"
+      ],
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "database": {
+          "const": "ok"
+        }
+      },
+      "additionalProperties": false
+    },
+    "HealthUnavailable": {
+      "type": "object",
+      "required": [
+        "status",
+        "database"
+      ],
+      "properties": {
+        "status": {
+          "const": "error"
+        },
+        "database": {
+          "const": "unavailable"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionLogin": {
+      "type": "object",
+      "required": [
+        "email",
+        "password"
+      ],
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "password": {
+          "$ref": "#/$defs/NonEmptyString"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Session": {
+      "type": "object",
+      "required": [
+        "user",
+        "csrf_token",
+        "operation"
+      ],
+      "properties": {
+        "user": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "id",
+                "name",
+                "role",
+                "brand_ids"
+              ],
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/Uuid"
+                },
+                "name": {
+                  "$ref": "#/$defs/NonEmptyString"
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "analyst",
+                    "supervisor",
+                    "simulator"
+                  ]
+                },
+                "brand_ids": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/Uuid"
+                  },
+                  "uniqueItems": true
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "csrf_token": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "operation": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "active_brand_id",
+                "switch_target_brand_id",
+                "available",
+                "active_count",
+                "portfolio_count",
+                "portfolio_limit",
+                "profile_version"
+              ],
+              "properties": {
+                "active_brand_id": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/Uuid"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "switch_target_brand_id": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/Uuid"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "active_count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "portfolio_count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "portfolio_limit": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "profile_version": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "OperationUpdate": {
+      "type": "object",
+      "properties": {
+        "available": {
+          "type": "boolean"
+        },
+        "switch_target_brand_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    },
+    "Case": {
+      "type": "object",
+      "required": [
+        "id",
+        "brand_id",
+        "queue_id",
+        "channel_id",
+        "status",
+        "assignee",
+        "classification",
+        "integration_status",
+        "version",
+        "created_at",
+        "updated_at",
+        "previous_case_id",
+        "human_queue_since",
+        "blocking_reason",
+        "handoff"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "brand_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "queue_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "channel_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "status": {
+          "$ref": "#/$defs/CaseStatus"
+        },
+        "assignee": {
+          "$ref": "#/$defs/Assignee"
+        },
+        "classification": {
+          "$ref": "#/$defs/Classification"
+        },
+        "integration_status": {
+          "$ref": "#/$defs/IntegrationStatus"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "previous_case_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "human_queue_since": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "blocking_reason": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NonEmptyString"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "handoff": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "summary",
+                "message_ids"
+              ],
+              "properties": {
+                "summary": {
+                  "$ref": "#/$defs/NonEmptyString"
+                },
+                "message_ids": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/Uuid"
+                  },
+                  "uniqueItems": true
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CaseList": {
+      "type": "object",
+      "required": [
+        "items",
+        "next_cursor"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Case"
+          }
+        },
+        "next_cursor": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NonEmptyString"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "MessageList": {
+      "type": "object",
+      "required": [
+        "items",
+        "next_after_sequence"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Message"
+          }
+        },
+        "next_after_sequence": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "NewCaseMessage": {
+      "type": "object",
+      "required": [
+        "text",
+        "expected_version"
+      ],
+      "properties": {
+        "text": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "expected_version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "CaseMessageResult": {
+      "type": "object",
+      "required": [
+        "case",
+        "message"
+      ],
+      "properties": {
+        "case": {
+          "$ref": "#/$defs/Case"
+        },
+        "message": {
+          "$ref": "#/$defs/Message"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CaseActionBase": {
+      "type": "object",
+      "required": [
+        "type",
+        "expected_version"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "expected_version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "CaseAction": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        {
+          "$ref": "#/$defs/CaseActionBase"
+        },
+        {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "type",
+                "text"
+              ],
+              "properties": {
+                "type": {
+                  "const": "wait_for_customer"
+                },
+                "text": {
+                  "$ref": "#/$defs/NonEmptyString"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "const": "resolve"
+                },
+                "reason": {
+                  "$ref": "#/$defs/NonEmptyString"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type",
+                "reason",
+                "destination_queue_id"
+              ],
+              "properties": {
+                "type": {
+                  "const": "transfer"
+                },
+                "reason": {
+                  "$ref": "#/$defs/NonEmptyString"
+                },
+                "destination_queue_id": {
+                  "$ref": "#/$defs/Uuid"
+                },
+                "destination_assignee_id": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/Uuid"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type",
+                "reason"
+              ],
+              "properties": {
+                "type": {
+                  "const": "retry_agent"
+                },
+                "reason": {
+                  "$ref": "#/$defs/NonEmptyString"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type",
+                "reason",
+                "summary"
+              ],
+              "properties": {
+                "type": {
+                  "const": "force_handoff"
+                },
+                "reason": {
+                  "$ref": "#/$defs/NonEmptyString"
+                },
+                "summary": {
+                  "$ref": "#/$defs/NonEmptyString"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "CaseClassificationCorrection": {
+      "type": "object",
+      "required": [
+        "expected_version",
+        "reason",
+        "category",
+        "priority"
+      ],
+      "properties": {
+        "expected_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reason": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "category": {
+          "$ref": "#/$defs/CategoryKey"
+        },
+        "priority": {
+          "$ref": "#/$defs/Priority"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AuditEvent": {
+      "type": "object",
+      "required": [
+        "id",
+        "case_id",
+        "correlation_id",
+        "occurred_at",
+        "actor",
+        "type",
+        "reason",
+        "previous_status",
+        "new_status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "case_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "occurred_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "actor": {
+          "$ref": "#/$defs/Actor"
+        },
+        "type": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "reason": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NonEmptyString"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "previous_status": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/CaseStatus"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "new_status": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/CaseStatus"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "AuditList": {
+      "type": "object",
+      "required": [
+        "items",
+        "next_cursor"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AuditEvent"
+          }
+        },
+        "next_cursor": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NonEmptyString"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SimulatorMessage": {
+      "type": "object",
+      "required": [
+        "text"
+      ],
+      "properties": {
+        "text": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "external_conversation_id": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "category": {
+          "description": "Ausência, null e string vazia acionam complemento. Qualquer outro valor é avaliado na triagem."
+        },
+        "priority": {
+          "description": "Ausência, null e string vazia acionam complemento. Qualquer outro valor é avaliado na triagem."
+        }
+      },
+      "additionalProperties": false
+    },
+    "SimulatorReceipt": {
+      "type": "object",
+      "required": [
+        "case_id",
+        "correlation_id",
+        "external_conversation_id"
+      ],
+      "properties": {
+        "case_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "external_conversation_id": {
+          "$ref": "#/$defs/NonEmptyString"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Brand": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BrandFields"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/Uuid"
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "id",
+            "version"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "BrandList": {
+      "type": "object",
+      "required": [
+        "items",
+        "next_cursor"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Brand"
+          }
+        },
+        "next_cursor": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NonEmptyString"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "BrandUpdate": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BrandFields"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "expected_version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "expected_version"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "TeamInput": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/TeamFields"
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "TeamUpdate": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/TeamFields"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "expected_version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "expected_version"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Team": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/TeamFields"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/Uuid"
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "id",
+            "version"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "TeamList": {
+      "type": "object",
+      "required": [
+        "items",
+        "next_cursor"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Team"
+          }
+        },
+        "next_cursor": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NonEmptyString"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "Channel": {
+      "type": "object",
+      "required": [
+        "id",
+        "brand_id",
+        "name",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "brand_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "chat",
+            "whatsapp",
+            "email"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChannelList": {
+      "type": "object",
+      "required": [
+        "items",
+        "next_cursor"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Channel"
+          }
+        },
+        "next_cursor": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NonEmptyString"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CapacityPair": {
+      "type": "object",
+      "required": [
+        "category",
+        "priority",
+        "limit"
+      ],
+      "properties": {
+        "category": {
+          "$ref": "#/$defs/CategoryKey"
+        },
+        "priority": {
+          "$ref": "#/$defs/Priority"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "CapacityAlternative": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/CapacityPair"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "QueueInput": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/QueueFields"
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "QueueUpdate": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/QueueFields"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "expected_version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "expected_version"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Queue": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/QueueFields"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/Uuid"
+            },
+            "brand_id": {
+              "$ref": "#/$defs/Uuid"
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "id",
+            "brand_id",
+            "version"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "QueueList": {
+      "type": "object",
+      "required": [
+        "items",
+        "next_cursor"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Queue"
+          }
+        },
+        "next_cursor": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NonEmptyString"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "RoutingRuleInput": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/RoutingRuleFields"
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "RoutingRuleUpdate": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/RoutingRuleFields"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "expected_version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "expected_version"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "RoutingRule": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/RoutingRuleFields"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/Uuid"
+            },
+            "brand_id": {
+              "$ref": "#/$defs/Uuid"
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "id",
+            "brand_id",
+            "version"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "RoutingRuleList": {
+      "type": "object",
+      "required": [
+        "items",
+        "next_cursor"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RoutingRule"
+          }
+        },
+        "next_cursor": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NonEmptyString"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CapacityProfileInput": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/CapacityProfileFields"
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CapacityProfileUpdate": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/CapacityProfileFields"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "expected_version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "expected_version"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CapacityProfile": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/CapacityProfileFields"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/Uuid"
+            },
+            "analyst_id": {
+              "$ref": "#/$defs/Uuid"
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "id",
+            "analyst_id",
+            "version"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CategoryConfig": {
+      "type": "object",
+      "required": [
+        "key",
+        "name",
+        "active"
+      ],
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/CategoryKey"
+        },
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "active": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "PriorityConfig": {
+      "type": "object",
+      "required": [
+        "key",
+        "name",
+        "description"
+      ],
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/Priority"
+        },
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "description": {
+          "$ref": "#/$defs/NonEmptyString"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Catalog": {
+      "type": "object",
+      "required": [
+        "brand_id",
+        "categories",
+        "priorities",
+        "version"
+      ],
+      "properties": {
+        "brand_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CategoryConfig"
+          }
+        },
+        "priorities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PriorityConfig"
+          },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "CatalogUpdate": {
+      "type": "object",
+      "required": [
+        "categories",
+        "expected_version"
+      ],
+      "properties": {
+        "categories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CategoryConfig"
+          }
+        },
+        "expected_version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "AgentMessagePayload": {
+      "type": "object",
+      "required": [
+        "request_event_id",
+        "text"
+      ],
+      "properties": {
+        "request_event_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "text": {
+          "$ref": "#/$defs/NonEmptyString"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SimulatorCase": {
+      "type": "object",
+      "required": [
+        "id",
+        "previous_case_id",
+        "status",
+        "updated_at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "previous_case_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/CaseStatus"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SimulatorCaseList": {
+      "type": "object",
+      "required": [
+        "items",
+        "next_cursor"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SimulatorCase"
+          }
+        },
+        "next_cursor": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NonEmptyString"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "QueueFields": {
+      "type": "object",
+      "required": [
+        "name",
+        "active",
+        "team_ids"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "team_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Uuid"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "RoutingRuleFields": {
+      "type": "object",
+      "required": [
+        "active",
+        "position",
+        "queue_id",
+        "category",
+        "priority"
+      ],
+      "properties": {
+        "active": {
+          "type": "boolean"
+        },
+        "position": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "queue_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "category": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/CategoryKey"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "priority": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Priority"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "CapacityProfileFields": {
+      "type": "object",
+      "required": [
+        "portfolio_limit",
+        "alternatives"
+      ],
+      "properties": {
+        "portfolio_limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CapacityAlternative"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "TeamFields": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        }
+      }
+    },
+    "BrandFields": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "default_queue_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "team_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Uuid"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "name",
+        "default_queue_id",
+        "team_ids"
+      ]
+    }
+  }
+}

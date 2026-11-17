@@ -1,0 +1,13 @@
+{
+  "schema": "../schemas/v1.json#/$defs/Error",
+  "data": {
+    "error": {
+      "code": "version_conflict",
+      "message": "O atendimento foi atualizado. Recarregue para continuar.",
+      "details": {
+        "expected_version": 4,
+        "current_version": 5
+      }
+    }
+  }
+}

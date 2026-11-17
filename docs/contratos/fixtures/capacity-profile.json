@@ -1,0 +1,54 @@
+{
+  "schema": "../schemas/v1.json#/$defs/CapacityProfile",
+  "data": {
+    "id": "00000000-0000-4000-8000-000000000802",
+    "analyst_id": "00000000-0000-4000-8000-000000000100",
+    "portfolio_limit": 6,
+    "version": 1,
+    "alternatives": [
+      [
+        {
+          "priority": "urgent",
+          "category": "pix",
+          "limit": 1
+        }
+      ],
+      [
+        {
+          "priority": "urgent",
+          "category": "terminal",
+          "limit": 1
+        },
+        {
+          "priority": "basic",
+          "category": "terminal",
+          "limit": 1
+        }
+      ],
+      [
+        {
+          "priority": "basic",
+          "category": "pix",
+          "limit": 3
+        },
+        {
+          "priority": "intermediate",
+          "category": "payouts",
+          "limit": 1
+        }
+      ],
+      [
+        {
+          "priority": "advanced",
+          "category": "payouts",
+          "limit": 1
+        },
+        {
+          "priority": "intermediate",
+          "category": "payouts",
+          "limit": 1
+        }
+      ]
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "schema": "../schemas/v1.json#/$defs/CaseAction",
+  "data": {
+    "type": "wait_for_customer",
+    "expected_version": 5,
+    "text": "Pode informar se a tela voltou a acender?"
+  }
+}

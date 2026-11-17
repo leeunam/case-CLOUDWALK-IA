@@ -1,0 +1,22 @@
+{
+  "schema": "../schemas/v1.json#/$defs/AgentHandoffProposed",
+  "data": {
+    "schema_version": "1.0",
+    "event_id": "00000000-0000-4000-8000-000000000613",
+    "event_type": "agent.handoff.proposed",
+    "occurred_at": "2026-11-17T13:32:02Z",
+    "correlation_id": "00000000-0000-4000-8000-000000000201",
+    "case_id": "00000000-0000-4000-8000-000000000301",
+    "brand_id": "22222222-2222-4222-8222-222222222222",
+    "assignment_generation": 1,
+    "turn_id": "00000000-0000-4000-8000-000000000703",
+    "payload": {
+      "request_event_id": "00000000-0000-4000-8000-000000000603",
+      "summary": "Cliente relata visor apagado após a troca de bateria da maquininha.",
+      "message_ids": [
+        "00000000-0000-4000-8000-000000000551"
+      ],
+      "text": "Vou encaminhar para a equipe que atende maquininhas."
+    }
+  }
+}

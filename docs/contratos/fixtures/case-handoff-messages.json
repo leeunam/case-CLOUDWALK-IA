@@ -1,0 +1,38 @@
+{
+  "schema": "../schemas/v1.json#/$defs/MessageList",
+  "data": {
+    "items": [
+      {
+        "id": "00000000-0000-4000-8000-000000000551",
+        "sequence": 1,
+        "author": {
+          "type": "customer",
+          "id": "00000000-0000-4000-8000-000000000103"
+        },
+        "text": "O visor da maquininha está apagado desde a troca de bateria.",
+        "created_at": "2026-11-17T13:32:00Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000552",
+        "sequence": 2,
+        "author": {
+          "type": "customer",
+          "id": "00000000-0000-4000-8000-000000000103"
+        },
+        "text": "A luz de carga acende, mas a tela continua apagada.",
+        "created_at": "2026-11-17T13:32:01Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000553",
+        "sequence": 3,
+        "author": {
+          "type": "ai",
+          "id": "00000000-0000-4000-8000-000000000101"
+        },
+        "text": "Vou encaminhar para a equipe que atende maquininhas.",
+        "created_at": "2026-11-17T13:32:02Z"
+      }
+    ],
+    "next_after_sequence": null
+  }
+}

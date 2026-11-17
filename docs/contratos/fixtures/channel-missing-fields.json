@@ -1,0 +1,11 @@
+{
+  "schema": "../schemas/v1.json#/$defs/ChannelMessage",
+  "data": {
+    "source_event_id": "chat-aurora-03",
+    "external_conversation_id": "chat-conversation-03",
+    "external_customer_id": "customer-aurora-01",
+    "text": "Qual é o prazo de confirmação de um Pix?",
+    "category": null,
+    "priority": ""
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "schema": "../schemas/v1.json#/$defs/Error",
+  "data": {
+    "error": {
+      "code": "invalid_operation",
+      "message": "O teto da carteira precisa cobrir a maior alternativa.",
+      "details": {
+        "field": "portfolio_limit"
+      }
+    }
+  }
+}

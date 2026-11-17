@@ -1,0 +1,11 @@
+{
+  "schema": "../schemas/v1.json#/$defs/ChannelMessage",
+  "data": {
+    "source_event_id": "chat-aurora-02",
+    "external_conversation_id": "chat-conversation-01",
+    "external_customer_id": "customer-aurora-01",
+    "text": "Funcionou. Obrigado!",
+    "category": "pix",
+    "priority": "basic"
+  }
+}

@@ -1,0 +1,1360 @@
+openapi: 3.1.0
+info:
+  title: Help desk CloudWalk
+  version: 1.0.0
+  description: Referência contratual do MVP. A F01 implementa somente a operação de saúde. As fases seguintes indicam
+    o contrato-alvo.
+servers:
+- url: /
+tags:
+- name: Base
+- name: Webhooks
+- name: API da aplicação
+paths:
+  /api/v1/health:
+    get:
+      operationId: getHealth
+      summary: Consultar saúde da API e do PostgreSQL
+      x-implementation-phase: F01
+      security: []
+      tags:
+      - Base
+      responses:
+        '200':
+          description: API e banco disponíveis.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/HealthSuccess
+        '503':
+          description: Banco indisponível.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/HealthUnavailable
+  /webhooks/v1/channels/{channel_id}/messages:
+    parameters:
+    - name: channel_id
+      in: path
+      required: true
+      description: ID do canal simulado.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    post:
+      operationId: receiveChannelMessage
+      summary: Receber mensagem de um canal simulado
+      x-implementation-phase: F02
+      security:
+      - WebhookTimestamp: []
+        WebhookSignature: []
+      tags:
+      - Webhooks
+      description: O Rails resolve a marca pela credencial do canal. Categoria e prioridade recebem validação operacional
+        após a entrada. Erro nesses campos encaminha para revisão de classificação.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/ChannelMessage
+      responses:
+        '202':
+          description: Mensagem persistida. Reentrega do mesmo conteúdo devolve os mesmos IDs.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/ChannelReceipt
+        '401':
+          $ref: '#/components/responses/Error401'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '503':
+          $ref: '#/components/responses/Error503'
+  /webhooks/v1/agent/requests:
+    post:
+      operationId: publishAgentRequest
+      summary: Publicar rodada pela ponte
+      x-implementation-phase: F02
+      security:
+      - WebhookTimestamp: []
+        WebhookSignature: []
+      tags:
+      - Webhooks
+      description: O Rails assina. A ponte recebe e publica em agent.requests. Reentregas mantêm o event_id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/AgentTurnRequested
+      responses:
+        '202':
+          description: Publicação confirmada e roteada pelo RabbitMQ.
+        '401':
+          $ref: '#/components/responses/Error401'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '503':
+          $ref: '#/components/responses/Error503'
+  /webhooks/v1/agent/events:
+    post:
+      operationId: receiveAgentEvent
+      summary: Receber proposta do atendente de IA
+      x-implementation-phase: F02
+      security:
+      - WebhookTimestamp: []
+        WebhookSignature: []
+      tags:
+      - Webhooks
+      description: A ponte assina. O Rails compara caso, marca, correlação, geração, rodada e evento da solicitação com
+        o envio vigente.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/AgentResult
+      responses:
+        '200':
+          description: Resultado aplicado, duplicado ou definitivamente descartado com auditoria.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/AgentReceipt
+        '401':
+          $ref: '#/components/responses/Error401'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '503':
+          $ref: '#/components/responses/Error503'
+  /api/v1/session:
+    get:
+      operationId: getSession
+      summary: Consultar sessão e obter token CSRF
+      x-implementation-phase: F05
+      security: []
+      tags:
+      - API da aplicação
+      description: O Rails define cookie de sessão e fornece um token CSRF antes do login.
+      responses:
+        '200':
+          description: Sessão atual ou sessão anônima com token CSRF.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/Session
+    post:
+      operationId: createSession
+      summary: Autenticar usuário
+      x-implementation-phase: F05
+      security:
+      - SessionCookie: []
+        CsrfToken: []
+      tags:
+      - API da aplicação
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/SessionLogin
+      responses:
+        '200':
+          description: Sessão autenticada com novo token CSRF.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/Session
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '422':
+          $ref: '#/components/responses/Error422'
+    delete:
+      operationId: deleteSession
+      summary: Encerrar sessão
+      x-implementation-phase: F05
+      security:
+      - SessionCookie: []
+        CsrfToken: []
+      tags:
+      - API da aplicação
+      responses:
+        '204':
+          description: Sessão encerrada.
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+  /api/v1/session/operation:
+    patch:
+      operationId: updateOperation
+      summary: Editar disponibilidade ou preparar troca de marca
+      x-implementation-phase: F03
+      security:
+      - SessionCookie: []
+        CsrfToken: []
+      tags:
+      - API da aplicação
+      description: Analista atualiza a própria operação. Rails verifica acesso à marca e bloqueia atribuições e retomadas
+        enquanto a troca estiver preparada.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/OperationUpdate
+      responses:
+        '200':
+          description: Sessão e contexto operacional atualizados.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/Session
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/cases:
+    get:
+      operationId: listCases
+      summary: Listar atendimentos visíveis na sessão
+      x-implementation-phase: F02
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      description: Rails filtra por marca, fila e vínculos efetivos. Integrações com falha podem ser filtradas pelo supervisor.
+      parameters:
+      - name: brand_id
+        in: query
+        required: false
+        description: Filtrar pela marca.
+        schema:
+          $ref: ./schemas/v1.json#/$defs/Uuid
+      - name: queue_id
+        in: query
+        required: false
+        description: Filtrar pela fila atual.
+        schema:
+          $ref: ./schemas/v1.json#/$defs/Uuid
+      - name: status
+        in: query
+        required: false
+        description: Filtrar pelo estado.
+        schema:
+          $ref: ./schemas/v1.json#/$defs/CaseStatus
+      - name: integration_status
+        in: query
+        required: false
+        description: Filtrar pela situação da integração.
+        schema:
+          $ref: ./schemas/v1.json#/$defs/IntegrationStatus
+      - name: category
+        in: query
+        required: false
+        description: Filtrar pela categoria.
+        schema:
+          $ref: ./schemas/v1.json#/$defs/CategoryKey
+      - name: priority
+        in: query
+        required: false
+        description: Filtrar pela prioridade.
+        schema:
+          $ref: ./schemas/v1.json#/$defs/Priority
+      - name: assignee
+        in: query
+        required: false
+        description: Filtrar por atribuição.
+        schema:
+          type: string
+          enum:
+          - me
+          - unassigned
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Página de atendimentos.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/CaseList
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/cases/{id}:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      description: ID do atendimento.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    get:
+      operationId: getCase
+      summary: Consultar detalhe do atendimento
+      x-implementation-phase: F02
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      responses:
+        '200':
+          description: Atendimento e contexto atual.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/Case
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+  /api/v1/cases/{id}/messages:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      description: ID do atendimento.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    get:
+      operationId: listCaseMessages
+      summary: Consultar mensagens em ordem de chegada
+      x-implementation-phase: F02
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      parameters:
+      - name: after_sequence
+        in: query
+        required: false
+        description: Somente mensagens com ordem maior que este valor.
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Página em ordem de sequence crescente.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/MessageList
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '422':
+          $ref: '#/components/responses/Error422'
+    post:
+      operationId: postCaseMessage
+      summary: Publicar resposta humana
+      x-implementation-phase: F03
+      security:
+      - SessionCookie: []
+        CsrfToken: []
+      tags:
+      - API da aplicação
+      description: Analista responsável, em sua marca em operação, responde em human_active. A resposta mantém o atendimento
+        ativo.
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/NewCaseMessage
+      responses:
+        '201':
+          description: Mensagem publicada e atendimento atualizado.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/CaseMessageResult
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/cases/{id}/actions:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      description: ID do atendimento.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    post:
+      operationId: applyCaseAction
+      summary: Aplicar uma ação do atendimento
+      x-implementation-phase: F03-F04
+      security:
+      - SessionCookie: []
+        CsrfToken: []
+      tags:
+      - API da aplicação
+      description: O módulo Atendimento aplica as transições após validar ator, acesso, versão, estado e dados. Consulte
+        README.md para condições de cada ação.
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/CaseAction
+      responses:
+        '200':
+          description: Ação aplicada e estado atual retornado.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/Case
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/cases/{id}/classification:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      description: ID do atendimento.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    post:
+      operationId: correctCaseClassification
+      summary: Corrigir classificação do atendimento
+      x-implementation-phase: F04
+      security:
+      - SessionCookie: []
+        CsrfToken: []
+      tags:
+      - API da aplicação
+      description: Supervisor autorizado valida a categoria na marca. Rails invalida complemento pendente e executa o
+        encaminhamento inicial ou mantém a fila em operação, conforme o estado.
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/CaseClassificationCorrection
+      responses:
+        '200':
+          description: Classificação atualizada com origem e motivo auditado.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/Case
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/cases/{id}/audit:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      description: ID do atendimento.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    get:
+      operationId: listCaseAudit
+      summary: Consultar eventos de auditoria do atendimento
+      x-implementation-phase: F03
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      description: Supervisor com acesso à marca consulta as decisões operacionais do atendimento.
+      parameters:
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Página de eventos auditáveis.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/AuditList
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/brands:
+    get:
+      operationId: listBrands
+      summary: Listar marcas
+      x-implementation-phase: F06
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      description: Supervisor vê marcas autorizadas.
+      parameters:
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Página de marcas.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/BrandList
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/teams:
+    get:
+      operationId: listTeams
+      summary: Listar equipes
+      x-implementation-phase: F06
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      description: Supervisor vê equipes vinculadas ao seu escopo de operação.
+      parameters:
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Página de equipes.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/TeamList
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '422':
+          $ref: '#/components/responses/Error422'
+    post:
+      operationId: createTeam
+      summary: Criar equipe
+      x-implementation-phase: F06
+      security:
+      - SessionCookie: []
+        CsrfToken: []
+      tags:
+      - API da aplicação
+      description: Supervisor autorizado cria equipes no escopo da operação.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/TeamInput
+      responses:
+        '201':
+          description: Equipe criada.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/Team
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/channels:
+    get:
+      operationId: listChannels
+      summary: Listar canais simulados
+      x-implementation-phase: F05
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      description: Sessão vê canais habilitados para seu escopo. O endpoint também fornece a seleção da simulação.
+      parameters:
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Página de canais simulados.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/ChannelList
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/teams/{id}:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      description: ID da equipe.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    put:
+      operationId: updateTeam
+      summary: Editar equipe
+      x-implementation-phase: F06
+      security:
+      - SessionCookie: []
+        CsrfToken: []
+      tags:
+      - API da aplicação
+      description: A edição de equipe compartilhada exige autorização em todas as marcas afetadas.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/TeamUpdate
+      responses:
+        '200':
+          description: Equipe atualizada.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/Team
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/brands/{brand_id}:
+    parameters:
+    - name: brand_id
+      in: path
+      required: true
+      description: ID da marca do recurso.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    put:
+      operationId: updateBrand
+      summary: Atualizar marca e equipes autorizadas
+      x-implementation-phase: F06
+      security:
+      - SessionCookie: []
+        CsrfToken: []
+      tags:
+      - API da aplicação
+      description: Supervisor da marca edita seus vínculos e a fila padrão. Rails verifica dependências em filas ativas
+        e efeito sobre carteiras.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/BrandUpdate
+      responses:
+        '200':
+          description: Marca atualizada.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/Brand
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/brands/{brand_id}/queues:
+    parameters:
+    - name: brand_id
+      in: path
+      required: true
+      description: ID da marca do recurso.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    get:
+      operationId: listQueues
+      summary: Listar filas da marca
+      x-implementation-phase: F06
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      description: Supervisor com autorização na marca.
+      parameters:
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Página de filas.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/QueueList
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '422':
+          $ref: '#/components/responses/Error422'
+    post:
+      operationId: createQueue
+      summary: Criar fila
+      x-implementation-phase: F06
+      security:
+      - SessionCookie: []
+        CsrfToken: []
+      tags:
+      - API da aplicação
+      description: Fila ativa exige equipe autorizada na marca. A desativação exige substituir referências ativas e retirar
+        casos em curso.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/QueueInput
+      responses:
+        '201':
+          description: Recurso criado.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/Queue
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/brands/{brand_id}/queues/{id}:
+    parameters:
+    - name: brand_id
+      in: path
+      required: true
+      description: ID da marca do recurso.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    - name: id
+      in: path
+      required: true
+      description: ID da fila.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    put:
+      operationId: updateQueue
+      summary: Editar fila
+      x-implementation-phase: F06
+      security:
+      - SessionCookie: []
+        CsrfToken: []
+      tags:
+      - API da aplicação
+      description: Fila ativa exige equipe autorizada na marca. A desativação exige substituir referências ativas e retirar
+        casos em curso.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/QueueUpdate
+      responses:
+        '200':
+          description: Recurso atualizado.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/Queue
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/brands/{brand_id}/routing-rules:
+    parameters:
+    - name: brand_id
+      in: path
+      required: true
+      description: ID da marca do recurso.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    get:
+      operationId: listRoutingRules
+      summary: Listar regras da marca
+      x-implementation-phase: F06
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      description: Supervisor com autorização na marca.
+      parameters:
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Página de regras.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/RoutingRuleList
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '422':
+          $ref: '#/components/responses/Error422'
+    post:
+      operationId: createRoutingRule
+      summary: Criar regra
+      x-implementation-phase: F06
+      security:
+      - SessionCookie: []
+        CsrfToken: []
+      tags:
+      - API da aplicação
+      description: A fila deve estar ativa na marca. Ao menos um filtro precisa existir. A primeira regra ativa aplicável
+        vence por position.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/RoutingRuleInput
+      responses:
+        '201':
+          description: Recurso criado.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/RoutingRule
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/brands/{brand_id}/routing-rules/{id}:
+    parameters:
+    - name: brand_id
+      in: path
+      required: true
+      description: ID da marca do recurso.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    - name: id
+      in: path
+      required: true
+      description: ID da regra.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    put:
+      operationId: updateRoutingRule
+      summary: Editar regra
+      x-implementation-phase: F06
+      security:
+      - SessionCookie: []
+        CsrfToken: []
+      tags:
+      - API da aplicação
+      description: A fila deve estar ativa na marca. Ao menos um filtro precisa existir. A primeira regra ativa aplicável
+        vence por position.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/RoutingRuleUpdate
+      responses:
+        '200':
+          description: Recurso atualizado.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/RoutingRule
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/brands/{brand_id}/catalog:
+    parameters:
+    - name: brand_id
+      in: path
+      required: true
+      description: ID da marca do recurso.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    get:
+      operationId: getCatalog
+      summary: Consultar catálogo da marca
+      x-implementation-phase: F06
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      responses:
+        '200':
+          description: Catálogo atual.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/Catalog
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+    put:
+      operationId: updateCatalog
+      summary: Editar categorias da marca
+      x-implementation-phase: F06
+      security:
+      - SessionCookie: []
+        CsrfToken: []
+      tags:
+      - API da aplicação
+      description: Supervisor autorizado edita a disponibilidade das categorias. Rails preserva referências do histórico
+        e valida configurações ativas.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/CatalogUpdate
+      responses:
+        '200':
+          description: Catálogo atualizado.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/Catalog
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/analysts/{analyst_id}/capacity-profile:
+    parameters:
+    - name: analyst_id
+      in: path
+      required: true
+      description: ID do analista.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    get:
+      operationId: getCapacityProfile
+      summary: Consultar perfil de capacidade
+      x-implementation-phase: F06
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      responses:
+        '200':
+          description: Versão atual do perfil.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/CapacityProfile
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+    post:
+      operationId: createCapacityProfile
+      summary: Cadastrar perfil de capacidade para o analista
+      x-implementation-phase: F06
+      security:
+      - SessionCookie: []
+        CsrfToken: []
+      tags:
+      - API da aplicação
+      description: Criação inicial para supervisor autorizado sobre o escopo do analista.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/CapacityProfileInput
+      responses:
+        '201':
+          description: Perfil criado.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/CapacityProfile
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+    put:
+      operationId: publishCapacityProfile
+      summary: Publicar nova versão do perfil de capacidade
+      x-implementation-phase: F06
+      security:
+      - SessionCookie: []
+        CsrfToken: []
+      tags:
+      - API da aplicação
+      description: Supervisor autorizado sobre o escopo do analista. Cada alternativa contém pares únicos. Carteira cobre
+        a maior soma de uma alternativa.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/CapacityProfileUpdate
+      responses:
+        '200':
+          description: Perfil publicado.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/CapacityProfile
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/simulator/session:
+    post:
+      operationId: createSimulatorSession
+      summary: Iniciar sessão de cliente sintético
+      x-implementation-phase: F05
+      security:
+      - SessionCookie: []
+        CsrfToken: []
+      tags:
+      - API da aplicação
+      description: O Rails cria a identidade sintética vinculada à sessão do navegador. O cookie e o token iniciais são
+        obtidos em GET /api/v1/session.
+      responses:
+        '201':
+          description: Sessão de simulação criada com novo token CSRF.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/Session
+        '403':
+          $ref: '#/components/responses/Error403'
+  /api/v1/simulator/cases:
+    get:
+      operationId: listSimulatorCases
+      summary: Listar atendimentos da própria sessão de simulação
+      x-implementation-phase: F05
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      parameters:
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Página de atendimentos do cliente simulado.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/SimulatorCaseList
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/simulator/cases/{id}:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      description: ID do atendimento.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    get:
+      operationId: getSimulatorCase
+      summary: Consultar atendimento da própria sessão de simulação
+      x-implementation-phase: F05
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      responses:
+        '200':
+          description: Atendimento acompanhado pelo cliente simulado.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/SimulatorCase
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+  /api/v1/simulator/cases/{id}/messages:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      description: ID do atendimento.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    get:
+      operationId: listSimulatorMessages
+      summary: Consultar mensagens públicas da própria conversa
+      x-implementation-phase: F05
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      parameters:
+      - name: after_sequence
+        in: query
+        required: false
+        description: Somente mensagens com ordem maior que este valor.
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Página de mensagens visíveis ao cliente.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/MessageList
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/simulator/channels/{channel_id}/messages:
+    parameters:
+    - name: channel_id
+      in: path
+      required: true
+      description: ID do canal simulado.
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    post:
+      operationId: sendSimulatorMessage
+      summary: Enviar mensagem pela sessão de simulação
+      x-implementation-phase: F05
+      security:
+      - SessionCookie: []
+        CsrfToken: []
+      tags:
+      - API da aplicação
+      description: Rails identifica a sessão, gera IDs externos e passa pela mesma fronteira de entrada por meio da simulação
+        no servidor. Conversa existente deve pertencer à sessão.
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/v1.json#/$defs/SimulatorMessage
+      responses:
+        '202':
+          description: Mensagem encaminhada e identificadores de acompanhamento.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/SimulatorReceipt
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '503':
+          $ref: '#/components/responses/Error503'
+components:
+  securitySchemes:
+    SessionCookie:
+      type: apiKey
+      in: cookie
+      name: _cloudwalk_session
+      description: Sessão HTTP-only na origem da aplicação.
+    CsrfToken:
+      type: apiKey
+      in: header
+      name: X-CSRF-Token
+      description: Token retornado pelo endpoint de sessão para escritas.
+    WebhookTimestamp:
+      type: apiKey
+      in: header
+      name: X-Webhook-Timestamp
+      description: Unix epoch em segundos, decimal, com janela de tolerância de 300 s.
+    WebhookSignature:
+      type: apiKey
+      in: header
+      name: X-Webhook-Signature
+      description: 64 dígitos hexadecimais minúsculos do HMAC-SHA256 de timestamp + ponto + bytes do corpo.
+  parameters:
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: Cursor opaco de próxima página, associado aos filtros da consulta.
+      schema:
+        type: string
+        minLength: 1
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Quantidade máxima de itens.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 25
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Chave única por ator, operação e recurso. A mesma chave e conteúdo repetem o resultado original.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+  responses:
+    Error401:
+      description: Sessão ausente, credenciais inválidas ou autenticação do webhook recusada.
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas/v1.json#/$defs/Error
+    Error403:
+      description: Ator autenticado sem permissão ou token CSRF recusado.
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas/v1.json#/$defs/Error
+    Error404:
+      description: Recurso inexistente ou oculto para a sessão.
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas/v1.json#/$defs/Error
+    Error409:
+      description: Versão divergente, ação incompatível com o estado ou chave de idempotência reutilizada com outro conteúdo.
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas/v1.json#/$defs/Error
+    Error422:
+      description: Envelope inválido ou regra de domínio não satisfeita na edição.
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas/v1.json#/$defs/Error
+    Error503:
+      description: Dependência temporariamente indisponível. Tentar novamente com a mesma identidade da operação.
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas/v1.json#/$defs/Error

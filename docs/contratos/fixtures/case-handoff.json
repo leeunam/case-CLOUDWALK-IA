@@ -1,0 +1,30 @@
+{
+  "schema": "../schemas/v1.json#/$defs/Case",
+  "data": {
+    "id": "00000000-0000-4000-8000-000000000301",
+    "brand_id": "22222222-2222-4222-8222-222222222222",
+    "queue_id": "00000000-0000-4000-8000-000000000912",
+    "channel_id": "00000000-0000-4000-8000-000000000910",
+    "status": "waiting_human",
+    "assignee": null,
+    "classification": {
+      "category": "terminal",
+      "category_source": "channel",
+      "priority": "advanced",
+      "priority_source": "jev"
+    },
+    "integration_status": "idle",
+    "version": 4,
+    "created_at": "2026-11-17T13:32:00Z",
+    "updated_at": "2026-11-17T13:32:02Z",
+    "previous_case_id": null,
+    "human_queue_since": "2026-11-17T13:32:02Z",
+    "blocking_reason": "no_eligible_analyst",
+    "handoff": {
+      "summary": "Cliente relata visor apagado após a troca de bateria da maquininha.",
+      "message_ids": [
+        "00000000-0000-4000-8000-000000000551"
+      ]
+    }
+  }
+}
