@@ -1,1 +1,10 @@
 .worktrees/
+.env
+.env.*
+!.env.example
+backend/.bundle/
+backend/log/
+backend/tmp/
+frontend/node_modules/
+frontend/dist/
+*.tsbuildinfo

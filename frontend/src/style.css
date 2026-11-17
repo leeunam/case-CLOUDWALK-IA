@@ -1,0 +1,32 @@
+:root {
+  font-family: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  color: #202a2e;
+  background: #f7f8f7;
+  line-height: 1.6;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  max-width: 42rem;
+  margin: 12vh auto;
+  padding: 1.5rem;
+}
+
+h1 {
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+a {
+  color: #075e4d;
+  text-underline-offset: 0.2em;
+}
+
+a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}

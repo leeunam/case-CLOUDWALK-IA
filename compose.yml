@@ -1,0 +1,93 @@
+name: ${COMPOSE_PROJECT_NAME:-cloudwalk}
+
+x-backend: &backend
+  build: ./backend
+  environment: &backend-environment
+    RAILS_ENV: development
+    POSTGRES_HOST: db
+    POSTGRES_USER: ${POSTGRES_USER:-cloudwalk}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cloudwalk_local}
+  volumes:
+    - ./backend:/app
+    - ./script:/workspace/script:ro
+    - ./docs/contratos:/workspace/docs/contratos:ro
+
+services:
+  db:
+    image: postgres:17-alpine@sha256:a77aa70e641402a21411b92b721c58d10f23b50ae5fdd2333efd22d166e1e5f7
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cloudwalk}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cloudwalk_local}
+      POSTGRES_DB: cloudwalk_development
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  rabbitmq:
+    image: rabbitmq:4.2-management-alpine@sha256:8639420fa83139a4dda18e210aa524ed69e918924a5f4ad183150b5a59a95c57
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-cloudwalk}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-cloudwalk_local}
+    ports:
+      - "127.0.0.1:${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+
+  db_setup:
+    <<: *backend
+    command: ["bundle", "exec", "rails", "db:prepare"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    <<: *backend
+    command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-P", "/tmp/cloudwalk-server.pid"]
+    ports:
+      - "127.0.0.1:${API_PORT:-3000}:3000"
+    depends_on:
+      db_setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - ruby
+        - -rnet/http
+        - -e
+        - "exit(Net::HTTP.get_response(URI('http://localhost:3000/api/v1/health')).code == '200' ? 0 : 1)"
+      interval: 5s
+      timeout: 5s
+      retries: 15
+
+  worker:
+    <<: *backend
+    command: ["bundle", "exec", "ruby", "bin/jobs"]
+    depends_on:
+      db_setup:
+        condition: service_completed_successfully
+
+  web:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:${WEB_PORT:-5173}:5173"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:5173').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
