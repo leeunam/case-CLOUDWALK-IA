@@ -35,11 +35,21 @@ atualização dos exemplos e coordenação com os consumidores.
   `401`. Cada tentativa recalcula timestamp e assinatura e conserva a
   identidade e o corpo do evento.
 - O Rails grava a rodada e o outbox junto à transição do atendimento. A ponte
-  retorna `202` para `/webhooks/v1/agent/requests` após confirmação de publicação
-  e roteamento para `agent.requests`. O mock produz uma proposta determinística
-  com ID estável por pedido e a devolve pela fila `agent.events`. O Rails
-  persiste o efeito ou o descarte antes de confirmar `/webhooks/v1/agent/events`.
-  A ponte confirma consumo no broker após essa confirmação ou deduplicação.
+  retorna `202` para `/webhooks/v1/agent/requests` após confirmação da publicação
+  no tópico `agent.requests`. Kafka usa `acks=all`, idempotência de produtor e
+  três partições por tópico na demo, com `case_id` como chave. Os tópicos
+  `agent.requests`, `agent.events` e `agent.failures` usam retenção de sete dias
+  (`KAFKA_RETENTION_MS`, padrão `604800000`) e `cleanup.policy=delete`; consumo
+  não remove eventos. O mock consome com o grupo `mock-agent-v1`; a ponte consome
+  retornos com `platform-agent-events-v1`. Auto commit fica desligado. Cada
+  grupo avança por partição apenas até o próximo offset do último registro
+  contíguo concluído. A ponte só conclui após o Rails confirmar aplicação ou
+  descarte definitivo auditado; o mock conclui após publicar o retorno. Após
+  tentativas limitadas, publica falha com identificação, motivo e origem em
+  `agent.failures`, confirmando o offset só após publicação. Timeout ambíguo
+  pode repetir o mesmo `event_id`, protegido pela deduplicação da aplicação.
+  Replay é explícito, limitado aos dados retidos e sujeito à geração/rodada
+  vigente. O PostgreSQL mantém o histórico e a auditoria do domínio.
 - O Rails aceita uma rodada em voo por atendimento. O payload da solicitação
   contém classificação validada e histórico por `sequence` crescente. Toda
   proposta referencia `request_event_id`. O Rails verifica marca, atendimento,

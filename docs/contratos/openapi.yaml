@@ -91,7 +91,7 @@ paths:
               $ref: ./schemas/v1.json#/$defs/AgentTurnRequested
       responses:
         '202':
-          description: Publicação confirmada e roteada pelo RabbitMQ.
+          description: Publicação confirmada no tópico Kafka agent.requests. Um timeout ambíguo pode causar reenvio do mesmo event_id, protegido pela deduplicação da aplicação.
         '401':
           $ref: '#/components/responses/Error401'
         '422':

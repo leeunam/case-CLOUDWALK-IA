@@ -15,6 +15,10 @@ O [fluxo operacional](fluxo-operacional.md) descreve a versão atual.
 A classificação inicial vem dos canais simulados. O Jev preenche apenas campos
 ausentes na primeira entrega, conforme D015.
 
+Para transporte de eventos, D016 substitui qualquer escolha técnica anterior:
+Kafka é o broker confirmado. F01 continua usando Solid Queue no PostgreSQL para
+jobs internos; filas de atendimento são conceitos do domínio e não tópicos Kafka.
+
 ## D001 — Rails como API e React na interface
 
 **Estado:** confirmado pelo responsável pelo projeto.
@@ -538,6 +542,47 @@ de campos ausentes e as alternativas de contingência estão em
 - Com apenas um campo ausente, o Jev preenche somente esse campo e o outro
   permanece com o valor recebido.
 - Com ambos ausentes, os dois valores retornados são validados antes do envio.
+
+## D016 — Kafka como broker de eventos com retenção e replay
+
+**Estado:** confirmado pelo responsável em 2026-11-18, antes do início da F02.
+
+- Usar Apache Kafka em modo KRaft single-node para a demonstração self-hosted,
+  com replicação 1, endpoint interno `kafka:9092` e sem porta pública no host.
+- Criar os tópicos `agent.requests`, `agent.events` e `agent.failures`, com três
+  partições no padrão da demonstração. Cada evento usa `case_id` como chave para
+  manter a afinidade do caso com uma partição. A ordem não é global entre
+  partições ou tópicos.
+- Usar `cleanup.policy=delete` e retenção padrão de sete dias (`retention.ms=604800000`),
+  configurável por `KAFKA_RETENTION_MS`. O consumo não remove registros; a
+  retenção finita pode expirar dados. Histórico e auditoria do domínio ficam no
+  PostgreSQL. Não há promessa de replay eterno nem arquivamento completo.
+- O produtor usa `acks=all` e `enable.idempotence=true`. A ponte só responde
+  HTTP `202` depois de confirmar a publicação. Um timeout ou resultado ambíguo
+  pode causar reenvio do mesmo `event_id`, tratado por deduplicação da aplicação.
+- O mock consome com o grupo `mock-agent-v1`; a ponte usa
+  `platform-agent-events-v1` para retornos. Auto commit fica desligado. O mock
+  só avança offset depois de publicar o resultado; a ponte só avança depois de
+  confirmação Rails de aplicação ou descarte definitivo auditado.
+- Confirmar o offset seguinte ao último registro contíguo concluído por
+  partição. Não avançar além de uma lacuna pendente. Em falha transitória,
+  repetir com política limitada preservando ordem da partição. Ao esgotar,
+  registrar e publicar `agent.failures` com evento, motivo e metadados de origem;
+  avançar o offset apenas após confirmar a publicação da falha.
+- Replay é explícito e só pode usar dados retidos, com grupo novo ou reset
+  controlado. Deduplicação e geração/rodada vigentes continuam valendo; resultado
+  antigo após handoff é descartado com auditoria.
+- Kafka não fornece exatamente-uma-vez para toda a cadeia HTTP e PostgreSQL.
+  Outbox transacional, `event_id` único, inbox/deduplicação e validação de
+  transições continuam necessários.
+- Solid Queue continua para jobs internos persistidos no PostgreSQL. Filas de
+  atendimento continuam distintas de tópicos e jobs internos.
+
+### Referências técnicas
+
+- [Apache Kafka: configurações de tópicos](https://kafka.apache.org/documentation/#topicconfigs)
+- [Apache Kafka: configurações de produtor](https://kafka.apache.org/documentation/#producerconfigs)
+- [Apache Kafka: configurações de consumidor e offsets](https://kafka.apache.org/documentation/#consumerconfigs)
 
 ### Detalhamento recomendado para avaliação
 

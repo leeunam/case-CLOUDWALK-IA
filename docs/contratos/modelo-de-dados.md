@@ -36,8 +36,12 @@ de marca, equipe, fila e responsável para distribuição e retomada.
   responsável anterior.
 - Rodada referencia atendimento, geração e o pedido do mock. Apenas uma
   rodada pode ficar em voo por caso. O outbox armazena o evento com ID único
-  e próxima data de tentativa. A confirmação do callback registra o
-  `event_id` do retorno para aplicar ou descartar uma única vez.
+  e próxima data de tentativa. A integração publica em `agent.requests` e
+  consome `agent.events` por grupos Kafka independentes. Os tópicos retêm os
+  registros por prazo finito; offsets não removem eventos e não substituem o
+  histórico/auditoria no PostgreSQL. A confirmação do callback registra o
+  `event_id` do retorno para aplicar ou descartar uma única vez. A aplicação
+  deduplica reenvios e não presume exatamente-uma-vez na cadeia HTTP + banco.
 - Auditoria persiste junto à mudança e associa caso, ator, horário, motivo,
   estado anterior e novo, vínculos aplicados e IDs de correlação. Índices
   cobrem fila/estado/ordem de espera, carteira por responsável e estado,
