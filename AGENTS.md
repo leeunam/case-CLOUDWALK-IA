@@ -19,7 +19,8 @@ Leia `/home/inteli/.codex/RTK.md` e use `rtk` nos comandos de terminal.
   Use a worktree que o integrador ou a ferramenta já preparou para a tarefa.
   Ao continuar a mesma tarefa, reutilize esse ambiente.
 - Se ainda faltar um ambiente isolado, crie uma worktree a partir do commit-base
-  informado pelo integrador, com branch `codex/<tarefa>-<agente>` e diretório
+  informado pelo integrador, com branch `feat/<assunto-curto>` para código,
+  testes e integrações, ou `docs/<assunto-curto>` para documentação, e diretório
   `.worktrees/<tarefa>-<agente>` na raiz do repositório principal. Confirme que
   esse caminho e essa branch estão livres antes de criar. Se já existirem,
   verifique a quem pertencem antes de reutilizar.
@@ -35,6 +36,10 @@ Leia `/home/inteli/.codex/RTK.md` e use `rtk` nos comandos de terminal.
 - Siga o escopo e as dependências do ID recebido. Combine com o integrador as
   alterações em contratos, schema, configurações e transições compartilhadas
   antes de as outras frentes consumirem a mudança.
+- Use Conventional Commits em português, como `feat:`, `fix:`, `docs:` e
+  `test:`. Escolha o tipo do commit pelo conteúdo da mudança. Antes de publicar
+  uma branch com outro nome, verifique as referências existentes e preserve
+  o histórico e as revisões das MRs.
 
 ## Entrega e aprendizagem
 
