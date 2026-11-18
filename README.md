@@ -8,7 +8,7 @@ O Jev complementará apenas categoria e prioridade ausentes.
 
 F01 prepara o ambiente, o banco inicial e os contratos. Rails expõe a consulta
 de saúde, React verifica essa consulta, PostgreSQL contém a operação sintética
-e RabbitMQ fica pronto para a integração de F02. As rotas de atendimento e
+e Kafka fica pronto para a integração de F02. As rotas de atendimento e
 administração descritas nos contratos serão implementadas nas próximas tarefas.
 
 Verificação local da F01 em 2026-11-17 passou com cinco testes Rails e quatorze
@@ -16,6 +16,10 @@ asserções, OpenAPI e 43 fixtures, build React/TypeScript, execução de um job
 pelo worker e instalação com bancos vazios. O teste de reinício preservou uma
 autorização removida. O aviso de dependência de desenvolvimento está descrito
 ao fim deste README.
+
+Em 2026-11-18, Kafka passou a ser o broker padrão. O teste de mensageria
+consumiu e releu o mesmo evento com grupos diferentes e confirmou a leitura
+de um evento após recriar o contêiner com o volume persistente.
 
 - [Escopo e arquitetura](docs/planejamento/especificacao-mvp.md)
 - [Backlog e critérios de aceite](docs/planejamento/plano-de-execucao.md)
@@ -35,19 +39,20 @@ docker compose up --build --wait
 Na primeira execução o Docker baixa as imagens, instala as dependências, cria
 os bancos e carrega o seed. Nos próximos inícios prepara as migrações pendentes.
 PostgreSQL precisa estar saudável antes da preparação
-do banco. A API inicia após a preparação, e a interface inicia após a API.
+do banco. A API inicia após a preparação. A interface aguarda a API e a
+preparação dos tópicos Kafka.
 [Inicialização no Compose](https://docs.docker.com/compose/how-tos/startup-order/)
 
 | Componente | Acesso local |
 | --- | --- |
 | React | http://localhost:5173 |
 | Saúde Rails + PostgreSQL | http://localhost:3000/api/v1/health |
-| Painel RabbitMQ | http://localhost:15672 |
+| Kafka na rede interna Docker | `kafka:9092` |
 
-O painel RabbitMQ usa `cloudwalk` e `cloudwalk_local` na configuração local.
-As variáveis de `.env.example` permitem mudar portas e credenciais. Para usar
+As variáveis de `.env.example` permitem mudar portas, credenciais locais e
+retenção do Kafka. Para usar
 outros valores, copie esse exemplo para `.env` antes de subir. Serviços internos
-usam os nomes `db`, `api` e `rabbitmq` dentro da rede do Compose. As portas
+usam os nomes `db`, `api` e `kafka` dentro da rede do Compose. As portas
 publicadas ficam limitadas ao computador local.
 
 Para conferir os serviços e o banco
@@ -96,8 +101,39 @@ Active Record representa uma tabela e oferece consultas como
 a criação ou alteração de tabelas. O seed cria os dados iniciais da demonstração.
 
 O worker executa jobs internos com Solid Queue, persistidos num segundo banco
-PostgreSQL no mesmo serviço. RabbitMQ transportará mensagens entre plataforma,
+PostgreSQL no mesmo serviço. Kafka transportará mensagens entre plataforma,
 ponte e atendente simulado em F02. [Active Job e Solid Queue](https://guides.rubyonrails.org/active_job_basics.html)
+
+## Eventos e retenção no Kafka
+
+O Compose inicia Kafka em modo KRaft, com um nó para a demonstração. O serviço
+`kafka_setup` cria `agent.requests`, `agent.events` e `agent.failures`, cada um
+com três partições e replicação um. O volume `kafka_data` mantém os registros
+entre reinícios. Os serviços usam `kafka:9092` dentro da rede Docker.
+
+A política `cleanup.policy=delete` e a configuração `retention.ms` controlam
+a expiração dos registros. A retenção inicial é de sete dias
+(`KAFKA_RETENTION_MS=604800000`). A leitura avança a posição de um grupo de
+consumidores. Outros grupos podem ler os mesmos eventos enquanto estiverem
+retidos. O histórico persistente dos atendimentos e a auditoria ficam no
+PostgreSQL. [Conceitos do Kafka](https://kafka.apache.org/intro/)
+
+O valor `KAFKA_RETENTION_MS=-1` permite desativar a expiração por tempo.
+[Configuração de retenção](https://kafka.apache.org/44/configuration/topic-configs/#retention.ms)
+
+Para listar os tópicos e demonstrar o consumo seguido de releitura
+
+```sh
+docker compose exec -T kafka /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --list
+docker compose exec -T kafka bash /workspace/script/check_kafka.sh
+```
+
+O teste cria um tópico temporário, publica um evento, faz uma leitura, avança
+a posição do primeiro grupo e relê o evento com outro grupo. Ao terminar,
+remove apenas o tópico e os grupos criados para o teste. `kafka_setup` reaplica
+a retenção configurada quando é executado novamente. O protocolo da F02 usa
+`case_id` como chave dos eventos e confirma offsets após persistir o efeito
+ou registrar a falha, conforme o [contrato](docs/contratos/README.md).
 
 ## Verificação da F01
 
@@ -136,7 +172,7 @@ reexecute o seed e confira que continuam existindo duas marcas.
 
 F02 acrescenta casos, mensagens, auditoria e outbox, com regras de domínio em
 serviços Rails para transições de atendimento, classificação e distribuição.
-Controller, job e webhook chamam esses mesmos serviços. Integrações HTTP e AMQP
+Controller, job e webhook chamam esses mesmos serviços. Integrações HTTP e Kafka
 ficam em adaptadores. O contrato documenta as interfaces antes do paralelismo
 entre backend e telas.
 
@@ -144,7 +180,7 @@ entre backend e telas.
 
 As versões de bibliotecas ficam em `backend/Gemfile.lock` e
 `frontend/package-lock.json`. Imagens têm tag e digest nos Dockerfiles e no
-Compose. A base usa Ruby 3.4, Rails 8.1, PostgreSQL 17, RabbitMQ 4.2 e Node 22.
+Compose. A base usa Ruby 3.4, Rails 8.1, PostgreSQL 17, Kafka 4.4 e Node 22.
 O servidor web usa Vite para desenvolvimento. Publicação por URL é F10.
 
 `npm audit` identificou um aviso em `picomatch`, dependência transitiva das

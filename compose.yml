@@ -7,6 +7,7 @@ x-backend: &backend
     POSTGRES_HOST: db
     POSTGRES_USER: ${POSTGRES_USER:-cloudwalk}
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cloudwalk_local}
+    KAFKA_BOOTSTRAP_SERVERS: kafka:9092
   volumes:
     - ./backend:/app
     - ./script:/workspace/script:ro
@@ -27,20 +28,47 @@ services:
       timeout: 3s
       retries: 15
 
-  rabbitmq:
-    image: rabbitmq:4.2-management-alpine@sha256:8639420fa83139a4dda18e210aa524ed69e918924a5f4ad183150b5a59a95c57
+  kafka:
+    image: apache/kafka:4.4.0@sha256:833b867a9585a141da455dc2b57431c65cbccb27f11c91f694444cca9f777e0f
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-cloudwalk}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-cloudwalk_local}
-    ports:
-      - "127.0.0.1:${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_HEAP_OPTS: -Xms256m -Xmx512m
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
+      - kafka_data:/var/lib/kafka/data
+      - ./script:/workspace/script:ro
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      test: ["CMD", "/opt/kafka/bin/kafka-topics.sh", "--bootstrap-server", "kafka:9092", "--list"]
       interval: 10s
-      timeout: 5s
+      timeout: 10s
       retries: 15
+      start_period: 15s
+
+  kafka_setup:
+    image: apache/kafka:4.4.0@sha256:833b867a9585a141da455dc2b57431c65cbccb27f11c91f694444cca9f777e0f
+    entrypoint: ["/bin/bash", "/workspace/script/setup_kafka.sh"]
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_RETENTION_MS: ${KAFKA_RETENTION_MS:-604800000}
+    volumes:
+      - ./script:/workspace/script:ro
+    depends_on:
+      kafka:
+        condition: service_healthy
 
   db_setup:
     <<: *backend
@@ -82,6 +110,8 @@ services:
     depends_on:
       api:
         condition: service_healthy
+      kafka_setup:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:5173').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
       interval: 5s
@@ -90,4 +120,4 @@ services:
 
 volumes:
   postgres_data:
-  rabbitmq_data:
+  kafka_data:
