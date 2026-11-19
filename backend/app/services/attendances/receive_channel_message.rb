@@ -4,11 +4,12 @@ module Attendances
   class ReceiveChannelMessage
     PRIORITIES = Classification::Catalog::PRIORITIES.keys.freeze
 
-    def initialize(channel, data, body)
+    def initialize(channel, data, body, simulator_session_id: nil, idempotency_body: body)
       @channel = channel
       @data = data
       @body = body
-      @digest = Digest::SHA256.hexdigest(body)
+      @digest = Digest::SHA256.hexdigest(idempotency_body)
+      @simulator_session_id = simulator_session_id
       @entry_key = { channel_id: channel.id, source_event_id: data.fetch("source_event_id") }
     end
 
@@ -20,12 +21,16 @@ module Attendances
         HumanLocks.brand!(@channel.brand_id)
         conversation = ChannelConversation.create_or_find_by!(
           channel: @channel, external_conversation_id: @data.fetch("external_conversation_id")
-        ) { |record| record.external_customer_id = @data.fetch("external_customer_id") }
+        ) do |record|
+          record.external_customer_id = @data.fetch("external_customer_id")
+          record.simulator_session_id = @simulator_session_id
+        end
         conversation.lock!
         entry = ChannelEntry.find_by(@entry_key)
         next receipt(entry) if entry
 
-        if conversation.external_customer_id != @data.fetch("external_customer_id")
+        if conversation.external_customer_id != @data.fetch("external_customer_id") ||
+            conversation.simulator_session_id != @simulator_session_id
           raise WebhookV1::Error.new(409, "conversation_conflict", "A conversa pertence a outro cliente.")
         end
 

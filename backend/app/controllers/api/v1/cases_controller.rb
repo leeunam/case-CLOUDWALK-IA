@@ -32,11 +32,7 @@ module Api
       end
 
       def messages
-        after = bounded_integer("after_sequence", default: 0, range: 0..)
-        limit = bounded_integer("limit", default: 25, range: 1..100)
-        rows = visible_case.messages.where("sequence > ?", [after, 2**31 - 1].min).order(:sequence).limit(limit + 1).to_a
-        items = rows.first(limit)
-        render json: { items: items.map(&:contract_data), next_after_sequence: rows.size > limit ? items.last.sequence : nil }
+        render json: messages_page(visible_case.messages)
       end
 
       def post_message
@@ -112,17 +108,6 @@ module Api
           end
         end
         relation
-      end
-
-      def bounded_integer(key, default:, range:)
-        raw = request.query_parameters.fetch(key, default.to_s)
-        value = Integer(raw, 10, exception: false) if raw.is_a?(String) && raw.match?(/\A[0-9]+\z/)
-        invalid_query!(key) unless value && range.cover?(value)
-        value
-      end
-
-      def invalid_query!(key)
-        raise WebhookV1::Error.new(422, "invalid_query", "Parâmetro inválido: #{key}.")
       end
 
       def cursor_position(filters)

@@ -15,14 +15,16 @@ module Api
           raise WebhookV1::Error.new(401, "unauthenticated", "Credenciais inválidas.")
         end
 
-        reset_session
-        session[:user_id] = user.id
+        start_browser_identity!("staff", user: user)
         @current_user = user
         render json: session_data
       end
 
       def destroy
-        require_user!
+        identities = [staff_identity, simulator_identity].compact
+        require_user! if identities.empty?
+
+        BrowserAccess::Session.transaction { identities.each(&:revoke!) }
         reset_session
         head 204
       end
@@ -51,7 +53,11 @@ module Api
 
       def session_data
         user = current_user
-        return { user: nil, operation: nil, csrf_token: form_authenticity_token } unless user
+        unless user
+          return simulator_session_data(simulator_identity) if simulator_identity
+
+          return { user: nil, operation: nil, csrf_token: form_authenticity_token }
+        end
 
         attendant = Operations::Attendant.find_by(user: user) if user.role == "analyst"
         {

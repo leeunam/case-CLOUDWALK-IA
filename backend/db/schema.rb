@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_19_000003) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_19_000004) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -94,6 +94,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000003) do
     t.index ["code"], name: "index_brands_on_code", unique: true
   end
 
+  create_table "browser_sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id"
+    t.string "audience", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "revoked_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_browser_sessions_on_user_id"
+    t.check_constraint "audience::text = 'staff'::text AND user_id IS NOT NULL OR audience::text = 'simulator'::text AND user_id IS NULL", name: "browser_session_audience_owner"
+  end
+
   create_table "capacity_profiles", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_id", null: false
     t.integer "version", null: false
@@ -169,7 +180,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000003) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["channel_id"], name: "index_channel_conversations_on_channel_id"
+    t.uuid "simulator_session_id"
     t.index ["channel_id", "external_conversation_id"], name: "unique_channel_conversation", unique: true
+    t.index ["simulator_session_id"], name: "index_channel_conversations_on_simulator_session_id"
   end
 
   create_table "channel_entries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -329,12 +342,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000003) do
   add_foreign_key "attendants", "users"
   add_foreign_key "brand_teams", "brands"
   add_foreign_key "brand_teams", "teams"
+  add_foreign_key "browser_sessions", "users", on_delete: :cascade
   add_foreign_key "capacity_profiles", "users"
   add_foreign_key "case_audits", "support_cases"
   add_foreign_key "case_command_receipts", "support_cases"
   add_foreign_key "case_command_receipts", "users"
   add_foreign_key "case_messages", "support_cases"
   add_foreign_key "categories", "brands"
+  add_foreign_key "channel_conversations", "browser_sessions", column: "simulator_session_id"
   add_foreign_key "channel_conversations", "channels"
   add_foreign_key "channel_entries", "channels"
   add_foreign_key "channel_entries", "support_cases"
