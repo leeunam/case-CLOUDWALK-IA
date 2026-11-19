@@ -2,7 +2,8 @@
 
 Preparação do integrador em 2026-11-19 sobre a base de código `6036fec`.
 Este documento fixa as responsabilidades e os contratos da próxima rodada.
-As extensões de catálogo e WebSocket descritas aqui ainda serão implementadas.
+As extensões de catálogo e WebSocket descritas aqui foram entregues na rodada.
+O aceite integrado e suas limitações estão em [integração F04/F05](../integracao-f04-f05.md).
 
 ## Responsabilidade por frente
 
@@ -112,3 +113,13 @@ da API real não pode cair silenciosamente em respostas locais quando o servidor
 falhar. Cada frente informa commit-base, branch, diretório, commits, comandos e
 resultados reais, falhas e pendências. Mudanças de contrato além das acima são
 coordenadas com o integrador antes de o outro agente consumi-las.
+
+## Ajuste da integração · audiência do catálogo
+
+A revisão central aprovou `GET /api/v1/channels?audience=simulator`.
+Essa indicação exige a identidade sintética vigente e responde `401` quando
+ela não existe, mesmo se houver identidade operacional no mesmo navegador.
+O simulador envia esse parâmetro em todas as páginas. Isso elimina a corrida
+em que a expiração sintética entre leituras faria o catálogo usar o escopo staff.
+A consulta sem esse parâmetro preserva o comportamento operacional anterior.
+O OpenAPI e o contrato de acesso registram a extensão.

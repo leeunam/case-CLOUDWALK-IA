@@ -2,15 +2,19 @@
 
 Projeto individual do TAPI Inteli/CloudWalk. A plataforma terá canais simulados,
 atendente de IA simulado via webhooks e broker, filas editáveis e handoff humano.
-O Jev complementará apenas categoria e prioridade ausentes.
+O Jev complementa apenas categoria e prioridade ausentes, com modo fixture local
+e modo HTTP explícito para o fornecedor real.
 
 ## Estado da entrega
 
 F01 prepara o ambiente, o banco inicial e os contratos. A F02 implementa o
 webhook de canal, a persistência do atendimento, o outbox, a ponte Kafka e o
-atendente simulado, com consulta autenticada do histórico. A preparação da F05
-traz o simulador React com fixtures; sua conexão real com Rails continua pendente.
-As demais rotas dos contratos serão implementadas nas respectivas tarefas.
+atendente simulado, com consulta autenticada do histórico. A F03 fornece o
+atendimento humano. A F04 integra o complemento de classificação em jobs e a
+correção por supervisão. A F05 usa Rails e Action Cable no simulador e na caixa
+do analista; as fixtures ficam no modo explícito `/?fixture=demo`.
+Configurações administrativas, robustez completa, carga e publicação continuam
+nas frentes F06–F10 do plano.
 
 Verificação local da F01 em 2026-11-17 passou com cinco testes Rails e quatorze
 asserções, OpenAPI e 43 fixtures, build React/TypeScript, execução de um job
@@ -26,15 +30,17 @@ Em 2026-11-19, a F02 passou com Rails e Kafka reais: dois turnos, resolução e
 quatro mensagens preservadas após reentrega. A suíte Rails passou com 10 testes
 e 111 asserções, a suíte Python com nove testes e os contratos com 43 fixtures.
 O [roteiro F02](docs/f02.md) contém os comandos e os limites dessa verificação.
-O comando padrão abaixo sobe a base e a interface com fixtures; a ponte e o
-mock são iniciados pelo roteiro F02.
+O comando padrão abaixo sobe a base e a interface conectada à API; a ponte e o
+mock são iniciados pelo roteiro F03.
 
 Na integração F03/F04 de 2026-11-19, a suíte Rails passou com 48 testes e
 657 asserções, sem falhas nem erros. O ensaio real Jev foi pulado por falta
 da chave TypeSafe. O [atendimento humano F03](docs/f03.md) foi verificado com
 HTTP, Kafka e worker reais. O [adaptador F04](docs/f04.md) foi validado com
-fixtures e transporte simulado; sua conexão ao fluxo de classificação ainda
-está pendente. As telas continuam com fixtures até a integração da F05.
+fixtures e transporte simulado naquela primeira fatia. Os resultados da
+conclusão dos jobs e da conexão real da interface estão na
+[integração F04/F05](docs/integracao-f04-f05.md). O ensaio TypeSafe ao vivo
+continua dependendo de `TYPESAFE_API_KEY`.
 
 - [Escopo e arquitetura](docs/planejamento/especificacao-mvp.md)
 - [Backlog e critérios de aceite](docs/planejamento/plano-de-execucao.md)
@@ -186,8 +192,9 @@ reexecute o seed e confira que continuam existindo duas marcas.
 | `docs/planejamento/` | Escopo, arquitetura, decisões e tarefas. |
 
 F02 acrescenta casos, mensagens, auditoria e outbox, com serviços Rails para
-entrada, rodadas e resultados do atendente. A distribuição humana e o Jev
-entram em F03 e F04. Integrações HTTP e Kafka ficam em adaptadores. O contrato
+entrada, rodadas e resultados do atendente. F03 implementa a distribuição
+humana e F04 integra os jobs de classificação Jev. Integrações HTTP e Kafka
+ficam em adaptadores. O contrato
 documenta as interfaces compartilhadas entre backend e telas.
 
 ## Configurações e limites atuais
@@ -206,44 +213,38 @@ indisponíveis na data da F01. O ambiente local mantém o Vite limitado a
 localhost. A publicação F10 deverá servir o build estático e revisar as
 dependências. [Aviso do picomatch](https://github.com/advisories/GHSA-fc5q-39xc-vjpf)
 
-### Preparação da F05 com fixtures
+### F05 com API e demonstração local
 
-Em `frontend/`, execute `npm ci`, `npm run build` e `npm run dev`.
-Abra `http://localhost:5173/`. A tela do cliente funciona com dados
-sintéticos guardados no navegador. Use **Novo atendimento** e **Usar
-exemplo** para enviar em Chat, WhatsApp ou E-mail. O chat consulta respostas
-automaticamente enquanto o caso está ativo. Nos canais assíncronos,
-use **Atualizar conversa** ou volte pelo histórico. Recarregar a página
-restaura a conversa selecionada.
+A raiz abre o simulador conectado ao Rails. `/analista` abre a operação com
+login, caixa filtrada, handoff e comandos de resposta, espera e resolução.
+Configure a credencial sintética conforme o [roteiro F03](docs/f03.md).
+O [README do frontend](frontend/README.md) descreve a execução fora do Compose.
 
-Na revisão integrada de 2026-11-19, a instalação do lockfile e o build passaram
-com Node 22.23.5, React 19.3.1 e Vite 8.3.8 no Docker. `npm test` passou seis
-testes de regressão das rodadas, mensagens pendentes, recuperação e reentrega.
-O runner requer suporte a remoção de tipos TypeScript; use o Node da imagem
-fixada do frontend se o Node instalado no host não oferecer esse recurso.
-Esses testes validam o adaptador local de fixtures. A integração real da F05
-continua pendente.
+O catálogo autorizado fornece os nomes das marcas. O simulador solicita
+`GET /api/v1/channels?audience=simulator` para exigir a própria identidade,
+mesmo quando existe uma sessão operacional no navegador. Mensagens passam
+pelo serviço canônico de entrada; cookies, CSRF, versões e chaves de
+idempotência são verificados pelo Rails. O navegador não recebe o segredo
+usado para assinar webhooks.
 
-O [roteiro F05](docs/f05.md) registra a revisão integrada, os cenários de
-reconexão verificados no navegador e o exercício para acompanhar um envio.
+A assinatura de `/cable` acompanha o caso aberto. Ao receber um aviso ou
+reconectar, a tela lê novamente o estado autorizado. WhatsApp e e-mail
+mantêm consulta pelo histórico e atualização manual. Os resultados do
+navegador e as limitações ficam na [integração F04/F05](docs/integracao-f04-f05.md).
 
-Em um perfil novo do navegador, `/?fixture=empty` começa com histórico vazio.
-`/?fixture=error` simula uma falha na primeira leitura do histórico e permite
-repetir a consulta. A cópia dos exemplos de `docs/contratos/fixtures/` fica em
-`frontend/src/simulator/fixtures.json` para funcionar também com o contexto de
-build do Docker. Para exercitar o fluxo sem classificador, o formulário
-oferece categoria e prioridade sugeridas por canal. Omitir um valor deixa o
-caso aguardando classificação.
+Use `/?fixture=demo` para o modo local no navegador; `/?fixture=empty`
+começa vazio e `/?fixture=error` simula erro de leitura. A API real exibe
+suas falhas, sem recorrer silenciosamente às fixtures. A cópia dos exemplos
+contratuais fica em `frontend/src/simulator/fixtures.json` para o build.
+Omitir classificação usa Jev fixture se o worker tiver
+`CLOUDWALK_JEV_MODE=fixture`; o padrão `disabled` encaminha à revisão com motivo.
 
-O contrato de acesso da tela fica em `frontend/src/simulator/contract.ts`.
-O adaptador Rails deve implementar sessão, catálogo, leituras e envio com
-CSRF e chave de idempotência. O integrador precisa definir a origem dos
-nomes das marcas para o simulador. `GET /api/v1/channels` devolve apenas
-`brand_id` e `GET /api/v1/brands` atende à supervisão. A atualização por
-WebSocket, a caixa do analista e as ações humanas fazem parte da integração
-da F05.
+Em `frontend/`, execute `rtk npm ci`, `rtk npm test` e `rtk npm run build`.
+Use o Node 22 da imagem fixada se a versão local não oferecer a remoção de
+tipos TypeScript requerida pelo runner. O [roteiro F05](docs/f05.md)
+preserva o histórico da primeira revisão com fixtures.
 
-F01 usa exclusivamente dados sintéticos. Credenciais Jev e chamada externa
-entram em F04. O experimento de carga, os resultados medidos e a análise das
+A demonstração usa exclusivamente dados sintéticos. Credencial e chamada
+Jev real têm verificação própria na F04. O experimento de carga, os resultados medidos e a análise das
 limitações entram em F08, conforme o plano. Na entrega final, este README
 também apresentará metodologia, resultados e possibilidades de evolução.

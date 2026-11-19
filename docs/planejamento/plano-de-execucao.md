@@ -2,18 +2,20 @@
 
 Este backlog usa a [especificação](especificacao-mvp.md) como contrato de produto. O horizonte de quatro semanas segue a estimativa do TAPI. Datas e dedicação semanal serão ajustadas à agenda real. Os checkpoints semanais são internos. A primeira entrega apresentável inclui atendente simulado via broker, complemento pelo Jev, experimento e resultados documentados.
 
-Em 2026-11-17, a F01 foi implementada e verificada localmente. Em 2026-11-19,
-o caminho mínimo da F02 foi verificado com Rails e Kafka reais, conforme
-o [roteiro e os resultados](../f02.md). A preparação das telas F05 usa fixtures;
-a conexão com a API, o WebSocket e a caixa do analista continuam pendentes.
-As rotas futuras dos contratos serão implementadas nas respectivas tarefas.
+F01–F03 estão integradas e verificadas localmente. A rodada de conclusão
+F04/F05 integra jobs persistidos, correção auditada, sessão e catálogo do
+simulador e interface conectada ao Rails e ao Action Cable. A suíte conjunta
+passou com 73 testes e 853 asserções, sem falhas nem erros. O único teste
+pulado foi a chamada TypeSafe real, pois falta `TYPESAFE_API_KEY`.
 
-Em 2026-11-19, a F03 e o adaptador isolado da F04 passaram na suíte Rails
-conjunta do runtime fixado (48 testes, 657 asserções, sem falhas/erros; um
-ensaio Jev real pulado). O fluxo humano foi verificado via HTTP, Kafka e
-Solid Queue reais. Os roteiros [F03](../f03.md) e [F04](../f04.md) registram
-evidências e reprodução. A F04 ainda precisa de jobs, persistência, revisão,
-correção e chamada real com credencial para cumprir seu aceite completo.
+A F05 passou no navegador com três canais, duas marcas, handoff, resposta
+humana, espera, retomada, resolução, reentrega após resposta perdida, conflito
+de versão e recuperação após reiniciar a API. A
+[integração F04/F05](../integracao-f04-f05.md) registra evidências e limites.
+A F04 tem implementação e verificação local concluídas; seu aceite ao vivo
+ainda depende da credencial. F06–F10 continuam conforme o backlog abaixo;
+a bateria completa de robustez, carga, avaliação do Jev e publicação não
+foi concluída por esta rodada.
 
 ## 1. Ordem de trabalho
 
