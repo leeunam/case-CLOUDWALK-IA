@@ -47,6 +47,10 @@ module Api
         render json: apply_command("action", "CaseAction")
       end
 
+      def correct_classification
+        render json: apply_command("classification", "CaseClassificationCorrection")
+      end
+
       def audit
         record = visible_case
         unless current_user.role == "supervisor"

@@ -2,7 +2,7 @@ require "digest"
 
 module Attendances
   class ReceiveChannelMessage
-    PRIORITIES = %w[basic intermediate advanced urgent].freeze
+    PRIORITIES = Classification::Catalog::PRIORITIES.keys.freeze
 
     def initialize(channel, data, body)
       @channel = channel
@@ -75,26 +75,34 @@ module Attendances
 
       brand = @channel.brand
       queue = brand.support_queues.find_by!(active: true, is_default: true)
-      status, classification = classify(brand)
+      status, classification, invalid_fields = classify(brand)
       assignee = Operations::Attendant.find_by!(code: "mock", kind: "ai") if status == "ai_active"
       support_case = conversation.support_cases.create!(
         **classification, brand: brand, channel: @channel, queue: queue, assignee: assignee,
-        status: status, previous_case_id: previous&.id, correlation_id: SecureRandom.uuid
+        status: status, previous_case_id: previous&.id, correlation_id: SecureRandom.uuid,
+        blocking_reason: ("invalid_input" if invalid_fields.any?)
       )
       support_case.audit!("case.opened", actor_type: "system", from_status: nil, queue_id: queue.id,
                           classification: support_case.classification, previous_case_id: previous&.id)
+      if status == "classification_pending"
+        request = Classification::Request.create!(support_case: support_case,
+          classification_version: support_case.classification_version, available_at: Time.current)
+        Classification::CompleteRequestJob.schedule(request.id)
+      elsif invalid_fields.any?
+        support_case.audit!("case.classification.review", actor_type: "system", reason: "invalid_input",
+                            invalid_fields: invalid_fields, classification_version: support_case.classification_version)
+      end
       support_case
     end
 
     def classify(brand)
       category, priority = @data.values_at("category", "priority")
-      category_valid = category.is_a?(String) && category.match?(/\A[a-z][a-z0-9_]*\z/) &&
-                       brand.categories.exists?(code: category, active: true)
+      category_valid = Classification::Catalog.category_active?(brand, category)
       priority_valid = PRIORITIES.include?(priority)
-      invalid = [[category, category_valid], [priority, priority_valid]].any? do |value, valid|
-        ![nil, ""].include?(value) && !valid
+      invalid_fields = { category: [category, category_valid], priority: [priority, priority_valid] }.filter_map do |field, (value, valid)|
+        field unless [nil, ""].include?(value) || valid
       end
-      status = if invalid
+      status = if invalid_fields.any?
         "classification_review"
       elsif category_valid && priority_valid
         "ai_active"
@@ -105,7 +113,7 @@ module Attendances
       [status, {
         category: category_valid ? category : nil, category_source: category_valid ? "channel" : nil,
         priority: priority_valid ? priority : nil, priority_source: priority_valid ? "channel" : nil
-      }]
+      }, invalid_fields]
     end
   end
 end

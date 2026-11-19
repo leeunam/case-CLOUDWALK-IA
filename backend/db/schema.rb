@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_19_000002) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_19_000003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -198,6 +198,29 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000002) do
     t.check_constraint "kind::text = ANY (ARRAY['chat'::character varying, 'whatsapp'::character varying, 'email'::character varying]::text[])", name: "channel_kind_allowed"
   end
 
+  create_table "classification_attempts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "classification_request_id", null: false
+    t.integer "number", null: false
+    t.datetime "finished_at"
+    t.string "disposition"
+    t.jsonb "issues", default: {}, null: false
+    t.jsonb "evidence", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["classification_request_id", "number"], name: "unique_classification_attempt", unique: true
+  end
+
+  create_table "classification_requests", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "support_case_id", null: false
+    t.integer "classification_version", null: false
+    t.datetime "available_at", null: false
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["available_at"], name: "due_classification_requests", where: "(completed_at IS NULL)"
+    t.index ["support_case_id", "classification_version"], name: "unique_classification_request", unique: true
+  end
+
   create_table "queue_teams", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "brand_id", null: false
     t.uuid "support_queue_id", null: false
@@ -316,6 +339,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000002) do
   add_foreign_key "channel_entries", "channels"
   add_foreign_key "channel_entries", "support_cases"
   add_foreign_key "channels", "brands"
+  add_foreign_key "classification_attempts", "classification_requests"
+  add_foreign_key "classification_requests", "support_cases"
   add_foreign_key "queue_teams", "brand_teams", column: ["brand_team_id", "brand_id"], primary_key: ["id", "brand_id"]
   add_foreign_key "queue_teams", "brands"
   add_foreign_key "queue_teams", "support_queues", column: ["support_queue_id", "brand_id"], primary_key: ["id", "brand_id"]

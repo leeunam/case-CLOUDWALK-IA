@@ -98,6 +98,11 @@ services:
 
   worker:
     <<: *backend
+    environment:
+      <<: *backend-environment
+      CLOUDWALK_JEV_MODE: ${CLOUDWALK_JEV_MODE:-disabled}
+      CLOUDWALK_JEV_MODEL: ${CLOUDWALK_JEV_MODEL:-jev-latest}
+      TYPESAFE_API_KEY: ${TYPESAFE_API_KEY:-}
     command: ["bundle", "exec", "ruby", "bin/jobs"]
     depends_on:
       db_setup:

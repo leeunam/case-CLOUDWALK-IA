@@ -79,6 +79,8 @@ module Attendances
         apply_human_action!(record, actor)
       elsif transfer?
         transfer!(record, actor, users, destination)
+      elsif @operation == "classification"
+        correct_classification!(record, actor)
       else
         recover_agent!(record, actor)
       end
@@ -142,6 +144,31 @@ module Attendances
                     queue_id: queue.id, previous_assignee_id: old_assignee, assignee_id: destination&.id)
       AnalystOperation.release_work!(origin, record.brand_id) if origin && changed_owner
       DistributeHumanWorkJob.schedule(record.brand_id)
+    end
+
+    def correct_classification!(record, actor)
+      reason = @data.fetch("reason").strip
+      category, priority = @data.values_at("category", "priority")
+      if reason.empty? || !Classification::Catalog.category_active?(record.brand, category) ||
+          !Classification::Catalog::PRIORITIES.key?(priority)
+        raise WebhookV1::Error.new(422, "invalid_classification", "Informe um motivo e valores ativos no catálogo da marca.")
+      end
+
+      previous = record.classification
+      previous_status = record.status
+      updated = previous.merge(category: category, priority: priority)
+      updated[:category_source] = "supervisor" unless previous[:category] == category
+      updated[:priority_source] = "supervisor" unless previous[:priority] == priority
+      Classification::Request.open.where(support_case: record).update_all(completed_at: Time.current, updated_at: Time.current)
+      if %w[classification_pending classification_review].include?(record.status)
+        ActivateClassifiedCase.call(record, updated)
+      else
+        record.advance!(**updated, classification_version: record.classification_version + 1)
+      end
+
+      record.audit!("case.classification.corrected", actor_type: "supervisor", actor_id: actor.id,
+                    reason: reason, from_status: previous_status, previous_classification: previous,
+                    classification: record.classification, classification_version: record.classification_version)
     end
 
     def recover_agent!(record, actor)

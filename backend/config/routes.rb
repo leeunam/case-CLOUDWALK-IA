@@ -11,6 +11,7 @@ Rails.application.routes.draw do
         get "messages", on: :member
         post "messages", action: :post_message, as: :post_message, on: :member
         post "actions", action: :apply_action, on: :member
+        post "classification", action: :correct_classification, on: :member
         get "audit", on: :member
       end
     end
