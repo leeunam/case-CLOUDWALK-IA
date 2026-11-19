@@ -25,18 +25,24 @@ module Attendances
       end
     end
 
-    # Chamado com o analista bloqueado, depois da alteração que liberou o ativo.
+    # Chamado com o analista bloqueado. A marca do caso já é tratada pelo chamador.
+    def self.release_work!(user, case_brand_id)
+      finish_switch!(user)
+      operating_brand_id = user.active_brand_id
+      DistributeHumanWorkJob.schedule(operating_brand_id) if operating_brand_id && operating_brand_id != case_brand_id
+    end
+
     def self.finish_switch!(user)
       target = user.switch_target_brand_id
       return if !target || HumanEligibility.portfolio(user.attendant).where(status: "human_active").exists?
 
       if allowed_brand?(user, target)
         update_and_audit!(user, { active_brand_id: target, switch_target_brand_id: nil }, "analyst.brand.switched")
-        DistributeHumanWorkJob.schedule(target)
       else
         update_and_audit!(user, { switch_target_brand_id: nil }, "analyst.brand.switch_cancelled")
       end
     end
+    private_class_method :finish_switch!
 
     def self.allowed_brand?(user, id)
       Visibility.new(user).queues.where(active: true, brand_id: id).exists?

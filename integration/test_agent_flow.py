@@ -147,6 +147,31 @@ class AgentFlowTest(unittest.TestCase):
         self.assertEqual(propose_result(second)["event_type"], "agent.resolve.proposed")
         self.assertNotEqual(propose_result(second)["event_id"], result["event_id"])
 
+    def test_mock_hands_off_advanced_terminal_cases_with_history_and_stable_replay(self):
+        for sources in (("channel", "jev"), ("channel", "channel"), ("supervisor", "supervisor")):
+            with self.subTest(sources=sources):
+                request = self.fixture("agent-handoff-request")
+                classification = request["payload"]["classification"]
+                classification["category_source"], classification["priority_source"] = sources
+                history = request["payload"]["history"]
+                record = self.record(request, REQUESTS)
+                publisher = Mock()
+                run_mock(record, self.contracts, publisher)
+                run_mock(record, self.contracts, publisher)
+
+                first, replay = publisher.publish.call_args_list
+                self.assertEqual(first, replay)
+                topic, key, body = first.args
+                self.assertEqual((topic, key), (EVENTS, request["case_id"]))
+                result = self.contracts.read("AgentResult", body)
+                self.assertEqual(result["event_type"], "agent.handoff.proposed")
+                self.assertNotEqual(result["event_id"], request["event_id"])
+                self.assertEqual(result["turn_id"], request["turn_id"])
+                payload = result["payload"]
+                self.assertEqual(payload["request_event_id"], request["event_id"])
+                self.assertEqual(payload["message_ids"], [message["id"] for message in history])
+                self.assertIn(history[-1]["text"], payload["summary"])
+
     def test_kafka_publish_waits_for_a_delivery_callback(self):
         producer = Mock()
         producer.produce.side_effect = lambda _topic, **kwargs: setattr(producer, "on_delivery", kwargs["on_delivery"])

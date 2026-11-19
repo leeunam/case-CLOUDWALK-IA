@@ -1,6 +1,8 @@
 require "test_helper"
 
 class HumanServiceTest < ActionDispatch::IntegrationTest
+  include ActiveJob::TestHelper
+
   setup do
     @environment = ENV.to_h.slice("CLOUDWALK_CHANNEL_SECRET", "CLOUDWALK_AGENT_EVENTS_SECRET", "CLOUDWALK_DEMO_PASSWORDS")
     ENV.update("CLOUDWALK_CHANNEL_SECRET" => "test-channel", "CLOUDWALK_AGENT_EVENTS_SECRET" => "test-agent",
@@ -122,6 +124,18 @@ class HumanServiceTest < ActionDispatch::IntegrationTest
     patch_operation(switch_target_brand_id: @horizonte.id)
     assert_response 200
     assert_equal [@aurora.id, @horizonte.id], json.fetch("operation").values_at("active_brand_id", "switch_target_brand_id")
+    payload = { type: "wait_for_customer", text: "Envie o comprovante.", expected_version: active.reload.version }
+    assert_no_difference [-> { active.messages.count }, -> { active.audits.count }, -> { active.command_receipts.count }] do
+      assert_no_enqueued_jobs(only: Attendances::DistributeHumanWorkJob) do
+        command(active, "actions", payload)
+        assert_response 409
+      end
+    end
+    assert_equal "invalid_transition", json.dig("error", "code")
+    assert_equal ["human_active", @alex.attendant.id, payload[:expected_version]],
+                 [active.reload.status, active.assignee_id, active.version]
+    assert_equal [@aurora.id, @horizonte.id], operation.values_at("active_brand_id", "switch_target_brand_id")
+
     during_switch = handoff
     distribute
     assert_equal ["waiting_human", "brand_switch_pending"], [during_switch.reload.status, during_switch.blocking_reason]
@@ -138,6 +152,24 @@ class HumanServiceTest < ActionDispatch::IntegrationTest
     distribute
     assert_equal "human_active", pending.reload.status
     assert_equal @alex.attendant.id, pending.assignee_id
+  end
+
+  test "transferring a pending case signals both brands when it frees a portfolio slot" do
+    pending, blocked = case_blocked_by_portfolio_in_another_brand
+    login("supervisor@example.test")
+    job = Attendances::DistributeHumanWorkJob
+    clear_enqueued_jobs
+
+    assert_enqueued_jobs 2, only: job do
+      command(pending, "actions", { type: "transfer", reason: "Redistribuir pendência.", expected_version: pending.version,
+                                    destination_queue_id: pending.queue_id, destination_assignee_id: nil })
+      assert_response 200
+    end
+    assert_enqueued_with(job: job, args: [@aurora.id])
+    assert_enqueued_with(job: job, args: [@horizonte.id])
+    perform_enqueued_jobs(only: job)
+    assert_equal ["waiting_customer", nil], [pending.reload.status, pending.assignee_id]
+    assert_equal ["human_active", @alex.attendant.id], [blocked.reload.status, blocked.assignee_id]
   end
 
   test "transfer revalidates brand, role, destination and queue access" do
@@ -232,6 +264,23 @@ class HumanServiceTest < ActionDispatch::IntegrationTest
     assert_equal "waiting_human", record.reload.status
   end
 
+  test "reconciling revoked access signals the operating brand without rescheduling its own sweep" do
+    pending, blocked = case_blocked_by_portfolio_in_another_brand
+    retained_team = Operations::Team.find_by!(code: "horizonte_specialists")
+    @alex.team_memberships.create!(team: retained_team)
+    @alex.team_memberships.where.not(team: retained_team).delete_all
+    job = Attendances::DistributeHumanWorkJob
+    clear_enqueued_jobs
+
+    assert_enqueued_jobs 1, only: job do
+      distribute
+    end
+    assert_enqueued_with(job: job, args: [@horizonte.id])
+    perform_enqueued_jobs(only: job)
+    assert_equal ["waiting_customer", nil], [pending.reload.status, pending.assignee_id]
+    assert_equal ["human_active", @alex.attendant.id], [blocked.reload.status, blocked.assignee_id]
+  end
+
   test "supervisor can retry a failed delivery and force a handoff with its original history" do
     record = open_case(brand: @aurora, priority: "basic")
     turn = record.turns.in_flight.sole
@@ -258,6 +307,23 @@ class HumanServiceTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def case_blocked_by_portfolio_in_another_brand
+    @alex.capacity_profiles.find_by!(active: true).update!(
+      portfolio_limit: 1, alternatives: [[{ priority: "basic", category: "pix", limit: 1 }]]
+    )
+    Operations::User.find_by!(email: "cris@example.test").update!(available: false)
+    pending = handoff
+    distribute
+    login(@alex.email)
+    wait_for_customer(pending)
+    patch_operation(switch_target_brand_id: @horizonte.id)
+    assert_response 200
+    blocked = handoff(brand: @horizonte)
+    Attendances::DistributeHumanWorkJob.perform_now(@horizonte.id)
+    assert_equal ["waiting_human", "portfolio_limit"], [blocked.reload.status, blocked.blocking_reason]
+    [pending.reload, blocked]
+  end
 
   def json
     JSON.parse(response.body)

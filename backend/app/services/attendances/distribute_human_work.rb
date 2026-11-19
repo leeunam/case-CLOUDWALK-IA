@@ -96,7 +96,7 @@ module Attendances
                         blocking_reason: "queue_access_revoked")
         record.audit!("case.human.unassigned", actor_type: "system", from_status: previous,
                       reason: "queue_access_revoked", previous_assignee_id: previous_assignee, queue_id: record.queue_id)
-        AnalystOperation.finish_switch!(owner)
+        AnalystOperation.release_work!(owner, record.brand_id)
       end
     end
 

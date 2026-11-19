@@ -86,6 +86,8 @@ module Attendances
 
     def apply_human_action!(record, actor)
       conflict! unless record.status == "human_active"
+      waiting_for_customer = @data["type"] == "wait_for_customer"
+      conflict! if waiting_for_customer && actor.switch_target_brand_id
 
       assignee = record.assignee_id
       message = if @data.key?("text")
@@ -98,7 +100,7 @@ module Attendances
         return message
       end
 
-      if @data["type"] == "wait_for_customer"
+      if waiting_for_customer
         record.advance!(status: "waiting_customer")
         record.audit!("case.human.waiting_customer", actor_type: "human", actor_id: assignee,
                       from_status: "human_active", message_id: message.id)
@@ -107,8 +109,8 @@ module Attendances
                         assignment_generation: record.assignment_generation + 1)
         record.audit!("case.human.resolved", actor_type: "human", actor_id: assignee,
                       from_status: "human_active", reason: @data["reason"], previous_assignee_id: assignee)
+        AnalystOperation.release_work!(actor, record.brand_id)
       end
-      AnalystOperation.finish_switch!(actor)
       DistributeHumanWorkJob.schedule(record.brand_id)
     end
 
@@ -138,7 +140,7 @@ module Attendances
       record.audit!("case.human.transferred", actor_type: "supervisor", actor_id: actor.id,
                     from_status: old_status, reason: @data.fetch("reason"), previous_queue_id: old_queue,
                     queue_id: queue.id, previous_assignee_id: old_assignee, assignee_id: destination&.id)
-      AnalystOperation.finish_switch!(origin) if origin
+      AnalystOperation.release_work!(origin, record.brand_id) if origin && changed_owner
       DistributeHumanWorkJob.schedule(record.brand_id)
     end
 

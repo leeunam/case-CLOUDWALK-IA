@@ -91,23 +91,34 @@ def require_key(event, record):
 
 def propose_result(request):
     history = request["payload"]["history"]
-    answered = any(message["author"]["type"] == "ai" for message in history)
-    category = request["payload"]["classification"]["category"]
-    suggestions = {
-        "pix": "Consulte o comprovante no histórico para conferir a confirmação.",
-        "payouts": "Confira a data prevista e o status do repasse no extrato.",
-        "terminal": "Confira a conexão da maquininha e tente novamente.",
-    }
+    classification = request["payload"]["classification"]
+    category = classification["category"]
+    payload = {"request_event_id": request["event_id"]}
+    if category == "terminal" and classification["priority"] == "advanced":
+        event_type = "agent.handoff.proposed"
+        payload.update(
+            summary=f"Atendimento avançado sobre maquininha. {history[-1]['text']}",
+            message_ids=[message["id"] for message in history],
+            text="Vou encaminhar para a equipe que atende maquininhas.",
+        )
+    elif any(message["author"]["type"] == "ai" for message in history):
+        event_type = "agent.resolve.proposed"
+        payload["text"] = "Certo. Vou encerrar este atendimento."
+    else:
+        event_type = "agent.reply.proposed"
+        suggestions = {
+            "pix": "Consulte o comprovante no histórico para conferir a confirmação.",
+            "payouts": "Confira a data prevista e o status do repasse no extrato.",
+            "terminal": "Confira a conexão da maquininha e tente novamente.",
+        }
+        payload["text"] = suggestions.get(
+            category, "Confira as informações do atendimento e me diga se a orientação resolveu."
+        )
     return {
         **request,
         "event_id": str(uuid.uuid5(uuid.NAMESPACE_URL, "cloudwalk:mock-agent-v1:" + request["event_id"])),
-        "event_type": "agent.resolve.proposed" if answered else "agent.reply.proposed",
-        "payload": {
-            "request_event_id": request["event_id"],
-            "text": "Certo. Vou encerrar este atendimento." if answered else suggestions.get(
-                category, "Confira as informações do atendimento e me diga se a orientação resolveu."
-            ),
-        },
+        "event_type": event_type,
+        "payload": payload,
     }
 
 
