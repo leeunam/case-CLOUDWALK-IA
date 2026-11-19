@@ -96,9 +96,10 @@ def propose_result(request):
     payload = {"request_event_id": request["event_id"]}
     if category == "terminal" and classification["priority"] == "advanced":
         event_type = "agent.handoff.proposed"
+        latest = history[-1]
         payload.update(
-            summary=f"Atendimento avançado sobre maquininha. {history[-1]['text']}",
-            message_ids=[message["id"] for message in history],
+            summary=f"Atendimento avançado sobre maquininha. {latest['text']}",
+            message_ids=[latest["id"]],
             text="Vou encaminhar para a equipe que atende maquininhas.",
         )
     elif any(message["author"]["type"] == "ai" for message in history):

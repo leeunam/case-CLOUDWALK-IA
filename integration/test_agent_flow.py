@@ -154,6 +154,8 @@ class AgentFlowTest(unittest.TestCase):
                 classification = request["payload"]["classification"]
                 classification["category_source"], classification["priority_source"] = sources
                 history = request["payload"]["history"]
+                latest = self.fixture("case-handoff-messages")["items"][1]
+                history.append(latest)
                 record = self.record(request, REQUESTS)
                 publisher = Mock()
                 run_mock(record, self.contracts, publisher)
@@ -169,8 +171,8 @@ class AgentFlowTest(unittest.TestCase):
                 self.assertEqual(result["turn_id"], request["turn_id"])
                 payload = result["payload"]
                 self.assertEqual(payload["request_event_id"], request["event_id"])
-                self.assertEqual(payload["message_ids"], [message["id"] for message in history])
-                self.assertIn(history[-1]["text"], payload["summary"])
+                self.assertEqual(payload["message_ids"], [latest["id"]])
+                self.assertEqual(payload["summary"], f"Atendimento avançado sobre maquininha. {latest['text']}")
 
     def test_kafka_publish_waits_for_a_delivery_callback(self):
         producer = Mock()
