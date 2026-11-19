@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Simulator } from './simulator/Simulator'
+import { StaffPage } from './staff/StaffPage'
 
 function HealthStatus() {
   const [status, setStatus] = useState('Conferindo conexão com a API…')
@@ -41,5 +42,7 @@ function HealthStatus() {
 }
 
 export function App() {
-  return window.location.pathname === '/health' ? <HealthStatus /> : <Simulator />
+  if (window.location.pathname === '/health') return <HealthStatus />
+  if (window.location.pathname === '/analista') return <StaffPage />
+  return <Simulator />
 }

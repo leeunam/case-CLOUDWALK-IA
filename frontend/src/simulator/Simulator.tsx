@@ -1,28 +1,37 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { ChannelType } from './contract'
+import type { ChannelType, SimulatorRepository } from './contract'
+import { readPages } from '../api/pagination'
+import { brandsFromChannels, createSimulatorApi } from '../api/simulator'
+import { Topbar } from '../Topbar'
+import { useOpenCase } from '../useOpenCase'
+import { usePagedCases } from '../usePagedCases'
 import { Composer } from './Composer'
 import { Conversation } from './Conversation'
 import { createFixtureRepository } from './fixtureRepository'
 import { caseLabels, channelLabels, formatTimestamp } from './presentation'
 import { useResource } from './useResource'
 
-const params = new URLSearchParams(window.location.search)
-const repository = createFixtureRepository(params.get('fixture'))
-
-async function loadCatalog() {
-  const [brands, channels] = await Promise.all([repository.listBrands(), repository.listChannels()])
-  return { brands, channels: channels.items }
+function selectRepository(): { repository: SimulatorRepository; demo: boolean } {
+  const fixture = new URLSearchParams(window.location.search).get('fixture')
+  return fixture && ['demo', 'empty', 'error'].includes(fixture)
+    ? { repository: createFixtureRepository(fixture), demo: true }
+    : { repository: createSimulatorApi(), demo: false }
 }
 
 export function Simulator() {
+  const [{ repository, demo }] = useState(selectRepository)
   const [catalogRevision, setCatalogRevision] = useState(0)
   const [historyRevision, setHistoryRevision] = useState(0)
-  const [caseId, setCaseId] = useState(params.get('case'))
+  const [caseId, setCaseId] = useOpenCase()
   const [brandId, setBrandId] = useState('')
   const [channelType, setChannelType] = useState<ChannelType>('chat')
   const [sendingNewCase, setSendingNewCase] = useState(false)
+  const loadCatalog = useCallback(async () => {
+    const channels = (await readPages(repository.listChannels)).items
+    return { brands: brandsFromChannels(channels), channels }
+  }, [repository])
   const catalog = useResource(loadCatalog, catalogRevision)
-  const history = useResource(repository.listCases, historyRevision)
+  const history = usePagedCases(repository.listCases, historyRevision)
   const refreshCatalog = useCallback(() => setCatalogRevision(previous => previous + 1), [])
   const refreshHistory = useCallback(() => setHistoryRevision(previous => previous + 1), [])
   const brands = catalog.data?.brands ?? []
@@ -37,13 +46,6 @@ export function Simulator() {
     item.channel_id === selectedCase.channel_id && item.external_conversation_id === selectedCase.external_conversation_id,
   )
   const latestCaseId = latestCase?.id !== caseId ? latestCase?.id : undefined
-
-  useEffect(() => {
-    const url = new URL(window.location.href)
-    if (caseId) url.searchParams.set('case', caseId)
-    else url.searchParams.delete('case')
-    window.history.replaceState(null, '', url)
-  }, [caseId])
 
   useEffect(() => {
     function reconnect() {
@@ -61,18 +63,7 @@ export function Simulator() {
 
   return (
     <>
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="identity">
-            <span className="brand-mark" aria-hidden="true"><i /><i /><i /></span>
-            <span>Help desk</span>
-          </div>
-          <div className="topbar-actions">
-            <span className="mode"><i aria-hidden="true" />Modo simulado</span>
-            <a href="/health">Status da API</a>
-          </div>
-        </div>
-      </header>
+      <Topbar demo={demo} />
       <main className="shell">
         <div className="page-heading">
           <h1>Simulador de atendimento</h1>
@@ -82,10 +73,11 @@ export function Simulator() {
             </button>
           )}
         </div>
+        <p className="mode-link"><a href={demo ? '/' : '/?fixture=demo'}>{demo ? 'Usar API real' : 'Abrir demonstração local'}</a></p>
         {catalog.error && (
           <div className="notice catalog-notice" role="alert">
             <p>Não foi possível carregar marcas e canais. {catalog.error}</p>
-            <button className="secondary" disabled={catalog.loading} onClick={refreshCatalog}>
+            <button className="secondary" disabled={catalog.loading} onClick={() => { refreshCatalog(); refreshHistory() }}>
               Recarregar marcas e canais
             </button>
           </div>
@@ -125,9 +117,12 @@ export function Simulator() {
                 })}
               </ul>
             )}
+            {history.data?.next_cursor && (
+              <button className="secondary sidebar-state" disabled={history.loading} onClick={history.loadMore}>Carregar mais atendimentos</button>
+            )}
           </aside>
           {caseId ? (
-            <Conversation key={caseId} id={caseId} latestCaseId={latestCaseId} brands={brands} channels={channels} repository={repository}
+            <Conversation key={caseId} id={caseId} latestCaseId={latestCaseId} brands={brands} channels={channels} repository={repository} demo={demo}
               onHistoryChanged={refreshHistory} onOpen={showCase} />
           ) : (
             <section className="panel workspace" aria-labelledby="new-heading">

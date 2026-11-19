@@ -1,17 +1,20 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Brand, Channel, SimulatorReceipt, SimulatorRepository } from './contract'
+import { Transcript } from '../Transcript'
+import { useCaseRefresh } from '../useCaseRefresh'
 import { Composer } from './Composer'
-import { authorLabels, caseLabels, channelLabels, formatTimestamp } from './presentation'
+import { caseLabels, channelLabels } from './presentation'
 import { useResource } from './useResource'
 
 export function Conversation({
-  id, latestCaseId, brands, channels, repository, onHistoryChanged, onOpen,
+  id, latestCaseId, brands, channels, repository, demo, onHistoryChanged, onOpen,
 }: {
   id: string
   latestCaseId?: string
   brands: Brand[]
   channels: Channel[]
   repository: SimulatorRepository
+  demo: boolean
   onHistoryChanged: () => void
   onOpen: (id: string) => void
 }) {
@@ -29,16 +32,8 @@ export function Conversation({
     if (updatedAt) onHistoryChanged()
   }, [updatedAt, onHistoryChanged])
 
-  useEffect(() => {
-    if (channel?.type !== 'chat' || detail?.status !== 'ai_active' || loading || error) return
-    const timer = window.setTimeout(refresh, 1000)
-    return () => window.clearTimeout(timer)
-  }, [channel?.type, detail?.status, loading, error, refresh])
-
-  useEffect(() => {
-    window.addEventListener('online', refresh)
-    return () => window.removeEventListener('online', refresh)
-  }, [refresh])
+  const demoPolling = channel?.type === 'chat' && detail?.status === 'ai_active' && !error ? 1000 : null
+  useCaseRefresh(id, demo || !detail ? null : 'simulator', demo ? demoPolling : 10000, loading, refresh)
 
   function handleSent(receipt: SimulatorReceipt) {
     if (receipt.case_id === id) refresh()
@@ -67,20 +62,7 @@ export function Conversation({
             <button className="secondary" onClick={refresh} disabled={loading}>Tentar novamente</button>
           </div>
         )}
-        {data && (
-          <ol className="messages" aria-label="Mensagens" aria-live="polite">
-            {data.messages.map(message => (
-              <li className={`message ${message.author.type === 'customer' ? 'customer' : ''}`} key={message.id}>
-                <div className="message-meta">
-                  <strong>{authorLabels[message.author.type]}</strong>
-                  <time dateTime={message.created_at}>{formatTimestamp(message.created_at)}</time>
-                </div>
-                <p>{message.text}</p>
-              </li>
-            ))}
-          </ol>
-        )}
-        {data?.messages.length === 0 && <p className="muted">Ainda não há mensagens neste atendimento.</p>}
+        {data && <Transcript messages={data.messages} />}
       </div>
       {latestCaseId ? (
         <div className="conversation-footer">
@@ -96,7 +78,7 @@ export function Conversation({
                   ? 'O chat busca novas mensagens enquanto o atendimento está ativo.'
                   : 'Volte pelo histórico ou atualize para consultar novas respostas.'}
             </p>
-            {channel.type !== 'chat' && <button className="secondary" onClick={refresh} disabled={loading}>Atualizar conversa</button>}
+            <button className="secondary" onClick={refresh} disabled={loading}>Atualizar conversa</button>
           </div>
           <Composer channel={channel} conversation={detail} repository={repository} onSent={handleSent} />
         </div>

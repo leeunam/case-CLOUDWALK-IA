@@ -24,9 +24,9 @@ type StoredFixtureState = Omit<FixtureState, 'cases'> & {
 const channels = fixtures.channels.items as Channel[]
 const demoChannels: Channel[] = [
   ...channels,
-  { ...channels[0], brand_id: fixtures.brands[1].id, id: '00000000-0000-4000-8000-000000000914' },
-  { ...channels[1], brand_id: fixtures.brands[0].id, id: '00000000-0000-4000-8000-000000000915' },
-  { ...channels[2], brand_id: fixtures.brands[0].id, id: '00000000-0000-4000-8000-000000000916' },
+  { ...channels[0], brand_id: fixtures.brands[1].id, brand_name: fixtures.brands[1].name, id: '00000000-0000-4000-8000-000000000914' },
+  { ...channels[1], brand_id: fixtures.brands[0].id, brand_name: fixtures.brands[0].name, id: '00000000-0000-4000-8000-000000000915' },
+  { ...channels[2], brand_id: fixtures.brands[0].id, brand_name: fixtures.brands[0].name, id: '00000000-0000-4000-8000-000000000916' },
 ]
 
 function initialState(empty: boolean): FixtureState {
@@ -143,7 +143,6 @@ export function createFixtureRepository(scenario: string | null = null): Simulat
   }
 
   return {
-    listBrands: () => access(() => fixtures.brands),
     listChannels: () => access(() => ({ items: demoChannels, next_cursor: null })),
     listCases: () => access(state => {
       if (failFirstHistoryRead) {
