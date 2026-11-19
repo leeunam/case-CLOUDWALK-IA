@@ -2,10 +2,11 @@
 
 Este backlog usa a [especificação](especificacao-mvp.md) como contrato de produto. O horizonte de quatro semanas segue a estimativa do TAPI. Datas e dedicação semanal serão ajustadas à agenda real. Os checkpoints semanais são internos. A primeira entrega apresentável inclui atendente simulado via broker, complemento pelo Jev, experimento e resultados documentados.
 
-Em 2026-11-17, a F01 foi implementada e verificada localmente. O README contém
-os comandos para subir o ambiente e repetir as verificações. F02 e a preparação
-das telas F05 com fixtures podem começar a partir dessa base. As rotas futuras
-dos contratos ainda serão implementadas nas respectivas tarefas.
+Em 2026-11-17, a F01 foi implementada e verificada localmente. Em 2026-11-19,
+o caminho mínimo da F02 foi verificado com Rails e Kafka reais, conforme
+o [roteiro e os resultados](../f02.md). A preparação das telas F05 usa fixtures;
+a conexão com a API, o WebSocket e a caixa do analista continuam pendentes.
+As rotas futuras dos contratos serão implementadas nas respectivas tarefas.
 
 ## 1. Ordem de trabalho
 

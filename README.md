@@ -6,10 +6,11 @@ O Jev complementará apenas categoria e prioridade ausentes.
 
 ## Estado da entrega
 
-F01 prepara o ambiente, o banco inicial e os contratos. Rails expõe a consulta
-de saúde, React verifica essa consulta, PostgreSQL contém a operação sintética
-e Kafka fica pronto para a integração de F02. As rotas de atendimento e
-administração descritas nos contratos serão implementadas nas próximas tarefas.
+F01 prepara o ambiente, o banco inicial e os contratos. A F02 implementa o
+webhook de canal, a persistência do atendimento, o outbox, a ponte Kafka e o
+atendente simulado, com consulta autenticada do histórico. A preparação da F05
+traz o simulador React com fixtures; sua conexão real com Rails continua pendente.
+As demais rotas dos contratos serão implementadas nas respectivas tarefas.
 
 Verificação local da F01 em 2026-11-17 passou com cinco testes Rails e quatorze
 asserções, OpenAPI e 43 fixtures, build React/TypeScript, execução de um job
@@ -20,6 +21,13 @@ ao fim deste README.
 Em 2026-11-18, Kafka passou a ser o broker padrão. O teste de mensageria
 consumiu e releu o mesmo evento com grupos diferentes e confirmou a leitura
 de um evento após recriar o contêiner com o volume persistente.
+
+Em 2026-11-19, a F02 passou com Rails e Kafka reais: dois turnos, resolução e
+quatro mensagens preservadas após reentrega. A suíte Rails passou com 10 testes
+e 111 asserções, a suíte Python com nove testes e os contratos com 43 fixtures.
+O [roteiro F02](docs/f02.md) contém os comandos e os limites dessa verificação.
+O comando padrão abaixo sobe a base e a interface com fixtures; a ponte e o
+mock são iniciados pelo roteiro F02.
 
 - [Escopo e arquitetura](docs/planejamento/especificacao-mvp.md)
 - [Backlog e critérios de aceite](docs/planejamento/plano-de-execucao.md)
@@ -101,8 +109,8 @@ Active Record representa uma tabela e oferece consultas como
 a criação ou alteração de tabelas. O seed cria os dados iniciais da demonstração.
 
 O worker executa jobs internos com Solid Queue, persistidos num segundo banco
-PostgreSQL no mesmo serviço. Kafka transportará mensagens entre plataforma,
-ponte e atendente simulado em F02. [Active Job e Solid Queue](https://guides.rubyonrails.org/active_job_basics.html)
+PostgreSQL no mesmo serviço. Na demonstração F02, Kafka transporta mensagens
+entre plataforma, ponte e atendente simulado. [Active Job e Solid Queue](https://guides.rubyonrails.org/active_job_basics.html)
 
 ## Eventos e retenção no Kafka
 
@@ -170,17 +178,19 @@ reexecute o seed e confira que continuam existindo duas marcas.
 | `docs/contratos/` | OpenAPI, schemas, estados, permissões e fixtures comuns aos agentes. |
 | `docs/planejamento/` | Escopo, arquitetura, decisões e tarefas. |
 
-F02 acrescenta casos, mensagens, auditoria e outbox, com regras de domínio em
-serviços Rails para transições de atendimento, classificação e distribuição.
-Controller, job e webhook chamam esses mesmos serviços. Integrações HTTP e Kafka
-ficam em adaptadores. O contrato documenta as interfaces antes do paralelismo
-entre backend e telas.
+F02 acrescenta casos, mensagens, auditoria e outbox, com serviços Rails para
+entrada, rodadas e resultados do atendente. A distribuição humana e o Jev
+entram em F03 e F04. Integrações HTTP e Kafka ficam em adaptadores. O contrato
+documenta as interfaces compartilhadas entre backend e telas.
 
 ## Configurações e limites atuais
 
 As versões de bibliotecas ficam em `backend/Gemfile.lock` e
-`frontend/package-lock.json`. Imagens têm tag e digest nos Dockerfiles e no
-Compose. A base usa Ruby 3.4, Rails 8.1, PostgreSQL 17, Kafka 4.4 e Node 22.
+`frontend/package-lock.json`. As imagens da base F01 têm tag e digest nos
+Dockerfiles e no Compose. A imagem Python da integração F02 usa a tag
+`python:3.13-slim`; seu digest e as dependências transitivas ainda precisam
+ser congelados para a reprodução final F09. A base usa Ruby 3.4, Rails 8.1,
+PostgreSQL 17, Kafka 4.4 e Node 22.
 O servidor web usa Vite para desenvolvimento. Publicação por URL é F10.
 
 `npm audit` identificou um aviso em `picomatch`, dependência transitiva das
@@ -198,6 +208,14 @@ exemplo** para enviar em Chat, WhatsApp ou E-mail. O chat consulta respostas
 automaticamente enquanto o caso está ativo. Nos canais assíncronos,
 use **Atualizar conversa** ou volte pelo histórico. Recarregar a página
 restaura a conversa selecionada.
+
+Na revisão integrada de 2026-11-19, a instalação do lockfile e o build passaram
+com Node 22.23.5, React 19.3.1 e Vite 8.3.8 no Docker. `npm test` passou seis
+testes de regressão das rodadas, mensagens pendentes, recuperação e reentrega.
+O runner requer suporte a remoção de tipos TypeScript; use o Node da imagem
+fixada do frontend se o Node instalado no host não oferecer esse recurso.
+Esses testes validam o adaptador local de fixtures. A integração real da F05
+continua pendente.
 
 Em um perfil novo do navegador, `/?fixture=empty` começa com histórico vazio.
 `/?fixture=error` simula uma falha na primeira leitura do histórico e permite
