@@ -35,7 +35,7 @@ def kafka_events(project, topic, case_id):
         key, separator, raw = line.partition(b"\t")
         if separator and key == case_id.encode():
             records.append((json.loads(raw), raw))
-    require(records, f"Não encontrei o caso {case_id} em {topic}. {process.stderr.decode(errors=replace)}")
+    require(records, f"Não encontrei o caso {case_id} em {topic}. {process.stderr.decode(errors='replace')}")
     return records
 
 
@@ -117,7 +117,7 @@ class Demo:
         initial = body(channel_message)
         receipt = self.send(initial)
         case_id = receipt["case_id"]
-        print(f"Entrada persistida case_id={case_id} correlation_id={receipt[correlation_id]}", flush=True)
+        print(f"Entrada persistida case_id={case_id} correlation_id={receipt['correlation_id']}", flush=True)
         require(self.send(initial) == receipt, "A reentrega mudou o recibo da entrada.")
         self.send(initial + b" ", expected=409)
         path = f"/api/v1/cases/{case_id}"
@@ -146,10 +146,10 @@ class Demo:
         for event, raw in results:
             replay = self.call("/webhooks/v1/agent/events", data=raw, secret=self.agent_secret)
             require(replay == {"event_id": event["event_id"], "disposition": "duplicate"}, "Callback repetido sem deduplicação.")
-            print(f"Kafka pedido={event[payload][request_event_id]} retorno={event[event_id]} rodada={event[turn_id]}")
+            print(f"Kafka pedido={event['payload']['request_event_id']} retorno={event['event_id']} rodada={event['turn_id']}")
         require(self.call(path + "/messages")["items"] == transcript, "A reentrega alterou o histórico.")
         for message in transcript:
-            print(f"{message[sequence]} {message[author][type]}  {message[text]}")
+            print(f"{message['sequence']} {message['author']['type']}  {message['text']}")
         print("Verificação F02 concluída: dois turnos, resolução e um efeito por entrada e retorno.")
 
 

@@ -283,6 +283,14 @@ def main():
     parser.add_argument("role", choices=("requests", "events", "mock"))
     parser.add_argument("--port", type=int, default=8080)
     args = parser.parse_args()
+
+    secret = None
+    if args.role != "mock":
+        variable = f"CLOUDWALK_AGENT_{args.role.upper()}_SECRET"
+        secret = os.environ.get(variable, "")
+        if not secret.strip():
+            parser.error(f"{variable} deve conter um segredo.")
+
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     brokers = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
     contracts = Contracts(os.environ.get("CLOUDWALK_CONTRACT_SCHEMA", DEFAULT_SCHEMA))
@@ -294,12 +302,10 @@ def main():
     }))
 
     if args.role == "requests":
-        secret = os.environ["CLOUDWALK_AGENT_REQUESTS_SECRET"]
         with ThreadingHTTPServer(("0.0.0.0", args.port), request_handler(publisher, contracts, secret)) as server:
             server.serve_forever()
     elif args.role == "events":
         url = os.environ["CLOUDWALK_AGENT_EVENTS_URL"]
-        secret = os.environ["CLOUDWALK_AGENT_EVENTS_SECRET"]
         consume(EVENTS, "platform-agent-events-v1", lambda record: forward_result(record, contracts, url, secret),
                 publisher, brokers)
     else:

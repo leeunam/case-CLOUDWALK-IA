@@ -1,7 +1,8 @@
 import json
 import unittest
+from contextlib import redirect_stderr
 from email.message import Message
-from io import BytesIO
+from io import BytesIO, StringIO
 from unittest.mock import Mock, call, patch
 
 from agent_flow import (
@@ -16,6 +17,7 @@ from agent_flow import (
     authenticate,
     forward_result,
     json_bytes,
+    main,
     process_record,
     propose_result,
     request_handler,
@@ -53,6 +55,58 @@ class AgentFlowTest(unittest.TestCase):
         self.assertFalse(authenticate(headers, "secret", raw + b" ", now=1300))
         headers["X-Webhook-Timestamp"] = "1000"
         self.assertFalse(authenticate(headers, "secret", raw, now=1000))
+
+    def test_bridge_requires_secrets_before_starting(self):
+        for role in ("requests", "events"):
+            variable = f"CLOUDWALK_AGENT_{role.upper()}_SECRET"
+            for value in (None, "", " \t "):
+                with self.subTest(role=role, value=value):
+                    environment = {"CLOUDWALK_AGENT_EVENTS_URL": "http://rails.test/webhooks/v1/agent/events"}
+                    if value is not None:
+                        environment[variable] = value
+                    stderr = StringIO()
+                    with (
+                        patch("sys.argv", ["agent_flow.py", role]),
+                        patch.dict("os.environ", environment, clear=True),
+                        patch("confluent_kafka.Producer") as producer,
+                        patch("agent_flow.ThreadingHTTPServer") as server,
+                        patch("agent_flow.consume") as consume,
+                        redirect_stderr(stderr),
+                    ):
+                        with self.assertRaises(SystemExit) as error:
+                            main()
+                        self.assertEqual(error.exception.code, 2)
+                        self.assertIn(variable, stderr.getvalue())
+                        producer.assert_not_called()
+                        server.assert_not_called()
+                        consume.assert_not_called()
+
+    def test_bridge_preserves_whitespace_in_configured_secrets(self):
+        secret = " secret \t"
+        url = "http://rails.test/webhooks/v1/agent/events"
+        environment = {
+            "CLOUDWALK_AGENT_REQUESTS_SECRET": secret,
+            "CLOUDWALK_AGENT_EVENTS_SECRET": secret,
+            "CLOUDWALK_AGENT_EVENTS_URL": url,
+        }
+        record = Mock()
+        with (
+            patch.dict("os.environ", environment, clear=True),
+            patch("confluent_kafka.Producer"),
+            patch("agent_flow.ThreadingHTTPServer"),
+            patch("agent_flow.request_handler") as handler,
+            patch("agent_flow.consume") as consume,
+            patch("agent_flow.forward_result") as forward,
+        ):
+            with patch("sys.argv", ["agent_flow.py", "requests"]):
+                main()
+            self.assertEqual(handler.call_args.args[2], secret)
+
+            with patch("sys.argv", ["agent_flow.py", "events"]):
+                main()
+            handle = consume.call_args.args[2]
+            handle(record)
+            self.assertEqual(forward.call_args.args[2:], (url, secret))
 
     def test_request_returns_202_after_publish_and_503_on_ambiguous_confirmation(self):
         raw = json_bytes(self.request)
