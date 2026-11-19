@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_19_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_19_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -53,6 +53,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000001) do
     t.index ["result_due_at"], name: "index_agent_turns_on_result_due_at", where: "completed_at IS NULL"
     t.index ["support_case_id"], name: "index_agent_turns_on_support_case_id"
     t.index ["support_case_id"], name: "one_in_flight_turn_per_case", unique: true, where: "completed_at IS NULL"
+  end
+
+  create_table "analyst_operation_audits", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.jsonb "changeset", null: false
+    t.datetime "created_at", null: false
+    t.string "event_type", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["user_id"], name: "index_analyst_operation_audits_on_user_id"
   end
 
   create_table "attendants", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -113,6 +122,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000001) do
     t.datetime "updated_at", null: false
     t.index ["correlation_id", "created_at"], name: "index_case_audits_on_correlation_id_and_created_at"
     t.index ["support_case_id"], name: "index_case_audits_on_support_case_id"
+  end
+
+  create_table "case_command_receipts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "body_sha256", null: false
+    t.datetime "created_at", null: false
+    t.string "key", limit: 128, null: false
+    t.string "operation", null: false
+    t.jsonb "response_body", null: false
+    t.uuid "support_case_id", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["support_case_id", "user_id", "operation", "key"], name: "unique_case_command", unique: true
+    t.index ["support_case_id"], name: "index_case_command_receipts_on_support_case_id"
+    t.index ["user_id"], name: "index_case_command_receipts_on_user_id"
   end
 
   create_table "case_messages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -263,24 +286,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000001) do
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "email", null: false
+    t.datetime "last_human_assignment_at"
     t.string "name", null: false
     t.string "role", null: false
+    t.uuid "switch_target_brand_id"
     t.uuid "active_brand_id"
     t.boolean "available", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["active_brand_id"], name: "index_users_on_active_brand_id"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["switch_target_brand_id"], name: "index_users_on_switch_target_brand_id"
     t.check_constraint "role::text = ANY (ARRAY['analyst'::character varying, 'supervisor'::character varying]::text[])", name: "user_role_allowed"
   end
 
   add_foreign_key "agent_outboxes", "agent_turns"
   add_foreign_key "agent_turns", "support_cases"
+  add_foreign_key "analyst_operation_audits", "users"
   add_foreign_key "attendants", "users"
   add_foreign_key "brand_teams", "brands"
   add_foreign_key "brand_teams", "teams"
   add_foreign_key "capacity_profiles", "users"
   add_foreign_key "case_audits", "support_cases"
+  add_foreign_key "case_command_receipts", "support_cases"
+  add_foreign_key "case_command_receipts", "users"
   add_foreign_key "case_messages", "support_cases"
   add_foreign_key "categories", "brands"
   add_foreign_key "channel_conversations", "channels"
@@ -302,4 +331,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000001) do
   add_foreign_key "team_memberships", "teams"
   add_foreign_key "team_memberships", "users"
   add_foreign_key "users", "brands", column: "active_brand_id"
+  add_foreign_key "users", "brands", column: "switch_target_brand_id"
 end

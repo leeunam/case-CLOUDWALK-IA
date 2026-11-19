@@ -1,6 +1,8 @@
 module Operations
   class User < ApplicationRecord
     belongs_to :active_brand, class_name: "Operations::Brand", optional: true
+    belongs_to :switch_target_brand, class_name: "Operations::Brand", optional: true
+    has_one :attendant
     has_many :team_memberships
     has_many :teams, through: :team_memberships
     has_many :capacity_profiles

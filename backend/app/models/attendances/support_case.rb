@@ -3,6 +3,8 @@ module Attendances
     STATUSES = %w[classification_pending classification_review ai_active waiting_human
                   human_active waiting_customer waiting_resumption resolved].freeze
     INTEGRATION_STATUSES = %w[idle pending_delivery awaiting_result failed].freeze
+    PORTFOLIO_STATUSES = %w[human_active waiting_customer waiting_resumption].freeze
+    HUMAN_STATUSES = (PORTFOLIO_STATUSES + ["waiting_human"]).freeze
 
     belongs_to :brand, class_name: "Operations::Brand"
     belongs_to :channel, class_name: "Operations::Channel"
@@ -12,6 +14,7 @@ module Attendances
     has_many :messages, class_name: "Attendances::CaseMessage"
     has_many :turns, class_name: "AgentIntegration::AgentTurn"
     has_many :audits, class_name: "Attendances::CaseAudit"
+    has_many :command_receipts, class_name: "Attendances::CaseCommandReceipt"
 
     def classification
       { category: category, category_source: category_source, priority: priority, priority_source: priority_source }
