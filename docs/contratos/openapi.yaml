@@ -642,9 +642,18 @@ paths:
       - SessionCookie: []
       tags:
       - API da aplicação
-      description: Sessão vê canais habilitados para seu escopo. Cada canal inclui o nome atual da marca
-        em brand_name. Na presença de ambas as identidades do navegador, usa-se o escopo do simulador.
+      description: >-
+        Cada canal inclui o nome atual da marca em brand_name. Sem audience, usa-se a sessão sintética
+        vigente quando disponível e, em seguida, a sessão operacional. Com audience=simulator, exige-se
+        sessão sintética vigente. Se ela estiver ausente ou expirada, retorna 401 mesmo com sessão
+        operacional vigente. Valores inválidos de audience retornam 422.
       parameters:
+      - name: audience
+        in: query
+        required: false
+        schema:
+          type: string
+          enum: [simulator]
       - $ref: '#/components/parameters/Cursor'
       - $ref: '#/components/parameters/Limit'
       responses:

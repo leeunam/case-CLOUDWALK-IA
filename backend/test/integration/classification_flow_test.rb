@@ -135,6 +135,59 @@ class ClassificationFlowTest < ActionDispatch::IntegrationTest
     assert_equal "urgent", audit.details.dig("classification", "priority")
   end
 
+  test "caso resolvido só aceita replay de correção autorizada" do
+    record = receive(body(text: "Pix", category: "fora", priority: "basic"))
+    csrf = login("supervisor@example.test")
+    payload = { expected_version: record.version, category: "pix", priority: "urgent", reason: "Corrigir triagem" }
+    correct(record, payload, csrf, "revision")
+    assert_response 200
+    original = response.parsed_body
+
+    request = JSON.parse(record.turns.sole.outbox.body)
+    resolution = request.merge("event_id" => SecureRandom.uuid, "event_type" => "agent.resolve.proposed",
+      "payload" => { "request_event_id" => request.fetch("event_id"), "text" => "Solicitação resolvida." })
+    assert_equal "applied", Attendances::ApplyAgentResult.new(resolution, JSON.generate(resolution)).call.fetch(:disposition)
+    assert_equal "resolved", record.reload.status
+    snapshot = record.attributes
+    audit_count = record.audits.count
+
+    correct(record, payload.merge(expected_version: record.version, priority: "basic"), csrf, "new-revision")
+    assert_response 409
+    assert_equal "invalid_transition", response.parsed_body.dig("error", "code")
+    correct(record, payload, csrf, "revision")
+    assert_response 200
+    assert_equal original, response.parsed_body
+    assert_equal snapshot, record.reload.attributes
+    assert_equal 1, record.command_receipts.count
+    assert_equal 1, record.turns.count
+    assert_equal audit_count, record.audits.count
+  end
+
+  test "correção fecha tentativa mesmo quando o worker cai antes do resultado" do
+    record = receive(body(text: "Pix", priority: "basic"))
+    request = Classification::Request.find_by!(support_case: record)
+    worker = Classification::CompleteRequest.new(request.id, classifier: ->(**) { raise "worker interrompido" })
+    assert_raises(RuntimeError) { worker.call }
+    assert_nil request.attempts.sole.finished_at
+
+    csrf = login("supervisor@example.test")
+    correct(record, { expected_version: record.version, category: "pix", priority: "basic", reason: "Corrigir triagem" },
+      csrf, "worker-interrompido")
+    assert_response 200
+    attempt = request.attempts.sole
+    assert_equal request.reload.completed_at, attempt.finished_at
+    assert_equal "discarded", attempt.disposition
+    assert_equal "supervisor_correction", attempt.issues.fetch("provider")
+
+    travel Classification::CompleteRequest::LEASE + 1.second do
+      refute_includes Classification::Request.due, request
+      Classification::CompleteRequestJob.perform_now(request.id)
+    end
+    assert_equal attempt.attributes, request.attempts.sole.attributes
+    assert_equal 1, record.turns.count
+    assert_equal 2, record.reload.classification_version
+  end
+
   private
 
   def body(**data)

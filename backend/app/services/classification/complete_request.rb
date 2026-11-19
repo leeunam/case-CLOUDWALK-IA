@@ -71,7 +71,7 @@ module Classification
       with_request do |request, record|
         attempt = request.attempts.find(attempt_id)
         evidence = result.evidence || {}
-        if attempt.disposition == "expired"
+        if %w[expired discarded].include?(attempt.disposition)
           attempt.update!(evidence: evidence, issues: attempt.issues.merge("late_result" => result.issues))
           next
         end

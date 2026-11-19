@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_19_000004) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_19_000006) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -193,6 +193,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000004) do
     t.text "body", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "simulator_body_sha256"
     t.index ["channel_id"], name: "index_channel_entries_on_channel_id"
     t.index ["channel_id", "source_event_id"], name: "index_channel_entries_on_channel_id_and_source_event_id", unique: true
     t.index ["support_case_id"], name: "index_channel_entries_on_support_case_id"

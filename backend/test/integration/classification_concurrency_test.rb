@@ -33,6 +33,10 @@ class ClassificationConcurrencyTest < ActiveSupport::TestCase
     Attendances::ApplyCaseCommand.new(user: supervisor, case_id: record.id, operation: "classification",
       key: "classification-race", data: { "expected_version" => record.version, "category" => "terminal",
       "priority" => "urgent", "reason" => "Corrigido durante a classificação" }).call
+    invalidated = request.attempts.sole
+    assert_equal "discarded", invalidated.disposition
+    assert invalidated.finished_at
+    assert_empty invalidated.evidence
     resumed << true
     worker.value
 
@@ -41,6 +45,8 @@ class ClassificationConcurrencyTest < ActiveSupport::TestCase
     assert_equal 2, record.classification_version
     attempt = request.attempts.sole
     assert_equal "discarded", attempt.disposition
+    assert_equal invalidated.finished_at, attempt.finished_at
+    assert_equal "supervisor_correction", attempt.issues.fetch("provider")
     assert_equal "pix", attempt.evidence.dig("answers", "category", "choice")
   ensure
     resumed << true if resumed && worker&.alive?

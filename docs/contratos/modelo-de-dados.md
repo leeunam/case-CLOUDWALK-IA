@@ -26,7 +26,8 @@ de marca, equipe, fila e responsável para distribuição e retomada.
   O Rails mantém as transferências anteriores na trilha.
 - A conversa é localizada pelo canal e ID externo de conversa. A entrada
   referencia também o cliente externo e guarda a chave
-  `(channel_id, source_event_id)`, hash do corpo e o resultado original. Uma
+  `(channel_id, source_event_id)`, SHA-256 do corpo arquivado e o resultado original. A
+  entrada do simulador também guarda o SHA-256 do pedido normalizado do navegador. Uma
   restrição única serializa deduplicação. Um vínculo à conversa serializa
   entrada simultânea e criação de novo caso após resolução.
 - Mensagens identificam autor, caso e ordem única `(case_id, sequence)).

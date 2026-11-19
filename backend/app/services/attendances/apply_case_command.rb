@@ -147,6 +147,8 @@ module Attendances
     end
 
     def correct_classification!(record, actor)
+      conflict! if record.status == "resolved"
+
       reason = @data.fetch("reason").strip
       category, priority = @data.values_at("category", "priority")
       if reason.empty? || !Classification::Catalog.category_active?(record.brand, category) ||
@@ -159,7 +161,7 @@ module Attendances
       updated = previous.merge(category: category, priority: priority)
       updated[:category_source] = "supervisor" unless previous[:category] == category
       updated[:priority_source] = "supervisor" unless previous[:priority] == priority
-      Classification::Request.open.where(support_case: record).update_all(completed_at: Time.current, updated_at: Time.current)
+      close_classification_requests!(record)
       if %w[classification_pending classification_review].include?(record.status)
         ActivateClassifiedCase.call(record, updated)
       else
@@ -169,6 +171,16 @@ module Attendances
       record.audit!("case.classification.corrected", actor_type: "supervisor", actor_id: actor.id,
                     reason: reason, from_status: previous_status, previous_classification: previous,
                     classification: record.classification, classification_version: record.classification_version)
+    end
+
+    def close_classification_requests!(record)
+      requests = Classification::Request.open.where(support_case: record)
+      completed_at = Time.current
+      Classification::Attempt.where(request: requests, finished_at: nil).update_all(
+        finished_at: completed_at, updated_at: completed_at, disposition: "discarded",
+        issues: { provider: "supervisor_correction" }
+      )
+      requests.update_all(completed_at: completed_at, updated_at: completed_at)
     end
 
     def recover_agent!(record, actor)

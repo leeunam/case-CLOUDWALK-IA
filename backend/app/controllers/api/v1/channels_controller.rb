@@ -2,8 +2,12 @@ module Api
   module V1
     class ChannelsController < BrowserController
       def index
-        if simulator_identity
-          identity = simulator_identity
+        if request.query_parameters.key?("audience")
+          invalid_query!("audience") unless request.query_parameters["audience"] == "simulator"
+          require_simulator!
+        end
+
+        if (identity = simulator_identity)
           channels = identity.simulator_channels
         else
           require_user!

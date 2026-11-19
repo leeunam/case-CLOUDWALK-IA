@@ -105,6 +105,12 @@ module Api
 
         raise WebhookV1::Error.new(401, "unauthenticated", "Sessão autenticada necessária.")
       end
+
+      def require_simulator!
+        return if simulator_identity
+
+        raise WebhookV1::Error.new(401, "unauthenticated", "Sessão do simulador necessária.")
+      end
     end
   end
 end

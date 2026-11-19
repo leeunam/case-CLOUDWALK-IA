@@ -111,14 +111,17 @@ exige autorização explícita para cada uma delas.
 O simulador usa uma identidade segregada e consulta apenas suas conversas.
 `POST /api/v1/simulator/session` cria ou recupera essa identidade e devolve o
 token CSRF vigente. Quando o mesmo navegador tem sessão operacional e sintética,
-`GET /api/v1/session` mostra a operacional e `GET /api/v1/channels` usa a
-identidade sintética para a seleção da simulação. O logout revoga as duas
-identidades presentes no navegador. As APIs de cada audiência aplicam seu
-próprio escopo.
+`GET /api/v1/session` mostra a operacional. O logout revoga as duas identidades
+presentes no navegador. As APIs de cada audiência aplicam seu próprio escopo.
 
 O catálogo paginado retorna somente canais habilitados para a sessão. Cada
 canal inclui `brand_id` e o `brand_name` atual da marca. A interface do
 simulador deriva suas opções desse par no catálogo autorizado.
+`GET /api/v1/channels?audience=simulator` exige uma sessão sintética vigente e
+retorna `401` quando ela está ausente ou expirada, inclusive com sessão
+operacional ativa. Outros valores de `audience` retornam `422`. A consulta
+sem `audience` usa a sessão sintética vigente quando disponível e, em seguida,
+a sessão operacional.
 Após recarregar, a listagem e o detalhe recuperam `channel_id` para a rota
 de envio e `external_conversation_id` para o corpo da continuação. O Rails
 verifica se o canal e a conversa pertencem à sessão e se a conversa usa

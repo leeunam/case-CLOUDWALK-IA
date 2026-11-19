@@ -4,11 +4,12 @@ module Attendances
   class ReceiveChannelMessage
     PRIORITIES = Classification::Catalog::PRIORITIES.keys.freeze
 
-    def initialize(channel, data, body, simulator_session_id: nil, idempotency_body: body)
+    def initialize(channel, data, body, simulator_session_id: nil, simulator_body: nil)
       @channel = channel
       @data = data
       @body = body
-      @digest = Digest::SHA256.hexdigest(idempotency_body)
+      @body_digest = Digest::SHA256.hexdigest(body)
+      @simulator_body_digest = Digest::SHA256.hexdigest(simulator_body) if simulator_body
       @simulator_session_id = simulator_session_id
       @entry_key = { channel_id: channel.id, source_event_id: data.fetch("source_event_id") }
     end
@@ -53,7 +54,8 @@ module Attendances
             !support_case.turns.in_flight.exists?
           AgentIntegration::QueueTurn.call(support_case)
         end
-        receipt(ChannelEntry.create!(**@entry_key, support_case: support_case, body_sha256: @digest, body: @body))
+        receipt(ChannelEntry.create!(**@entry_key, support_case: support_case, body: @body,
+          body_sha256: @body_digest, simulator_body_sha256: @simulator_body_digest))
       end
     rescue ActiveRecord::RecordNotUnique
       entry = ChannelEntry.find_by(@entry_key)
@@ -65,7 +67,12 @@ module Attendances
     private
 
     def receipt(entry)
-      if entry.body_sha256 != @digest
+      same_body = if @simulator_body_digest
+        entry.simulator_body_sha256 == @simulator_body_digest
+      else
+        entry.body_sha256 == @body_digest
+      end
+      unless same_body
         raise WebhookV1::Error.new(409, "idempotency_conflict",
                                   "O ID de origem já foi aceito com outro conteúdo.",
                                   { source_event_id: @entry_key[:source_event_id] })

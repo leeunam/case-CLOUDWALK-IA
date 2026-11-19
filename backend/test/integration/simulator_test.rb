@@ -10,15 +10,18 @@ class SimulatorTest < ActionDispatch::IntegrationTest
     @email = @horizonte.channels.find_by!(kind: "email")
     @old_brands = ENV["CLOUDWALK_SIMULATOR_BRANDS"]
     @old_passwords = ENV["CLOUDWALK_DEMO_PASSWORDS"]
+    @old_channel_secret = ENV["CLOUDWALK_CHANNEL_SECRET"]
     @forgery_protection = Api::V1::BrowserController.allow_forgery_protection
     ENV["CLOUDWALK_SIMULATOR_BRANDS"] = "aurora,horizonte"
-    ENV["CLOUDWALK_DEMO_PASSWORDS"] = { "bia@example.test" => "test" }.to_json
+    ENV["CLOUDWALK_DEMO_PASSWORDS"] = { "bia@example.test" => "test", "supervisor@example.test" => "test" }.to_json
+    ENV["CLOUDWALK_CHANNEL_SECRET"] = "test-channel"
     Api::V1::BrowserController.allow_forgery_protection = true
   end
 
   teardown do
     ENV["CLOUDWALK_SIMULATOR_BRANDS"] = @old_brands
     ENV["CLOUDWALK_DEMO_PASSWORDS"] = @old_passwords
+    ENV["CLOUDWALK_CHANNEL_SECRET"] = @old_channel_secret
     Api::V1::BrowserController.allow_forgery_protection = @forgery_protection
   end
 
@@ -98,6 +101,35 @@ class SimulatorTest < ActionDispatch::IntegrationTest
     assert_equal "Continuo com dúvida", json(client).fetch("items").sole.fetch("text")
   end
 
+  test "corpo canônico do simulador pode ser reentregue pelo webhook autenticado" do
+    client = open_session
+    csrf = start_simulator(client)
+    send_message(client, @chat, csrf, key: "opening")
+    assert_equal 202, client.response.status
+    receipt = json(client)
+    entry = Attendances::ChannelEntry.find_by!(channel_id: @chat.id, support_case_id: receipt.fetch("case_id"))
+    assert_equal Digest::SHA256.hexdigest(entry.body), entry.body_sha256
+
+    channel = open_session
+    secret = WebhookV1::Signature.channel_secret(@chat)
+    webhook = "/webhooks/v1/channels/#{@chat.id}/messages"
+    channel.post webhook, params: entry.body, headers: WebhookV1::Signature.headers("wrong", entry.body)
+      .merge("Content-Type" => "application/json")
+    assert_equal 401, channel.response.status
+    channel.post webhook, params: entry.body, headers: WebhookV1::Signature.headers(secret, entry.body)
+      .merge("Content-Type" => "application/json")
+    assert_equal 202, channel.response.status
+    assert_equal receipt.slice("case_id", "correlation_id"), json(channel)
+
+    changed = entry.body + " "
+    channel.post webhook, params: changed, headers: WebhookV1::Signature.headers(secret, changed)
+      .merge("Content-Type" => "application/json")
+    assert_equal 409, channel.response.status
+    assert_equal "idempotency_conflict", json(channel).dig("error", "code")
+    assert_equal 1, entry.support_case.messages.count
+    assert_equal 1, entry.support_case.turns.count
+  end
+
   test "identidades operacional e sintética coexistem com escopos próprios" do
     client = open_session
     client.get "/api/v1/session"
@@ -134,6 +166,42 @@ class SimulatorTest < ActionDispatch::IntegrationTest
     assert_equal [@aurora.id], channels.pluck("brand_id").uniq
     send_message(client, @whatsapp, csrf, key: "outside-scope")
     assert_equal 404, client.response.status
+  end
+
+  test "catálogo explícito do simulador exige sessão sintética mesmo com sessão operacional" do
+    ENV["CLOUDWALK_SIMULATOR_BRANDS"] = "aurora"
+    client = open_session
+    client.get "/api/v1/session"
+    client.post "/api/v1/session", params: { email: "supervisor@example.test", password: "test" }, as: :json,
+      headers: { "X-CSRF-Token" => json(client).fetch("csrf_token") }
+    assert_equal 200, client.response.status
+    client.get "/api/v1/channels", params: { audience: "simulator" }
+    assert_equal 401, client.response.status
+
+    start_simulator(client)
+    identity = BrowserAccess::Session.find(json(client).dig("user", "id"))
+    client.get "/api/v1/channels", params: { audience: "simulator" }
+    assert_equal 200, client.response.status
+    assert_equal [@aurora.name], json(client).fetch("items").pluck("brand_name").uniq
+    client.get "/api/v1/channels"
+    assert_equal 200, client.response.status
+    assert_equal [@aurora.name], json(client).fetch("items").pluck("brand_name").uniq
+
+    ["staff", "", ["simulator"]].each do |invalid|
+      client.get "/api/v1/channels", params: { audience: invalid }
+      assert_equal 422, client.response.status
+      assert_equal "invalid_query", json(client).dig("error", "code")
+    end
+
+    identity.update!(expires_at: 1.second.ago)
+    client.get "/api/v1/channels", params: { audience: "simulator" }
+    assert_equal 401, client.response.status
+    assert_equal "unauthenticated", json(client).dig("error", "code")
+    refute json(client).key?("items")
+
+    client.get "/api/v1/channels"
+    assert_equal 200, client.response.status
+    assert_equal [@aurora.name, @horizonte.name].sort, json(client).fetch("items").pluck("brand_name").uniq.sort
   end
 
   private

@@ -24,7 +24,7 @@ module BrowserAccess
       channel_data = @data.merge("source_event_id" => "simulator-#{event_id}", "external_conversation_id" => conversation_id,
                                  "external_customer_id" => @identity.id)
       receipt = Attendances::ReceiveChannelMessage.new(channel, channel_data, JSON.generate(channel_data),
-        simulator_session_id: @identity.id, idempotency_body: JSON.generate(@data.sort.to_h)).call
+        simulator_session_id: @identity.id, simulator_body: JSON.generate(@data.sort.to_h)).call
       receipt.merge(channel_id: channel.id, external_conversation_id: conversation_id)
     end
   end

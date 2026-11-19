@@ -36,12 +36,6 @@ module Api
 
       private
 
-      def require_simulator!
-        return if simulator_identity
-
-        raise WebhookV1::Error.new(401, "unauthenticated", "Sessão do simulador necessária.")
-      end
-
       def visible_case
         simulator_identity.visible_cases.find(request.path_parameters.fetch(:id))
       end
