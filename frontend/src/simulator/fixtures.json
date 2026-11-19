@@ -1,0 +1,147 @@
+{
+  "brands": [
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "name": "Aurora Pagamentos"
+    },
+    {
+      "id": "22222222-2222-4222-8222-222222222222",
+      "name": "Horizonte Negócios"
+    }
+  ],
+  "channels": {
+    "items": [
+      {
+        "id": "00000000-0000-4000-8000-000000000900",
+        "brand_id": "11111111-1111-4111-8111-111111111111",
+        "name": "Chat",
+        "type": "chat"
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000910",
+        "brand_id": "22222222-2222-4222-8222-222222222222",
+        "name": "WhatsApp simulado",
+        "type": "whatsapp"
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000913",
+        "brand_id": "22222222-2222-4222-8222-222222222222",
+        "name": "E-mail simulado",
+        "type": "email"
+      }
+    ],
+    "next_cursor": null
+  },
+  "recoveredCase": {
+    "id": "00000000-0000-4000-8000-000000000301",
+    "previous_case_id": null,
+    "channel_id": "00000000-0000-4000-8000-000000000910",
+    "status": "waiting_human",
+    "updated_at": "2026-11-17T13:32:02Z",
+    "external_conversation_id": "whatsapp-conversation-01"
+  },
+  "recoveredReceipt": {
+    "case_id": "00000000-0000-4000-8000-000000000301",
+    "correlation_id": "00000000-0000-4000-8000-000000000201",
+    "channel_id": "00000000-0000-4000-8000-000000000910",
+    "external_conversation_id": "whatsapp-conversation-01"
+  },
+  "handoffMessages": {
+    "items": [
+      {
+        "id": "00000000-0000-4000-8000-000000000551",
+        "sequence": 1,
+        "author": {
+          "type": "customer",
+          "id": "00000000-0000-4000-8000-000000000103"
+        },
+        "text": "O visor da maquininha está apagado desde a troca de bateria.",
+        "created_at": "2026-11-17T13:32:00Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000552",
+        "sequence": 2,
+        "author": {
+          "type": "customer",
+          "id": "00000000-0000-4000-8000-000000000103"
+        },
+        "text": "A luz de carga acende, mas a tela continua apagada.",
+        "created_at": "2026-11-17T13:32:01Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000553",
+        "sequence": 3,
+        "author": {
+          "type": "ai",
+          "id": "00000000-0000-4000-8000-000000000101"
+        },
+        "text": "Vou encaminhar para a equipe que atende maquininhas.",
+        "created_at": "2026-11-17T13:32:02Z"
+      }
+    ],
+    "next_after_sequence": null
+  },
+  "resolvedCase": {
+    "id": "00000000-0000-4000-8000-000000000300",
+    "previous_case_id": null,
+    "status": "resolved",
+    "updated_at": "2026-11-17T13:31:01Z",
+    "channel_id": "00000000-0000-4000-8000-000000000900"
+  },
+  "resolvedConversationId": "chat-conversation-01",
+  "resolvedMessages": {
+    "items": [
+      {
+        "id": "00000000-0000-4000-8000-000000000501",
+        "sequence": 1,
+        "author": {
+          "type": "customer",
+          "id": "00000000-0000-4000-8000-000000000102"
+        },
+        "text": "Qual é o prazo de confirmação de um Pix?",
+        "created_at": "2026-11-17T13:30:00Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000502",
+        "sequence": 2,
+        "author": {
+          "type": "ai",
+          "id": "00000000-0000-4000-8000-000000000101"
+        },
+        "text": "Consulte o comprovante no histórico para conferir a confirmação.",
+        "created_at": "2026-11-17T13:30:01Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000503",
+        "sequence": 3,
+        "author": {
+          "type": "customer",
+          "id": "00000000-0000-4000-8000-000000000102"
+        },
+        "text": "Funcionou. Obrigado!",
+        "created_at": "2026-11-17T13:31:00Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000504",
+        "sequence": 4,
+        "author": {
+          "type": "ai",
+          "id": "00000000-0000-4000-8000-000000000101"
+        },
+        "text": "Certo. Vou encerrar este atendimento.",
+        "created_at": "2026-11-17T13:31:01Z"
+      }
+    ],
+    "next_after_sequence": null
+  },
+  "invalidEnvelope": {
+    "error": {
+      "code": "invalid_envelope",
+      "message": "O envelope de entrada é inválido.",
+      "details": {
+        "field": "text",
+        "reason": "required"
+      }
+    }
+  }
+}

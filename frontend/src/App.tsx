@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
+import { Simulator } from './simulator/Simulator'
 
-export function App() {
+function HealthStatus() {
   const [status, setStatus] = useState('Conferindo conexão com a API…')
 
   useEffect(() => {
@@ -28,10 +29,17 @@ export function App() {
   }, [])
 
   return (
-    <main>
-      <h1>Help desk</h1>
-      <p role="status">{status}</p>
-      <a href="/api/v1/health">Consultar a saúde da API</a>
+    <main className="shell">
+      <section className="panel workspace-state">
+        <h1>Status da API</h1>
+        <p role="status">{status}</p>
+        <p><a href="/api/v1/health">Consultar a saúde da API</a></p>
+        <a href="/">Voltar ao simulador</a>
+      </section>
     </main>
   )
+}
+
+export function App() {
+  return window.location.pathname === '/health' ? <HealthStatus /> : <Simulator />
 }

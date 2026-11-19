@@ -89,8 +89,8 @@ docker compose down
 
 ## Entendendo o caminho
 
-1. O navegador abre o React em `localhost:5173`.
-2. React faz `GET /api/v1/health`. O proxy do Vite entrega a requisição ao Rails.
+1. O navegador abre o simulador React em `localhost:5173`.
+2. Em **Status da API**, o React faz `GET /api/v1/health`. O proxy do Vite entrega a requisição ao Rails.
 3. [A rota Rails](backend/config/routes.rb) chama
    [HealthController](backend/app/controllers/api/v1/health_controller.rb).
 4. O controller consulta PostgreSQL e devolve JSON. React mostra o resultado.
@@ -188,6 +188,32 @@ ferramentas de desenvolvimento. O fornecedor informa versões corrigidas ainda
 indisponíveis na data da F01. O ambiente local mantém o Vite limitado a
 localhost. A publicação F10 deverá servir o build estático e revisar as
 dependências. [Aviso do picomatch](https://github.com/advisories/GHSA-fc5q-39xc-vjpf)
+
+### Preparação da F05 com fixtures
+
+Em `frontend/`, execute `npm ci`, `npm run build` e `npm run dev`.
+Abra `http://localhost:5173/`. A tela do cliente funciona com dados
+sintéticos guardados no navegador. Use **Novo atendimento** e **Usar
+exemplo** para enviar em Chat, WhatsApp ou E-mail. O chat consulta respostas
+automaticamente enquanto o caso está ativo. Nos canais assíncronos,
+use **Atualizar conversa** ou volte pelo histórico. Recarregar a página
+restaura a conversa selecionada.
+
+Em um perfil novo do navegador, `/?fixture=empty` começa com histórico vazio.
+`/?fixture=error` simula uma falha na primeira leitura do histórico e permite
+repetir a consulta. A cópia dos exemplos de `docs/contratos/fixtures/` fica em
+`frontend/src/simulator/fixtures.json` para funcionar também com o contexto de
+build do Docker. Para exercitar o fluxo sem classificador, o formulário
+oferece categoria e prioridade sugeridas por canal. Omitir um valor deixa o
+caso aguardando classificação.
+
+O contrato de acesso da tela fica em `frontend/src/simulator/contract.ts`.
+O adaptador Rails deve implementar sessão, catálogo, leituras e envio com
+CSRF e chave de idempotência. O integrador precisa definir a origem dos
+nomes das marcas para o simulador. `GET /api/v1/channels` devolve apenas
+`brand_id` e `GET /api/v1/brands` atende à supervisão. A atualização por
+WebSocket, a caixa do analista e as ações humanas fazem parte da integração
+da F05.
 
 F01 usa exclusivamente dados sintéticos. Credenciais Jev e chamada externa
 entram em F04. O experimento de carga, os resultados medidos e a análise das
