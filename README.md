@@ -217,6 +217,9 @@ fixada do frontend se o Node instalado no host não oferecer esse recurso.
 Esses testes validam o adaptador local de fixtures. A integração real da F05
 continua pendente.
 
+O [roteiro F05](docs/f05.md) registra a revisão integrada, os cenários de
+reconexão verificados no navegador e o exercício para acompanhar um envio.
+
 Em um perfil novo do navegador, `/?fixture=empty` começa com histórico vazio.
 `/?fixture=error` simula uma falha na primeira leitura do histórico e permite
 repetir a consulta. A cópia dos exemplos de `docs/contratos/fixtures/` fica em
