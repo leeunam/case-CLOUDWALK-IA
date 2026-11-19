@@ -123,3 +123,11 @@ O simulador envia esse parâmetro em todas as páginas. Isso elimina a corrida
 em que a expiração sintética entre leituras faria o catálogo usar o escopo staff.
 A consulta sem esse parâmetro preserva o comportamento operacional anterior.
 O OpenAPI e o contrato de acesso registram a extensão.
+
+A revisão final também aprovou o header de expectativa
+`X-Simulator-Session-Id` no envio do simulador. O React fixa a identidade
+sintética por tentativa e a conserva após reautenticação. O Rails compara o
+header com a identidade do cookie no próprio POST e rejeita divergência antes
+da persistência. Isso fecha a troca entre a leitura de sessão e o envio.
+O header não autentica nem concede acesso e permanece opcional para clientes
+legados; o frontend integrado sempre o envia.

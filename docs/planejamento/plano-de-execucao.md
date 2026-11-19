@@ -5,7 +5,7 @@ Este backlog usa a [especificação](especificacao-mvp.md) como contrato de prod
 F01–F03 estão integradas e verificadas localmente. A rodada de conclusão
 F04/F05 integra jobs persistidos, correção auditada, sessão e catálogo do
 simulador e interface conectada ao Rails e ao Action Cable. A suíte conjunta
-passou com 73 testes e 853 asserções, sem falhas nem erros. O único teste
+passou com 74 testes e 881 asserções, sem falhas nem erros. O único teste
 pulado foi a chamada TypeSafe real, pois falta `TYPESAFE_API_KEY`.
 
 A F05 passou no navegador com três canais, duas marcas, handoff, resposta
