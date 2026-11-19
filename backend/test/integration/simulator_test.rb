@@ -115,6 +115,27 @@ class SimulatorTest < ActionDispatch::IntegrationTest
     assert_equal 200, client.response.status
   end
 
+  test "catálogo paginado inclui nomes somente das marcas autorizadas" do
+    client = open_session
+    client.get "/api/v1/channels"
+    assert_equal 401, client.response.status
+    ENV["CLOUDWALK_SIMULATOR_BRANDS"] = "aurora"
+    csrf = start_simulator(client)
+
+    client.get "/api/v1/channels", params: { limit: 2 }
+    first = json(client)
+    assert WebhookV1::Contract.valid?("ChannelList", first)
+    assert_equal 2, first.fetch("items").size
+    client.get "/api/v1/channels", params: { cursor: first.fetch("next_cursor") }
+    second = json(client)
+    channels = first.fetch("items") + second.fetch("items")
+    assert_equal 3, channels.size
+    assert_equal [@aurora.name], channels.pluck("brand_name").uniq
+    assert_equal [@aurora.id], channels.pluck("brand_id").uniq
+    send_message(client, @whatsapp, csrf, key: "outside-scope")
+    assert_equal 404, client.response.status
+  end
+
   private
 
   def start_simulator(client, csrf: nil)

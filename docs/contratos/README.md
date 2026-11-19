@@ -108,7 +108,17 @@ ela pode editar em `GET /api/v1/analysts` e usa o `user_id` na rota de perfil.
 Como o perfil vale em todas as marcas de atuação do analista, a edição
 exige autorização explícita para cada uma delas.
 
-O simulador usa sessão segregada e consulta apenas suas conversas.
+O simulador usa uma identidade segregada e consulta apenas suas conversas.
+`POST /api/v1/simulator/session` cria ou recupera essa identidade e devolve o
+token CSRF vigente. Quando o mesmo navegador tem sessão operacional e sintética,
+`GET /api/v1/session` mostra a operacional e `GET /api/v1/channels` usa a
+identidade sintética para a seleção da simulação. O logout revoga as duas
+identidades presentes no navegador. As APIs de cada audiência aplicam seu
+próprio escopo.
+
+O catálogo paginado retorna somente canais habilitados para a sessão. Cada
+canal inclui `brand_id` e o `brand_name` atual da marca. A interface do
+simulador deriva suas opções desse par no catálogo autorizado.
 Após recarregar, a listagem e o detalhe recuperam `channel_id` para a rota
 de envio e `external_conversation_id` para o corpo da continuação. O Rails
 verifica se o canal e a conversa pertencem à sessão e se a conversa usa

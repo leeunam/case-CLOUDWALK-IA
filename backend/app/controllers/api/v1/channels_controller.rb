@@ -12,9 +12,10 @@ module Api
           channels = Operations::Channel.where(active: true, brand_id: brands.select(:id))
         end
 
-        page = paginated(channels, order: [:id], scope: ["channels", identity.id])
+        page = paginated(channels.includes(:brand), order: [:id], scope: ["channels", identity.id])
         items = page.fetch(:items).map do |channel|
-          { id: channel.id, brand_id: channel.brand_id, name: channel.name, type: channel.kind }
+          { id: channel.id, brand_id: channel.brand_id, brand_name: channel.brand.name,
+            name: channel.name, type: channel.kind }
         end
         render json: page.merge(items: items)
       end

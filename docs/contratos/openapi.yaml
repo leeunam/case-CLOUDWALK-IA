@@ -642,7 +642,8 @@ paths:
       - SessionCookie: []
       tags:
       - API da aplicação
-      description: Sessão vê canais habilitados para seu escopo. O endpoint também fornece a seleção da simulação.
+      description: Sessão vê canais habilitados para seu escopo. Cada canal inclui o nome atual da marca
+        em brand_name. Na presença de ambas as identidades do navegador, usa-se o escopo do simulador.
       parameters:
       - $ref: '#/components/parameters/Cursor'
       - $ref: '#/components/parameters/Limit'
