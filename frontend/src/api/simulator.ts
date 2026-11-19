@@ -18,37 +18,34 @@ export function brandsFromChannels(channels: Channel[]): Brand[] {
 }
 
 export function createSimulatorApi(): SimulatorRepository {
-  let ready: Promise<void> | undefined
+  let ready: Promise<string> | undefined
+  // A renovação da sessão não muda a identidade dos envios já iniciados nesta aba.
+  const sessionByAttempt = new Map<string, string>()
 
   async function prepare() {
     const session = await getSession()
-    if (session.user?.role === 'simulator') return
-
-    try {
-      // Uma sessão operacional pode estar visível em /session e coexistir com a simulação.
-      await request<Page<SimulatorCase>>(query(cases, { limit: 1 }))
-    } catch (failure) {
-      if (!(failure instanceof ApiError) || failure.status !== 401) throw failure
-      const created = await withFreshCsrf(session.csrf_token,
-        csrf => request<Session>('/simulator/session', { method: 'POST', csrf }),
-        async () => (await getSession()).csrf_token)
-      if (created.user?.role !== 'simulator' || !created.csrf_token) {
-        throw new ApiError(0, 'invalid_session', 'A API não confirmou a sessão de simulação.')
-      }
+    // O POST recupera a mesma identidade quando /session prioriza a sessão operacional.
+    const simulator = session.user?.role === 'simulator' ? session : await withFreshCsrf(session.csrf_token,
+      csrf => request<Session>('/simulator/session', { method: 'POST', csrf }),
+      async () => (await getSession()).csrf_token)
+    if (simulator.user?.role !== 'simulator' || !simulator.user.id || !simulator.csrf_token) {
+      throw new ApiError(0, 'invalid_session', 'A API não confirmou a sessão de simulação.')
     }
+    return simulator.user.id
   }
 
-  async function withSession<T>(operation: () => Promise<T>) {
+  async function withSession<T>(operation: (id: string) => Promise<T>) {
     ready ??= prepare().catch(failure => {
       ready = undefined
       throw failure
     })
     const prepared = ready
-    await prepared
+    const id = await prepared
     try {
-      return await operation()
+      return await operation(id)
     } catch (failure) {
-      if (failure instanceof ApiError && failure.status === 401 && ready === prepared) ready = undefined
+      if (ready === prepared && failure instanceof ApiError &&
+        (failure.status === 401 || failure.code === 'simulator_session_changed')) ready = undefined
       throw failure
     }
   }
@@ -59,11 +56,15 @@ export function createSimulatorApi(): SimulatorRepository {
     listCases: cursor => withSession(() =>
       request<Page<SimulatorCase>>(query(cases, { cursor, limit: pageSize }))),
     getConversation: id => withSession(() => readConversation<SimulatorCase>(`${cases}/${encodeURIComponent(id)}`)),
-    sendMessage: (channelId, message, key) => withSession(async () => {
-      const session = await getSession()
-      return request<SimulatorReceipt>(`/simulator/channels/${encodeURIComponent(channelId)}/messages`, {
-        method: 'POST', body: message, csrf: session.csrf_token, key,
-      })
+    sendMessage: (channelId, message, key) => withSession(async id => {
+      const attempt = JSON.stringify([channelId, key])
+      const simulatorSessionId = sessionByAttempt.get(attempt) ?? id
+      sessionByAttempt.set(attempt, simulatorSessionId)
+      const readCsrf = async () => (await getSession()).csrf_token
+      return withFreshCsrf(await readCsrf(), csrf =>
+        request<SimulatorReceipt>(`/simulator/channels/${encodeURIComponent(channelId)}/messages`, {
+          method: 'POST', body: message, csrf, key, simulatorSessionId,
+        }), readCsrf)
     }),
   }
 }

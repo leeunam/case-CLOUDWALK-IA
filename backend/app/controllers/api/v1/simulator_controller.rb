@@ -28,6 +28,7 @@ module Api
       end
 
       def send_message
+        verify_simulator_identity!
         data = WebhookV1::Contract.parse!(request.raw_post, "SimulatorMessage")
         receipt = BrowserAccess::SendSimulatorMessage.new(identity: simulator_identity,
           channel_id: request.path_parameters.fetch(:channel_id), key: request.headers["Idempotency-Key"], data: data).call
@@ -35,6 +36,18 @@ module Api
       end
 
       private
+
+      def verify_simulator_identity!
+        expected = request.headers["X-Simulator-Session-Id"]
+        return if expected.nil?
+        unless WebhookV1::Contract::UUID.match?(expected)
+          raise WebhookV1::Error.new(422, "invalid_simulator_session_id", "Informe um UUID em X-Simulator-Session-Id.")
+        end
+        return if expected.casecmp?(simulator_identity.id)
+
+        raise WebhookV1::Error.new(409, "simulator_session_changed",
+          "A sessão do simulador mudou desde o início deste envio.")
+      end
 
       def visible_case
         simulator_identity.visible_cases.find(request.path_parameters.fetch(:id))

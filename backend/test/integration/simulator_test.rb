@@ -101,6 +101,51 @@ class SimulatorTest < ActionDispatch::IntegrationTest
     assert_equal "Continuo com dúvida", json(client).fetch("items").sole.fetch("text")
   end
 
+  test "reentrega com identidade esperada mantém o recibo e impede novo caso após troca de sessão" do
+    client = open_session
+    csrf = start_simulator(client)
+    original_id = json(client).dig("user", "id")
+    assert_difference "Attendances::SupportCase.count", 1 do
+      send_message(client, @chat, csrf, key: "opening-uncertain", session_id: original_id)
+      assert_equal 202, client.response.status
+    end
+    receipt = json(client)
+    original_case = Attendances::SupportCase.find(receipt.fetch("case_id"))
+
+    assert_no_difference ["Attendances::SupportCase.count", "original_case.messages.count"] do
+      send_message(client, @chat, csrf, key: "opening-uncertain", session_id: original_id)
+      assert_equal 202, client.response.status
+      assert_equal receipt, json(client)
+    end
+
+    client.delete "/api/v1/session", headers: { "X-CSRF-Token" => csrf }
+    assert_equal 204, client.response.status
+    client.get "/api/v1/session"
+    send_message(client, @chat, json(client).fetch("csrf_token"), key: "opening-uncertain", session_id: original_id)
+    assert_equal 401, client.response.status
+    csrf = start_simulator(client)
+    new_id = json(client).dig("user", "id")
+    refute_equal original_id, new_id
+
+    assert_no_difference ["Attendances::SupportCase.count", "Attendances::ChannelEntry.count", "original_case.messages.count"] do
+      # O cookie atual trocou, mesmo se o cliente acabou de ler a identidade de origem.
+      send_message(client, @chat, csrf, key: "opening-uncertain", session_id: original_id)
+      assert_equal 409, client.response.status
+      assert_equal "simulator_session_changed", json(client).dig("error", "code")
+      send_message(client, @chat, csrf, key: "opening-uncertain", session_id: "not-a-uuid")
+      assert_equal 422, client.response.status
+      assert_equal "invalid_simulator_session_id", json(client).dig("error", "code")
+    end
+    client.get "/api/v1/simulator/cases"
+    assert_empty json(client).fetch("items")
+
+    send_message(client, @chat, csrf, key: "new-opening", text: "Novo envio", session_id: new_id)
+    assert_equal 202, client.response.status
+    new_case = Attendances::SupportCase.find(json(client).fetch("case_id"))
+    assert_equal ["Novo envio"], new_case.messages.pluck(:text)
+    assert_equal ["Dúvida sobre Pix"], original_case.messages.pluck(:text)
+  end
+
   test "corpo canônico do simulador pode ser reentregue pelo webhook autenticado" do
     client = open_session
     csrf = start_simulator(client)
@@ -217,10 +262,10 @@ class SimulatorTest < ActionDispatch::IntegrationTest
     json(client).fetch("csrf_token")
   end
 
-  def send_message(client, channel, csrf, key:, text: "Dúvida sobre Pix", conversation: nil)
+  def send_message(client, channel, csrf, key:, text: "Dúvida sobre Pix", conversation: nil, session_id: nil)
     client.post "/api/v1/simulator/channels/#{channel.id}/messages", as: :json,
       params: { text: text, category: "pix", priority: "basic", external_conversation_id: conversation }.compact,
-      headers: { "X-CSRF-Token" => csrf, "Idempotency-Key" => key }
+      headers: { "X-CSRF-Token" => csrf, "Idempotency-Key" => key, "X-Simulator-Session-Id" => session_id }.compact
   end
 
   def json(client)

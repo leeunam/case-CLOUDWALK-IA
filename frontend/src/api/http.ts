@@ -32,11 +32,13 @@ export async function request<T>(path: string, options: {
   body?: object
   csrf?: string
   key?: string
+  simulatorSessionId?: string
 } = {}): Promise<T> {
   const headers = new Headers({ Accept: 'application/json' })
   if (options.body) headers.set('Content-Type', 'application/json')
   if (options.csrf) headers.set('X-CSRF-Token', options.csrf)
   if (options.key) headers.set('Idempotency-Key', options.key)
+  if (options.simulatorSessionId) headers.set('X-Simulator-Session-Id', options.simulatorSessionId)
 
   let response: Response
   try {

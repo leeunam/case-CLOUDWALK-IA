@@ -17,6 +17,11 @@ const channels = [
   { id: 'channel-3', brand_id: 'aurora', brand_name: 'Nome vindo da API', type: 'whatsapp' },
 ]
 const message = sequence => ({ sequence, id: `message-${sequence}` })
+const identityA = '00000000-0000-4000-8000-000000000001'
+const identityB = '00000000-0000-4000-8000-000000000002'
+const identityC = '00000000-0000-4000-8000-000000000003'
+const simulatorSession = (id = identityA, csrf = 'rotated') =>
+  Response.json({ user: { id, role: 'simulator' }, csrf_token: csrf }, { status: 201 })
 
 test('simulador prepara uma sessão compartilhada entre leituras e usa CSRF rotacionado nos três canais', async t => {
   let simulatorReady = false
@@ -35,7 +40,7 @@ test('simulador prepara uma sessão compartilhada entre leituras e usa CSRF rota
       assert.equal(options.body, undefined)
       created += 1
       simulatorReady = true
-      return Response.json({ user: { role: 'simulator' }, csrf_token: 'rotated' }, { status: 201 })
+      return simulatorSession()
     }
     if (route === '/api/v1/simulator/cases' && !simulatorReady) return Response.json({}, { status: 401 })
     if (route === '/api/v1/simulator/cases') return Response.json({ items: [], next_cursor: null })
@@ -48,6 +53,7 @@ test('simulador prepara uma sessão compartilhada entre leituras e usa CSRF rota
     assert.match(route, /^\/api\/v1\/simulator\/channels\/.+\/messages$/)
     assert.equal(options.headers.get('X-CSRF-Token'), 'rotated')
     assert.equal(options.headers.get('Idempotency-Key'), 'unique-key')
+    assert.equal(options.headers.get('X-Simulator-Session-Id'), identityA)
     sends.push([route.split('/')[5], JSON.parse(options.body)])
     return Response.json({ case_id: 'case', external_conversation_id: 'from-the-server' }, { status: 202 })
   })
@@ -68,11 +74,12 @@ test('simulador prepara uma sessão compartilhada entre leituras e usa CSRF rota
 
 test('simulador reaproveita a sessão coexistente com login e carrega as páginas da conversa', async t => {
   const sequences = []
-  t.mock.method(globalThis, 'fetch', async path => {
+  t.mock.method(globalThis, 'fetch', async (path, options) => {
     const url = new URL(path, 'https://help.test')
-    if (url.pathname.endsWith('/session')) {
-      assert.equal(url.pathname, '/api/v1/session')
-      return Response.json(session)
+    if (url.pathname === '/api/v1/session') return Response.json(session)
+    if (url.pathname === '/api/v1/simulator/session') {
+      assert.equal(options.method, 'POST')
+      return simulatorSession()
     }
     if (url.pathname === '/api/v1/simulator/cases') return Response.json({ items: [], next_cursor: null })
     if (url.pathname.endsWith('/case')) {
@@ -98,10 +105,10 @@ test('catálogo exige identidade sintética mesmo após a sessão expirar com o 
     const url = new URL(path, 'https://help.test')
     if (url.pathname === '/api/v1/session') return Response.json(session)
     if (url.pathname === '/api/v1/simulator/session') {
-      created += 1
+      if (!simulatorReady) created += 1
       simulatorReady = true
       assert.equal(options.method, 'POST')
-      return Response.json({ user: { role: 'simulator' }, csrf_token: 'rotated' }, { status: 201 })
+      return simulatorSession()
     }
     const unauthenticated = () => Response.json({ error: { code: 'unauthenticated' } }, { status: 401 })
     if (url.pathname === '/api/v1/simulator/cases') {
@@ -122,6 +129,66 @@ test('catálogo exige identidade sintética mesmo após a sessão expirar com o 
   const [catalog] = await Promise.all([api.listChannels(), api.listCases()])
   assert.deepEqual(catalog.items, channels)
   assert.equal(created, 1)
+})
+
+test('abertura incerta repete o recibo original e nunca vira novo pedido em outra identidade', async t => {
+  const receipts = new Map()
+  const writes = []
+  let currentId = identityA
+  let switchAtWrite
+  let loseReceipt = true
+  const csrf = () => `csrf-${currentId}`
+  const error = (status, code) => Response.json({ error: { code } }, { status })
+  t.mock.method(globalThis, 'fetch', async (path, { headers, body }) => {
+    const route = new URL(path, 'https://help.test').pathname
+    if (route === '/api/v1/session') return Response.json({ ...session, csrf_token: csrf() })
+    if (route === '/api/v1/simulator/session') return simulatorSession(currentId, csrf())
+    if (route === '/api/v1/simulator/cases') {
+      return currentId ? Response.json({ items: [], next_cursor: null }) : error(401, 'unauthenticated')
+    }
+    assert.match(route, /^\/api\/v1\/simulator\/channels\/.+\/messages$/)
+    if (switchAtWrite) {
+      currentId = switchAtWrite
+      switchAtWrite = undefined
+    }
+    const expected = headers.get('X-Simulator-Session-Id')
+    const key = headers.get('Idempotency-Key')
+    writes.push({ currentId, expected, key, body, csrf: headers.get('X-CSRF-Token') })
+    if (headers.get('X-CSRF-Token') !== csrf()) return error(403, 'csrf_rejected')
+    if (expected !== currentId) return error(409, 'simulator_session_changed')
+    const namespace = `${currentId}/${key}`
+    if (!receipts.has(namespace)) receipts.set(namespace, { case_id: namespace })
+    if (loseReceipt) {
+      loseReceipt = false
+      return error(502, 'bad_gateway')
+    }
+    return Response.json(receipts.get(namespace), { status: 202 })
+  })
+
+  const api = createSimulatorApi()
+  const send = key => api.sendMessage('channel-1', { text: 'Abertura' }, key)
+  await assert.rejects(send('repeat-in-a'), { status: 502 })
+  assert.equal((await send('repeat-in-a')).case_id, `${identityA}/repeat-in-a`)
+  assert.deepEqual(writes[1], writes[0])
+  assert.equal(receipts.size, 1)
+
+  loseReceipt = true
+  await assert.rejects(send('lost-in-a'), { status: 502 })
+  currentId = null
+  await assert.rejects(api.listCases(), { status: 401 })
+  currentId = identityB
+  await assert.rejects(send('lost-in-a'), { status: 409, code: 'simulator_session_changed' })
+  assert.deepEqual(writes[3], { ...writes[2], currentId: identityB, csrf: csrf() })
+  assert.equal(receipts.size, 2)
+  assert.equal((await send('new-in-b')).case_id, `${identityB}/new-in-b`)
+
+  switchAtWrite = identityC
+  await assert.rejects(send('race-b-c'), { status: 409, code: 'simulator_session_changed' })
+  const [beforeRefresh, afterRefresh] = writes.slice(-2)
+  assert.equal(beforeRefresh.expected, identityB)
+  assert.equal(beforeRefresh.currentId, identityC)
+  assert.deepEqual(afterRefresh, { ...beforeRefresh, csrf: csrf() })
+  assert.equal(receipts.size, 3)
 })
 
 test('falha HTTP, rede e catálogo fora do contrato são exibíveis e nunca acionam fixtures', async t => {

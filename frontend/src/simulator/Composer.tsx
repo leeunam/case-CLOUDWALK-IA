@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { deliveryUncertain } from '../api/http'
+import { ApiError, deliveryUncertain } from '../api/http'
 import type { Category, Channel, Priority, SimulatorCase, SimulatorMessage, SimulatorReceipt, SimulatorRepository } from './contract'
 import { categoryLabels, channelExamples, priorityLabels } from './presentation'
 import { errorMessage } from './useResource'
@@ -57,7 +57,9 @@ export function Composer({
       setText('')
       onSent(receipt)
     } catch (failure) {
-      setPending(deliveryUncertain(failure) ? attempt : null)
+      const sessionRejected = failure instanceof ApiError && (failure.status === 401 ||
+        ['simulator_session_changed', 'csrf_rejected'].includes(failure.code))
+      if (!pending || !sessionRejected) setPending(deliveryUncertain(failure) ? attempt : null)
       setError(errorMessage(failure))
     } finally {
       setSending(false)

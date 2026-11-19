@@ -128,6 +128,16 @@ verifica se o canal e a conversa pertencem à sessão e se a conversa usa
 esse canal. O recibo devolve os dois IDs. As leituras do simulador expõem
 estados e mensagens públicas.
 
+Ao enviar uma mensagem, o React registra o ID sintético da tentativa no
+cabeçalho `X-Simulator-Session-Id`. A confirmação usa o mesmo ID, corpo e
+`Idempotency-Key`, inclusive após mudança de cookie em outra aba. O Rails
+autentica pelo cookie e verifica o ID informado antes de persistir.
+Um UUID malformado retorna `422 invalid_simulator_session_id`. Uma
+identidade autenticada diferente da esperada retorna
+`409 simulator_session_changed`. O cabeçalho é opcional para clientes
+anteriores. Na identidade original, o envio idêntico retorna o recibo
+existente.
+
 Nas mutações de atendimento, o Rails verifica `Idempotency-Key` e
 `expected_version`. A chave é vinculada ao ator, operação e recurso. Repetir o
 comando idêntico devolve o resultado original depois de conferir a autorização

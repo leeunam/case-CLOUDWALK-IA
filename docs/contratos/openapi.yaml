@@ -1235,11 +1235,11 @@ paths:
         CsrfToken: []
       tags:
       - API da aplicação
-      description: O Rails cria a identidade sintética vinculada à sessão do navegador. O cookie e o token iniciais são
-        obtidos em GET /api/v1/session.
+      description: O Rails cria ou recupera a identidade sintética vinculada à sessão do navegador, inclusive quando
+        GET /api/v1/session retorna a identidade operacional. O cookie e o token iniciais são obtidos em GET /api/v1/session.
       responses:
         '201':
-          description: Sessão de simulação criada com novo token CSRF.
+          description: Identidade sintética e token CSRF vigentes.
           content:
             application/json:
               schema:
@@ -1364,9 +1364,18 @@ paths:
       - API da aplicação
       description: Rails identifica a sessão, gera IDs externos e passa pela mesma fronteira de entrada por meio da simulação
         no servidor. Na continuação, Rails exige que canal e conversa pertençam à sessão e que a conversa use o canal
-        da rota.
+        da rota. Com X-Simulator-Session-Id, uma sessão autenticada diferente da esperada devolve 409 simulator_session_changed.
+        Um valor malformado devolve 422 invalid_simulator_session_id.
       parameters:
       - $ref: '#/components/parameters/IdempotencyKey'
+      - name: X-Simulator-Session-Id
+        in: header
+        required: false
+        description: ID da identidade sintética vigente no início da tentativa. O React repete o ID, a chave e o corpo
+          originais se precisar confirmar o envio. O cookie autentica a requisição. O ID informado apenas verifica a
+          identidade e pode ser omitido por clientes anteriores.
+        schema:
+          $ref: ./schemas/v1.json#/$defs/Uuid
       requestBody:
         required: true
         content:
