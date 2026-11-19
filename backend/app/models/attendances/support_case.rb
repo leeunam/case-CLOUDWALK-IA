@@ -20,6 +20,22 @@ module Attendances
       { category: category, category_source: category_source, priority: priority, priority_source: priority_source }
     end
 
+    def contract_data
+      assigned = assignee && { type: assignee.kind, id: assignee.id }
+      as_json(only: %i[id brand_id queue_id channel_id status integration_status version
+                       previous_case_id blocking_reason handoff]).merge(
+        assignee: assigned, classification: classification, created_at: created_at.iso8601(6),
+        updated_at: updated_at.iso8601(6), human_queue_since: human_queue_since&.iso8601(6)
+      )
+    end
+
+    def handoff_attributes(summary:, message_ids:)
+      { status: "waiting_human", assignee: nil, human_queue_since: Time.current,
+        integration_status: "idle", blocking_reason: nil,
+        handoff: { summary: summary, message_ids: message_ids },
+        assignment_generation: assignment_generation + 1 }
+    end
+
     def advance!(**attributes)
       update!(**attributes, version: version + 1)
     end

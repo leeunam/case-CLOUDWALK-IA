@@ -14,7 +14,9 @@ module Attendances
         existing = AgentIntegration::AgentReceipt.find_by(event_id: @event_id)
         next duplicate(existing) if existing
 
-        support_case = SupportCase.lock.find_by(id: @data.fetch("case_id"))
+        snapshot = SupportCase.find_by(id: @data.fetch("case_id"))
+        HumanLocks.brand!(snapshot.brand_id) if snapshot
+        support_case = snapshot&.lock!
         turn = support_case&.turns&.in_flight&.lock&.first
         reason = discard_reason(support_case, turn)
         disposition = reason ? discard(support_case, reason) : apply(support_case, turn)
@@ -83,15 +85,15 @@ module Attendances
                             assignment_generation: support_case.assignment_generation + 1)
         end
       when "agent.handoff.proposed"
-        attributes.merge!(status: "waiting_human", assignee: nil, human_queue_since: Time.current,
-                          handoff: @payload.slice("summary", "message_ids"),
-                          assignment_generation: support_case.assignment_generation + 1)
+        attributes.merge!(support_case.handoff_attributes(summary: @payload.fetch("summary"),
+                                                          message_ids: @payload.fetch("message_ids")))
       end
       support_case.advance!(**attributes)
       support_case.audit!(@data.fetch("event_type"), actor_type: "ai",
                           actor_id: actor_id, from_status: old_status,
                           event_id: @event_id, turn_id: turn.id, request_event_id: turn.request_event_id)
       AgentIntegration::QueueTurn.call(support_case) if newer_messages && support_case.status == "ai_active"
+      DistributeHumanWorkJob.schedule(support_case.brand_id) if support_case.status == "waiting_human"
       "applied"
     end
   end

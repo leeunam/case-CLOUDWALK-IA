@@ -17,6 +17,7 @@ module Attendances
       return receipt(entry) if entry
 
       SupportCase.transaction do
+        HumanLocks.brand!(@channel.brand_id)
         conversation = ChannelConversation.create_or_find_by!(
           channel: @channel, external_conversation_id: @data.fetch("external_conversation_id")
         ) { |record| record.external_customer_id = @data.fetch("external_customer_id") }
@@ -31,7 +32,16 @@ module Attendances
         support_case = current_case(conversation)
         message = support_case.append_message!(type: "customer", author_id: conversation.id,
                                                text: @data.fetch("text"), source_event_id: @entry_key[:source_event_id])
-        support_case.advance!
+        previous_status = support_case.status
+        if previous_status == "waiting_customer"
+          status = support_case.assignee_id ? "waiting_resumption" : "waiting_human"
+          support_case.advance!(status: status, human_queue_since: Time.current, blocking_reason: nil)
+          support_case.audit!("case.human.customer_returned", actor_type: "customer", actor_id: conversation.id,
+                              from_status: previous_status, message_id: message.id, assignee_id: support_case.assignee_id)
+          DistributeHumanWorkJob.schedule(support_case.brand_id)
+        else
+          support_case.advance!
+        end
         support_case.audit!("channel.message.received", actor_type: "customer", actor_id: conversation.id,
                             source_event_id: @entry_key[:source_event_id], message_id: message.id)
         if support_case.status == "ai_active" && support_case.integration_status == "idle" &&

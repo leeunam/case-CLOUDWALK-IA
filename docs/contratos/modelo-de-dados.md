@@ -69,3 +69,23 @@ carteira e combinação. Se a revalidação exigir novos bloqueios que precedam
 os já adquiridos, reinicia dentro do mesmo protocolo. Chamadas ao broker e ao
 Jev ocorrem depois do commit. O teste da última vaga em F03 deve disputar
 duas atribuições e observar apenas uma aceita.
+
+### Aplicação na F03
+
+- `users` guarda a marca de destino, se houver troca em preparação, e o horário
+  da última atribuição nova. Retomadas conservam esse horário. A auditoria da
+  operação do analista fica em `analyst_operation_audits`.
+- `case_command_receipts` registra o conteúdo por hash e a resposta original
+  das mutações do caso, com chave única por caso, usuário, operação e chave
+  de idempotência. O recibo e a mudança do caso compartilham a transação.
+- A marca serve de bloqueio de coordenação para o atendimento. O PostgreSQL usa
+  `FOR NO KEY UPDATE` nessa linha para permitir verificações de chave estrangeira
+  quando uma troca altera a marca em operação. A distribuição bloqueia os
+  analistas por UUID antes de revalidar o caso. O ajuste da própria operação
+  bloqueia as marcas por UUID antes de bloquear o analista, pois pode preparar,
+  cancelar ou concluir uma troca.
+- O distribuidor recebe sinais após o commit de handoff, retorno do cliente,
+  espera, resolução, transferência e ajuste da operação. O worker também
+  reavalia as filas a cada minuto e identifica casos cujo responsável perdeu
+  acesso. Alterações de configuração em F06 devem seguir a mesma ordem de
+  bloqueios e solicitar reavaliação após publicar.
