@@ -69,7 +69,7 @@ h2 { font-size: 1.16rem; letter-spacing: -.025em; }
 }
 .sidebar-state { margin: 1rem 1.15rem; }
 .workspace-state { padding: 1.35rem; }
-.workspace-state.notice { margin: .9rem 1.35rem; }
+.catalog-notice { margin-bottom: 1rem; }
 
 .primary, .secondary, .icon-button, .text-button {
   font-weight: 650;

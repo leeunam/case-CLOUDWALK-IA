@@ -23,6 +23,7 @@ export function Simulator() {
   const [sendingNewCase, setSendingNewCase] = useState(false)
   const catalog = useResource(loadCatalog, catalogRevision)
   const history = useResource(repository.listCases, historyRevision)
+  const refreshCatalog = useCallback(() => setCatalogRevision(previous => previous + 1), [])
   const refreshHistory = useCallback(() => setHistoryRevision(previous => previous + 1), [])
   const brands = catalog.data?.brands ?? []
   const channels = catalog.data?.channels ?? []
@@ -43,6 +44,15 @@ export function Simulator() {
     else url.searchParams.delete('case')
     window.history.replaceState(null, '', url)
   }, [caseId])
+
+  useEffect(() => {
+    function reconnect() {
+      refreshCatalog()
+      refreshHistory()
+    }
+    window.addEventListener('online', reconnect)
+    return () => window.removeEventListener('online', reconnect)
+  }, [refreshCatalog, refreshHistory])
 
   function showCase(id: string) {
     refreshHistory()
@@ -72,6 +82,14 @@ export function Simulator() {
             </button>
           )}
         </div>
+        {catalog.error && (
+          <div className="notice catalog-notice" role="alert">
+            <p>Não foi possível carregar marcas e canais. {catalog.error}</p>
+            <button className="secondary" disabled={catalog.loading} onClick={refreshCatalog}>
+              Recarregar marcas e canais
+            </button>
+          </div>
+        )}
         <div className="layout">
           <aside className="panel sidebar" aria-labelledby="history-heading">
             <div className="sidebar-header">
@@ -95,7 +113,8 @@ export function Simulator() {
                   const itemBrand = brands.find(entry => entry.id === itemChannel?.brand_id)
                   return (
                     <li key={item.id}>
-                      <button onClick={() => setCaseId(item.id)} aria-current={caseId === item.id ? 'true' : undefined}>
+                      <button onClick={() => setCaseId(item.id)} disabled={sendingNewCase}
+                        aria-current={caseId === item.id ? 'true' : undefined}>
                         <strong>{itemChannel ? channelLabels[itemChannel.type] : 'Atendimento'}</strong>
                         {itemBrand && <span>{itemBrand.name}</span>}
                         <time className="muted" dateTime={item.updated_at}>{formatTimestamp(item.updated_at)}</time>
@@ -116,14 +135,6 @@ export function Simulator() {
                 <h2 id="new-heading">Novo atendimento</h2>
               </div>
               {!catalog.data && catalog.loading && <p className="workspace-state" role="status">Carregando marcas e canais…</p>}
-              {catalog.error && (
-                <div className="notice workspace-state" role="alert">
-                  <p>{catalog.error}</p>
-                  <button className="secondary" disabled={catalog.loading} onClick={() => setCatalogRevision(value => value + 1)}>
-                    Tentar novamente
-                  </button>
-                </div>
-              )}
               {catalog.data && !brand && <p className="workspace-state muted">Nenhuma marca está disponível.</p>}
               {brand && (
                 <div className="new-case">
