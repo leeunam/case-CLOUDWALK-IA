@@ -1,18 +1,24 @@
 import type {
-  Channel, Message, SimulatorCase, SimulatorMessage, SimulatorReceipt, SimulatorRepository,
+  Channel, Message, SimulatorCase, SimulatorReceipt, SimulatorRepository,
 } from './contract'
-import fixtures from './fixtures.json'
+import fixtures from './fixtures.json' with { type: 'json' }
 
-type PendingReply = { due: number; resolves: boolean }
+type PendingReply = { due: number; throughSequence: number; proposesResolution: boolean }
 type CaseRecord = {
   detail: SimulatorCase
   correlationId: string
   messages: Message[]
-  replies: PendingReply[]
+  pendingReply: PendingReply | null
 }
 type FixtureState = {
   cases: CaseRecord[]
   sent: Record<string, { fingerprint: string; receipt: SimulatorReceipt }>
+}
+type LegacyCaseRecord = Omit<CaseRecord, 'pendingReply'> & {
+  replies: Array<{ due: number; resolves: boolean }>
+}
+type StoredFixtureState = Omit<FixtureState, 'cases'> & {
+  cases: Array<CaseRecord | LegacyCaseRecord>
 }
 
 const channels = fixtures.channels.items as Channel[]
@@ -30,7 +36,7 @@ function initialState(empty: boolean): FixtureState {
         detail: structuredClone(fixtures.recoveredCase) as SimulatorCase,
         correlationId: fixtures.recoveredReceipt.correlation_id,
         messages: structuredClone(fixtures.handoffMessages.items) as Message[],
-        replies: [],
+        pendingReply: null,
       },
       {
         detail: {
@@ -40,10 +46,30 @@ function initialState(empty: boolean): FixtureState {
         },
         correlationId: '00000000-0000-4000-8000-000000000200',
         messages: structuredClone(fixtures.resolvedMessages.items) as Message[],
-        replies: [],
+        pendingReply: null,
       },
     ],
     sent: {},
+  }
+}
+
+function restoreState(stored: string): FixtureState {
+  const { cases, sent }: StoredFixtureState = JSON.parse(stored)
+  return {
+    sent,
+    cases: cases.map(record => {
+      if ('pendingReply' in record) return record
+
+      const { replies, ...savedCase } = record
+      const [reply] = replies
+      // O formato anterior agendava a primeira e a segunda mensagem separadamente.
+      const customers = savedCase.messages.filter(message => message.author.type === 'customer')
+      const throughSequence = customers[reply?.resolves ? 1 : 0]?.sequence
+      const pendingReply = savedCase.detail.status === 'ai_active' && reply && throughSequence !== undefined
+        ? { due: reply.due, throughSequence, proposesResolution: reply.resolves }
+        : null
+      return { ...savedCase, pendingReply }
+    }),
   }
 }
 
@@ -59,17 +85,35 @@ function appendMessage(record: CaseRecord, type: 'customer' | 'ai', text: string
   record.detail.updated_at = created_at
 }
 
+function queueReply(record: CaseRecord, now: number, proposesResolution: boolean) {
+  const channel = demoChannels.find(item => item.id === record.detail.channel_id)
+  const delay = channel?.type === 'chat' ? 1000 : 3500
+  record.pendingReply = {
+    due: now + delay,
+    throughSequence: record.messages.at(-1)?.sequence ?? 0,
+    proposesResolution,
+  }
+}
+
 function settleReplies(state: FixtureState, now: number) {
   for (const record of state.cases) {
-    for (const reply of record.replies) {
-      if (reply.due > now) break
-      const text = reply.resolves
+    while (record.pendingReply && record.pendingReply.due <= now) {
+      const { due, throughSequence, proposesResolution } = record.pendingReply
+      const hasNewMessages = record.messages.some(message =>
+        message.author.type === 'customer' && message.sequence > throughSequence,
+      )
+      const resolves = proposesResolution && !hasNewMessages
+      const text = resolves
         ? 'Recebi o complemento. Vou encerrar este atendimento simulado.'
-        : 'Recebi a sua mensagem. Pode contar um pouco mais sobre o que aconteceu?'
-      appendMessage(record, 'ai', text, Math.max(reply.due, Date.parse(record.detail.updated_at)))
-      if (reply.resolves) record.detail.status = 'resolved'
+        : proposesResolution
+          ? 'Recebi o complemento. Vou considerar as novas mensagens antes de encerrar.'
+          : 'Recebi a sua mensagem. Pode contar um pouco mais sobre o que aconteceu?'
+      const repliedAt = Math.max(due, Date.parse(record.detail.updated_at))
+      appendMessage(record, 'ai', text, repliedAt)
+      record.pendingReply = null
+      if (resolves) record.detail.status = 'resolved'
+      if (hasNewMessages) queueReply(record, repliedAt, true)
     }
-    record.replies = record.replies.filter(reply => reply.due > now)
   }
 }
 
@@ -78,17 +122,17 @@ export function createFixtureRepository(scenario: string | null = null): Simulat
   const storageKey = empty ? 'cloudwalk.simulator.v1.empty' : 'cloudwalk.simulator.v1'
   let failFirstHistoryRead = scenario === 'error'
 
-  async function access<T>(readOrWrite: (state: FixtureState) => T): Promise<T> {
+  async function access<T>(readOrWrite: (state: FixtureState, now: number) => T): Promise<T> {
     await new Promise(resolve => window.setTimeout(resolve, 320))
     if (!navigator.onLine) throw new Error('Conexão indisponível. Verifique a rede e tente novamente.')
 
     const stored = window.localStorage.getItem(storageKey)
-    const state: FixtureState = stored ? JSON.parse(stored) : initialState(empty)
-    const before = JSON.stringify(state)
-    settleReplies(state, Date.now())
-    const result = readOrWrite(state)
+    const state = stored ? restoreState(stored) : initialState(empty)
+    const now = Date.now()
+    settleReplies(state, now)
+    const result = readOrWrite(state, now)
     const after = JSON.stringify(state)
-    if (stored === null || after !== before) window.localStorage.setItem(storageKey, after)
+    if (after !== stored) window.localStorage.setItem(storageKey, after)
     return result
   }
 
@@ -110,9 +154,11 @@ export function createFixtureRepository(scenario: string | null = null): Simulat
       items.sort((first, second) => Date.parse(second.updated_at) - Date.parse(first.updated_at))
       return { items, next_cursor: null }
     }),
-    getCase: id => access(state => findCase(state, id).detail),
-    listMessages: id => access(state => ({ items: findCase(state, id).messages, next_after_sequence: null })),
-    sendMessage: (channelId, message, idempotencyKey) => access(state => {
+    getConversation: id => access(state => {
+      const { detail, messages } = findCase(state, id)
+      return { detail, messages }
+    }),
+    sendMessage: (channelId, message, idempotencyKey) => access((state, now) => {
       if (!message.text.trim()) throw new Error(fixtures.invalidEnvelope.error.message)
       const channel = demoChannels.find(item => item.id === channelId)
       if (!channel) throw new Error('Canal indisponível nesta simulação.')
@@ -133,7 +179,6 @@ export function createFixtureRepository(scenario: string | null = null): Simulat
         throw new Error('Conversa indisponível neste canal.')
       }
 
-      const now = Date.now()
       if (!record || record.detail.status === 'resolved') {
         record = {
           detail: {
@@ -146,17 +191,15 @@ export function createFixtureRepository(scenario: string | null = null): Simulat
           },
           correlationId: crypto.randomUUID(),
           messages: [],
-          replies: [],
+          pendingReply: null,
         }
         state.cases.unshift(record)
       }
 
       appendMessage(record, 'customer', message.text, now)
-      const customers = record.messages.filter(item => item.author.type === 'customer').length
-      if (record.detail.status === 'ai_active' && customers <= 2) {
-        const delay = channel.type === 'chat' ? 1000 : 3500
-        const due = Math.max(now + delay, (record.replies.at(-1)?.due ?? 0) + 1)
-        record.replies.push({ due, resolves: customers === 2 })
+      if (record.detail.status === 'ai_active' && !record.pendingReply) {
+        const hasAiReply = record.messages.some(item => item.author.type === 'ai')
+        queueReply(record, now, hasAiReply)
       }
 
       const receipt = {

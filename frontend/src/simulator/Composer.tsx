@@ -5,12 +5,13 @@ import { categoryLabels, channelExamples, priorityLabels } from './presentation'
 import { errorMessage } from './useResource'
 
 export function Composer({
-  channel, conversation, repository, onSent,
+  channel, conversation, repository, onSent, onSendingChange,
 }: {
   channel: Channel
   conversation?: SimulatorCase
   repository: SimulatorRepository
   onSent: (receipt: SimulatorReceipt) => void
+  onSendingChange?: (sending: boolean) => void
 }) {
   const example = channelExamples[channel.type]
   const [text, setText] = useState('')
@@ -35,6 +36,7 @@ export function Composer({
     }
 
     setSending(true)
+    onSendingChange?.(true)
     setError(null)
     try {
       const receipt = await repository.sendMessage(channel.id, message, attempt.current.key)
@@ -45,6 +47,7 @@ export function Composer({
       setError(errorMessage(failure))
     } finally {
       setSending(false)
+      onSendingChange?.(false)
     }
   }
 

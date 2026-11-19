@@ -17,11 +17,7 @@ export function Conversation({
 }) {
   const [revision, setRevision] = useState(0)
   const refresh = useCallback(() => setRevision(previous => previous + 1), [])
-  const load = useCallback(async () => {
-    const detail = await repository.getCase(id)
-    const messages = await repository.listMessages(id)
-    return { detail, messages: messages.items }
-  }, [repository, id])
+  const load = useCallback(() => repository.getConversation(id), [repository, id])
   const { data, error, loading } = useResource(load, revision)
   const detail = data?.detail
   const channel = channels.find(item => item.id === detail?.channel_id)

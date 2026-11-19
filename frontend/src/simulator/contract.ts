@@ -47,13 +47,12 @@ export type Message = {
   text: string
   created_at: string
 }
-export type MessageList = { items: Message[]; next_after_sequence: number | null }
+export type ConversationSnapshot = { detail: SimulatorCase; messages: Message[] }
 
 export interface SimulatorRepository {
   listBrands(): Promise<Brand[]>
   listChannels(): Promise<Page<Channel>>
   listCases(): Promise<Page<SimulatorCase>>
-  getCase(id: string): Promise<SimulatorCase>
-  listMessages(caseId: string): Promise<MessageList>
+  getConversation(id: string): Promise<ConversationSnapshot>
   sendMessage(channelId: string, message: SimulatorMessage, idempotencyKey: string): Promise<SimulatorReceipt>
 }

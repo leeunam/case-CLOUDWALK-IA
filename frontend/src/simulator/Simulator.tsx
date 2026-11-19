@@ -20,6 +20,7 @@ export function Simulator() {
   const [caseId, setCaseId] = useState(params.get('case'))
   const [brandId, setBrandId] = useState('')
   const [channelType, setChannelType] = useState<ChannelType>('chat')
+  const [sendingNewCase, setSendingNewCase] = useState(false)
   const catalog = useResource(loadCatalog, catalogRevision)
   const history = useResource(repository.listCases, historyRevision)
   const refreshHistory = useCallback(() => setHistoryRevision(previous => previous + 1), [])
@@ -128,11 +129,11 @@ export function Simulator() {
                 <div className="new-case">
                   <label className="brand-field">
                     Marca
-                    <select value={brand.id} onChange={event => setBrandId(event.target.value)}>
+                    <select value={brand.id} disabled={sendingNewCase} onChange={event => setBrandId(event.target.value)}>
                       {brands.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
                     </select>
                   </label>
-                  <fieldset className="channel-picker">
+                  <fieldset className="channel-picker" disabled={sendingNewCase}>
                     <legend>Canal</legend>
                     <div>
                       {brandChannels.map(item => (
@@ -145,7 +146,7 @@ export function Simulator() {
                     </div>
                   </fieldset>
                   {channel ? (
-                    <Composer key={channel.id} channel={channel} repository={repository}
+                    <Composer key={channel.id} channel={channel} repository={repository} onSendingChange={setSendingNewCase}
                       onSent={receipt => showCase(receipt.case_id)} />
                   ) : <p className="muted">Nenhum canal está disponível para esta marca.</p>}
                 </div>
