@@ -81,6 +81,16 @@ operação. Após um sinal de atualização do Action Cable, o cliente consulta 
 recurso novamente. Também recarrega na reconexão e pode intercalar consultas
 periódicas enquanto a conversa estiver aberta.
 
+O WebSocket usa `/cable` na mesma origem. O identificador de assinatura contém
+`channel: "CaseUpdatesChannel"`, `case_id` e `audience: "simulator" | "staff"`.
+A sessão do simulador só pode assinar conversas próprias e a sessão operacional
+precisa de visibilidade vigente sobre o caso. O servidor verifica essa permissão
+na assinatura e em cada aviso. Sessões revogadas ou expiradas perdem acesso.
+O adapter PostgreSQL propaga entre API e workers, após commit, somente
+`{ "type": "case.updated", "case_id": "<uuid>" }`. Os envelopes de controle são
+do Action Cable. Os formatos estão em [assinatura](fixtures/case-update-subscription.json)
+e [aviso](fixtures/case-updated.json).
+
 Supervisores têm autorização explícita por marca. Analistas ganham visibilidade
 pelo caminho equipe → autorização na marca → vínculo de responsabilidade da
 fila. `GET /api/v1/case-filters` fornece nomes e IDs para os filtros dessa

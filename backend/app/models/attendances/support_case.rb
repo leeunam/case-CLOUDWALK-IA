@@ -16,6 +16,8 @@ module Attendances
     has_many :audits, class_name: "Attendances::CaseAudit"
     has_many :command_receipts, class_name: "Attendances::CaseCommandReceipt"
 
+    after_commit :publish_update, on: %i[create update]
+
     def classification
       { category: category, category_source: category_source, priority: priority, priority_source: priority_source }
     end
@@ -49,6 +51,12 @@ module Attendances
       audits.create!(correlation_id: correlation_id, event_type: event_type, actor_type: actor_type,
                      actor_id: actor_id, from_status: from_status, to_status: status,
                      reason: reason, details: details)
+    end
+
+    private
+
+    def publish_update
+      CaseUpdatesChannel.publish(id)
     end
   end
 end

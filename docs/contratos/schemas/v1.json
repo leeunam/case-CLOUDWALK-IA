@@ -1808,6 +1808,25 @@
       },
       "additionalProperties": false
     },
+    "CaseUpdateSubscription": {
+      "type": "object",
+      "required": ["channel", "case_id", "audience"],
+      "properties": {
+        "channel": { "const": "CaseUpdatesChannel" },
+        "case_id": { "$ref": "#/$defs/Uuid" },
+        "audience": { "enum": ["simulator", "staff"] }
+      },
+      "additionalProperties": false
+    },
+    "CaseUpdated": {
+      "type": "object",
+      "required": ["type", "case_id"],
+      "properties": {
+        "type": { "const": "case.updated" },
+        "case_id": { "$ref": "#/$defs/Uuid" }
+      },
+      "additionalProperties": false
+    },
     "SimulatorCase": {
       "type": "object",
       "required": [

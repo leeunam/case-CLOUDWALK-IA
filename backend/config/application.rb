@@ -14,6 +14,7 @@ module Cloudwalk
   class Application < Rails::Application
     config.load_defaults 8.1
     config.api_only = true
+    config.action_cable.mount_path = "/cable"
     config.active_job.queue_adapter = :solid_queue
     config.solid_queue.connects_to = { database: { writing: :queue } }
 
