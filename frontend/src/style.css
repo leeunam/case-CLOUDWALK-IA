@@ -13,7 +13,7 @@
 
 * { box-sizing: border-box; }
 body { margin: 0; }
-button, textarea, select { font: inherit; }
+button, input, textarea, select { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: default; opacity: .58; }
 a { color: var(--accent); text-underline-offset: .2em; }
@@ -36,7 +36,7 @@ h2 { font-size: 1.16rem; letter-spacing: -.025em; }
   gap: 1rem;
 }
 .identity, .topbar-actions, .mode { display: flex; align-items: center; }
-.identity { gap: .7rem; font-size: 1.05rem; font-weight: 700; }
+.identity { gap: .7rem; font-size: 1.05rem; font-weight: 700; color: inherit; text-decoration: none; }
 .brand-mark {
   display: inline-flex;
   align-items: center;
@@ -70,6 +70,7 @@ h2 { font-size: 1.16rem; letter-spacing: -.025em; }
 .sidebar-state { margin: 1rem 1.15rem; }
 .workspace-state { padding: 1.35rem; }
 .catalog-notice { margin-bottom: 1rem; }
+.mode-link { margin: -.8rem 0 1.1rem; font-size: .87rem; }
 
 .primary, .secondary, .icon-button, .text-button {
   font-weight: 650;
@@ -122,7 +123,7 @@ h2 { font-size: 1.16rem; letter-spacing: -.025em; }
 
 .new-case { padding: 1.35rem; }
 .brand-field { display: grid; gap: .42rem; max-width: 26rem; font-size: .9rem; font-weight: 650; }
-select, textarea { width: 100%; padding: .65rem .75rem; border: 1px solid #c8d4cf; border-radius: .54rem; color: var(--ink); background: #fff; }
+select, textarea, .signin input { width: 100%; padding: .65rem .75rem; border: 1px solid #c8d4cf; border-radius: .54rem; color: var(--ink); background: #fff; }
 textarea { resize: vertical; min-height: 5.2rem; }
 textarea::placeholder { color: var(--muted); }
 .channel-picker { padding: 0; margin: 1.2rem 0 1.35rem; border: 0; min-width: 0; }
@@ -170,6 +171,24 @@ textarea::placeholder { color: var(--muted); }
 .conversation-tools { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .6rem; margin-bottom: .78rem; font-size: .85rem; }
 .notice { display: grid; gap: .6rem; justify-items: start; padding: .68rem .8rem; border-radius: .5rem; background: #fff3f1; color: #8c332f; font-size: .9rem; }
 .transcript .notice { margin-bottom: .7rem; }
+
+.signin { display: grid; gap: 1.2rem; max-width: 27rem; padding: clamp(1rem, 5vw, 2rem); }
+.signin h1 { font-size: 1.8rem; }
+.signin label, .operation > label:first-child, .case-filters label { display: grid; min-width: 0; gap: .4rem; font-size: .87rem; font-weight: 650; }
+.signin button { justify-self: start; }
+.staff-controls, .operation { display: flex; align-items: center; flex-wrap: wrap; gap: .7rem 1rem; }
+.operation { margin-bottom: 1.25rem; padding: .9rem 1.35rem; }
+.operation .availability { display: flex; align-items: center; gap: .4rem; }
+.availability input { accent-color: var(--accent); }
+.case-filters { padding: .9rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; }
+.case-filters select { padding: .37rem; }
+.case-context, .handoff { padding: .9rem 1.35rem; overflow-wrap: anywhere; }
+.case-context { display: grid; gap: .22rem; justify-items: start; }
+.handoff { margin: 0 1.35rem; border-radius: .6rem; background: var(--tint); }
+.handoff h3 { margin: 0 0 .4rem; font-size: .97rem; }
+.handoff-references { display: flex; flex-wrap: wrap; gap: .5rem 1rem; list-style: none; padding: 0; margin: .45rem 0 0; font-size: .84rem; }
+.message:target { outline: 2px solid var(--accent); }
+.staff-actions { flex-wrap: wrap; }
 
 @media (max-width: 43rem) {
   .shell, .topbar-inner { width: calc(100% - 1.5rem); }

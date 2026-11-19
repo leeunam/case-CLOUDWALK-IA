@@ -1,7 +1,7 @@
 export type ChannelType = 'chat' | 'whatsapp' | 'email'
 
 export type Brand = { id: string; name: string }
-export type Channel = { id: string; brand_id: string; name: string; type: ChannelType }
+export type Channel = { id: string; brand_id: string; brand_name: string; name: string; type: ChannelType }
 export type Page<T> = { items: T[]; next_cursor: string | null }
 
 export type CaseStatus =
@@ -50,9 +50,8 @@ export type Message = {
 export type ConversationSnapshot = { detail: SimulatorCase; messages: Message[] }
 
 export interface SimulatorRepository {
-  listBrands(): Promise<Brand[]>
-  listChannels(): Promise<Page<Channel>>
-  listCases(): Promise<Page<SimulatorCase>>
+  listChannels(cursor?: string): Promise<Page<Channel>>
+  listCases(cursor?: string): Promise<Page<SimulatorCase>>
   getConversation(id: string): Promise<ConversationSnapshot>
   sendMessage(channelId: string, message: SimulatorMessage, idempotencyKey: string): Promise<SimulatorReceipt>
 }
