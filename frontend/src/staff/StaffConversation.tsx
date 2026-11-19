@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import type { CaseFilters, Session, StaffCommand } from '../api/contract'
-import { ApiError, accessLost } from '../api/http'
+import { ApiError, accessLost, deliveryUncertain } from '../api/http'
 import { canHandle } from '../api/permissions'
 import { staff } from '../api/staff'
 import { categoryLabels, priorityLabels } from '../simulator/presentation'
@@ -20,7 +20,13 @@ const blocks: Record<string, string> = {
   queue_access_revoked: 'O responsável perdeu acesso à fila.',
 }
 
-type Attempt = { kind: StaffCommand['type']; text: string; command: StaffCommand; key: string }
+type Attempt = { command: StaffCommand; key: string }
+
+const retryLabels: Record<StaffCommand['type'], string> = {
+  reply: 'Confirmar resposta anterior',
+  wait_for_customer: 'Confirmar espera anterior',
+  resolve: 'Confirmar resolução anterior',
+}
 
 export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
   id: string
@@ -33,7 +39,8 @@ export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [commandError, setCommandError] = useState<string | null>(null)
-  const attempt = useRef<Attempt | null>(null)
+  const [confirmation, setConfirmation] = useState<string | null>(null)
+  const [pending, setPending] = useState<Attempt | null>(null)
   const refresh = useCallback(() => setRevision(value => value + 1), [])
   const load = useCallback(() => staff.getConversation(id), [id])
   const { data, error, loading, replaceData } = useResource(load, revision)
@@ -43,6 +50,9 @@ export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
   const queue = filters?.queues.find(item => item.id === detail?.queue_id)
   const owned = detail?.assignee?.id === session.user?.attendant_id
   const canAct = detail && !error && canHandle(session, detail)
+  const switchPending = !!session.operation?.switch_target_brand_id
+  const canConfirm = detail && !error && session.user?.role === 'analyst' &&
+    detail.brand_id === session.operation?.active_brand_id && (owned || detail.status === 'resolved')
   const handoff = detail?.handoff
 
   useCaseRefresh(id, detail ? 'staff' : null, 10000, loading, refresh)
@@ -52,31 +62,35 @@ export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
 
   async function send(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!detail || !canAct || busy || loading) return
+    if (!detail || !canAct || pending || busy || loading) return
     const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null
     const kind = submitter?.value === 'resolve' ? 'resolve' : submitter?.value === 'wait_for_customer' ? 'wait_for_customer' : 'reply'
     const body = kind === 'resolve' ? '' : text.trim()
-    if (kind !== 'resolve' && !body) return
+    if ((kind !== 'resolve' && !body) || (kind === 'wait_for_customer' && switchPending)) return
     const command: StaffCommand = kind === 'resolve'
       ? { type: kind, expected_version: detail.version }
       : { type: kind, expected_version: detail.version, text: body }
-    if (attempt.current?.kind !== kind || attempt.current.text !== body) {
-      attempt.current = { kind, text: body, command, key: crypto.randomUUID() }
-    }
+    await runCommand({ command, key: crypto.randomUUID() }, false)
+  }
 
+  async function runCommand(attempt: Attempt, confirming: boolean) {
     setBusy(true)
     setCommandError(null)
+    setConfirmation(null)
     try {
-      await staff.command(id, attempt.current.command, session.csrf_token, attempt.current.key)
-      attempt.current = null
+      await staff.command(id, attempt.command, session, attempt.key)
+      setPending(null)
       setText('')
+      if (confirming) setConfirmation('A tentativa anterior foi confirmada. Confira o estado atual antes de iniciar outra ação.')
       refresh()
       onChanged()
     } catch (failure) {
-      if (failure instanceof ApiError && failure.status >= 400 && failure.status < 500) attempt.current = null
+      setPending(deliveryUncertain(failure) ? attempt : null)
       if (accessLost(failure)) replaceData(null)
       if (failure instanceof ApiError && failure.status === 409) {
-        setCommandError('O atendimento foi atualizado. Confira o estado atual e tente novamente. Seu rascunho foi preservado.')
+        setCommandError(failure.code === 'version_conflict'
+          ? 'O atendimento foi atualizado. Confira o estado atual e tente novamente. Seu rascunho foi preservado.'
+          : errorMessage(failure))
         refresh()
         onChanged()
       } else {
@@ -136,15 +150,32 @@ export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
           <button className="secondary" onClick={refresh} disabled={loading}>Atualizar conversa</button>
         </div>
         {commandError && <p className="error" role="alert">{commandError}</p>}
-        {canAct && (
+        {confirmation && <p role="status">{confirmation}</p>}
+        {pending && (
+          <div className="composer">
+            <p className="muted">A ação pode ter sido aplicada. Reenvie a tentativa para confirmar.</p>
+            {'text' in pending.command && <p>{pending.command.text}</p>}
+            <div className="composer-actions staff-actions">
+              <button className="primary" type="button" disabled={busy || loading || !canConfirm}
+                onClick={() => void runCommand(pending, true)}>{retryLabels[pending.command.type]}</button>
+              <button className="secondary" type="button" disabled={busy} onClick={() => {
+                setPending(null)
+                setCommandError(null)
+              }}>Preparar outra ação</button>
+            </div>
+          </div>
+        )}
+        {canAct && !pending && (
           <form className="composer" onSubmit={send}>
             <label htmlFor="staff-reply">Resposta ao cliente</label>
             <textarea id="staff-reply" value={text} onChange={event => setText(event.target.value)} rows={3} disabled={busy} />
             <div className="composer-actions staff-actions">
               <button className="primary" type="submit" value="reply" disabled={loading || busy || !text.trim()}>Enviar resposta</button>
-              <button className="secondary" type="submit" value="wait_for_customer" disabled={loading || busy || !text.trim()}>Aguardar cliente</button>
+              <button className="secondary" type="submit" value="wait_for_customer"
+                disabled={loading || busy || switchPending || !text.trim()}>Aguardar cliente</button>
               <button className="secondary" type="submit" value="resolve" disabled={loading || busy}>Resolver atendimento</button>
             </div>
+            {switchPending && <p className="muted">A espera pelo cliente fica indisponível durante a troca de marca.</p>}
           </form>
         )}
       </div>

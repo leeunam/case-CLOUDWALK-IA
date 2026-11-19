@@ -1,23 +1,36 @@
 import type { Page, Message } from '../simulator/contract'
 import type { CaseFilters, ListFilters, OperationUpdate, Session, StaffCase, StaffCommand } from './contract'
-import { query, request } from './http.ts'
+import { ApiError, query, request, withFreshCsrf } from './http.ts'
 import { pageSize, readConversation } from './pagination.ts'
 
 export function getSession() {
   return request<Session>('/session')
 }
 
+function withStaffCsrf<T>(session: Session, operation: (csrf: string) => Promise<T>) {
+  return withFreshCsrf(session.csrf_token, operation, async () => {
+    const current = await getSession()
+    if (!current.user || current.user.id !== session.user?.id || current.user.role !== session.user.role) {
+      throw new ApiError(401, 'session_changed', 'A sessão da operação mudou. Confira a conta antes de repetir a ação.')
+    }
+    return current.csrf_token
+  })
+}
+
 export const staff = {
   login: (email: string, password: string, csrf: string) =>
-    request<Session>('/session', { method: 'POST', body: { email, password }, csrf }),
-  logout: (csrf: string) => request<void>('/session', { method: 'DELETE', csrf }),
-  updateOperation: (body: OperationUpdate, csrf: string) =>
-    request<Session>('/session/operation', { method: 'PATCH', body, csrf }),
+    withFreshCsrf(csrf, token => request<Session>('/session', {
+      method: 'POST', body: { email, password }, csrf: token,
+    }), async () => (await getSession()).csrf_token),
+  logout: (session: Session) =>
+    withStaffCsrf(session, csrf => request<void>('/session', { method: 'DELETE', csrf })),
+  updateOperation: (body: OperationUpdate, session: Session) =>
+    withStaffCsrf(session, csrf => request<Session>('/session/operation', { method: 'PATCH', body, csrf })),
   filters: () => request<CaseFilters>('/case-filters'),
   listCases: (filters: ListFilters, cursor?: string) =>
     request<Page<StaffCase>>(query('/cases', { ...filters, cursor, limit: pageSize })),
   getConversation: (id: string) => readConversation<StaffCase>(`/cases/${encodeURIComponent(id)}`),
-  command: (id: string, command: StaffCommand, csrf: string, key: string) => {
+  command: (id: string, command: StaffCommand, session: Session, key: string) => withStaffCsrf(session, csrf => {
     const path = `/cases/${encodeURIComponent(id)}`
     if (command.type === 'reply') {
       const { expected_version, text } = command
@@ -26,5 +39,5 @@ export const staff = {
       }).then(result => result.case)
     }
     return request<StaffCase>(`${path}/actions`, { method: 'POST', body: command, csrf, key })
-  },
+  }),
 }

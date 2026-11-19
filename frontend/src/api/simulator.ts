@@ -1,6 +1,6 @@
 import type { Brand, Channel, Page, SimulatorCase, SimulatorReceipt, SimulatorRepository } from '../simulator/contract'
 import type { Session } from './contract'
-import { ApiError, query, request } from './http.ts'
+import { ApiError, query, request, withFreshCsrf } from './http.ts'
 import { pageSize, readConversation } from './pagination.ts'
 import { getSession } from './staff.ts'
 
@@ -29,7 +29,9 @@ export function createSimulatorApi(): SimulatorRepository {
       await request<Page<SimulatorCase>>(query(cases, { limit: 1 }))
     } catch (failure) {
       if (!(failure instanceof ApiError) || failure.status !== 401) throw failure
-      const created = await request<Session>('/simulator/session', { method: 'POST', csrf: session.csrf_token })
+      const created = await withFreshCsrf(session.csrf_token,
+        csrf => request<Session>('/simulator/session', { method: 'POST', csrf }),
+        async () => (await getSession()).csrf_token)
       if (created.user?.role !== 'simulator' || !created.csrf_token) {
         throw new ApiError(0, 'invalid_session', 'A API não confirmou a sessão de simulação.')
       }
@@ -41,18 +43,19 @@ export function createSimulatorApi(): SimulatorRepository {
       ready = undefined
       throw failure
     })
-    await ready
+    const prepared = ready
+    await prepared
     try {
       return await operation()
     } catch (failure) {
-      if (failure instanceof ApiError && failure.status === 401) ready = undefined
+      if (failure instanceof ApiError && failure.status === 401 && ready === prepared) ready = undefined
       throw failure
     }
   }
 
   return {
     listChannels: cursor => withSession(() =>
-      request<Page<Channel>>(query('/channels', { cursor, limit: pageSize }))),
+      request<Page<Channel>>(query('/channels', { audience: 'simulator', cursor, limit: pageSize }))),
     listCases: cursor => withSession(() =>
       request<Page<SimulatorCase>>(query(cases, { cursor, limit: pageSize }))),
     getConversation: id => withSession(() => readConversation<SimulatorCase>(`${cases}/${encodeURIComponent(id)}`)),

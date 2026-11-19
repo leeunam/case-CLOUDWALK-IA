@@ -25,7 +25,7 @@ export function Simulator() {
   const [caseId, setCaseId] = useOpenCase()
   const [brandId, setBrandId] = useState('')
   const [channelType, setChannelType] = useState<ChannelType>('chat')
-  const [sendingNewCase, setSendingNewCase] = useState(false)
+  const [pendingNewCase, setPendingNewCase] = useState(false)
   const loadCatalog = useCallback(async () => {
     const channels = (await readPages(repository.listChannels)).items
     return { brands: brandsFromChannels(channels), channels }
@@ -105,7 +105,7 @@ export function Simulator() {
                   const itemBrand = brands.find(entry => entry.id === itemChannel?.brand_id)
                   return (
                     <li key={item.id}>
-                      <button onClick={() => setCaseId(item.id)} disabled={sendingNewCase}
+                      <button onClick={() => setCaseId(item.id)} disabled={pendingNewCase}
                         aria-current={caseId === item.id ? 'true' : undefined}>
                         <strong>{itemChannel ? channelLabels[itemChannel.type] : 'Atendimento'}</strong>
                         {itemBrand && <span>{itemBrand.name}</span>}
@@ -135,11 +135,11 @@ export function Simulator() {
                 <div className="new-case">
                   <label className="brand-field">
                     Marca
-                    <select value={brand.id} disabled={sendingNewCase} onChange={event => setBrandId(event.target.value)}>
+                    <select value={brand.id} disabled={pendingNewCase} onChange={event => setBrandId(event.target.value)}>
                       {brands.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
                     </select>
                   </label>
-                  <fieldset className="channel-picker" disabled={sendingNewCase}>
+                  <fieldset className="channel-picker" disabled={pendingNewCase}>
                     <legend>Canal</legend>
                     <div>
                       {brandChannels.map(item => (
@@ -152,7 +152,7 @@ export function Simulator() {
                     </div>
                   </fieldset>
                   {channel ? (
-                    <Composer key={channel.id} channel={channel} repository={repository} onSendingChange={setSendingNewCase}
+                    <Composer key={channel.id} channel={channel} repository={repository} onAttemptChange={setPendingNewCase}
                       onSent={receipt => showCase(receipt.case_id)} />
                   ) : <p className="muted">Nenhum canal está disponível para esta marca.</p>}
                 </div>

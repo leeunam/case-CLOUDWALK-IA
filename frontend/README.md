@@ -28,7 +28,7 @@ marca informadas pela sessão. A retomada é aplicada pelo distribuidor.
 | Operação | Fornecimento na rodada F04 |
 | --- | --- |
 | `POST /api/v1/simulator/session` | Criar e recuperar identidade sintética com cookie e CSRF. |
-| `GET /api/v1/channels` | Listar canais autorizados com `brand_name` e cursor. |
+| `GET /api/v1/channels?audience=simulator` | Listar canais da identidade sintética com `brand_name` e cursor. Uma sessão sintética expirada retorna `401`. |
 | `GET /api/v1/simulator/cases`, detalhe e mensagens | Restringir ao cliente autenticado e devolver identidade para continuar a conversa. |
 | `POST /api/v1/simulator/channels/{channel_id}/messages` | Persistir a mensagem e devolver o recibo idempotente. |
 | `/cable` · `CaseUpdatesChannel` | Autorizar a assinatura do caso e avisar após alterações, inclusive as feitas por workers. |
@@ -44,6 +44,12 @@ marca informadas pela sessão. A retomada é aplicada pelo distribuidor.
    reconecte o chat e confira a nova confirmação de assinatura e as leituras.
 4. Faça duas ações simultâneas com a mesma versão. Observe o conflito,
    a nova versão carregada e o rascunho preservado.
+5. Abra a tela de login em uma aba, inicie a simulação em outra e volte
+   para entrar na operação sem atualizar a página. Confira a nova consulta
+   de sessão e a repetição do login após `csrf_rejected`.
+6. Com um atendimento ativo, solicite a troca de marca. Confira que
+   a espera pelo cliente fica indisponível e que a resposta e a resolução
+   continuam disponíveis.
 
 Exercício: no painel de rede, siga um envio do analista e compare o
 `Idempotency-Key`, o `expected_version` e a consulta disparada pelo aviso

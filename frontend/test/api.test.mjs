@@ -40,6 +40,7 @@ test('simulador prepara uma sessão compartilhada entre leituras e usa CSRF rota
     if (route === '/api/v1/simulator/cases' && !simulatorReady) return Response.json({}, { status: 401 })
     if (route === '/api/v1/simulator/cases') return Response.json({ items: [], next_cursor: null })
     if (route === '/api/v1/channels') {
+      assert.equal(url.searchParams.get('audience'), 'simulator')
       return url.searchParams.get('cursor') === 'second page+'
         ? Response.json({ items: channels.slice(1), next_cursor: null })
         : Response.json({ items: [channels[0]], next_cursor: 'second page+' })
@@ -90,6 +91,39 @@ test('simulador reaproveita a sessão coexistente com login e carrega as página
   assert.deepEqual(messages.map(item => item.sequence), [1, 2, 3])
 })
 
+test('catálogo exige identidade sintética mesmo após a sessão expirar com o analista conectado', async t => {
+  let simulatorReady = true
+  let created = 0
+  t.mock.method(globalThis, 'fetch', async (path, options) => {
+    const url = new URL(path, 'https://help.test')
+    if (url.pathname === '/api/v1/session') return Response.json(session)
+    if (url.pathname === '/api/v1/simulator/session') {
+      created += 1
+      simulatorReady = true
+      assert.equal(options.method, 'POST')
+      return Response.json({ user: { role: 'simulator' }, csrf_token: 'rotated' }, { status: 201 })
+    }
+    const unauthenticated = () => Response.json({ error: { code: 'unauthenticated' } }, { status: 401 })
+    if (url.pathname === '/api/v1/simulator/cases') {
+      return simulatorReady ? Response.json({ items: [], next_cursor: null }) : unauthenticated()
+    }
+    assert.equal(url.pathname, '/api/v1/channels')
+    if (url.searchParams.get('audience') !== 'simulator') {
+      return Response.json({ items: [{ ...channels[0], brand_id: 'staff', brand_name: 'Somente operação' }], next_cursor: null })
+    }
+    return simulatorReady ? Response.json({ items: channels, next_cursor: null }) : unauthenticated()
+  })
+
+  const api = createSimulatorApi()
+  assert.deepEqual((await api.listChannels()).items, channels)
+  assert.equal(created, 0)
+  simulatorReady = false
+  await assert.rejects(api.listChannels(), { status: 401, code: 'unauthenticated' })
+  const [catalog] = await Promise.all([api.listChannels(), api.listCases()])
+  assert.deepEqual(catalog.items, channels)
+  assert.equal(created, 1)
+})
+
 test('falha HTTP, rede e catálogo fora do contrato são exibíveis e nunca acionam fixtures', async t => {
   const mocked = t.mock.method(globalThis, 'fetch', async () => Response.json({
     error: { code: 'unavailable', message: 'API indisponível.' },
@@ -113,13 +147,13 @@ test('cliente operacional envia sessão, filtro, ações versionadas e chaves co
     return Response.json({ ...session, case: { id: 'active' } })
   })
   const login = await staff.login('analyst@test', 'password', 'anonymous-token')
-  await staff.updateOperation({ switch_target_brand_id: 'horizonte' }, login.csrf_token)
+  await staff.updateOperation({ switch_target_brand_id: 'horizonte' }, login)
   await staff.listCases({ brand_id: 'aurora', status: 'waiting_resumption', assignee: 'me' }, 'next+page')
-  await staff.command('active', { type: 'reply', expected_version: 7, text: 'Olá' }, login.csrf_token, 'reply')
-  await staff.command('active', { type: 'wait_for_customer', expected_version: 8, text: 'Envie o comprovante' }, login.csrf_token, 'wait')
-  await assert.rejects(staff.command('active', { type: 'resolve', expected_version: 9 }, login.csrf_token, 'conflict'),
+  await staff.command('active', { type: 'reply', expected_version: 7, text: 'Olá' }, login, 'reply')
+  await staff.command('active', { type: 'wait_for_customer', expected_version: 8, text: 'Envie o comprovante' }, login, 'wait')
+  await assert.rejects(staff.command('active', { type: 'resolve', expected_version: 9 }, login, 'conflict'),
     { name: 'ApiError', status: 409, code: 'version_conflict' })
-  await staff.logout(login.csrf_token)
+  await staff.logout(login)
   assert.deepEqual(requests.map(req => [req.method, req.path, req.headers.get('X-CSRF-Token'), req.headers.get('Idempotency-Key')]), [
     ['POST', '/api/v1/session', 'anonymous-token', null],
     ['PATCH', '/api/v1/session/operation', 'initial', null],
@@ -132,6 +166,58 @@ test('cliente operacional envia sessão, filtro, ações versionadas e chaves co
   assert.deepEqual(JSON.parse(requests[3].body), { expected_version: 7, text: 'Olá' })
   assert.deepEqual(JSON.parse(requests[4].body), { type: 'wait_for_customer', expected_version: 8, text: 'Envie o comprovante' })
   assert.deepEqual(JSON.parse(requests[5].body), { type: 'resolve', expected_version: 9 })
+})
+
+test('login e escritas operacionais renovam CSRF rejeitado preservando corpo e chave', async t => {
+  const requests = []
+  t.mock.method(globalThis, 'fetch', async (path, { method, headers, body }) => {
+    requests.push({ path, method, body, csrf: headers.get('X-CSRF-Token'), key: headers.get('Idempotency-Key') })
+    if (method === 'GET') return Response.json({ ...session, csrf_token: 'rotated' })
+    if (headers.get('X-CSRF-Token') === 'initial') {
+      return Response.json({ error: { code: 'csrf_rejected' } }, { status: 403 })
+    }
+    assert.equal(headers.get('X-CSRF-Token'), 'rotated')
+    if (method === 'DELETE') return new Response(null, { status: 204 })
+    return Response.json({ ...session, case: { version: 8 } })
+  })
+
+  const actions = [
+    () => staff.login('analyst@test', 'demo-password', 'initial'),
+    () => staff.updateOperation({ available: false }, session),
+    () => staff.command('active', { type: 'reply', expected_version: 7, text: 'Olá' }, session, 'reply-attempt'),
+    () => staff.command('active', { type: 'wait_for_customer', expected_version: 7, text: 'Olá' }, session, 'wait-attempt'),
+    () => staff.logout(session),
+  ]
+  for (const action of actions) {
+    requests.length = 0
+    await action()
+    assert.equal(requests.length, 3)
+    const [first, refresh, retry] = requests
+    assert.deepEqual(refresh, { path: '/api/v1/session', method: 'GET', body: undefined, csrf: null, key: null })
+    assert.deepEqual(retry, { ...first, csrf: 'rotated' })
+  }
+})
+
+test('CSRF renovado não repete ações sob outra conta e a repetição é limitada a uma tentativa', async t => {
+  let current = { ...session, user: { ...session.user, id: 'other-account' }, csrf_token: 'rotated' }
+  let code = 'csrf_rejected'
+  const mocked = t.mock.method(globalThis, 'fetch', async (_path, options) => {
+    if (options.method === 'GET') return Response.json(current)
+    return Response.json({ error: { code } }, { status: 403 })
+  })
+  const command = () => staff.command('active', { type: 'resolve', expected_version: 9 }, session, 'resolve-attempt')
+  await assert.rejects(command(), { code: 'session_changed' })
+  assert.equal(mocked.mock.callCount(), 2)
+
+  mocked.mock.resetCalls()
+  current = { ...session, csrf_token: 'rotated' }
+  await assert.rejects(command(), { code: 'csrf_rejected' })
+  assert.equal(mocked.mock.callCount(), 3)
+
+  mocked.mock.resetCalls()
+  code = 'forbidden'
+  await assert.rejects(command(), { code: 'forbidden' })
+  assert.equal(mocked.mock.callCount(), 1)
 })
 
 test('ações exigem identidade do atendente, marca em operação e caso humano ativo', () => {

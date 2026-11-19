@@ -14,12 +14,17 @@ const errorLabels: Record<number, string> = {
   401: 'Sua sessão expirou ou ainda não foi iniciada.',
   403: 'Esta operação não está disponível para a sua sessão.',
   404: 'O recurso não está disponível nesta sessão.',
-  409: 'O atendimento mudou. Atualize e tente novamente.',
+  409: 'A API encontrou um conflito ao processar a solicitação.',
   422: 'Os dados enviados foram recusados pela API.',
 }
 
 export function accessLost(error: unknown) {
   return error instanceof ApiError && [401, 403, 404].includes(error.status)
+}
+
+export function deliveryUncertain(error: unknown) {
+  return !(error instanceof ApiError) || error.status === 0 ||
+    error.status >= 500 || error.code === 'invalid_response'
 }
 
 export async function request<T>(path: string, options: {
@@ -65,4 +70,17 @@ export function query(path: string, params: Record<string, string | number | nul
     if (value !== null && value !== undefined && value !== '') search.set(key, String(value))
   }
   return search.size ? `${path}?${search}` : path
+}
+
+export async function withFreshCsrf<T>(
+  csrf: string,
+  operation: (csrf: string) => Promise<T>,
+  refreshCsrf: () => Promise<string>,
+) {
+  try {
+    return await operation(csrf)
+  } catch (failure) {
+    if (!(failure instanceof ApiError) || failure.status !== 403 || failure.code !== 'csrf_rejected') throw failure
+    return operation(await refreshCsrf())
+  }
 }

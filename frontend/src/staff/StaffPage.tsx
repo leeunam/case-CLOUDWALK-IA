@@ -110,7 +110,7 @@ function Inbox({ session, onSession, refreshSession, onLogout }: {
     setBusy(true)
     setOperationError(null)
     try {
-      onSession(await staff.updateOperation(data, session.csrf_token))
+      onSession(await staff.updateOperation(data, session))
       refreshInbox()
     } catch (failure) {
       setOperationError(errorMessage(failure))
@@ -124,7 +124,7 @@ function Inbox({ session, onSession, refreshSession, onLogout }: {
     setBusy(true)
     setOperationError(null)
     try {
-      await staff.logout(session.csrf_token)
+      await staff.logout(session)
       const url = new URL(window.location.href)
       url.searchParams.delete('case')
       window.history.replaceState(null, '', url)

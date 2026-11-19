@@ -64,23 +64,26 @@ export function Conversation({
         )}
         {data && <Transcript messages={data.messages} />}
       </div>
-      {latestCaseId ? (
+      {(latestCaseId || (channel && detail)) && (
         <div className="conversation-footer">
-          <button className="secondary" onClick={() => onOpen(latestCaseId)}>Abrir atendimento mais recente</button>
-        </div>
-      ) : channel && detail && (
-        <div className="conversation-footer">
-          <div className="conversation-tools">
-            <p className="muted">
-              {detail.status === 'resolved'
-                ? 'Uma nova mensagem abre outro atendimento nesta conversa.'
-                : channel.type === 'chat'
-                  ? 'O chat busca novas mensagens enquanto o atendimento está ativo.'
-                  : 'Volte pelo histórico ou atualize para consultar novas respostas.'}
-            </p>
-            <button className="secondary" onClick={refresh} disabled={loading}>Atualizar conversa</button>
-          </div>
-          <Composer channel={channel} conversation={detail} repository={repository} onSent={handleSent} />
+          {latestCaseId ? (
+            <button className="secondary" onClick={() => onOpen(latestCaseId)}>Abrir atendimento mais recente</button>
+          ) : channel && detail && (
+            <div className="conversation-tools">
+              <p className="muted">
+                {detail.status === 'resolved'
+                  ? 'Uma nova mensagem abre outro atendimento nesta conversa.'
+                  : channel.type === 'chat'
+                    ? 'O chat busca novas mensagens enquanto o atendimento está ativo.'
+                    : 'Volte pelo histórico ou atualize para consultar novas respostas.'}
+              </p>
+              <button className="secondary" onClick={refresh} disabled={loading}>Atualizar conversa</button>
+            </div>
+          )}
+          {channel && detail && (
+            <Composer channel={channel} conversation={detail} repository={repository} onSent={handleSent}
+              allowNewMessage={!latestCaseId} />
+          )}
         </div>
       )}
     </section>
