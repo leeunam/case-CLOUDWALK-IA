@@ -46,13 +46,15 @@ class ClassificationConcurrencyTest < ActiveSupport::TestCase
     resumed << true if resumed && worker&.alive?
     worker&.join
     if record
-      request&.attempts&.delete_all
-      request&.destroy!
+      if request
+        Classification::Attempt.where(classification_request_id: request.id).delete_all
+        request.destroy!
+      end
       AgentIntegration::AgentOutbox.where(agent_turn_id: record.turns.ids).delete_all
-      record.turns.delete_all
-      record.command_receipts.delete_all
-      record.audits.delete_all
-      record.messages.delete_all
+      AgentIntegration::AgentTurn.where(support_case: record).delete_all
+      Attendances::CaseCommandReceipt.where(support_case: record).delete_all
+      Attendances::CaseAudit.where(support_case: record).delete_all
+      Attendances::CaseMessage.where(support_case: record).delete_all
       Attendances::ChannelEntry.where(support_case: record).delete_all
       conversation = record.channel_conversation
       record.destroy!

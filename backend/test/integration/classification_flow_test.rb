@@ -77,12 +77,12 @@ class ClassificationFlowTest < ActionDispatch::IntegrationTest
     end
     service = Classification::CompleteRequest.new(request.id, classifier: classifier)
 
-    freeze_time(with_usec: true) do
+    travel_to(Time.current.change(usec: 0) + 1.second) do
       service.call
       assert_equal 75.seconds.from_now, request.reload.available_at
       service.call
       assert_equal ["retry"], request.attempts.pluck(:disposition)
-      travel_to 75.seconds.from_now, with_usec: true
+      travel 75.seconds
       service.call
     end
 
