@@ -1,4 +1,5 @@
 require "minitest/autorun"
+require "stringio"
 require_relative "samples"
 
 class JevHttpClientTest < Minitest::Test
@@ -19,7 +20,7 @@ class JevHttpClientTest < Minitest::Test
 
     def request(request)
       @requests << request
-      @exchange.call
+      @exchange.call(request)
     end
   end
 
@@ -35,7 +36,8 @@ class JevHttpClientTest < Minitest::Test
 
   def test_official_http_shape_and_model_evidence
     answer = choice(:category, "pix")
-    body = JSON.generate(model: "jev-1.13.0", answers: { category: answer, priority: choice(:priority, "urgent") })
+    body = JSON.generate(model: "jev-1.13.0", answers: { category: answer, priority: choice(:priority, "urgent") },
+                         ignored: "classificação").b.freeze
     connection = Connection.new { Response.new("200", body, {}) }
 
     result = classifier(http_client(connection)).call(**@input)
@@ -145,6 +147,42 @@ class JevHttpClientTest < Minitest::Test
       assert_equal "basic", result.classification.fetch(:priority)
       refute result.retryable
     end
+  end
+
+  def test_invalid_utf8_body_requires_review
+    body = "{\"model\":\"jev-\xFF\",\"answers\":#{JSON.generate(category: choice(:category, "pix"))}}".b
+    connection = Connection.new { Response.new("200", body, {}) }
+
+    result = classifier(http_client(connection)).call(**@input)
+
+    assert_equal :review, result.status
+    assert_equal({ provider: :invalid_response }, result.issues)
+    assert_equal({ category: nil, category_source: nil, priority: "basic", priority_source: "channel" },
+                 result.classification)
+    assert_equal 200, result.evidence.fetch(:http_status)
+    refute result.evidence.key?(:model)
+    refute result.retryable
+  end
+
+  def test_corrupted_gzip_body_requires_review
+    wire_response = "HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Length: 4\r\n\r\nboom"
+    connection = Connection.new do |request|
+      socket = Net::BufferedIO.new(StringIO.new(wire_response))
+      response = Net::HTTPResponse.read_new(socket)
+      response.decode_content = request.decode_content
+      response.reading_body(socket, true) { response.body }
+      response
+    end
+
+    result = classifier(http_client(connection)).call(**@input)
+
+    assert_equal :review, result.status
+    assert_equal({ provider: :invalid_response }, result.issues)
+    assert_equal({ category: nil, category_source: nil, priority: "basic", priority_source: "channel" },
+                 result.classification)
+    assert_equal :http, result.evidence.fetch(:mode)
+    assert_equal "jev-latest", result.evidence.fetch(:requested_model)
+    refute result.retryable
   end
 
   def test_missing_model_identity_prevents_completion_and_keeps_the_available_answer

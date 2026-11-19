@@ -16,12 +16,15 @@ module JevSamples
     "urgent" => "Problema que exige ação imediata, como operação totalmente interrompida."
   }.freeze
 
-  def classifier(client, categories: CATEGORIES)
-    Classification::Jev::Classifier.new(client: client, categories: categories, priorities: PRIORITIES)
+  def classifier(client, categories: CATEGORIES, priorities: PRIORITIES)
+    Classification::Jev::Classifier.new(client: client, categories: categories, priorities: priorities)
   end
 
   def channel_input(fixture)
-    path = File.expand_path("../../../../../docs/contratos/fixtures/#{fixture}.json", __dir__)
+    roots = [File.expand_path("../../../../../docs/contratos", __dir__), "/workspace/docs/contratos"]
+    path = roots.map { |root| File.join(root, "fixtures", "#{fixture}.json") }.find { |file| File.file?(file) }
+    raise "Fixture contratual #{fixture}.json não encontrada em #{roots.join(' ou ')}." unless path
+
     JSON.parse(File.read(path)).fetch("data").slice("text", "category", "priority").transform_keys(&:to_sym)
   end
 

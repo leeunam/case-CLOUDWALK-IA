@@ -5,6 +5,7 @@ module Classification
 
       ABSTENTION = "informacao_insuficiente"
       ABSTENTION_DESCRIPTION = "O relato não permite escolher com segurança entre as demais opções."
+      PRIORITY_CODES = %w[basic intermediate advanced urgent].freeze
       INSTRUCTIONS = {
         category: "Qual é o assunto principal do atendimento relatado?",
         priority: "Que urgência o atendimento exige, considerando o impacto e a necessidade de ação imediata?"
@@ -13,8 +14,14 @@ module Classification
 
       # Catálogos ativos e já filtrados pelo chamador, em mapas de código para descrição.
       def initialize(client:, categories:, priorities:)
+        priorities = validate_catalog(priorities)
+        unknown_priorities = priorities.keys - PRIORITY_CODES
+        if unknown_priorities.any?
+          raise ArgumentError, "prioridades fora do contrato v1: #{unknown_priorities.join(', ')}"
+        end
+
         @client = client
-        @catalogs = { category: validate_catalog(categories), priority: validate_catalog(priorities) }
+        @catalogs = { category: validate_catalog(categories), priority: priorities }
       end
 
       def call(text:, category: nil, priority: nil)
@@ -66,7 +73,8 @@ module Classification
         evidence = provider_evidence(started)
 
         model, answers = response.values_at("model", "answers") if response.is_a?(Hash)
-        evidence[:model] = model if model.is_a?(String) && !model.strip.empty?
+        model = model_name(model)
+        evidence[:model] = model if model
         issues = {}
         unless evidence.key?(:model) && answers.is_a?(Hash)
           issues[:provider] = :invalid_response
@@ -123,7 +131,16 @@ module Classification
 
       def provider_evidence(started)
         elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - started
-        { mode: @client.mode, requested_model: @client.model, latency_ms: (elapsed * 1000).round, answers: {} }
+        { mode: @client.mode, requested_model: model_name(@client.model), latency_ms: (elapsed * 1000).round, answers: {} }
+      end
+
+      def model_name(value)
+        return unless value.is_a?(String)
+
+        name = value.encode(Encoding::UTF_8)
+        name if name.valid_encoding? && !name.strip.empty?
+      rescue EncodingError
+        nil
       end
 
       def set_field(classification, field, value, source)

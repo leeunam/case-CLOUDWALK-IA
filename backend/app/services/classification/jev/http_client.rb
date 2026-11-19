@@ -2,6 +2,7 @@ require "json"
 require "net/http"
 require "time"
 require "timeout"
+require "zlib"
 
 module Classification
   module Jev
@@ -50,20 +51,27 @@ module Classification
         request["Content-Type"] = "application/json"
         request.body = JSON.generate(model: model, state: state, questions: questions)
 
+        read_response(request)
+      end
+
+      private
+
+      def read_response(request)
         response = Timeout.timeout(@timeout_seconds) { send_request(request) }
         status = response.code.to_i
         raise http_error(response, status) unless status == 200
 
-        JSON.parse(response.body.to_s)
-      rescue JSON::ParserError, Net::ProtocolError, Net::HTTPBadResponse
-        raise Error.new(:invalid_response)
+        body = response.body.to_s.dup.force_encoding(Encoding::UTF_8)
+        raise Error.new(:invalid_response, http_status: status) unless body.valid_encoding?
+
+        JSON.parse(body)
+      rescue JSON::ParserError, EncodingError, Net::ProtocolError, Net::HTTPBadResponse, Zlib::Error
+        raise Error.new(:invalid_response, http_status: status)
       rescue Timeout::Error
         raise Error.new(:timeout, retryable: true)
       rescue SocketError, IOError, SystemCallError, OpenSSL::SSL::SSLError
         raise Error.new(:network_error, retryable: true)
       end
-
-      private
 
       def send_request(request)
         http = @connection_factory.call(ENDPOINT.host, ENDPOINT.port)

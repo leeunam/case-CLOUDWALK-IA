@@ -66,6 +66,30 @@ class JevClassifierTest < Minitest::Test
     assert_equal ["priority"], @fixture.calls.fetch(0).fetch(:questions).keys
   end
 
+  def test_priority_subset_keeps_descriptions_in_choice_criteria
+    priorities = { "urgent" => PRIORITIES.fetch("urgent") }
+    answer = choice(:priority, "urgent").merge("probabilities" => { "urgent" => 1.0, abstention => 0.0 })
+    fixture = RecordingFixture.new(answers: { "priority" => answer })
+
+    result = classifier(fixture, priorities: priorities).call(**@input.merge(priority: nil))
+
+    assert_equal :complete, result.status
+    assert_equal "urgent", result.classification.fetch(:priority)
+    assert_equal "jev", result.classification.fetch(:priority_source)
+    criteria = fixture.calls.fetch(0).fetch(:questions).fetch("priority").fetch(:criteria)
+    assert_equal priorities.fetch("urgent"), criteria.fetch("urgent")
+    assert_equal ["urgent", abstention], criteria.keys
+  end
+
+  def test_priority_catalog_must_use_codes_from_the_v1_contract
+    error = assert_raises(ArgumentError) do
+      classifier(@fixture, priorities: { "basic" => PRIORITIES.fetch("basic"), "critical" => "Crítico" })
+    end
+
+    assert_includes error.message, "critical"
+    assert_empty @fixture.calls
+  end
+
   def test_contract_fixture_with_two_missing_fields_uses_one_request_and_records_evidence
     result = classifier(@fixture).call(**channel_input("channel-missing-fields"))
 
@@ -153,6 +177,21 @@ class JevClassifierTest < Minitest::Test
     assert_equal({ category: :invalid_response }, result.issues)
     assert_nil result.classification.fetch(:category)
     assert_equal({ choice: "pix", confidence: 0.36 }, result.evidence.dig(:answers, :category))
+  end
+
+  def test_invalid_fixture_model_encoding_keeps_available_answer_evidence
+    fixture = RecordingFixture.new(model: "jev-\xFF", answers: { "category" => choice(:category, "pix") })
+
+    result = classifier(fixture).call(**@input.merge(category: nil))
+
+    assert_equal :review, result.status
+    assert_equal({ provider: :invalid_response }, result.issues)
+    assert_nil result.classification.fetch(:category)
+    assert_equal "basic", result.classification.fetch(:priority)
+    assert_equal "channel", result.classification.fetch(:priority_source)
+    refute result.evidence.key?(:model)
+    assert_nil result.evidence.fetch(:requested_model)
+    assert_equal "pix", result.evidence.dig(:answers, :category, :choice)
   end
 
   def test_invalid_or_missing_choice_preserves_valid_channel_input
