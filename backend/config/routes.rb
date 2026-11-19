@@ -5,9 +5,13 @@ Rails.application.routes.draw do
     namespace :v1 do
       get "health", to: "health#show"
       resource :session, only: %i[show create destroy]
+      patch "session/operation", to: "sessions#update_operation"
       get "case-filters", to: "cases#filters"
       resources :cases, only: %i[index show] do
         get "messages", on: :member
+        post "messages", action: :post_message, as: :post_message, on: :member
+        post "actions", action: :apply_action, on: :member
+        get "audit", on: :member
       end
     end
   end

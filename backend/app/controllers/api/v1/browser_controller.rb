@@ -5,7 +5,9 @@ module Api
       before_action :prevent_caching
 
       rescue_from WebhookV1::Error do |error|
-        render json: { error: { code: error.code, message: error.message } }, status: error.status
+        payload = { code: error.code, message: error.message }
+        payload[:details] = error.details if error.details.present?
+        render json: { error: payload }, status: error.status
       end
 
       rescue_from ActionController::InvalidAuthenticityToken do

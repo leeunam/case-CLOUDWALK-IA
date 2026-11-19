@@ -24,11 +24,11 @@ module Api
         rows = relation.includes(:assignee).order(created_at: :desc, id: :desc).limit(limit + 1).to_a
         items = rows.first(limit)
         next_cursor = encode_cursor(items.last, filters) if rows.size > limit
-        render json: { items: items.map { |record| case_data(record) }, next_cursor: next_cursor }
+        render json: { items: items.map(&:contract_data), next_cursor: next_cursor }
       end
 
       def show
-        render json: case_data(visible_case)
+        render json: visible_case.contract_data
       end
 
       def messages
@@ -39,7 +39,40 @@ module Api
         render json: { items: items.map(&:contract_data), next_after_sequence: rows.size > limit ? items.last.sequence : nil }
       end
 
+      def post_message
+        render json: apply_command("message", "NewCaseMessage"), status: :created
+      end
+
+      def apply_action
+        render json: apply_command("action", "CaseAction")
+      end
+
+      def audit
+        record = visible_case
+        unless current_user.role == "supervisor"
+          raise WebhookV1::Error.new(403, "forbidden", "A auditoria exige acesso de supervisão.")
+        end
+
+        limit = bounded_integer("limit", default: 25, range: 1..100)
+        filters = { "audit_case_id" => record.id }
+        relation = record.audits
+        if (cursor = cursor_position(filters))
+          relation = relation.where("(created_at, id) < (?, ?)", Time.iso8601(cursor.fetch("created_at")), cursor.fetch("id"))
+        end
+
+        rows = relation.order(created_at: :desc, id: :desc).limit(limit + 1).to_a
+        items = rows.first(limit)
+        next_cursor = encode_cursor(items.last, filters) if rows.size > limit
+        render json: { items: items.map(&:contract_data), next_cursor: next_cursor }
+      end
+
       private
+
+      def apply_command(operation, definition)
+        data = WebhookV1::Contract.parse!(request.raw_post, definition)
+        Attendances::ApplyCaseCommand.new(user: current_user, case_id: request.path_parameters.fetch(:id),
+                                          operation: operation, key: request.headers["Idempotency-Key"], data: data).call
+      end
 
       def visibility
         @visibility ||= Attendances::Visibility.new(current_user)
@@ -105,15 +138,6 @@ module Api
 
       def cursor_verifier
         Rails.application.message_verifier("attendances-case-list")
-      end
-
-      def case_data(record)
-        assignee = record.assignee && { type: record.assignee.kind, id: record.assignee.id }
-        record.as_json(only: %i[id brand_id queue_id channel_id status integration_status version
-                                previous_case_id blocking_reason handoff]).merge(
-          assignee: assignee, classification: record.classification, created_at: record.created_at.iso8601(6),
-          updated_at: record.updated_at.iso8601(6), human_queue_since: record.human_queue_since&.iso8601(6)
-        )
       end
     end
   end

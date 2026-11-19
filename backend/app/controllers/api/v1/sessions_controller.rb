@@ -27,6 +27,13 @@ module Api
         head 204
       end
 
+      def update_operation
+        require_user!
+        data = WebhookV1::Contract.parse!(request.raw_post, "OperationUpdate")
+        Attendances::AnalystOperation.update!(current_user, data)
+        render json: session_data
+      end
+
       private
 
       def demo_password_valid?(email, password)
@@ -57,9 +64,9 @@ module Api
 
       def operation_data(user, attendant)
         profile = user.capacity_profiles.find_by!(active: true)
-        portfolio = Attendances::SupportCase.where(assignee: attendant, status: %w[human_active waiting_customer waiting_resumption])
+        portfolio = Attendances::HumanEligibility.portfolio(attendant)
         {
-          active_brand_id: user.active_brand_id, switch_target_brand_id: nil, available: user.available,
+          active_brand_id: user.active_brand_id, switch_target_brand_id: user.switch_target_brand_id, available: user.available,
           active_count: portfolio.where(status: "human_active", brand_id: user.active_brand_id).count,
           portfolio_count: portfolio.count, portfolio_limit: profile.portfolio_limit, profile_version: profile.version
         }
