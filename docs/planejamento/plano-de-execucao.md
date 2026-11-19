@@ -8,6 +8,13 @@ o [roteiro e os resultados](../f02.md). A preparação das telas F05 usa fixture
 a conexão com a API, o WebSocket e a caixa do analista continuam pendentes.
 As rotas futuras dos contratos serão implementadas nas respectivas tarefas.
 
+Em 2026-11-19, a F03 e o adaptador isolado da F04 passaram na suíte Rails
+conjunta do runtime fixado (48 testes, 657 asserções, sem falhas/erros; um
+ensaio Jev real pulado). O fluxo humano foi verificado via HTTP, Kafka e
+Solid Queue reais. Os roteiros [F03](../f03.md) e [F04](../f04.md) registram
+evidências e reprodução. A F04 ainda precisa de jobs, persistência, revisão,
+correção e chamada real com credencial para cumprir seu aceite completo.
+
 ## 1. Ordem de trabalho
 
 | Etapa | Entregas internas | Evidência para avançar |

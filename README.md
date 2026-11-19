@@ -29,6 +29,13 @@ O [roteiro F02](docs/f02.md) contém os comandos e os limites dessa verificaçã
 O comando padrão abaixo sobe a base e a interface com fixtures; a ponte e o
 mock são iniciados pelo roteiro F02.
 
+Na integração F03/F04 de 2026-11-19, a suíte Rails passou com 48 testes e
+657 asserções, sem falhas nem erros. O ensaio real Jev foi pulado por falta
+da chave TypeSafe. O [atendimento humano F03](docs/f03.md) foi verificado com
+HTTP, Kafka e worker reais. O [adaptador F04](docs/f04.md) foi validado com
+fixtures e transporte simulado; sua conexão ao fluxo de classificação ainda
+está pendente. As telas continuam com fixtures até a integração da F05.
+
 - [Escopo e arquitetura](docs/planejamento/especificacao-mvp.md)
 - [Backlog e critérios de aceite](docs/planejamento/plano-de-execucao.md)
 - [Decisões confirmadas](docs/planejamento/decisoes.md)
