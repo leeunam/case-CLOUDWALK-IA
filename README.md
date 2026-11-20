@@ -15,8 +15,8 @@ correção por supervisão. A F05 usa Rails e Action Cable no simulador e na cai
 do analista; as fixtures ficam no modo explícito `/?fixture=demo`.
 A F06 fornece configuração administrativa e supervisão. A F07-A verifica os
 cinco cenários de robustez dos fluxos F02–F05 sobre a base integrada da F06.
-O fechamento da matriz administrativa da F07, carga e publicação continuam
-no plano.
+A matriz administrativa foi complementada com concorrência no PostgreSQL e
+revogação em REST e WebSocket reais. Carga e publicação continuam no plano.
 
 Verificação local da F01 em 2026-11-17 passou com cinco testes Rails e quatorze
 asserções, OpenAPI e 43 fixtures, build React/TypeScript, execução de um job

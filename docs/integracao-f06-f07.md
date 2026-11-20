@@ -19,6 +19,7 @@ outros chats foram superados no ambiente de integração. Não houve push.
 | Ponte e mock | 10 testes aprovados com as dependências da imagem, incluindo `confluent_kafka`. |
 | Verificador F07-A | 12 testes isolados aprovados. |
 | Kafka, HTTP, SQL e WebSocket reais | Cinco cenários aprovados em duas rodadas: `c7239cd` e `fbc2192`. A pilha isolada foi removida ao final de cada rodada. |
+| Revogação administrativa real | Supervisor removeu a equipe de uma fila pela API. O analista perdeu leitura REST e novas assinaturas; a assinatura já aberta não recebeu avisos durante três escritas de controle e seis segundos posteriores. A sessão continuou autenticada e o supervisor recebeu as atualizações. |
 
 O [relatório JSON final](evidencias/f07-a-2026-11-20.json) registra o resultado
 por cenário e as evidências observadas. No cenário 05, o ACK de publicação
@@ -92,11 +93,20 @@ Ainda falta a chamada TypeSafe real com `TYPESAFE_API_KEY` e a avaliação
 da qualidade do classificador. Fixture não mede precisão nem latência do
 fornecedor. O atendente via Kafka continua sendo o mock previsto no escopo.
 
-A F07-A não contém a matriz externa de revogação administrativa da F06; os
-testes Rails cobrem autorização e reconciliação e as duas corridas usam o
-PostgreSQL real. O fechamento dessa matriz deve registrar também uma sessão
-WebSocket aberta durante a revogação administrativa. O teste de carga, o
-experimento de 10 mil usuários e a publicação seguem nas próximas entregas.
+A F07-A é complementada pelos testes Rails de configuração e reconciliação,
+pelas duas corridas no PostgreSQL e pelo [ensaio externo de revogação](evidencias/f06-revogacao-2026-11-20.json).
+O analista leu o caso e recebeu um aviso antes da revogação. Depois do PUT
+administrativo auditado, caso e mensagens retornaram `404`, a lista ficou
+vazia e uma nova assinatura foi rejeitada. O socket anterior não recebeu
+avisos das três correções posteriores, que tiveram versões e auditorias
+confirmadas e foram recebidas pelo socket de controle do supervisor.
+A ausência de avisos foi observada por mais seis segundos após o último
+controle. A [reprodução desse complemento](evidencias/f06-revogacao/README.md)
+usa fixture própria em banco descartável. Esse complemento foi executado
+com o mesmo código `fbc2192`; o commit posterior só acrescentou documentação.
+
+O aceite local da F06 e da F07 está concluído nesses cenários. O teste de carga,
+o experimento de 10 mil usuários e a publicação seguem nas próximas entregas.
 
 Como limitações dos ensaios, a janela sem avisos no cenário 04 é finita;
 o runner pode diagnosticar bloqueio em preparação muito lenta; o encerramento
