@@ -24,6 +24,10 @@ registra os resultados e a complementação administrativa da F07, incluindo
 revogação com uma sessão WebSocket já aberta. F06 e F07 têm aceite local
 concluído. Carga, avaliação real do Jev e publicação seguem pendentes.
 
+A [passagem da F08](passagem-f08.md) separa o gerador/observador de carga
+do dataset/avaliador Jev, com arquivos próprios e a mesma base Git. A execução
+comparável e a revisão humana dos rótulos ficam no chat central.
+
 ## 1. Ordem de trabalho
 
 | Etapa | Entregas internas | Evidência para avançar |
