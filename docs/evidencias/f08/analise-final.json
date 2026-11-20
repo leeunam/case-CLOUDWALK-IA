@@ -1,0 +1,618 @@
+{
+  "revisao_analisador": "11d5bd0915f92e90771f9862b0a055a7a76d2438",
+  "sha256_report_py": "19395be0a5ebf3e7d5bd1ba6186adaeb574b2482cf6c6b090d518f8052f17842",
+  "metodo": "Leitura em memória dos arquivos compactados. Cada membro foi conferido por caminho, tamanho e SHA-256 contra o inventário publicado. Foram comparados todos os campos recalculados por summarize e cada linha por turno de evidence com os relatórios originais. As entradas sintéticas modificadas em memória foram usadas apenas nas regressões, fora dos resultados das rodadas.",
+  "lotes": [
+    {
+      "pasta": "referencia-inicial",
+      "arquivo": "dados-brutos.tar.gz",
+      "sha256": "856b23a4e6817b47baef1f2fe3ca0b9914210f335c1f499405769f4c5ac8f95c",
+      "inventario": "inventario.json",
+      "sha256_inventario": "6255c7cb30a9632503d987be7f23b8f69e14ab78c1734c60001dba2c1c572ff0",
+      "arquivos_verificados": 64
+    },
+    {
+      "pasta": "referencia-complemento",
+      "arquivo": "dados-brutos.tar.gz",
+      "sha256": "54dbdd975cb7aa585c3f92d5e6d20b101f617b851b765c674134a171cb065515",
+      "inventario": "inventario.json",
+      "sha256_inventario": "9eb2c28d52314ecac76c0e6d84e557ab7aeb3ae7e6ba36cec0c728485468f8d5",
+      "arquivos_verificados": 95
+    }
+  ],
+  "rodadas": [
+    {
+      "run_id": "f08-reference-1795207088594-f6c560-01",
+      "lote": "referencia-inicial",
+      "revisao_da_rodada": "10125a57a8d72abd69a646dea0970cca59cf3ce2",
+      "estado_original": "aprovado",
+      "estado_recalculado": "aprovado",
+      "metas": {
+        "p95_aceite_ate_500_ms": true,
+        "aceite_inicial_minimo_99_pct_do_plano": true,
+        "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+        "escoamento_na_janela": true,
+        "todos_segundos_turnos_enviados_e_concluidos": true,
+        "jev_sem_solicitacoes_ou_tentativas": true
+      },
+      "falhas_observadas": [],
+      "lacunas": [],
+      "mensagens_sql_por_autor": {
+        "ai": 1800,
+        "customer": 1800
+      },
+      "turnos_com_reconciliacao_identica": 1800,
+      "mensagens_sql_sem_atribuicao": 0,
+      "entradas_excedentes": 0,
+      "iniciais": {
+        "planned": 1500,
+        "offered": 1500,
+        "http_202": 1500,
+        "states": {
+          "concluído": 1500
+        },
+        "latency_accept": {
+          "unit": "ms",
+          "n": 1500,
+          "p50": 59,
+          "p95": 123
+        },
+        "latency_persisted": {
+          "unit": "ms",
+          "n": 1500,
+          "p50": 273.72900390625,
+          "p95": 398.1201171875
+        }
+      },
+      "continuacoes": {
+        "planned": 300,
+        "offered": 300,
+        "http_202": 300,
+        "states": {
+          "concluído": 300
+        },
+        "latency_accept": {
+          "unit": "ms",
+          "n": 300,
+          "p50": 56.214568,
+          "p95": 131.092331
+        },
+        "latency_persisted": {
+          "unit": "ms",
+          "n": 300,
+          "p50": 278.693115234375,
+          "p95": 419.39306640625
+        }
+      },
+      "metas_contagens_latencias_identicas": true,
+      "diferencas_nos_campos_recalculados": {
+        "integrity.unattributed_message_count": {
+          "operação": "adicionado",
+          "valor": 0
+        },
+        "integrity.unattributed_messages": {
+          "operação": "adicionado",
+          "valor": []
+        },
+        "integrity.unplanned_entries": {
+          "operação": "adicionado",
+          "valor": []
+        }
+      }
+    },
+    {
+      "run_id": "f08-reference-1795207088594-f6c560-02",
+      "lote": "referencia-inicial",
+      "revisao_da_rodada": "10125a57a8d72abd69a646dea0970cca59cf3ce2",
+      "estado_original": "aprovado",
+      "estado_recalculado": "aprovado",
+      "metas": {
+        "p95_aceite_ate_500_ms": true,
+        "aceite_inicial_minimo_99_pct_do_plano": true,
+        "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+        "escoamento_na_janela": true,
+        "todos_segundos_turnos_enviados_e_concluidos": true,
+        "jev_sem_solicitacoes_ou_tentativas": true
+      },
+      "falhas_observadas": [],
+      "lacunas": [],
+      "mensagens_sql_por_autor": {
+        "customer": 1800,
+        "ai": 1800
+      },
+      "turnos_com_reconciliacao_identica": 1800,
+      "mensagens_sql_sem_atribuicao": 0,
+      "entradas_excedentes": 0,
+      "iniciais": {
+        "planned": 1500,
+        "offered": 1500,
+        "http_202": 1500,
+        "states": {
+          "concluído": 1500
+        },
+        "latency_accept": {
+          "unit": "ms",
+          "n": 1500,
+          "p50": 66,
+          "p95": 112
+        },
+        "latency_persisted": {
+          "unit": "ms",
+          "n": 1500,
+          "p50": 302.10498046875,
+          "p95": 28090.736083984375
+        }
+      },
+      "continuacoes": {
+        "planned": 300,
+        "offered": 300,
+        "http_202": 300,
+        "states": {
+          "concluído": 300
+        },
+        "latency_accept": {
+          "unit": "ms",
+          "n": 300,
+          "p50": 66.209891,
+          "p95": 134.465252
+        },
+        "latency_persisted": {
+          "unit": "ms",
+          "n": 300,
+          "p50": 309.73193359375,
+          "p95": 3622.81689453125
+        }
+      },
+      "metas_contagens_latencias_identicas": true,
+      "diferencas_nos_campos_recalculados": {
+        "integrity.unattributed_message_count": {
+          "operação": "adicionado",
+          "valor": 0
+        },
+        "integrity.unattributed_messages": {
+          "operação": "adicionado",
+          "valor": []
+        },
+        "integrity.unplanned_entries": {
+          "operação": "adicionado",
+          "valor": []
+        }
+      }
+    },
+    {
+      "run_id": "f08-reference-1795207088594-f6c560-03",
+      "lote": "referencia-inicial",
+      "revisao_da_rodada": "10125a57a8d72abd69a646dea0970cca59cf3ce2",
+      "estado_original": "bloqueado",
+      "estado_recalculado": "bloqueado",
+      "metas": {
+        "p95_aceite_ate_500_ms": true,
+        "aceite_inicial_minimo_99_pct_do_plano": true,
+        "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+        "escoamento_na_janela": true,
+        "todos_segundos_turnos_enviados_e_concluidos": true,
+        "jev_sem_solicitacoes_ou_tentativas": true
+      },
+      "falhas_observadas": [],
+      "lacunas": [
+        "captura Kafka sem par request/resultado causal para 1800 turnos concluídos",
+        "leitura de eventos Kafka incompleta"
+      ],
+      "mensagens_sql_por_autor": {
+        "customer": 1800,
+        "ai": 1800
+      },
+      "turnos_com_reconciliacao_identica": 1800,
+      "mensagens_sql_sem_atribuicao": 0,
+      "entradas_excedentes": 0,
+      "iniciais": {
+        "planned": 1500,
+        "offered": 1500,
+        "http_202": 1500,
+        "states": {
+          "concluído": 1500
+        },
+        "latency_accept": {
+          "unit": "ms",
+          "n": 1500,
+          "p50": 68,
+          "p95": 113
+        },
+        "latency_persisted": {
+          "unit": "ms",
+          "n": 1500,
+          "p50": 285.698974609375,
+          "p95": 391.35009765625
+        }
+      },
+      "continuacoes": {
+        "planned": 300,
+        "offered": 300,
+        "http_202": 300,
+        "states": {
+          "concluído": 300
+        },
+        "latency_accept": {
+          "unit": "ms",
+          "n": 300,
+          "p50": 63.003838,
+          "p95": 129.468808
+        },
+        "latency_persisted": {
+          "unit": "ms",
+          "n": 300,
+          "p50": 294.136962890625,
+          "p95": 406.756103515625
+        }
+      },
+      "metas_contagens_latencias_identicas": true,
+      "diferencas_nos_campos_recalculados": {
+        "integrity.unattributed_message_count": {
+          "operação": "adicionado",
+          "valor": 0
+        },
+        "integrity.unattributed_messages": {
+          "operação": "adicionado",
+          "valor": []
+        },
+        "integrity.unplanned_entries": {
+          "operação": "adicionado",
+          "valor": []
+        }
+      }
+    },
+    {
+      "run_id": "f08-reference-1795208792430-8b61b6-01",
+      "lote": "referencia-complemento",
+      "revisao_da_rodada": "dfbcc79f4ced07e5460eb73d06e956d94799d453",
+      "estado_original": "aprovado",
+      "estado_recalculado": "aprovado",
+      "metas": {
+        "p95_aceite_ate_500_ms": true,
+        "aceite_inicial_minimo_99_pct_do_plano": true,
+        "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+        "escoamento_na_janela": true,
+        "todos_segundos_turnos_enviados_e_concluidos": true,
+        "jev_sem_solicitacoes_ou_tentativas": true
+      },
+      "falhas_observadas": [],
+      "lacunas": [],
+      "mensagens_sql_por_autor": {
+        "customer": 1800,
+        "ai": 1800
+      },
+      "turnos_com_reconciliacao_identica": 1800,
+      "mensagens_sql_sem_atribuicao": 0,
+      "entradas_excedentes": 0,
+      "iniciais": {
+        "planned": 1500,
+        "offered": 1500,
+        "http_202": 1500,
+        "states": {
+          "concluído": 1500
+        },
+        "latency_accept": {
+          "unit": "ms",
+          "n": 1500,
+          "p50": 80,
+          "p95": 142
+        },
+        "latency_persisted": {
+          "unit": "ms",
+          "n": 1500,
+          "p50": 312.594970703125,
+          "p95": 433.05908203125
+        }
+      },
+      "continuacoes": {
+        "planned": 300,
+        "offered": 300,
+        "http_202": 300,
+        "states": {
+          "concluído": 300
+        },
+        "latency_accept": {
+          "unit": "ms",
+          "n": 300,
+          "p50": 81.357054,
+          "p95": 159.667586
+        },
+        "latency_persisted": {
+          "unit": "ms",
+          "n": 300,
+          "p50": 337.947021484375,
+          "p95": 477.94189453125
+        }
+      },
+      "metas_contagens_latencias_identicas": true,
+      "diferencas_nos_campos_recalculados": {
+        "integrity.unattributed_message_count": {
+          "operação": "adicionado",
+          "valor": 0
+        },
+        "integrity.unattributed_messages": {
+          "operação": "adicionado",
+          "valor": []
+        },
+        "integrity.unplanned_entries": {
+          "operação": "adicionado",
+          "valor": []
+        }
+      }
+    },
+    {
+      "run_id": "f08-reference-1795208792430-8b61b6-02",
+      "lote": "referencia-complemento",
+      "revisao_da_rodada": "dfbcc79f4ced07e5460eb73d06e956d94799d453",
+      "estado_original": "aprovado",
+      "estado_recalculado": "aprovado",
+      "metas": {
+        "p95_aceite_ate_500_ms": true,
+        "aceite_inicial_minimo_99_pct_do_plano": true,
+        "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+        "escoamento_na_janela": true,
+        "todos_segundos_turnos_enviados_e_concluidos": true,
+        "jev_sem_solicitacoes_ou_tentativas": true
+      },
+      "falhas_observadas": [],
+      "lacunas": [],
+      "mensagens_sql_por_autor": {
+        "ai": 1800,
+        "customer": 1800
+      },
+      "turnos_com_reconciliacao_identica": 1800,
+      "mensagens_sql_sem_atribuicao": 0,
+      "entradas_excedentes": 0,
+      "iniciais": {
+        "planned": 1500,
+        "offered": 1500,
+        "http_202": 1500,
+        "states": {
+          "concluído": 1500
+        },
+        "latency_accept": {
+          "unit": "ms",
+          "n": 1500,
+          "p50": 72,
+          "p95": 121
+        },
+        "latency_persisted": {
+          "unit": "ms",
+          "n": 1500,
+          "p50": 312.197021484375,
+          "p95": 31753.946044921875
+        }
+      },
+      "continuacoes": {
+        "planned": 300,
+        "offered": 300,
+        "http_202": 300,
+        "states": {
+          "concluído": 300
+        },
+        "latency_accept": {
+          "unit": "ms",
+          "n": 300,
+          "p50": 70.571982,
+          "p95": 143.896468
+        },
+        "latency_persisted": {
+          "unit": "ms",
+          "n": 300,
+          "p50": 325.8798828125,
+          "p95": 5187.041015625
+        }
+      },
+      "metas_contagens_latencias_identicas": true,
+      "diferencas_nos_campos_recalculados": {
+        "integrity.unattributed_message_count": {
+          "operação": "adicionado",
+          "valor": 0
+        },
+        "integrity.unattributed_messages": {
+          "operação": "adicionado",
+          "valor": []
+        },
+        "integrity.unplanned_entries": {
+          "operação": "adicionado",
+          "valor": []
+        }
+      }
+    },
+    {
+      "run_id": "f08-reference-1795208792430-8b61b6-03",
+      "lote": "referencia-complemento",
+      "revisao_da_rodada": "dfbcc79f4ced07e5460eb73d06e956d94799d453",
+      "estado_original": "aprovado",
+      "estado_recalculado": "aprovado",
+      "metas": {
+        "p95_aceite_ate_500_ms": true,
+        "aceite_inicial_minimo_99_pct_do_plano": true,
+        "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+        "escoamento_na_janela": true,
+        "todos_segundos_turnos_enviados_e_concluidos": true,
+        "jev_sem_solicitacoes_ou_tentativas": true
+      },
+      "falhas_observadas": [],
+      "lacunas": [],
+      "mensagens_sql_por_autor": {
+        "customer": 1800,
+        "ai": 1800
+      },
+      "turnos_com_reconciliacao_identica": 1800,
+      "mensagens_sql_sem_atribuicao": 0,
+      "entradas_excedentes": 0,
+      "iniciais": {
+        "planned": 1500,
+        "offered": 1500,
+        "http_202": 1500,
+        "states": {
+          "concluído": 1500
+        },
+        "latency_accept": {
+          "unit": "ms",
+          "n": 1500,
+          "p50": 99,
+          "p95": 145
+        },
+        "latency_persisted": {
+          "unit": "ms",
+          "n": 1500,
+          "p50": 332.0791015625,
+          "p95": 487.615966796875
+        }
+      },
+      "continuacoes": {
+        "planned": 300,
+        "offered": 300,
+        "http_202": 300,
+        "states": {
+          "concluído": 300
+        },
+        "latency_accept": {
+          "unit": "ms",
+          "n": 300,
+          "p50": 98.025101,
+          "p95": 179.547772
+        },
+        "latency_persisted": {
+          "unit": "ms",
+          "n": 300,
+          "p50": 356.722900390625,
+          "p95": 505.193115234375
+        }
+      },
+      "metas_contagens_latencias_identicas": true,
+      "diferencas_nos_campos_recalculados": {
+        "integrity.unattributed_message_count": {
+          "operação": "adicionado",
+          "valor": 0
+        },
+        "integrity.unattributed_messages": {
+          "operação": "adicionado",
+          "valor": []
+        },
+        "integrity.unplanned_entries": {
+          "operação": "adicionado",
+          "valor": []
+        }
+      }
+    },
+    {
+      "run_id": "f08-reference-1795208792430-8b61b6-04",
+      "lote": "referencia-complemento",
+      "revisao_da_rodada": "dfbcc79f4ced07e5460eb73d06e956d94799d453",
+      "estado_original": "reprovado",
+      "estado_recalculado": "reprovado",
+      "metas": {
+        "p95_aceite_ate_500_ms": true,
+        "aceite_inicial_minimo_99_pct_do_plano": true,
+        "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+        "escoamento_na_janela": false,
+        "todos_segundos_turnos_enviados_e_concluidos": false,
+        "jev_sem_solicitacoes_ou_tentativas": true
+      },
+      "falhas_observadas": [
+        "metas do ensaio não atingidas: escoamento_na_janela, todos_segundos_turnos_enviados_e_concluidos"
+      ],
+      "lacunas": [],
+      "mensagens_sql_por_autor": {
+        "customer": 1560,
+        "ai": 356
+      },
+      "turnos_com_reconciliacao_identica": 1800,
+      "mensagens_sql_sem_atribuicao": 0,
+      "entradas_excedentes": 0,
+      "iniciais": {
+        "planned": 1500,
+        "offered": 1500,
+        "http_202": 1500,
+        "states": {
+          "concluído": 301,
+          "falho": 1199
+        },
+        "latency_accept": {
+          "unit": "ms",
+          "n": 1500,
+          "p50": 86,
+          "p95": 126
+        },
+        "latency_persisted": {
+          "unit": "ms",
+          "n": 301,
+          "p50": 335.528076171875,
+          "p95": 492.76904296875
+        }
+      },
+      "continuacoes": {
+        "planned": 300,
+        "offered": 60,
+        "http_202": 60,
+        "states": {
+          "concluído": 55,
+          "falho": 5,
+          "não enviado": 240
+        },
+        "latency_accept": {
+          "unit": "ms",
+          "n": 60,
+          "p50": 100.916442,
+          "p95": 194.918154
+        },
+        "latency_persisted": {
+          "unit": "ms",
+          "n": 55,
+          "p50": 382.56494140625,
+          "p95": 537.68896484375
+        }
+      },
+      "metas_contagens_latencias_identicas": true,
+      "diferencas_nos_campos_recalculados": {
+        "integrity.unattributed_message_count": {
+          "operação": "adicionado",
+          "valor": 0
+        },
+        "integrity.unattributed_messages": {
+          "operação": "adicionado",
+          "valor": []
+        },
+        "integrity.unplanned_entries": {
+          "operação": "adicionado",
+          "valor": []
+        }
+      }
+    }
+  ],
+  "regressoes_em_memoria": {
+    "lag_periodico_indisponivel": {
+      "origem": "f08-reference-1795208792430-8b61b6-01",
+      "estado": "bloqueado",
+      "escoamento": null,
+      "lacunas": [
+        "leitura final de lag indisponível ou fora do intervalo exigido"
+      ],
+      "falhas_observadas": []
+    },
+    "mensagem_ia_adicional": {
+      "origem": "f08-reference-1795208792430-8b61b6-01",
+      "estado": "reprovado",
+      "integridade": false,
+      "mensagens_sem_atribuicao": [
+        {
+          "case_id": "a90c78ec-6301-4189-9bf6-def9988d1aee",
+          "id": "extra-ai",
+          "sequence": 5,
+          "author": "ai",
+          "source_event_id": "extra-source"
+        }
+      ],
+      "duplicacoes_com_mesma_identidade": 0
+    }
+  },
+  "estados_recalculados": {
+    "aprovado": 5,
+    "bloqueado": 1,
+    "reprovado": 1
+  },
+  "contagens_metas_latencias_identicas_em_todas": true
+}
