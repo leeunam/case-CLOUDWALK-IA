@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0",
+  "category": {
+    "payouts": "Repasse, recebimento ou liquidação de valores de vendas.",
+    "pix": "Transferência ou pagamento por Pix, prazo, estorno ou falha.",
+    "terminal": "Instalação, uso ou defeito da maquininha de cartão."
+  },
+  "priority": {
+    "basic": "Orientação de rotina, sem operação prejudicada.",
+    "intermediate": "Impacto moderado com operação ainda disponível.",
+    "advanced": "Impacto relevante sem necessidade de ação imediata.",
+    "urgent": "Necessidade de ação imediata, como operação totalmente interrompida."
+  }
+}
