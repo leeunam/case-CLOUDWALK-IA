@@ -70,6 +70,12 @@ class KafkaProbeTests(unittest.TestCase):
                 kafka_probe.validate("records", response)
 
     def test_sql_followup_and_snapshot_survive_worker_exit_and_partial_evidence(self):
+        self.check_observer_continuity("os.kill(os.getpid(),signal.SIGTERM)", f"sinal_{signal.SIGTERM.value}")
+
+    def test_sql_followup_and_snapshot_survive_hung_worker(self):
+        self.check_observer_continuity("time.sleep(30)", "prazo_excedido")
+
+    def check_observer_continuity(self, first_outcome, expected_error):
         with tempfile.TemporaryDirectory() as tmp, contextlib.ExitStack() as mocks:
             output = Path(tmp)
             script, started_marker = output / "reader.py", output / "started"
@@ -78,7 +84,7 @@ class KafkaProbeTests(unittest.TestCase):
                 "import sys,time,os,signal\nfrom pathlib import Path\n"
                 f"marker=Path({str(started_marker)!r})\n"
                 "if sys.argv[1]=='records': raise SystemExit(7)\n"
-                "if not marker.exists():\n marker.write_text(str(os.getpid()))\n time.sleep(0.45)\n os.kill(os.getpid(),signal.SIGTERM)\n"
+                f"if not marker.exists():\n marker.write_text(str(os.getpid()))\n time.sleep(0.45)\n {first_outcome}\n"
                 f"print({valid_sample})")
             entries = plan("test", 1, [(5, 1)])
             entry = next(row for row in entries if row["second"])
@@ -126,10 +132,12 @@ class KafkaProbeTests(unittest.TestCase):
             mocks.enter_context(patch.object(observe, "readiness", return_value={"warmup_case_id": "warm"}))
             mocks.enter_context(patch.object(observe, "webhook", send))
             mocks.enter_context(patch.object(kafka_probe, "READER", script))
+            real_probe = kafka_probe.probe
+            mocks.enter_context(patch.object(kafka_probe, "probe", lambda op: real_probe(op, timeout=0.7)))
             observe.main()
             samples = list(rows(output / "kafka-lag.jsonl"))
             self.assertIsNone(samples[0]["total_lag"])
-            self.assertEqual(samples[0]["error"], f"sinal_{signal.SIGTERM.value}")
+            self.assertEqual(samples[0]["error"], expected_error)
             self.assertGreaterEqual(samples[0]["cost_ms"], 400)
             self.assertEqual(samples[1]["total_lag"], 0)
             self.assertEqual(len(sent), 1)
