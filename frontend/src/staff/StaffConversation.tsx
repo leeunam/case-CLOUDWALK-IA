@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import type { FormEvent } from 'react'
 import type { CaseFilters, Session, StaffCommand } from '../api/contract'
-import { ApiError, accessLost, deliveryUncertain } from '../api/http'
+import { ApiError, accessLost } from '../api/http'
 import { canHandle } from '../api/permissions'
 import { staff } from '../api/staff'
 import { categoryLabels, priorityLabels } from '../simulator/presentation'
@@ -9,8 +9,7 @@ import { errorMessage, useResource } from '../simulator/useResource'
 import { Transcript } from '../Transcript'
 import { useCaseRefresh } from '../useCaseRefresh'
 import { SupervisorActions } from './SupervisorActions'
-import { beginCommandAttempt } from './commandAttempt'
-import type { CommandAttempt } from './commandAttempt'
+import type { SessionCommandAttempts } from './commandAttempt'
 import { staffCaseLabels } from './presentation'
 
 const blocks: Record<string, string> = {
@@ -33,9 +32,10 @@ const retryLabels: Record<StaffCommand['type'], string> = {
   force_handoff: 'Confirmar encaminhamento anterior',
 }
 
-export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
+export function StaffConversation({ id, session, attempts, filters, onOpen, onChanged }: {
   id: string
   session: Session
+  attempts: SessionCommandAttempts
   filters: CaseFilters | null
   onOpen: (id: string) => void
   onChanged: () => void
@@ -44,13 +44,17 @@ export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
   const [text, setText] = useState('')
   const [commandError, setCommandError] = useState<string | null>(null)
   const [confirmation, setConfirmation] = useState<string | null>(null)
-  const [attempt, setAttempt] = useState<CommandAttempt | null>(null)
-  const latestAttempt = useRef<CommandAttempt | null>(null)
-  const busy = attempt?.status === 'sending' || attempt?.status === 'confirming'
-  const pending = attempt?.status === 'sending' ? null : attempt
   const refresh = useCallback(() => setRevision(value => value + 1), [])
   const load = useCallback(() => staff.getConversation(id), [id])
   const { data, error, loading, replaceData } = useResource(load, revision)
+  const subscribe = useCallback((notify: () => void) => attempts.subscribe(id, change => {
+    if (change === 'access_lost') replaceData(null)
+    if (change !== 'changed') refresh()
+    notify()
+  }), [attempts, id, refresh, replaceData])
+  const attempt = useSyncExternalStore(subscribe, () => attempts.get(id))
+  const busy = attempt?.status === 'sending' || attempt?.status === 'confirming'
+  const pending = attempt?.status === 'sending' ? null : attempt
   const detail = data?.detail
   const version = detail?.version
   const brand = filters?.brands.find(item => item.id === detail?.brand_id)
@@ -82,43 +86,33 @@ export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
     await runCommand(command)
   }
 
-  function updateAttempt(next: CommandAttempt | null) {
-    latestAttempt.current = next
-    setAttempt(next)
-  }
-
   async function runCommand(command?: StaffCommand) {
     if (loading || (!command && !canConfirm)) return false
-    const current = beginCommandAttempt(latestAttempt.current, version, command)
+    const current = attempts.begin(id, version, command)
     if (!current) return false
 
-    updateAttempt(current)
     setCommandError(null)
     setConfirmation(null)
     try {
       await staff.command(id, current.command, session, current.key)
     } catch (failure) {
-      const stillUncertain = deliveryUncertain(failure) || (current.status === 'confirming' && accessLost(failure))
-      updateAttempt(stillUncertain ? { ...current, status: 'uncertain' } : null)
-      if (accessLost(failure)) replaceData(null)
+      attempts.settle(id, current, { failure })
       if (failure instanceof ApiError && failure.status === 409) {
         setCommandError(failure.code === 'version_conflict'
           ? 'O atendimento foi atualizado. Confira o estado atual antes de tentar novamente.'
           : errorMessage(failure))
-        refresh()
         onChanged()
       } else {
         setCommandError(errorMessage(failure))
-        if (accessLost(failure)) { refresh(); onChanged() }
+        if (accessLost(failure)) onChanged()
       }
       return false
     }
 
-    updateAttempt(null)
+    attempts.settle(id, current)
     setText('')
     if (current.status === 'confirming') setConfirmation('A tentativa anterior foi confirmada. Confira o estado atual antes de iniciar outra ação.')
     else if (supervisor) setConfirmation('Ação de supervisão aplicada.')
-    refresh()
     onChanged()
     return true
   }
@@ -173,7 +167,7 @@ export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
         </div>
         {commandError && <p className="error" role="alert">{commandError}</p>}
         {confirmation && <p role="status">{confirmation}</p>}
-        {pending && (
+        {detail && !error && pending && (
           <div className="composer">
             <p className="muted">A ação pode ter sido aplicada. Reenvie a tentativa para confirmar.</p>
             {'text' in pending.command && <p>{pending.command.text}</p>}
@@ -181,8 +175,7 @@ export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
               <button className="primary" type="button" disabled={busy || loading || !canConfirm}
                 onClick={() => void runCommand()}>{retryLabels[pending.command.type]}</button>
               <button className="secondary" type="button" disabled={busy} onClick={() => {
-                if (latestAttempt.current?.status !== 'uncertain') return
-                updateAttempt(null)
+                attempts.abandon(id)
                 setCommandError(null)
               }}>Preparar outra ação</button>
             </div>

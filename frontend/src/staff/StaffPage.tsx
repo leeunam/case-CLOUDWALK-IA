@@ -10,6 +10,7 @@ import { ConfigurationPanel } from '../configuration/ConfigurationPanel'
 import { useOpenCase } from '../useOpenCase'
 import { usePagedCases } from '../usePagedCases'
 import { StaffConversation } from './StaffConversation'
+import { SessionCommandAttempts } from './commandAttempt'
 import { staffCaseLabels } from './presentation'
 
 function Login({ session, onSession }: { session: Session; onSession: (session: Session) => void }) {
@@ -83,6 +84,7 @@ function Inbox({ session, onSession, refreshSession, onLogout }: {
   const [revision, setRevision] = useState(0)
   const [filterRevision, setFilterRevision] = useState(0)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [attempts] = useState(() => new SessionCommandAttempts())
   const [filters, setFilters] = useState<ListFilters>({})
   const [caseId, setCaseId] = useOpenCase()
   const [busy, setBusy] = useState(false)
@@ -249,7 +251,8 @@ function Inbox({ session, onSession, refreshSession, onLogout }: {
           <CaseList key={JSON.stringify(filters)} filters={filters} catalog={catalog} revision={revision} caseId={caseId} onOpen={setCaseId} />
         </aside>
         {caseId
-          ? <StaffConversation key={caseId} id={caseId} session={session} filters={catalog} onOpen={setCaseId} onChanged={refreshAll} />
+          ? <StaffConversation key={caseId} id={caseId} session={session} attempts={attempts} filters={catalog}
+              onOpen={setCaseId} onChanged={refreshAll} />
           : <section className="panel workspace-state"><p>Selecione um atendimento para acompanhar a conversa.</p></section>}
       </div>}
     </>
@@ -274,7 +277,7 @@ export function StaffPage() {
         )}
         {!session && loading && <p role="status">Conferindo sessão…</p>}
         {session && (loggedIn
-          ? <Inbox key={session.user?.id} session={session} onSession={replaceData} refreshSession={refresh}
+          ? <Inbox key={`${session.user?.role}:${session.user?.id}`} session={session} onSession={replaceData} refreshSession={refresh}
               onLogout={() => { replaceData(null); refresh() }} />
           : <Login session={session} onSession={replaceData} />)}
       </main>
