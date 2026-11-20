@@ -1,0 +1,85 @@
+x-rails-env: &rails-env
+  RAILS_ENV: development
+  POSTGRES_HOST: db
+  POSTGRES_USER: ${POSTGRES_USER:?}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+  SECRET_KEY_BASE: ${F07_RAILS_SECRET:?}
+  CLOUDWALK_CHANNEL_SECRET: ${CLOUDWALK_CHANNEL_SECRET:?}
+  CLOUDWALK_AGENT_REQUESTS_SECRET: ${CLOUDWALK_AGENT_REQUESTS_SECRET:?}
+  CLOUDWALK_AGENT_EVENTS_SECRET: ${CLOUDWALK_AGENT_EVENTS_SECRET:?}
+  CLOUDWALK_AGENT_REQUEST_URL: http://requests:8080/webhooks/v1/agent/requests
+  CLOUDWALK_SIMULATOR_BRANDS: aurora,horizonte
+  CLOUDWALK_DEMO_PASSWORDS: ${CLOUDWALK_DEMO_PASSWORDS:?}
+  CLOUDWALK_JEV_MODE: fixture
+  TYPESAFE_API_KEY: ""
+  RAILS_LOG_LEVEL: warn
+
+x-integration: &integration
+  build: ./integration
+  environment: &integration-env
+    KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    CLOUDWALK_CONTRACT_SCHEMA: /workspace/docs/contratos/schemas/v1.json
+    CLOUDWALK_AGENT_REQUESTS_SECRET: ${CLOUDWALK_AGENT_REQUESTS_SECRET:?}
+    CLOUDWALK_AGENT_EVENTS_SECRET: ${CLOUDWALK_AGENT_EVENTS_SECRET:?}
+  volumes:
+    - ./docs/contratos:/workspace/docs/contratos:ro
+
+services:
+  api:
+    environment: *rails-env
+    ports: !reset []
+  writer:
+    build: ./backend
+    environment: *rails-env
+    command: [bundle, exec, rails, server, -b, 0.0.0.0, -P, /tmp/cloudwalk-server.pid]
+  worker:
+    environment: *rails-env
+  db_setup:
+    environment: *rails-env
+  outbox:
+    build: ./backend
+    environment: *rails-env
+    command: [bundle, exec, rails, runner, script/f02_outbox.rb]
+  requests:
+    <<: *integration
+    command: [requests]
+  events:
+    <<: *integration
+    command: [events]
+    environment:
+      <<: *integration-env
+      CLOUDWALK_AGENT_EVENTS_URL: http://fault:8080/webhooks/v1/agent/events
+  mock:
+    <<: *integration
+    command: [mock]
+  fault:
+    image: python:3.13-slim
+    command: [python, -B, /f07/fault.py]
+    volumes:
+      - ./script/f07:/f07:ro
+  web:
+    ports: !reset []
+    command: [node, -e, "setInterval(() => {}, 3600000)"]
+    healthcheck:
+      disable: true
+    volumes:
+      - ./script/f07:/f07:ro
+  probe:
+    build:
+      context: ./script/f07
+      additional_contexts:
+        product: ./integration
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      CLOUDWALK_CHANNEL_SECRET: ${CLOUDWALK_CHANNEL_SECRET:?}
+      CLOUDWALK_AGENT_REQUESTS_SECRET: ${CLOUDWALK_AGENT_REQUESTS_SECRET:?}
+      CLOUDWALK_AGENT_EVENTS_SECRET: ${CLOUDWALK_AGENT_EVENTS_SECRET:?}
+      CLOUDWALK_DEMO_PASSWORDS: ${CLOUDWALK_DEMO_PASSWORDS:?}
+    volumes:
+      - ./script/f07:/f07:ro
+      - ./integration/agent_flow.py:/product/agent_flow.py:ro
+
+networks:
+  default:
+    internal: true

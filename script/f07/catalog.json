@@ -1,0 +1,37 @@
+{
+  "01": {
+    "id": "01",
+    "name": "kafka_outbox_recuperacao",
+    "precondition": "API, Kafka e grupos prontos, outbox parado antes da entrada para controlar o instante do envio.",
+    "action": "Aceitar webhook, parar Kafka, executar outbox até uma falha observada e restaurar Kafka e outbox.",
+    "outcome": "Entrada e outbox sobrevivem à falha e há uma publicação, um retorno e um efeito no histórico."
+  },
+  "02": {
+    "id": "02",
+    "name": "reentrega_resposta_perdida",
+    "precondition": "Entrada e callback válidos, proxy observa a resposta original e seleciona só os IDs do ensaio.",
+    "action": "Trocar confirmação persistida por 502, reentregar bytes, enviar divergência e repetir em outra identidade.",
+    "outcome": "Recibos, auditoria e contagens de domínio são estáveis, com conflito para bytes ou identidade divergentes."
+  },
+  "03": {
+    "id": "03",
+    "name": "replay_retorno_atrasado",
+    "precondition": "Handoff real concluído, humano responsável responde, Kafka retém o retorno original.",
+    "action": "Rebobinar o grupo até o retorno original e publicar outro evento da rodada encerrada.",
+    "outcome": "Releitura retorna duplicate, retorno tardio retorna discarded e o atendimento humano permanece intacto."
+  },
+  "04": {
+    "id": "04",
+    "name": "autenticacao_isolamento",
+    "precondition": "Duas marcas e identidades independentes de simulador, analista e supervisor.",
+    "action": "Enviar integrações com credencial inválida, cruzar visibilidade, atualizar em outro processo e revogar sessão.",
+    "outcome": "Integrações rejeitadas sem efeito, REST e Cable segregados, aviso e recuperação confirmados."
+  },
+  "05": {
+    "id": "05",
+    "name": "falhas_antes_do_offset",
+    "precondition": "Grupo estável, callback HTTP retorna 503 seletivo e Kafka confirma pedidos/leituras do ensaio.",
+    "action": "Esgotar retentativas, rejeitar publicação em agent.failures no próprio Kafka, restaurar tópico e grupo.",
+    "outcome": "Falha tem origem exata, offset fica pendente sob rejeição e o mesmo registro é reentregue após recuperação."
+  }
+}
