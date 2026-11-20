@@ -28,7 +28,7 @@ SELECT e.source_event_id, e.support_case_id AS case_id, e.channel_id, c.correlat
 FROM channel_entries e JOIN support_cases c ON c.id = e.support_case_id
 JOIN case_messages customer ON customer.support_case_id = c.id AND customer.source_event_id = e.source_event_id
 JOIN agent_turns t ON t.support_case_id = c.id AND t.through_sequence = customer.sequence
-JOIN case_messages m ON m.support_case_id = c.id AND m.source_event_id = t.result_event_id AND m.author_type = 'ai'
+JOIN case_messages m ON m.support_case_id = c.id AND m.source_event_id = t.result_event_id::text AND m.author_type = 'ai'
 WHERE e.source_event_id = ANY(%s) AND c.status = 'ai_active'
 """
 
