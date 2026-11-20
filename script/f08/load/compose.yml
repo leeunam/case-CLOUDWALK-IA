@@ -1,0 +1,106 @@
+x-rails: &rails
+  RAILS_ENV: development
+  CLOUDWALK_CHANNEL_SECRET: ${CLOUDWALK_CHANNEL_SECRET:?}
+  CLOUDWALK_AGENT_REQUESTS_SECRET: ${CLOUDWALK_AGENT_REQUESTS_SECRET:?}
+  CLOUDWALK_AGENT_EVENTS_SECRET: ${CLOUDWALK_AGENT_EVENTS_SECRET:?}
+  CLOUDWALK_AGENT_REQUEST_URL: http://requests:8080/webhooks/v1/agent/requests
+  CLOUDWALK_DEMO_PASSWORDS: ${CLOUDWALK_DEMO_PASSWORDS:?}
+  SECRET_KEY_BASE: ${F08_RAILS_SECRET:?}
+  CLOUDWALK_JEV_MODE: disabled
+  TYPESAFE_API_KEY: ""
+  RAILS_LOG_LEVEL: warn
+  RAILS_MAX_THREADS: "5"
+  JOB_CONCURRENCY: "1"
+
+x-integration: &integration
+  build: ./integration
+  environment: &integration-env
+    KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    CLOUDWALK_CONTRACT_SCHEMA: /workspace/docs/contratos/schemas/v1.json
+    CLOUDWALK_AGENT_REQUESTS_SECRET: ${CLOUDWALK_AGENT_REQUESTS_SECRET:?}
+    CLOUDWALK_AGENT_EVENTS_SECRET: ${CLOUDWALK_AGENT_EVENTS_SECRET:?}
+  volumes:
+    - ./docs/contratos:/workspace/docs/contratos:ro
+  depends_on:
+    kafka_setup:
+      condition: service_completed_successfully
+
+services:
+  api:
+    ports: !reset []
+    environment: *rails
+    volumes: !override
+      - ./docs/contratos:/workspace/docs/contratos:ro
+  worker:
+    environment: *rails
+    volumes: !override
+      - ./docs/contratos:/workspace/docs/contratos:ro
+  db_setup:
+    command: [sh, -ec, 'bundle exec rails db:prepare && bundle exec rails db:seed']
+    environment: *rails
+    volumes: !override
+      - ./docs/contratos:/workspace/docs/contratos:ro
+  outbox:
+    build: ./backend
+    volumes:
+      - ./docs/contratos:/workspace/docs/contratos:ro
+    environment:
+      <<: *rails
+      POSTGRES_HOST: db
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+    depends_on:
+      db_setup:
+        condition: service_completed_successfully
+    command: [bundle, exec, rails, runner, script/f02_outbox.rb]
+  requests:
+    <<: *integration
+    command: [requests]
+  events:
+    <<: *integration
+    environment:
+      <<: *integration-env
+      CLOUDWALK_AGENT_EVENTS_URL: http://api:3000/webhooks/v1/agent/events
+    command: [events]
+  mock:
+    <<: *integration
+    command: [mock]
+  web:
+    profiles: [unused]
+    ports: !reset []
+  observe:
+    build: ./script/f08/load
+    depends_on:
+      api:
+        condition: service_healthy
+      worker:
+        condition: service_started
+      outbox:
+        condition: service_started
+      requests:
+        condition: service_started
+      events:
+        condition: service_started
+      mock:
+        condition: service_started
+    user: "${F08_UID:?}:${F08_GID:?}"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      CLOUDWALK_CHANNEL_SECRET: ${CLOUDWALK_CHANNEL_SECRET:?}
+      CLOUDWALK_DEMO_PASSWORDS: ${CLOUDWALK_DEMO_PASSWORDS:?}
+    volumes: &mounts
+      - ./script/f08/load:/load:ro
+      - ${F08_OUTPUT:?}:/results
+    command: [python, -B, /load/observe.py]
+  generator:
+    image: grafana/k6:2.3.0
+    user: "${F08_UID:?}:${F08_GID:?}"
+    environment:
+      CLOUDWALK_CHANNEL_SECRET: ${CLOUDWALK_CHANNEL_SECRET:?}
+    volumes: *mounts
+    entrypoint: [k6]
+    profiles: [load]
+networks:
+  default:
+    internal: true

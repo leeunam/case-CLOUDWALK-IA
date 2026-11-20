@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Artefatos F08-A, versão 1",
+  "oneOf": [
+    {"$ref": "#/$defs/report"},
+    {"$ref": "#/$defs/manifest"},
+    {"$ref": "#/$defs/reconciliation"}
+  ],
+  "$defs": {
+    "envelope": {
+      "type": "object",
+      "required": ["schema_version", "run_id", "scenario", "revision", "parameters"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "run_id": {"type": "string", "pattern": "^f08-"},
+        "scenario": {"enum": ["smoke", "reference", "ramp", "human", "chat"]},
+        "revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "parameters": {
+          "type": "object",
+          "required": ["seed", "stages", "observe_seconds", "fault_after_seconds", "fault_seconds", "chat"]
+        }
+      }
+    },
+    "report": {
+      "allOf": [
+        {"$ref": "#/$defs/envelope"},
+        {
+          "type": "object",
+          "required": ["state", "reason", "units", "initial", "followups", "observed_failures", "goals"],
+          "properties": {
+            "state": {"enum": ["aprovado", "reprovado", "bloqueado"]},
+            "reason": {"type": ["string", "null"]},
+            "observed_failures": {"type": "array", "items": {"type": "string"}},
+            "goals": {"type": "object", "additionalProperties": {"type": "boolean"}},
+            "initial": {"type": ["object", "null"]},
+            "followups": {"type": ["object", "null"]}
+          }
+        }
+      ]
+    },
+    "manifest": {
+      "allOf": [
+        {"$ref": "#/$defs/envelope"},
+        {
+          "type": "object",
+          "required": ["base", "source_sha256", "compose_project", "mock", "jev", "observer", "artifacts"],
+          "properties": {
+            "compose_project": {"const": "cloudwalk_f08_load"},
+            "artifacts": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+            "started_ms": {"type": "integer"},
+            "finished_ms": {"type": "integer"}
+          }
+        }
+      ]
+    },
+    "reconciliation": {
+      "type": "object",
+      "required": ["source_event_id", "case_id", "correlation_id", "http_status", "effects", "state",
+        "confirmed_loss", "duplicate_effect", "turn_number", "expected_body_sha256"],
+      "properties": {
+        "source_event_id": {"type": "string"},
+        "case_id": {"type": ["string", "null"]},
+        "correlation_id": {"type": ["string", "null"]},
+        "http_status": {"type": ["integer", "null"]},
+        "turn_number": {"enum": [1, 2]},
+        "state": {"enum": ["concluído", "pendente", "falho", "inconsistente", "não enviado",
+          "ausente sem aceite", "indisponível"]},
+        "effects": {"type": ["object", "null"], "additionalProperties": {"type": "integer", "minimum": 0}},
+        "confirmed_loss": {"type": "boolean"},
+        "duplicate_effect": {"type": "boolean"},
+        "expected_body_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    }
+  }
+}
