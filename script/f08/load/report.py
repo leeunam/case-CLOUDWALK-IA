@@ -609,6 +609,11 @@ def render(report):
                f"Cenário `{report['scenario']}`, revisão `{report['revision']}`.", ""]
     if report["reason"]:
         content.extend([f"Bloqueio — {report['reason']}", ""])
+    capture = (report.get("kafka") or {}).get("evidence") or {}
+    failed_bounds = [a for a in capture.get("attempts", []) if a["phase"] == "final_offsets" and a["status"] == "failed"]
+    for attempt in failed_bounds:
+        reason = attempt.get("kafka_name") or attempt.get("error")
+        content.append(f"- Captura pós-janela: consulta de offsets {attempt['attempt']} falhou ({reason}).")
     for failure in report["observed_failures"]:
         content.append(f"- {failure}")
     if report["initial"]:

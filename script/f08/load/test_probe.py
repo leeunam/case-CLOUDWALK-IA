@@ -8,8 +8,9 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
+import kafka_capture
 import kafka_probe
 import observe
 from protocol import DIRECTORY, append, now_ms, plan, rows, write_json
@@ -22,6 +23,55 @@ def sample_reply():
     return {"partitions": parts, "offsets": [
         {"topic": topic, "partition": part, "offset": 1} for topic in kafka_probe.TOPICS for part in range(3)],
         "versions": {"confluent_kafka": "2.12.2", "librdkafka": "teste"}}
+
+
+class FinalRangeTests(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.output = Path(directory.name)
+        self.baseline = {("agent.events", 0): 2, ("agent.requests", 1): 4}
+        self.ends = {("agent.events", 0): 12, ("agent.requests", 1): 14}
+
+    def attempts(self):
+        return list(rows(self.output / "kafka-capture-attempts.jsonl"))
+
+    def test_first_metadata_failure_then_fixed_valid_range(self):
+        class KafkaException(Exception):
+            pass
+
+        detail = Mock()
+        detail.code.return_value = -185
+        detail.name.return_value = "_TIMED_OUT"
+        read = Mock(side_effect=[KafkaException(detail), self.ends, RuntimeError("intervalo já fixado")])
+        result = kafka_capture.freeze_range(self.output, self.baseline, read, (KafkaException, TimeoutError))
+        self.assertEqual(result, self.ends)
+        self.assertEqual(read.call_count, 2)
+        attempts = self.attempts()
+        self.assertEqual([row["status"] for row in attempts], ["started", "failed", "started", "fixed"])
+        self.assertEqual(attempts[1]["kafka_name"], "_TIMED_OUT")
+        self.assertEqual(attempts[1]["kafka_code"], -185)
+        fixed = json.loads((self.output / "kafka-offset-range.json").read_text())
+        self.assertEqual(fixed["attempt"], 2)
+        self.assertEqual({(p["topic"], p["partition"]): (p["start"], p["end"]) for p in fixed["partitions"]},
+                         {k: (self.baseline[k], end) for k, end in self.ends.items()})
+
+    def test_exhausted_queries_cannot_create_artifacts_or_claim_zero_records_expected(self):
+        with self.assertRaises(TimeoutError):
+            kafka_capture.freeze_range(self.output, self.baseline, Mock(side_effect=TimeoutError), (TimeoutError,))
+        self.assertEqual([i["attempt"] for i in self.attempts() if i["status"] == "failed"], [1, 2, 3])
+        self.assertFalse((self.output / "kafka-offset-range.json").exists())
+        self.assertFalse((self.output / "kafka-records.jsonl").exists())
+
+    def test_invalid_range_or_expired_global_bound_cannot_be_frozen(self):
+        for result in ({("other", 0): 5}, {**self.ends, ("agent.events", 0): 1}):
+            with self.subTest(result=result), self.assertRaises(ValueError):
+                read = Mock(return_value=result)
+                kafka_capture.freeze_range(self.output, self.baseline, read, (TimeoutError,))
+            self.assertEqual(read.call_count, 1)
+        with patch.object(kafka_capture.time, "monotonic", side_effect=[0, 1, 19, 20]), self.assertRaises(TimeoutError):
+            kafka_capture.freeze_range(self.output, self.baseline, Mock(return_value=self.ends), (TimeoutError,))
+        self.assertFalse((self.output / "kafka-offset-range.json").exists())
 
 
 class KafkaProbeTests(unittest.TestCase):
@@ -91,6 +141,10 @@ class KafkaProbeTests(unittest.TestCase):
             write_json(output / "plan.json", entries)
             write_json(output / "config.json", {"run_id": "test", "scenario": "smoke"})
             write_json(output / "window.json", {"end_ms": now_ms() + 120000})
+            write_json(output / "kafka-offset-range.json", {"partitions": [
+                {"topic": "agent.events", "partition": 0, "start": 1, "end": 3}]})
+            append(output / "kafka-capture-attempts.jsonl", {"phase": "read_records", "status": "started",
+                                                             "attempt": 1, "started_ms": now_ms()})
             # Registro já lido antes de o auxiliar de captura encerrar.
             append(output / "kafka-records.jsonl", {"topic": "agent.events", "partition": 0, "offset": 1})
             sql_times, sent = [], []
@@ -148,3 +202,6 @@ class KafkaProbeTests(unittest.TestCase):
             evidence = json.loads((output / "observed.json").read_text())["kafka_records"]
             self.assertFalse(evidence["complete"])
             self.assertEqual(evidence["error"], "saida_7")
+            self.assertEqual((evidence["records_read"], evidence["expected_offsets"]), (1, 2))
+            self.assertEqual([a["status"] for a in evidence["attempts"]], ["started", "incomplete"])
+            self.assertEqual(evidence["timeout_ms"], 52000)

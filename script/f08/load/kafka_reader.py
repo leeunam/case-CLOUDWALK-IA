@@ -4,11 +4,12 @@ import sys
 import time
 from importlib.metadata import version
 
-from confluent_kafka import Consumer, TopicPartition, libversion
+from confluent_kafka import Consumer, KafkaException, TopicPartition, libversion
 from confluent_kafka.admin import AdminClient, OffsetSpec
 
+from kafka_capture import freeze_range
 from kafka_probe import GROUPS, TOPICS
-from protocol import RESULTS, append, write_json
+from protocol import RESULTS, append, now_ms
 
 
 KAFKA = "kafka:9092"
@@ -59,12 +60,23 @@ def kafka_ready(admin):
     return True
 
 
-def kafka_records(admin, baseline, run_id):
-    """Leitura por offsets fixos do fim do ensaio, sem grupo operacional ou commits."""
-    ends, _ = kafka_sample(admin, groups=False)
-    write_json(RESULTS / "kafka-offset-range.json", {
-        "partitions": [{"topic": t, "partition": p, "start": baseline[t, p], "end": end}
-                       for (t, p), end in ends.items()]})
+def final_offsets(timeout):
+    deadline = time.monotonic() + timeout
+    admin = AdminClient({"bootstrap.servers": KAFKA, "socket.timeout.ms": max(1, round(timeout * 1000))})
+    partitions = {TopicPartition(topic, p): OffsetSpec.latest() for topic in TOPICS for p in range(3)}
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise TimeoutError
+    futures = admin.list_offsets(partitions, request_timeout=remaining)
+    return {(part.topic, part.partition): future.result(max(0, deadline - time.monotonic())).offset
+            for part, future in futures.items()}
+
+
+def kafka_records(baseline, run_id):
+    """Leitura única do primeiro intervalo final válido, sem commits de consumo."""
+    ends = freeze_range(RESULTS, baseline, final_offsets, (KafkaException, TimeoutError))
+    append(RESULTS / "kafka-capture-attempts.jsonl", {"phase": "read_records", "attempt": 1,
+                                                     "status": "started", "started_ms": now_ms()})
     consumer = Consumer({"bootstrap.servers": KAFKA, "group.id": f"{run_id}-evidence",
                          "enable.auto.commit": False, "enable.partition.eof": True,
                          "auto.offset.reset": "error", "socket.timeout.ms": 2500})
@@ -109,6 +121,10 @@ def kafka_records(admin, baseline, run_id):
 
 
 def main(operation):
+    if operation == "records":
+        baseline = json.loads((RESULTS / "kafka-baseline.json").read_text())
+        config = json.loads((RESULTS / "config.json").read_text())
+        return kafka_records({(r["topic"], r["partition"]): r["offset"] for r in baseline}, config["run_id"])
     admin = kafka_client()
     if operation == "ready":
         return {"ready": kafka_ready(admin)}
@@ -117,10 +133,6 @@ def main(operation):
         return {"offsets": [{"topic": t, "partition": p, "offset": offset} for (t, p), offset in offsets.items()],
                 "partitions": lag, "versions": {"confluent_kafka": version("confluent-kafka"),
                                                 "librdkafka": libversion()[0]}}
-    if operation == "records":
-        baseline = json.loads((RESULTS / "kafka-baseline.json").read_text())
-        config = json.loads((RESULTS / "config.json").read_text())
-        return kafka_records(admin, {(r["topic"], r["partition"]): r["offset"] for r in baseline}, config["run_id"])
     raise ValueError("operação desconhecida")
 
 
