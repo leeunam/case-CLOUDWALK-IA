@@ -46,6 +46,10 @@ class Browser:
 HUMAN_CASES = """
 SELECT c.id AS case_id, c.status, c.assignee_id, c.version, c.channel_id,
        conv.external_conversation_id, conv.external_customer_id, p.portfolio_limit,
+       (SELECT max((slot->>'limit')::integer)
+        FROM jsonb_array_elements(p.alternatives) AS alternative,
+             jsonb_array_elements(alternative) AS slot
+        WHERE slot->>'priority' = 'advanced' AND slot->>'category' = 'terminal') AS active_limit,
        (SELECT count(*) FROM support_cases x WHERE x.assignee_id = c.assignee_id
          AND x.status IN ('human_active', 'waiting_customer', 'waiting_resumption')) AS portfolio,
        (SELECT count(*) FROM support_cases x WHERE x.assignee_id = c.assignee_id
@@ -78,11 +82,12 @@ def exercise_human(database, deadline):
                     scripts[case_id] = {"step": 0, "after": 0, "state": None}
                 progress = scripts[case_id]
                 state = (row["status"], str(row["assignee_id"]))
-                if progress["state"] != state:
+                observed = (state, row["portfolio"], row["active_work"], row["portfolio_limit"], row["active_limit"])
+                if progress["state"] != observed:
                     append(RESULTS / "human.jsonl", {"at_ms": now_ms(), "case_id": case_id, "state": state[0],
                            "assignee_id": state[1], "portfolio": row["portfolio"], "active_work": row["active_work"],
-                           "portfolio_limit": row["portfolio_limit"]})
-                    progress["state"] = state
+                           "portfolio_limit": row["portfolio_limit"], "advanced_terminal_limit": row["active_limit"]})
+                    progress["state"] = observed
                 if progress["after"] > now_ms():
                     continue
                 actor = actors.get(state[1])

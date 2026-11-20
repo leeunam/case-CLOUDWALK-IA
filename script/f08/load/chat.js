@@ -73,7 +73,7 @@ export default function ({ steady, end }) {
     return response.status === 202;
   }
 
-  function recover(reason) {
+  function recover(reason, identifier) {
     let status;
     let recovered = 0;
     const before = cursor;
@@ -92,7 +92,7 @@ export default function ({ steady, end }) {
       if (!data.next_after_sequence) break;
     } while (Date.now() < end);
     if (reason === 'reconnect' || status !== 200) {
-      log('chat_read', { reason, status, case_id: caseId, after_sequence: before, through_sequence: cursor, recovered, recovered_ids: ids });
+      log('chat_read', { reason, status, identifier, case_id: caseId, after_sequence: before, through_sequence: cursor, recovered, recovered_ids: ids });
     }
   }
 
@@ -105,7 +105,7 @@ export default function ({ steady, end }) {
     const close = (socket, reason) => {
       if (closing) return;
       closing = true;
-      if (confirmed) log('subscription_closed', { case_id: caseId, reason });
+      if (confirmed) log('subscription_closed', { case_id: caseId, identifier, cursor, reason });
       confirmed = false;
       socket.close();
     };
@@ -129,14 +129,14 @@ export default function ({ steady, end }) {
           }
           if (frame.type === 'confirm_subscription' && identifier === frame.identifier && !confirmed) {
             confirmed = true;
-            log('subscription_confirmed', { case_id: caseId, reconnect: everConfirmed });
-            recover(everConfirmed ? 'reconnect' : 'initial');
+            log('subscription_confirmed', { case_id: caseId, identifier, reconnect: everConfirmed });
+            recover(everConfirmed ? 'reconnect' : 'initial', identifier);
             everConfirmed = true;
           }
-          if (confirmed && frame.identifier === identifier && frame.message?.type === 'case.updated') recover('update');
+          if (confirmed && frame.identifier === identifier && frame.message?.type === 'case.updated') recover('update', identifier);
         });
         socket.on('close', () => {
-          if (confirmed) log('subscription_closed', { case_id: caseId, reason: 'remoto' });
+          if (confirmed) log('subscription_closed', { case_id: caseId, identifier, cursor, reason: 'remoto' });
           confirmed = false;
         });
         socket.on('error', () => {
@@ -153,7 +153,9 @@ export default function ({ steady, end }) {
             return;
           }
           if (!confirmed) return;
-          if (client === 1 && !reconnectProbe && at >= steady + hold_seconds * 400) {
+          if (client === 1 && !reconnectProbe) {
+            // Provar a recuperação no caso inicial, antes que outra escrita o resolva.
+            if (cursor <= 0) return;
             reconnectProbe = controlled = true;
             close(socket, 'prova_reconexao');
             return;
@@ -168,7 +170,7 @@ export default function ({ steady, end }) {
           const previous = caseId;
           send();
           if (caseId !== previous) {
-            log('subscription_closed', { case_id: previous, reason: 'novo_caso' });
+            log('subscription_closed', { case_id: previous, identifier, reason: 'novo_caso' });
             confirmed = false;
             socket.send(JSON.stringify({ command: 'unsubscribe', identifier }));
             subscribe();
@@ -179,7 +181,7 @@ export default function ({ steady, end }) {
     } catch (_) {
       log('socket_error', { operation: 'exception' });
     } finally {
-      if (confirmed) log('subscription_closed', { case_id: caseId, reason: 'fim_da_iteracao' });
+      if (confirmed) log('subscription_closed', { case_id: caseId, identifier, cursor, reason: 'fim_da_iteracao' });
     }
     if (controlled) send(true, true); // Escrita identificada fora do socket para testar recuperação pelo cursor.
     if (Date.now() < end) sleep(1);

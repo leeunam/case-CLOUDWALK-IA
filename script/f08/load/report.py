@@ -72,7 +72,9 @@ def reconcile(body, channel, attempt, persisted, failures, snapshot, *, human=Fa
                any(event in failures for event in (expected_result_id, turn.get("request_event_id")) if event))
     expected_audit = ("agent.handoff.proposed" if human else
                       "agent.resolve.proposed" if source.endswith("-2") else "agent.reply.proposed")
-    complete = (all(count == 1 for count in effects.values())
+    resolution_required = expected_audit == "agent.resolve.proposed"
+    resolution_applied = case.get("status") == "resolved" and case.get("resolved_ms") is not None
+    complete = ((not resolution_required or resolution_applied) and all(count == 1 for count in effects.values())
                 and published is not None and types[expected_audit] == 1
                 and turn.get("disposition") == "applied" and result_id == expected_result_id
                 and not (duplicate or case_identity_wrong or entry["sha256"] != planned_digest))
@@ -90,7 +92,15 @@ def reconcile(body, channel, attempt, persisted, failures, snapshot, *, human=Fa
         state = "não enviado"
     else:
         state = "ausente sem aceite"
+    timestamps = {"ai_message": persisted_ms, "turn_completed": turn.get("completed_ms"),
+                  "outbox_published": published,
+                  "result_audit": next((a.get("at_ms") for a in audits if a["type"] == expected_audit), None)}
+    if resolution_required:
+        timestamps["case_resolved"] = case.get("resolved_ms") if resolution_applied else None
     return {
+        "expected_result_type": expected_audit, "effect_timestamps_ms": timestamps,
+        "last_effect_ms": max(timestamps.values()) if all(t is not None for t in timestamps.values()) else None,
+        "resolution_required": resolution_required, "resolution_applied": resolution_applied if resolution_required else None,
         "source_event_id": source, "channel_id": channel, "case_id": case.get("case_id"),
         "correlation_id": case.get("correlation_id"), "http_case_id": attempt.get("case_id"),
         "http_correlation_id": attempt.get("correlation_id"), "sent_ms": sent, "http_status": attempt.get("status"),
@@ -109,6 +119,21 @@ def reconcile(body, channel, attempt, persisted, failures, snapshot, *, human=Fa
     }
 
 
+def kafka_offsets(row, records_by_id):
+    offsets = {}
+    for topic, event_id, event_type in (
+        ("agent.requests", row["request_event_id"], "agent.turn.requested"),
+        ("agent.events", row["expected_result_event_id"], row["expected_result_type"]),
+    ):
+        offsets[topic] = [{"partition": entry["partition"], "offset": entry["offset"]}
+                          for entry in records_by_id.get((topic, event_id), [])
+                          if event_id and entry.get("event_type") == event_type
+                          and all(row[k] and entry.get(k) == row[k] for k in ("turn_id", "case_id", "correlation_id"))
+                          and (topic == "agent.requests" or entry.get("request_event_id") == row["request_event_id"])
+                          and isinstance(entry.get("partition"), int) and isinstance(entry.get("offset"), int)]
+    return offsets
+
+
 def evidence(output, manifest, plan, events):
     snapshot = load(output / "persistence.json", None)
     cases = snapshot["cases"] if snapshot else []
@@ -119,6 +144,9 @@ def evidence(output, manifest, plan, events):
     second_events = {row["source_event_id"]: row for row in rows(output / "followups.jsonl")}
     kafka = list(rows(output / "kafka-records.jsonl"))
     failures = {row["event_id"] for row in kafka if row["topic"] == "agent.failures" and row["event_id"]}
+    records_by_id = defaultdict(list)
+    for record in kafka:
+        records_by_id[(record["topic"], record["event_id"])].append(record)
     observations = []
     for item in plan:
         channel = channels.get(item["brand"], {}).get(item["kind"])
@@ -146,6 +174,7 @@ def evidence(output, manifest, plan, events):
     with (output / "reconciliation.jsonl").open("w"):
         pass
     for row in observations:
+        row["kafka_offsets"] = kafka_offsets(row, records_by_id)
         append(output / "reconciliation.jsonl", row)
     return observations, kafka, cases
 
@@ -178,12 +207,49 @@ def human_summary(events, cases, window):
     return {"states_observed": dict(Counter(item["state"] for item in events if "state" in item)),
             "max_active_per_analyst_observed": max(active, default=None),
             "max_portfolio_per_analyst_observed": max(portfolios, default=None),
+            "above_active_profile": sum(item.get("active_work", 0) > (item.get("advanced_terminal_limit") or 0)
+                                        for item in events),
             "above_portfolio_limit": sum(item.get("portfolio_limit") is not None
                                          and item["portfolio"] > item["portfolio_limit"] for item in events),
             "operation_statuses": dict(operations),
             "operation_errors": sum(item["status"] != item["expected_status"] for item in events if "operation" in item),
             "resolved": sum(case["status"] == "resolved" and case["resolved_ms"] <= window.get("end_ms", 0)
                             for case in cases)}
+
+
+def chat_recovery(events, probe, indexed):
+    if not probe or probe["status"] != 202 or probe.get("opened_case") is not False:
+        return False, False
+    timeline = [event for event in events if event.get("client") == probe["client"]]
+    write_at = timeline.index(probe)
+    transitions = [row for row in timeline[:write_at] if row["type"] in {"subscription_confirmed", "subscription_closed"}]
+    if len(transitions) < 2:
+        return False, False
+    confirmed, closed = transitions[-2:]
+    signature = closed.get("identifier")
+    cursor = closed.get("cursor", 0)
+    case_id = probe["case_id"]
+    if not (confirmed["type"] == "subscription_confirmed" and closed["type"] == "subscription_closed"
+            and closed.get("reason") == "prova_reconexao" and signature and cursor > 0
+            and confirmed.get("identifier") == signature and confirmed.get("case_id") == closed.get("case_id") == case_id
+            and closed["at_ms"] <= probe["sent_ms"]):
+        return False, False
+    matching = indexed.get((probe["channel_id"], probe["source_event_id"]), [])
+    ids = {message["id"] for case, _ in matching if case["case_id"] == case_id
+           and case["correlation_id"] == probe["correlation_id"] for message in case["messages"] or []
+           if message["source_event_id"] == probe["source_event_id"] and message["author"] == "customer"
+           and message["sequence"] > cursor}
+    reconnected = False
+    for row in timeline[write_at + 1:]:
+        if row["type"] == "subscription_closed":
+            break
+        if row["type"] == "subscription_confirmed":
+            reconnected = row.get("reconnect") and row.get("identifier") == signature and row.get("case_id") == case_id
+        if reconnected and row["type"] == "chat_read" and row["reason"] == "reconnect":
+            return True, bool(row["status"] == 200 and row.get("identifier") == signature and row["case_id"] == case_id
+                              and row["after_sequence"] == cursor and row["through_sequence"] > cursor
+                              and ids.intersection(row.get("recovered_ids", [])))
+    return True, False
 
 
 def chat_summary(events, config, window, cases):
@@ -231,11 +297,7 @@ def chat_summary(events, config, window, cases):
                                        "stored_correlation_id": case.get("correlation_id"), "entry_count": len(matching)})
     reads = [row for row in events if row["type"] == "chat_read" and row["reason"] == "reconnect"]
     probe = next((row for row in preparation if row.get("reconnect_probe_write")), None)
-    probe_ids = next((set(row["customer_message_ids"]) for row in traffic_reconciliation
-                      if probe and row["key"] == probe["key"]), set())
-    probe_recovered = bool(probe and probe["status"] == 202 and any(
-        row["client"] == probe["client"] and row["case_id"] == probe["case_id"] and row["status"] == 200
-        and probe_ids.intersection(row.get("recovered_ids", [])) and row["at_ms"] >= probe["at_ms"] for row in reads))
+    disconnected_write, probe_recovered = chat_recovery(events, probe, indexed)
     steady_seconds = config["hold_seconds"]
     expected_slots = sum(max(0, math.ceil(steady_seconds / config["period_seconds"] - offset / config["target"]))
                          for offset in range(config["target"]))
@@ -245,7 +307,7 @@ def chat_summary(events, config, window, cases):
             "emitted": len(traffic), "emitted_per_s": len(traffic) / steady_seconds if end else None,
             "expected_messages_at_target": expected_slots,
             "emission_shortfall": max(0, expected_slots - len(traffic)),
-            "recovery_probe_wrote_while_disconnected": bool(probe and probe["status"] == 202),
+            "recovery_probe_wrote_while_disconnected": disconnected_write,
             "recovery_probe_read_new_messages": probe_recovered,
             "accepted": len(accepted), "opened_cases": sum(row["opened_case"] for row in accepted),
             "continued_cases": sum(not row["opened_case"] for row in accepted),
@@ -288,7 +350,14 @@ def resource_summary(samples):
     host_cpu = [row["host_cpu_busy_percent"] for row in samples if "host_cpu_busy_percent" in row]
     host_memory = [1024 * (row["host_memory_kib"]["MemTotal"] - row["host_memory_kib"]["MemAvailable"])
                    for row in samples if {"MemTotal", "MemAvailable"} <= row.get("host_memory_kib", {}).keys()]
-    return {"per_service": services, "host_cpu_busy_percent_peak": max(host_cpu, default=None),
+    expected = ("api", "worker", "outbox", "requests", "events", "mock", "db", "kafka", "generator")
+    missing = [name for name in expected if services.get(name, {}).get("cpu_percent_peak") is None
+               or services[name].get("ram_bytes_peak") is None]
+    missing_host = [name for name, data in (("cpu", host_cpu), ("ram", host_memory)) if not data]
+    return {"expected_services": expected, "missing_services": missing, "missing_host": missing_host,
+            "sample_errors": dict(Counter(row["error"] for row in samples if row.get("error"))),
+            "samples_in_window": len(samples), "sufficient": not missing and not missing_host,
+            "per_service": services, "host_cpu_busy_percent_peak": max(host_cpu, default=None),
             "host_ram_used_bytes_peak": max(host_memory, default=None)}
 
 
@@ -311,13 +380,18 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
     unsafe_sql = [row for row in sql if "error" in row]
     snapshot = load(output / "persistence.json", None)
     in_window = lambda value: value is not None and window.get("start_ms", 0) <= value <= window.get("end_ms", 0)
-    good = [row for row in sql if "error" not in row and in_window(row["sample_ms"])]
-    lag_during_window = [row for row in lag if in_window(row["sample_ms"])]
+    def sampled_in_window(row):
+        return in_window(row["sample_ms"]) and in_window(row["sample_ms"] + row["cost_ms"])
+
+    sql_during_window = [row for row in sql if sampled_in_window(row)]
+    good = [row for row in sql_during_window if "error" not in row]
+    lag_during_window = [row for row in lag if sampled_in_window(row)]
     lag_good = [row for row in lag_during_window if row["total_lag"] is not None]
     tail = good[-1] if good else {}
     tail_lag = lag_good[-1] if lag_good else {}
     tail_lag_fresh = bool(lag_during_window and tail_lag and lag_during_window[-1]["sample_ms"] == tail_lag["sample_ms"]
                           and window["end_ms"] - tail_lag["sample_ms"] <= 12000)
+    tail_sql_fresh = bool(tail and sql_during_window[-1] is tail and window["end_ms"] - tail["sample_ms"] <= 5000)
     fault = manifest.get("fault", {})
     stopped = docker_ms(fault.get("stopped_state", {}).get("FinishedAt"))
     started = docker_ms(fault.get("started_state", {}).get("StartedAt"))
@@ -331,16 +405,29 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
                        if row["event_id"] and row["topic"] == "agent.failures"}
     duplicates = Counter((row["topic"], row["event_id"]) for row in kafka if row["event_id"]
                          and row["topic"] != "agent.failures")
-    all_completed_by_deadline = all(row["state"] == "concluído" and in_window(row["ai_persisted_timestamp_ms"])
-                                    for row in accepted)
+    measured_turns = [row for row in reconciled if row["http_status"] == 202 or row["case_id"]]
+    all_completed_by_deadline = all(row["state"] == "concluído" and in_window(row["last_effect_ms"])
+                                    for row in measured_turns)
+    latest_work = max([window.get("arrivals_end_ms", 0)] +
+                      [row["last_effect_ms"] for row in measured_turns if row["last_effect_ms"] is not None])
     initial_metrics, second_metrics = times(initial), times(second)
     dropped = (k6.get("dropped_iterations") or {}).get("count", 0) if k6 else None
     outbox_final = [turn for case in cases for turn in case["turns"] or []
                     if turn["outbox_event_id"] and turn["published_ms"] is None and turn["failed_ms"] is None]
     dangling_cases = [case for case in cases if case["integration_status"] in {"pending_delivery", "awaiting_result"}]
     backlog_drained = (bool(snapshot) and all_completed_by_deadline and not outbox_final and not dangling_cases
-                       and tail_lag_fresh and tail_lag["total_lag"] == 0)
+                       and tail_sql_fresh and tail["sample_ms"] >= latest_work
+                       and tail["outbox_pending"] == tail["cases_waiting_processing"] == tail["outbox_failed"] == 0
+                       and tail_lag_fresh and tail_lag["sample_ms"] >= latest_work and tail_lag["total_lag"] == 0)
     failures = []
+    gaps = []
+    resource_metrics = resource_summary([row for row in resources if sampled_in_window(row)])
+    if window and not resource_metrics["sufficient"]:
+        missing = resource_metrics["missing_services"] + [f"host/{field}" for field in resource_metrics["missing_host"]]
+        gaps.append("CPU/RAM com cobertura insuficiente (" + ", ".join(missing) + ")")
+    missing_pairs = [row for row in reconciled if row["state"] == "concluído" and not all(row["kafka_offsets"].values())]
+    if window and missing_pairs:
+        gaps.append(f"captura Kafka sem par request/resultado causal para {len(missing_pairs)} turnos concluídos")
     goals = {}
     if config["chat"]:
         chat = chat_summary(events, config["chat"], window, cases)
@@ -372,7 +459,7 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
             "jev_sem_solicitacoes_ou_tentativas": tail.get("classification_requests") == 0
             and tail.get("classification_attempts") == 0,
         }
-        if dropped or initial_metrics["offered"] != len(plan):
+        if initial_metrics["offered"] != len(plan):
             failures.append("gerador não ofereceu todas as entradas planejadas; conferir iterações descartadas")
         if len([event for event in events if event["type"] == "initial"]) != initial_metrics["offered"]:
             failures.append("entradas iniciais repetidas no registro do gerador")
@@ -381,14 +468,15 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
         if any(not passed for passed in goals.values()):
             failures.append("metas do ensaio não atingidas: " + ", ".join(name for name, passed in goals.items() if not passed))
     human = human_summary(list(rows(output / "human.jsonl")), cases, window) if config["scenario"] == "human" else None
-    if human and (human["resolved"] != len(plan) or human["above_portfolio_limit"] or human["operation_errors"]):
-        failures.append("roteiro humano incompleto ou ação/carteira fora do esperado")
+    if human and (human["resolved"] != len(plan) or human["above_portfolio_limit"]
+                  or human["above_active_profile"] or human["operation_errors"]):
+        failures.append("roteiro humano incompleto ou ação, perfil ou carteira fora do esperado")
     if not k6 or manifest.get("k6_exit") != 0:
         failures.append("k6 sem encerramento normal ou métricas")
     if unsafe_sql or (output / "observer-errors.jsonl").exists():
         failures.append("observador SQL registrou erros")
     if not manifest.get("observation", {}).get("kafka_records", {}).get("complete"):
-        failures.append("leitura de eventos Kafka incompleta")
+        gaps.append("leitura de eventos Kafka incompleta")
     if config["fault_seconds"] and (not ready or not stopped or fault.get("error")):
         failures.append("parada/partida/prontidão Kafka sem evidência completa")
     elif config["fault_seconds"] and started - stopped < config["fault_seconds"] * 1000:
@@ -417,7 +505,7 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
         phase_seconds += seconds
     first_bottleneck = next((index + 1 for index, stage in enumerate(stages) if stage["offered"] != stage["planned"] or
                              stage["acceptance_of_planned"] < 0.99 or (stage["latency_accept"]["p95"] or 0) > 500), None)
-    completed_count = sum(in_window(row["ai_persisted_timestamp_ms"]) for row in reconciled if row["state"] == "concluído")
+    completed_count = sum(in_window(row["last_effect_ms"]) for row in reconciled if row["state"] == "concluído")
     resolved_count = sum(in_window(case["resolved_ms"]) for case in cases)
     measured_seconds = (window["end_ms"] - window["start_ms"]) / 1000 if window else None
     bins = defaultdict(Counter)
@@ -425,15 +513,21 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
         "initial_offered": (row["sent_ms"] for row in initial),
         "initial_202": (row["finished_ms"] for row in initial if row["http_status"] == 202),
         "followups_sent": (row["sent_ms"] for row in second),
-        "turns_completed": (row["ai_persisted_timestamp_ms"] for row in reconciled if row["state"] == "concluído"),
+        "turns_completed": (row["last_effect_ms"] for row in reconciled if row["state"] == "concluído"),
         "cases_resolved": (case["resolved_ms"] for case in cases),
     }.items():
         for stamp in timestamps:
             if in_window(stamp):
                 bins[int((stamp - window["start_ms"]) // 1000)][key] += 1
+    reasons = [manifest["blocked"]] if manifest.get("blocked") else []
+    if manifest.get("cleanup") not in (None, "concluída"):
+        reasons.append("limpeza interrompida: " + manifest["cleanup"])
+    if window:
+        reasons.extend(gaps)
+    emissions = [row for row in events if row["type"] == "initial"]
     return {
-        "state": "bloqueado" if manifest.get("blocked") else "reprovado" if failures else "aprovado",
-        "reason": manifest.get("blocked"), "observed_failures": [] if manifest.get("blocked") and not window else failures,
+        "state": "bloqueado" if reasons else "reprovado" if failures else "aprovado",
+        "reason": "; ".join(reasons) or None, "measurement_gaps": gaps if window else [], "observed_failures": [] if manifest.get("blocked") and not window else failures,
         "cleanup": manifest.get("cleanup"), "goals": goals if window else {},
         "planned_inputs": len(plan), "initial": initial_metrics if window else None,
         "followups": {**second_metrics,
@@ -443,6 +537,11 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
                       "visibility_observation_delay": distribution([
                           row["observed_ms"] - row["due_ms"] + 5000 for row in second
                           if row["observed_ms"] is not None and row["due_ms"] is not None])} if window else None,
+        "generator_accounting": {"planned": len(plan), "http_attempt_logs": len(emissions),
+                                 "unique_initial_ids": len({row["source_event_id"] for row in emissions}),
+                                 "planned_not_offered": len(plan) - initial_metrics["offered"],
+                                 "suppressed_stage_overflow": sum(row["type"] == "stage_overflow" for row in events),
+                                 "raw_dropped_iterations": dropped} if window and not chat else None,
         "k6": k6 or None, "dropped_iterations": dropped, "stages": stages if window else [],
         "first_stage_with_shortfall": first_bottleneck if window else None,
         "arrival_clock": {"per_stage_first_iteration_schedule_ms": sorted({
@@ -455,16 +554,17 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
                         "ai_turns_per_s": completed_count / measured_seconds,
                         "resolved_cases_per_s": resolved_count / measured_seconds} if measured_seconds else None,
         "per_second_counts": [{"second": index, **counts} for index, counts in sorted(bins.items())],
-        "kafka": {"repeated_records_observed": sum(count - 1 for count in duplicates.values()),
+        "kafka": {"completed_turns_missing_causal_pair": len(missing_pairs),
+                  "repeated_records_observed": sum(count - 1 for count in duplicates.values()),
                   "repeated_ids": [{"topic": topic, "event_id": event, "copies": count}
                                    for (topic, event), count in duplicates.items() if count > 1],
                   "distinct_dead_letter_event_ids": len(failure_offsets),
                   "dead_letter_records_observed": sum(row["topic"] == "agent.failures" for row in kafka),
                   "evidence": manifest.get("observation", {}).get("kafka_records")} if window else None,
-        "http": {"initial_and_followup_reqs": initial_metrics["offered"] + second_metrics["offered"],
+        "http": {"initial_and_followup_reqs": len(emissions) + second_metrics["offered"],
                  "initial_and_followup_non_202": initial_metrics["non_202"] + second_metrics["non_202"]}
         if window and not chat else None,
-        "resources": resource_summary([row for row in resources if in_window(row["sample_ms"])]) if window else None,
+        "resources": resource_metrics if window else None,
         "integrity": {"confirmed_losses": sum(row["confirmed_loss"] for row in accepted),
                       "duplicated_effect_identities": sum(row["duplicate_effect"] for row in accepted),
                       "persisted_without_http_202": sum(bool(row["case_id"]) and row["http_status"] != 202
@@ -476,7 +576,7 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
                         "cases_waiting_human", "cases_human_active", "cases_waiting_customer")},
                     "max_consumer_lag": max((row["total_lag"] for row in lag_good), default=None),
                     "last_sql_in_window": tail or None, "last_kafka_lag_in_window": tail_lag or None,
-                    "last_kafka_lag_available_near_end": tail_lag_fresh,
+                    "last_kafka_lag_available_near_end": tail_lag_fresh, "latest_required_work_ms": latest_work,
                     "pending_outboxes_at_snapshot": len(outbox_final) if snapshot else None,
                     "pending_cases_at_snapshot": len(dangling_cases) if snapshot else None} if window else None,
         "outage": {"stop_observed_at_ms": stopped, "start_observed_at_ms": started, "broker_ready_observed_ms": ready,
@@ -567,6 +667,10 @@ def render_matrix(results):
     lines = ["# F08-A — rodadas executadas", "",
              "| Rodada | Cenário | Estado | Planejadas | HTTP 202 | p95 aceite (ms) | p95 resposta (ms) |",
              "| --- | --- | --- | ---: | ---: | ---: | ---: |"]
+    skipped = [result for result in results if result.get("executed") is False]
+    if skipped:
+        lines[2:2] = [f"Matriz incompleta. {len(results) - len(skipped)} de {len(results)} rodadas executadas. "
+                       + skipped[0]["reason"], ""]
     for result in results:
         config = result["parameters"]
         scenario = config["scenario"]
@@ -575,11 +679,12 @@ def render_matrix(results):
             scenario = "Kafka interrompido" if config["fault_seconds"] else "Kafka disponível"
         if scenario == "chat":
             scenario = f"Chat {config['chat']['target']}"
-        initial = result["initial"] or {}
+        initial = result.get("initial") or {}
         values = [initial.get("planned"), initial.get("http_202"),
                   (initial.get("latency_accept") or {}).get("p95"),
                   (initial.get("latency_persisted") or {}).get("p95")]
-        cells = [f"[{result_id}]({result_id}/report.md)", scenario, result["state"],
+        link = result_id if result.get("executed") is False else f"[{result_id}]({result_id}/report.md)"
+        cells = [link, scenario, result["state"],
                  *("—" if value is None else f"{value:.2f}" if isinstance(value, float) else str(value)
                    for value in values)]
         lines.append("| " + " | ".join(cells) + " |")
