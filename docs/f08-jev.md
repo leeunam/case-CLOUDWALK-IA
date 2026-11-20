@@ -44,8 +44,9 @@ generalização limitada para atendimentos reais ou catálogos por marca.
 ## Como rodar
 
 Execute da raiz desta worktree. O runner usa Ruby 3.3 ou superior e os módulos
-do backend via `require_relative`. O teste usa Minitest. A versão do backend
-está em `backend/.ruby-version`.
+do backend via `require_relative`. O manifesto precisa do Git disponível no
+`PATH` e do checkout para registrar a revisão e as mudanças locais. O teste
+usa Minitest. A versão do backend está em `backend/.ruby-version`.
 
 ```sh
 rtk proxy ruby script/f08/jev/run.rb --mode validate
@@ -71,11 +72,31 @@ rtk proxy ruby script/f08/jev/run.rb --mode live --limit 6 \
 
 Sem `--model`, o runner usa `CLOUDWALK_JEV_MODEL` ou `jev-latest`. Para
 comparações, prefira uma versão fixa quando disponível e confira o modelo
-retornado no relatório. Pré-condições inválidas saem com código 2 e JSON
-`blocked` no stderr. Quebra de preservação, do contrato de perguntas ou de
-controle offline gera `invariant_failed` e código 1. `completed` indica que o
-procedimento terminou e suas invariantes passaram. Falhas do fornecedor
-continuam registradas nas métricas por caso.
+retornado no relatório. O redirecionamento acima também guarda o JSON dos
+bloqueios iniciais. Argumentos ou pré-condições inválidas produzem
+`blocked` com o motivo e código 2. O JSON inclui manifesto e seleção quando
+esses dados puderam ser calculados. Quebra de preservação, do contrato
+de perguntas ou de controle offline gera `invariant_failed` e código 1.
+
+Em modo live, um caso é avaliável quando pelo menos um campo omitido recebe
+uma escolha ou abstenção válida. Se nenhum caso for avaliável, o relatório
+registra `measurement_unavailable` com código 1. `completed` tem código 0
+para o offline com controles aprovados e para o live com amostra avaliável
+e invariantes atendidas.
+
+| `measurement.status` | Como ler |
+| --- | --- |
+| `available` | Todas as respostas live são avaliáveis por inteiro, inclusive as que indicam abstenção. |
+| `partial` | Há campos avaliáveis em pelo menos um caso live e respostas incompletas, inválidas ou falhas na seleção. O motivo é `incomplete_responses`. |
+| `unavailable` | Nenhuma escolha ou abstenção válida chegou no live. O motivo é `no_evaluable_response`. |
+| `not_measured` | O modo offline usa a fixture. |
+
+`measurement.evaluable_cases` registra quantos relatos tiveram pelo menos
+um campo avaliável no live. Os relatos selecionados continuam nos
+denominadores e os motivos detalhados permanecem em `issues` e
+`http_status` por caso. Confira a disponibilidade antes de interpretar as
+taxas de qualidade. Uma amostra composta inteiramente por abstenções
+válidas pode ter cobertura automática zero e medição disponível.
 
 ## Leitura do resultado
 
