@@ -1,7 +1,8 @@
 # Integração F06/F07-A — 2026-11-20
 
 A F06 e a F07-A foram verificadas juntas sobre `2b17a2f`, na branch
-`feat/integracao-f06-f07`. O código validado está em `fbc2192`.
+`feat/integracao-f06-f07`. O backend e a matriz Kafka foram validados em
+`fbc2192`; a correção final da navegação do frontend foi validada em `ca5ad2e`.
 As worktrees das duas frentes e seus históricos foram preservados. A entrega
 original da F06 foi registrada em `06ee854` e a da F07-A em `bc2b502`.
 Os impedimentos de Git, Docker e instalação de dependências relatados pelos
@@ -15,7 +16,7 @@ outros chats foram superados no ambiente de integração. Não houve push.
 | Concorrência administrativa | Duas conexões disputam revogação versus atribuição e publicação de regra versus classificação inicial. Ambas passaram no PostgreSQL real. |
 | Migração de atualização | Aplicação sobre o schema de `2b17a2f`, em banco separado, preservou usuários, caso, fila, mensagem e auditoria já existentes. |
 | Contratos e carregamento Rails | OpenAPI 3.1, JSON Schema 2020-12, 47 fixtures (uma inválida esperada) e Zeitwerk aprovados. |
-| Frontend | Instalação com `npm ci`, 24 testes, checagem TypeScript e build Vite aprovados no Node 22 da imagem do projeto. Inclui o proxy HTTP real. |
+| Frontend | Instalação com `npm ci`, 27 testes, checagem TypeScript e build Vite aprovados no Node 22 da imagem do projeto. Inclui o proxy HTTP real. |
 | Ponte e mock | 10 testes aprovados com as dependências da imagem, incluindo `confluent_kafka`. |
 | Verificador F07-A | 12 testes isolados aprovados. |
 | Kafka, HTTP, SQL e WebSocket reais | Cinco cenários aprovados em duas rodadas: `c7239cd` e `fbc2192`. A pilha isolada foi removida ao final de cada rodada. |
@@ -46,6 +47,11 @@ O ensaio usou apenas identidades e dados sintéticos em uma pilha local própria
 6. Substituiu a resposta HTTP de uma correção já gravada por `502`. Com duas
    ações abertas, os demais comandos ficaram bloqueados. **Confirmar correção
    anterior** reutilizou a tentativa original e retornou a confirmação.
+7. Repetiu a perda da resposta na correção final `ca5ad2e`. Abriu a
+   configuração, voltou, visitou outro atendimento e retornou ao original.
+   A tentativa continuou disponível somente no caso correto. Após confirmá-la,
+   a consulta ao PostgreSQL encontrou exatamente uma auditoria com o motivo
+   do ensaio (`e9bd1ac9-900d-441b-81ba-13f36f6d6c22`), com versão final 10.
 
 Casos usados para localizar a trilha na sessão de ensaio:
 
@@ -63,9 +69,18 @@ Esses IDs pertencem ao banco descartável do ensaio; a reprodução gera outros.
 
 ![Tentativa original confirmada](evidencias/f06-confirmacao-verificada.png)
 
+![Confirmação preservada após navegar](evidencias/f06-navegacao-confirmada.png)
+
 ## Correções e decisões da revisão
 
 As correções da F06 estão em `abf0823`, `0263e2c`, `1f2dc1a` e `6b6da41`.
+Na revisão ampla final, um P2 adicional mostrou que desmontar a conversa
+apagava a tentativa pendente. `ca5ad2e` mantém o registro na caixa autenticada,
+separado por identidade e atendimento. A rerevisão restrita aprovou a correção,
+os três testes novos e a prova real acima confirmaram o retorno à tentativa.
+Essa memória cobre a navegação interna; recarregar a página ou sair encerra
+o estado local, sem desfazer uma operação já gravada no servidor.
+
 O perfil de um analista exige autorização sobre seu conteúdo inteiro. Quando
 um vínculo removido deixa uma categoria fora do escopo, leitura e publicação
 retornam `403`. Isso evita revelar ou sobrescrever alternativas ocultas;

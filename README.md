@@ -45,7 +45,7 @@ conclusão dos jobs e da conexão real da interface estão na
 continua dependendo de `TYPESAFE_API_KEY`.
 
 Na integração F06/F07-A de 2026-11-20, passaram 86 testes Rails com 1.065
-asserções (uma omissão da chamada TypeSafe real), 24 testes frontend com
+asserções (uma omissão da chamada TypeSafe real), 27 testes frontend com
 instalação pelo lockfile e build, 10 testes da ponte, 12 do verificador e
 47 fixtures contratuais. A configuração e a recuperação por supervisão foram
 percorridas no navegador. Resultados, reprodução e limites estão na

@@ -18,7 +18,7 @@ ainda depende da credencial.
 A F06 está implementada e verificada localmente, incluindo configuração,
 supervisão, migração e duas corridas de configuração no PostgreSQL. A base
 conjunta passou com 86 testes Rails e 1.065 asserções (uma omissão TypeSafe),
-24 testes frontend e build pelo lockfile. A F07-A fornece cinco cenários reais
+27 testes frontend e build pelo lockfile. A F07-A fornece cinco cenários reais
 de robustez dos fluxos F02–F05. A [integração F06/F07-A](../integracao-f06-f07.md)
 registra os resultados e a complementação administrativa da F07, incluindo
 revogação com uma sessão WebSocket já aberta. F06 e F07 têm aceite local
