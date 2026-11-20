@@ -200,10 +200,14 @@ module Operations
         previous&.update!(active: false)
         profile = user.capacity_profiles.create!(version: version, portfolio_limit: limit, alternatives: alternatives)
         after = ConfigurationData.profile(profile)
+        previous_events = ConfigurationAudit.where(brand_id: brand_ids, resource_type: "capacity_profile",
+                                                   resource_id: user.id, version: previous&.version).index_by(&:brand_id)
         Brand.where(id: brand_ids).each do |brand|
           codes = @scope.visible_profile_category_codes(brand_ids: brand.id)
-          audit!([brand.id], "capacity_profile", ConfigurationData.scoped_profile_snapshot(before, codes),
-                 ConfigurationData.scoped_profile_snapshot(after, codes), resource_id: user.id)
+          # O catálogo atual só vale para a nova versão. A anterior conserva o escopo da publicação original.
+          scoped_before = previous_events[brand.id]&.contract_data&.fetch("after") || before&.except(:alternatives)
+          scoped_after = ConfigurationAudit.with_verified_profile_scope(ConfigurationData.scoped_profile_snapshot(after, codes))
+          audit!([brand.id], "capacity_profile", scoped_before, scoped_after, resource_id: user.id)
           Attendances::DistributeHumanWorkJob.schedule(brand.id)
         end
         after

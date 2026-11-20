@@ -37,9 +37,6 @@ module Operations
     end
 
     def self.scoped_profile_snapshot(snapshot, codes)
-      return unless snapshot
-
-      snapshot = snapshot.with_indifferent_access
       snapshot.merge(alternatives: snapshot.fetch(:alternatives).filter_map do |alternative|
         alternative.select { |pair| codes.include?(pair.fetch("category")) }.presence
       end)

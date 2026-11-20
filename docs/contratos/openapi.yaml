@@ -1003,8 +1003,9 @@ paths:
       tags:
       - API da aplicação
       description: Supervisor consulta alterações administrativas da marca, inclusive sem atendimentos. Ordenação por
-        ocorrido mais recente, com ID como desempate. A consulta por resource_id exige resource_type. O servidor filtra
-        as fotografias pelos campos operacionais visíveis à marca autorizada.
+        ocorrido mais recente, com ID como desempate. A consulta por resource_id exige resource_type. Os eventos de
+        perfil conservam a projeção autorizada na publicação por marca. Quando o escopo de uma fotografia antiga
+        não pode ser verificado, o servidor omite o campo alternatives.
       parameters:
       - name: resource_type
         in: query
