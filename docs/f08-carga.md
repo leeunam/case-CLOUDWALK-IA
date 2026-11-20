@@ -50,6 +50,8 @@ Use `--help` para ver os parâmetros. Exemplos de ajustes são `--seed`, `--vus`
 
 A cobertura de recursos indica quais serviços tiveram CPU e RAM observadas, quais medidas do host existem e quantas amostras falharam. Ausência dessas medidas bloqueia a avaliação e preserva as metas e falhas de produto observadas. Em smokes curtos, o gerador pode terminar antes da coleta Docker e a CPU do host depende de duas leituras.
 
+O observador abre um processo independente para cada leitura Kafka, inclusive na prontidão e na captura final. A consulta periódica tem prazo total de 8 s, e o custo inclui a criação do processo e da conexão. Uma saída inesperada, um timeout ou uma resposta incompleta gera uma amostra de lag indisponível com motivo. O processo que consulta SQL e agenda as continuações segue trabalhando. A captura final tem prazo próprio de 52 s e grava os registros Kafka diretamente no JSONL. O relatório exige contagens coerentes entre os offsets esperados, o total lido e o arquivo de registros.
+
 ## Artefatos por rodada
 
 | Artefato | Conteúdo |
@@ -57,6 +59,7 @@ A cobertura de recursos indica quais serviços tiveram CPU e RAM observadas, qua
 | `manifest.json` | Revisão Git, hash dos scripts, seed, parâmetros, horários UTC, versões, IDs de imagens, limites, réplicas, concorrência, prontidão, aquecimento, falha e inventário. |
 | `plan.json`, `k6-console.jsonl`, `k6-summary.json`, `followups.jsonl` | IDs e bytes reconstruíveis, eventos do gerador, contadores do k6 e continuações com timestamps. |
 | `sql-samples.jsonl`, `kafka-lag.jsonl`, `resources.jsonl`, `followup-samples.jsonl` | Evolução temporal, CPU/RAM dos serviços e gerador, memória/CPU do host, custos de amostragem e conexões do banco. |
+| `kafka-baseline.json`, `kafka-offset-range.json` | Offsets por tópico e partição depois do aquecimento e intervalo efetivo da captura final. |
 | `persistence.json`, `kafka-records.jsonl`, `reconciliation.jsonl` | Efeitos persistidos, metadados de Kafka lidos por intervalo de offsets sem confirmar consumo, e comparação por identidade. |
 | `report.json`, `report.md`, `matrix.json`, `matrix.md` | Medidas, metas, estado aprovado/reprovado/bloqueado e comparação lado a lado das rodadas executadas. |
 
@@ -66,9 +69,10 @@ O diretório padrão é `script/f08/load/results/`. O esquema dos artefatos prin
 
 | Verificação | Resultado observado |
 | --- | --- |
-| Testes automatizados | 26 aprovados, incluindo os dois ensaios TCP em loopback com o k6, o caso lento com descartes e as regressões de drenagem, reconexão, integridade, recursos e limpeza. |
+| Testes automatizados | 32 aprovados, incluindo os dois ensaios TCP em loopback com o k6, o caso lento com descartes e as regressões de drenagem, reconexão, integridade, recursos e limpeza. |
 | Compose | v5.1.0 compilou 13 serviços incluindo os perfis opcionais. Rede interna, volumes próprios e nenhuma porta publicada. |
 | Smoke real | Rodada `f08-smoke-1795206209189-d05f95-01` em `6d0feb5`, aprovada. 15/15 entradas com HTTP 202 e 3/3 continuações concluídas. p95 do aceite de 102 ms e da primeira resposta persistida de 381,83 ms. Leitura de 36/36 registros Kafka, com par causal para os 18 turnos. Cinco amostras de recursos, nenhuma perda ou duplicação comprovada e limpeza concluída. A tentativa anterior em `dfd4bdb` bloqueou no aquecimento por incompatibilidade de tipos SQL e foi limpa. |
+| Smoke após isolar o leitor Kafka | Rodada `f08-smoke-1795206778592-ba23dd-01` em `e099be4`, com Kafka disponível. Aceitou 15/15 iniciais e concluiu 3/3 continuações, com 36/36 registros Kafka. O p95 foi de 109 ms no aceite e 391,30 ms até a primeira resposta persistida. As cinco amostras de lag custaram p50 de 98 ms e p95 de 107 ms, incluindo o novo processo e sua conexão. A captura final levou 104 ms. Limpeza concluída. |
 | Referência, aumento progressivo, humano e chat | Execuções reservadas ao chat central. A capacidade e o comportamento sob interrupção dependem da pilha real. |
 
 **Exercício.** Depois de um smoke real ou da referência, escolha um caso aceito durante a interrupção. Compare `request_ms` com `ai_persisted_timestamp_ms - sent_ms` na reconciliação. Se o segundo tempo estiver indisponível, use o estado da linha e as amostras de outbox/lag para identificar se o trabalho ainda estava pendente ou se uma falha foi registrada.

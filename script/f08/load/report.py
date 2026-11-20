@@ -423,6 +423,8 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
     failures = []
     gaps = []
     resource_metrics = resource_summary([row for row in resources if sampled_in_window(row)])
+    if window and not snapshot:
+        gaps.append("snapshot de persistência indisponível")
     if window and not resource_metrics["sufficient"]:
         missing = resource_metrics["missing_services"] + [f"host/{field}" for field in resource_metrics["missing_host"]]
         gaps.append("CPU/RAM com cobertura insuficiente (" + ", ".join(missing) + ")")
@@ -476,7 +478,10 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
         failures.append("k6 sem encerramento normal ou métricas")
     if unsafe_sql or (output / "observer-errors.jsonl").exists():
         failures.append("observador SQL registrou erros")
-    if not manifest.get("observation", {}).get("kafka_records", {}).get("complete"):
+    capture = manifest.get("observation", {}).get("kafka_records", {})
+    if (capture.get("complete") is not True or type(capture.get("expected_offsets")) is not int
+            or type(capture.get("records_read")) is not int
+            or capture["expected_offsets"] != capture["records_read"] or capture["records_read"] != len(kafka)):
         gaps.append("leitura de eventos Kafka incompleta")
     if config["fault_seconds"] and (not ready or not stopped or fault.get("error")):
         failures.append("parada/partida/prontidão Kafka sem evidência completa")

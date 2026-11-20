@@ -173,7 +173,7 @@ class ReconciliationTests(unittest.TestCase):
         self.assertTrue(different["identity_inconsistent"])
 
     def aggregate(self, *, sql=None, lag=None, records=None, resources=None, cleanup="concluída", mode="smoke",
-                  fault=None, earlier_lag=()):
+                  fault=None, earlier_lag=(), capture=None):
         entries = plan("test", 1, [(1, 1)])
         entry = entries[0]
         config = next(configurations(arguments(["smoke", "--rate", "1", "--seconds", "1"])))
@@ -181,6 +181,9 @@ class ReconciliationTests(unittest.TestCase):
         manifest = {"cleanup": cleanup, "run_id": "f08-test", "revision": "a" * 40, "scenario": mode, "parameters": config,
                     "window": {"start_ms": 10, "arrivals_end_ms": 1010, "end_ms": 6010}, "k6_exit": 0,
                     "observation": {"kafka_records": {"complete": True}}}
+        records = self.records() if records is None else records
+        manifest["observation"]["kafka_records"] = ({"complete": True, "expected_offsets": len(records),
+                                                     "records_read": len(records)} if capture is None else capture)
         if fault:
             manifest["fault"] = fault
         event = {"type": "initial", "source_event_id": self.body["source_event_id"],
@@ -197,7 +200,7 @@ class ReconciliationTests(unittest.TestCase):
             for sample in earlier_lag:
                 append(output / "kafka-lag.jsonl", sample)
             append(output / "kafka-lag.jsonl", {"sample_ms": 5000, "cost_ms": 1, "total_lag": 0, **(lag or {})})
-            for record in self.records() if records is None else records:
+            for record in records:
                 append(output / "kafka-records.jsonl", record)
             for sample in self.resources() if resources is None else resources:
                 append(output / "resources.jsonl", sample)
@@ -239,6 +242,12 @@ class ReconciliationTests(unittest.TestCase):
                 self.assertEqual(summary["kafka"]["completed_turns_missing_causal_pair"], 1)
                 self.assertEqual(row["state"], "concluído")
                 self.assertEqual(summary["integrity"]["confirmed_losses"], 0)
+
+    def test_incomplete_kafka_terminal_counts_block_even_when_records_match_turn(self):
+        for capture in ({"complete": True}, {"complete": True, "records_read": 1, "expected_offsets": 1}):
+            summary, _ = self.aggregate(capture=capture)
+            self.assertEqual(summary["state"], "bloqueado")
+            self.assertEqual(summary["kafka"]["completed_turns_missing_causal_pair"], 0)
 
     def test_drain_requires_all_effects_and_completed_samples_before_deadline(self):
         for field in ("published_ms", "completed_ms"):
