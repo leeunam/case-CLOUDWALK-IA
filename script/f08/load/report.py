@@ -397,10 +397,11 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
     started = docker_ms(fault.get("started_state", {}).get("StartedAt"))
     ready = next((row["sample_ms"] + row["cost_ms"] for row in lag
                   if started and row["sample_ms"] >= started and row["total_lag"] is not None), None)
-    drained = next((row["sample_ms"] for row in good if ready and row["sample_ms"] >= ready
-                    and row["outbox_pending"] == row["cases_waiting_processing"] == 0
+    drained = next((row["sample_ms"] + row["cost_ms"] for row in good if ready and row["sample_ms"] >= ready
+                    and row["outbox_pending"] == row["cases_waiting_processing"] == row["outbox_failed"] == 0
                     and any(point["total_lag"] == 0 and point["sample_ms"] >= ready
-                            and 0 <= row["sample_ms"] - point["sample_ms"] <= 7000 for point in lag_good)), None)
+                            and 0 <= row["sample_ms"] - (point["sample_ms"] + point["cost_ms"]) <= 7000
+                            for point in lag_good)), None)
     failure_offsets = {(row["topic"], row["event_id"]) for row in kafka
                        if row["event_id"] and row["topic"] == "agent.failures"}
     duplicates = Counter((row["topic"], row["event_id"]) for row in kafka if row["event_id"]

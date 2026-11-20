@@ -172,7 +172,8 @@ class ReconciliationTests(unittest.TestCase):
         different = self.outcome([self.case], {**self.attempt, "case_id": "other"})
         self.assertTrue(different["identity_inconsistent"])
 
-    def aggregate(self, *, sql=None, lag=None, records=None, resources=None, cleanup="concluída", mode="smoke"):
+    def aggregate(self, *, sql=None, lag=None, records=None, resources=None, cleanup="concluída", mode="smoke",
+                  fault=None, earlier_lag=()):
         entries = plan("test", 1, [(1, 1)])
         entry = entries[0]
         config = next(configurations(arguments(["smoke", "--rate", "1", "--seconds", "1"])))
@@ -180,6 +181,8 @@ class ReconciliationTests(unittest.TestCase):
         manifest = {"cleanup": cleanup, "run_id": "f08-test", "revision": "a" * 40, "scenario": mode, "parameters": config,
                     "window": {"start_ms": 10, "arrivals_end_ms": 1010, "end_ms": 6010}, "k6_exit": 0,
                     "observation": {"kafka_records": {"complete": True}}}
+        if fault:
+            manifest["fault"] = fault
         event = {"type": "initial", "source_event_id": self.body["source_event_id"],
                  "scenario_start_ms": 10, **self.attempt}
         with tempfile.TemporaryDirectory() as temporary:
@@ -191,6 +194,8 @@ class ReconciliationTests(unittest.TestCase):
                    "outbox_pending": 0, "outbox_failed": 0, "cases_waiting_processing": 0, "cases_failed": 0,
                    "cases_waiting_human": 0, "cases_human_active": 0, "cases_waiting_customer": 0,
                    "classification_requests": 0, "classification_attempts": 0, **(sql or {})})
+            for sample in earlier_lag:
+                append(output / "kafka-lag.jsonl", sample)
             append(output / "kafka-lag.jsonl", {"sample_ms": 5000, "cost_ms": 1, "total_lag": 0, **(lag or {})})
             for record in self.records() if records is None else records:
                 append(output / "kafka-records.jsonl", record)
@@ -247,6 +252,16 @@ class ReconciliationTests(unittest.TestCase):
             with self.subTest(changes=changes):
                 self.assertFalse(self.aggregate(**changes)[0]["goals"]["escoamento_na_janela"])
         self.assertTrue(self.aggregate(lag={"sample_ms": 6009, "cost_ms": 1})[0]["goals"]["escoamento_na_janela"])
+
+    def test_recovery_witness_uses_completed_kafka_and_sql_reads(self):
+        parameters = {"fault": {"stopped_state": {"FinishedAt": "1970-01-01T00:00:00.010+00:00"},
+                                "started_state": {"StartedAt": "1970-01-01T00:00:00.100+00:00"}},
+                      "earlier_lag": [{"sample_ms": 200, "cost_ms": 100, "total_lag": 2}],
+                      "sql": {"sample_ms": 5000, "cost_ms": 20}}
+        late = self.aggregate(**parameters, lag={"sample_ms": 4900, "cost_ms": 101})[0]
+        self.assertIsNone(late["outage"]["drained_sample_ms"])
+        timely = self.aggregate(**parameters, lag={"sample_ms": 4900, "cost_ms": 100})[0]
+        self.assertEqual(timely["outage"]["drained_sample_ms"], 5020)
 
     def test_missing_resource_evidence_preserves_product_goals(self):
         for scenario in ("smoke", "reference"):
