@@ -7,7 +7,7 @@ require_relative "evaluation"
 module F08Jev
   class Runner
     ROOT = File.expand_path("../../..", __dir__)
-    REPORT_VERSION = "1.0.0"
+    REPORT_VERSION = "1.1.0"
     DEFAULT_MODEL = "jev-latest"
     TIMEOUT_SECONDS = 5
 
@@ -26,8 +26,9 @@ module F08Jev
     end
 
     def run
-      dataset = Dataset.new(dataset_path: File.join(__dir__, "dataset.json"), catalog_path: File.join(__dir__, "catalog.json"))
       mode = @options.fetch(:mode)
+      dataset = Dataset.new(dataset_path: File.join(__dir__, "dataset.json"), catalog_path: File.join(__dir__, "catalog.json"))
+      report_context = manifest(dataset, mode)
       limit = @options.fetch(:limit, dataset.cases.size)
       if @options.key?(:limit) && !limit.between?(1, dataset.cases.size)
         raise ValidationError, "--limit precisa estar entre 1 e #{dataset.cases.size}"
@@ -36,14 +37,12 @@ module F08Jev
       raise ValidationError, "modelo, revisão e orçamento são opções exclusivas do modo live" if live_only && mode != "live"
       raise ValidationError, "--limit não se aplica ao modo validate" if mode == "validate" && @options[:limit]
 
-      manifest = manifest(dataset, mode)
-      if mode == "validate"
-        return manifest.merge(status: "validated", selection: selection(dataset.cases))
-      end
+      cases = dataset.cases.first(limit)
+      report_context[:selection] = selection(cases)
+      return report_context.merge(status: "validated") if mode == "validate"
 
       client = build_client(mode, dataset)
       evaluation = Evaluation.new(catalog: dataset.catalog, mode: mode)
-      cases = dataset.cases.first(limit)
       rows = cases.map do |entry|
         evaluation.observe(entry, client).tap do |row|
           row[:model] = nil if @secret && row[:model]&.include?(@secret)
@@ -54,17 +53,44 @@ module F08Jev
         row[:channel_preservation].values.all? && row[:request_count] == 1 && row[:questions] == row[:missing]
       end
 
-      manifest.merge(
-        status: valid ? "completed" : "invariant_failed",
-        selection: selection(cases),
+      measurement = measurement_availability(mode, rows)
+      status = if !valid
+        "invariant_failed"
+      elsif measurement.fetch(:status) == "unavailable"
+        "measurement_unavailable"
+      else
+        "completed"
+      end
+
+      report_context.merge(
+        status: status, measurement: measurement,
         parameters: { limit: limit, concurrency: 1, attempts_per_case: 1, requested_model: client.model,
                       timeout_seconds: mode == "live" ? TIMEOUT_SECONDS : nil, budget_reference: @options[:budget] },
         metrics: evaluation.summarize(rows), cases: rows, offline_controls: controls,
         finished_at: Time.now.utc.iso8601
       )
+    rescue ValidationError, Errno::ENOENT => error
+      context = report_context || { report_version: REPORT_VERSION, mode: mode }
+      context.merge(status: "blocked", reason: error.message, finished_at: Time.now.utc.iso8601)
     end
 
     private
+
+    def measurement_availability(mode, rows)
+      return { status: "not_measured", reason: "offline_mode", evaluable_cases: nil } if mode == "offline"
+
+      evaluable_cases = rows.count do |row|
+        row.fetch(:fields).values.any? { |field| %i[choice abstention].include?(field.fetch(:raw_status)) }
+      end
+      status, reason = if evaluable_cases.zero?
+        ["unavailable", "no_evaluable_response"]
+      elsif rows.any? { |row| !%i[complete abstention].include?(row.fetch(:outcome)) }
+        ["partial", "incomplete_responses"]
+      else
+        ["available", nil]
+      end
+      { status: status, reason: reason, evaluable_cases: evaluable_cases }
+    end
 
     def build_client(mode, dataset)
       if mode == "offline"
@@ -112,13 +138,12 @@ if $PROGRAM_NAME == __FILE__
   begin
     report = F08Jev::Runner.new(ARGV).run
     puts JSON.pretty_generate(report)
-    exit 1 if report[:status] == "invariant_failed"
-  rescue F08Jev::ValidationError, Errno::ENOENT => error
-    warn JSON.generate(status: "blocked", reason: error.message)
-    exit 2
+    exit 2 if report[:status] == "blocked"
+    exit 1 if %w[invariant_failed measurement_unavailable].include?(report[:status])
   rescue OptionParser::ParseError
     # Erros de argumentos não repetem valores digitados por engano.
-    warn JSON.generate(status: "blocked", reason: "opções inválidas, consulte --help")
+    puts JSON.generate(report_version: F08Jev::Runner::REPORT_VERSION,
+                       status: "blocked", reason: "opções inválidas, consulte --help")
     exit 2
   end
 end

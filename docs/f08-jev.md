@@ -9,12 +9,12 @@ retentativa de job ou encaminhamento do atendimento.
 ## Conjunto e rótulos
 
 [Dataset](../script/f08/jev/dataset.json) e [catálogo](../script/f08/jev/catalog.json)
-estão na versão 1.0.0. São 60 relatos novos e sintéticos em português, com 20
-por máscara de omissão. Os três grupos se alternam na ordem do arquivo, e cada
-relato tem ID, texto, campos recebidos, campos omitidos, rótulos esperados,
-estrato e justificativa. O validador confere os códigos e as descrições do
-snapshot contra o catálogo do produto. O snapshot usa as categorias das
-marcas do seed e as prioridades do contrato v1.
+estão nas versões 1.1.0 e 1.0.0, respectivamente. São 60 relatos sintéticos
+em português, com 20 por máscara de omissão. Os três grupos se alternam na
+ordem do arquivo. Cada relato tem ID, texto, campos recebidos, campos omitidos,
+rótulos esperados, estrato e justificativa. O validador confere os códigos e
+as descrições do snapshot contra o catálogo do produto. O snapshot usa as
+categorias das marcas do seed e as prioridades do contrato v1.
 
 Use o assunto em que o problema ocorreu ou sobre o qual o cliente pede
 orientação. Uma venda aprovada com crédito ausente trata de repasse, uma
@@ -29,23 +29,37 @@ perda continuada ou um compromisso iminente sem alternativa podem justificar
 Marque `informacao_insuficiente` para o campo que o relato não permite decidir.
 Assunto desconhecido pode coexistir com urgência clara, como em `jev-027`.
 Expressões de pressa, isoladamente, são evidência insuficiente de impacto.
+Um QR por si só deixa o meio de pagamento indeterminado. Para decidir a
+prioridade de um reembolso isolado ainda pendente, considere o prazo e as
+consequências para a operação ou o cliente.
 `rotina` indica relatos determináveis sem urgência imediata, incluindo casos
 `advanced`. `ambiguo` indica pelo menos um campo com abstenção esperada, mesmo
-quando o outro campo é urgente. Há 35 relatos de rotina, 13 urgentes e 12
+quando o outro campo é urgente. Há 33 relatos de rotina, 13 urgentes e 14
 ambíguos. O recorte de prioridade urgente tem 10 relatos com prioridade omitida
 e esperada como `urgent`, independentemente do estrato.
 
-Os rótulos foram escritos antes do primeiro ensaio e seguem provisórios até a
-revisão humana no chat central. Registre o SHA-256 exato da versão revisada.
-A amostra tem distribuição de omissões planejada, poucas categorias, um
-rótulo por campo e texto sintético. As proporções medem esse conjunto e têm
+Em 20/11/2026, a revisão humana confirmou duas abstenções mantendo os
+textos originais.
+
+- `jev-001` recebe `informacao_insuficiente` em categoria. O QR deixa o
+  meio de pagamento em aberto.
+- `jev-041` recebe `informacao_insuficiente` em prioridade. O impacto e o
+  prazo do reembolso específico permanecem indeterminados.
+
+O SHA-256 da versão 1.1.0 é
+`0e7e4c342c2a39cefd89855d8c0513f447d7878303eb4091488ca8af78928880`.
+O conjunto segue provisório enquanto os demais rótulos aguardam revisão
+humana no chat central. Os rótulos antecedem a avaliação ao vivo. A amostra
+tem distribuição de omissões planejada, poucas categorias, um rótulo por
+campo e texto sintético. As proporções medem esse conjunto e têm
 generalização limitada para atendimentos reais ou catálogos por marca.
 
 ## Como rodar
 
 Execute da raiz desta worktree. O runner usa Ruby 3.3 ou superior e os módulos
-do backend via `require_relative`. O teste usa Minitest. A versão do backend
-está em `backend/.ruby-version`.
+do backend via `require_relative`. O manifesto precisa do Git disponível no
+`PATH` e do checkout para registrar a revisão e as mudanças locais. O teste
+usa Minitest. A versão do backend está em `backend/.ruby-version`.
 
 ```sh
 rtk proxy ruby script/f08/jev/run.rb --mode validate
@@ -71,11 +85,31 @@ rtk proxy ruby script/f08/jev/run.rb --mode live --limit 6 \
 
 Sem `--model`, o runner usa `CLOUDWALK_JEV_MODEL` ou `jev-latest`. Para
 comparações, prefira uma versão fixa quando disponível e confira o modelo
-retornado no relatório. Pré-condições inválidas saem com código 2 e JSON
-`blocked` no stderr. Quebra de preservação, do contrato de perguntas ou de
-controle offline gera `invariant_failed` e código 1. `completed` indica que o
-procedimento terminou e suas invariantes passaram. Falhas do fornecedor
-continuam registradas nas métricas por caso.
+retornado no relatório. O redirecionamento acima também guarda o JSON dos
+bloqueios iniciais. Argumentos ou pré-condições inválidas produzem
+`blocked` com o motivo e código 2. O JSON inclui manifesto e seleção quando
+esses dados puderam ser calculados. Quebra de preservação, do contrato
+de perguntas ou de controle offline gera `invariant_failed` e código 1.
+
+Em modo live, um caso é avaliável quando pelo menos um campo omitido recebe
+uma escolha ou abstenção válida. Se nenhum caso for avaliável, o relatório
+registra `measurement_unavailable` com código 1. `completed` tem código 0
+para o offline com controles aprovados e para o live com amostra avaliável
+e invariantes atendidas.
+
+| `measurement.status` | Como ler |
+| --- | --- |
+| `available` | Todas as respostas live são avaliáveis por inteiro, inclusive as que indicam abstenção. |
+| `partial` | Há campos avaliáveis em pelo menos um caso live e respostas incompletas, inválidas ou falhas na seleção. O motivo é `incomplete_responses`. |
+| `unavailable` | Nenhuma escolha ou abstenção válida chegou no live. O motivo é `no_evaluable_response`. |
+| `not_measured` | O modo offline usa a fixture. |
+
+`measurement.evaluable_cases` registra quantos relatos tiveram pelo menos
+um campo avaliável no live. Os relatos selecionados continuam nos
+denominadores e os motivos detalhados permanecem em `issues` e
+`http_status` por caso. Confira a disponibilidade antes de interpretar as
+taxas de qualidade. Uma amostra composta inteiramente por abstenções
+válidas pode ter cobertura automática zero e medição disponível.
 
 ## Leitura do resultado
 
@@ -122,8 +156,8 @@ externa foi feita e os números descrevem a fixture e o avaliador.
 
 | Campo | Acerto na resposta | Acerto aplicado | Cobertura automática | Abstenções |
 | --- | --- | --- | --- | --- |
-| Categoria | 18/34 | 8/34 | 8/40 | 22/40 |
-| Prioridade | 2/33 | 2/33 | 2/40 | 37/40 |
+| Categoria | 18/33 | 8/33 | 8/40 | 22/40 |
+| Prioridade | 2/32 | 2/32 | 2/40 | 37/40 |
 
 As 10 omissões rotuladas como urgentes seguiram para revisão na fixture.
 A execução ao vivo aguarda revisão humana e orçamento no chat central.
