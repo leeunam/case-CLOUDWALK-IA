@@ -12,7 +12,7 @@ module Attendances
       @cases.where(status: SupportCase::PORTFOLIO_STATUSES).where.not(assignee_id: nil)
             .includes(assignee: :user).find_each do |record|
         owner = record.assignee&.user
-        reconcile(record.id) if owner && !queue_access?(owner, record)
+        reconcile(record.id) if owner && !RevokeQueueAccess.allowed?(owner, record)
       end
       pending_ids.each { |id| assign_pending(id) }
     end
@@ -85,23 +85,8 @@ module Attendances
         HumanLocks.brand!(@brand_id)
         owner = HumanLocks.users!([@cases.find(id).assignee&.user_id]).first
         record = @cases.lock.find(id)
-        next if !owner || !SupportCase::PORTFOLIO_STATUSES.include?(record.status) || queue_access?(owner, record)
-
-        previous = record.status
-        previous_assignee = record.assignee_id
-        waiting = previous == "waiting_customer"
-        record.advance!(assignee: nil, status: waiting ? previous : "waiting_human",
-                        assignment_generation: record.assignment_generation + 1,
-                        human_queue_since: waiting ? nil : record.human_queue_since || Time.current,
-                        blocking_reason: "queue_access_revoked")
-        record.audit!("case.human.unassigned", actor_type: "system", from_status: previous,
-                      reason: "queue_access_revoked", previous_assignee_id: previous_assignee, queue_id: record.queue_id)
-        AnalystOperation.release_work!(owner, record.brand_id)
+        RevokeQueueAccess.call(record, owner) if owner
       end
-    end
-
-    def queue_access?(user, record)
-      user.role == "analyst" && Visibility.new(user).queues.where(active: true).exists?(record.queue_id)
     end
   end
 end

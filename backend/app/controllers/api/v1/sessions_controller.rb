@@ -69,7 +69,8 @@ module Api
       end
 
       def operation_data(user, attendant)
-        profile = user.capacity_profiles.find_by!(active: true)
+        profile = user.capacity_profiles.find_by(active: true)
+        return unless profile
         portfolio = Attendances::HumanEligibility.portfolio(attendant)
         {
           active_brand_id: user.active_brand_id, switch_target_brand_id: user.switch_target_brand_id, available: user.available,

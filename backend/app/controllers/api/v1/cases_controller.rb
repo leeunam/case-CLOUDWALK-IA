@@ -8,7 +8,11 @@ module Api
 
       def filters
         render json: {
-          brands: visibility.brands.order(:name, :id).as_json(only: %i[id name]),
+          brands: visibility.brands.includes(:categories).order(:name, :id).map do |brand|
+            { id: brand.id, name: brand.name, categories: brand.categories.sort_by(&:code).map do |category|
+              Operations::ConfigurationData.category(category)
+            end }
+          end,
           queues: visibility.queues.order(:name, :id).as_json(only: %i[id brand_id name])
         }
       end

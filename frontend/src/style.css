@@ -205,3 +205,31 @@ textarea::placeholder { color: var(--muted); }
   .topbar-actions { font-size: .73rem; }
   .fields { grid-template-columns: 1fr; }
 }
+
+.configuration-panel { padding: 1.25rem; }
+.configuration-panel .page-heading { margin-top: 0; }
+.configuration-tabs, .configuration-row {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: .7rem;
+  margin-block: .75rem;
+}
+.configuration-form { margin-block: .75rem 1.25rem; }
+.configuration-form > fieldset { padding: 0; border: 0; margin: 0 0 .85rem; min-width: 0; }
+.configuration-form label, .configuration-panel section > label, .configuration-panel > label {
+  display: block;
+  margin-block: .45rem;
+}
+.configuration-form select, .configuration-form input:not([type="checkbox"]),
+.configuration-panel select { max-width: 100%; }
+.configuration-checks { margin-block: .8rem; padding: .55rem .8rem; }
+.configuration-comparison {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 285px), 1fr));
+  gap: 1rem;
+}
+.configuration-audit { border-bottom: 1px solid #dce3e9; padding: .8rem 0; }
+.configuration-audit pre { overflow: auto; max-height: 20rem; }
+.configuration-audit dd { overflow-wrap: anywhere; }
+.configuration-audit summary { cursor: pointer; }

@@ -611,7 +611,7 @@ paths:
         CsrfToken: []
       tags:
       - API da aplicação
-      description: Supervisor autorizado cria equipes no escopo da operação.
+      description: Supervisor cria equipe vinculada às brand_ids informadas ou, quando omitidas, às próprias marcas autorizadas.
       requestBody:
         required: true
         content:
@@ -686,7 +686,7 @@ paths:
         CsrfToken: []
       tags:
       - API da aplicação
-      description: A edição de equipe compartilhada exige autorização em todas as marcas afetadas.
+      description: A edição de equipe compartilhada exige autorização em todas as marcas afetadas. Quando informados, member_user_ids substitui os membros.
       requestBody:
         required: true
         content:
@@ -727,8 +727,8 @@ paths:
         CsrfToken: []
       tags:
       - API da aplicação
-      description: Supervisor da marca edita seus vínculos e a fila padrão. Rails verifica dependências em filas ativas
-        e efeito sobre carteiras.
+      description: Supervisor da marca edita seus vínculos e a fila padrão. Alterações de autorização de equipe compartilhada
+        exigem acesso a todas as marcas afetadas. Rails verifica dependências em filas ativas e efeito sobre carteiras.
       requestBody:
         required: true
         content:
@@ -913,7 +913,7 @@ paths:
         CsrfToken: []
       tags:
       - API da aplicação
-      description: A fila deve estar ativa na marca. Ao menos um filtro precisa existir. A primeira regra ativa aplicável
+      description: A fila deve pertencer à marca e estar ativa para publicar. Ao menos um filtro precisa existir e a posição deve ser única entre regras ativas. A primeira regra ativa aplicável
         vence por position.
       requestBody:
         required: true
@@ -961,7 +961,7 @@ paths:
         CsrfToken: []
       tags:
       - API da aplicação
-      description: A fila deve estar ativa na marca. Ao menos um filtro precisa existir. A primeira regra ativa aplicável
+      description: A fila deve pertencer à marca e estar ativa para publicar. Ao menos um filtro precisa existir e a posição deve ser única entre regras ativas. A primeira regra ativa aplicável
         vence por position.
       requestBody:
         required: true
@@ -1107,7 +1107,7 @@ paths:
       - API da aplicação
       description: Supervisor consulta apenas analistas cujo perfil está em seu escopo de edição. Como o perfil vale
         em todas as marcas do analista, Rails exige autorização em todas as marcas em que ele atua. O filtro por marca
-        restringe a lista dentro desse escopo. Use user_id no caminho do perfil.
+        restringe a lista dentro desse escopo. Use user_id no caminho do perfil e brand_ids para reunir as categorias do analista.
       parameters:
       - name: brand_id
         in: query
@@ -1127,6 +1127,71 @@ paths:
           $ref: '#/components/responses/Error401'
         '403':
           $ref: '#/components/responses/Error403'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/team-members:
+    get:
+      operationId: listTeamMembers
+      summary: Listar analistas vinculáveis a equipes
+      x-implementation-phase: F06
+      description: Inclui analistas em ao menos uma marca supervisionada, mesmo quando o perfil é administrado em escopo maior.
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      parameters:
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Página de analistas da área supervisionada.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/AnalystList
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '422':
+          $ref: '#/components/responses/Error422'
+  /api/v1/brands/{brand_id}/queues/{id}/analysts:
+    parameters:
+    - name: brand_id
+      in: path
+      required: true
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    - name: id
+      in: path
+      required: true
+      schema:
+        $ref: ./schemas/v1.json#/$defs/Uuid
+    get:
+      operationId: listQueueAnalysts
+      summary: Listar candidatos para transferência
+      x-implementation-phase: F06
+      description: Membros das equipes da fila ativa na marca supervisionada. O comando valida elegibilidade no momento da transferência.
+      security:
+      - SessionCookie: []
+      tags:
+      - API da aplicação
+      parameters:
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Página de analistas da fila.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/v1.json#/$defs/AnalystList
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
         '422':
           $ref: '#/components/responses/Error422'
   /api/v1/analysts/{analyst_id}/capacity-profile:

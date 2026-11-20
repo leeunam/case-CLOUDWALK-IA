@@ -238,6 +238,8 @@ determinísticos dentro dos exemplos e podem ser usados no mock da interface.
 | `simulator-followup.json` | `SimulatorMessage` | O cliente envia outra mensagem à conversa recuperada. |
 | `simulator-followup-accepted.json` | `SimulatorReceipt` | O Rails confirma o mesmo caso, conversa e correlação. |
 | `case-wait-for-customer.json` | `CaseAction` | Responsável ativo solicita informação usando a versão do caso. |
+| `team-create.json` | `TeamInput` | Criação com marca inicial e membros. |
+| `team-list.json` | `TeamList` | Equipe compartilhada visível com edição indisponível para o supervisor. |
 | `routing-rule-brand.json` | `RoutingRule` | Encaminha a categoria para uma fila da mesma marca. |
 | `configuration-audit.json` | `ConfigurationAuditList` | Criação e edição da regra são consultáveis por marca e recurso. |
 | `capacity-profile.json` | `CapacityProfile` | Perfil com teto de carteira e alternativas de simultaneidade. |
@@ -259,3 +261,17 @@ Exercício curto. Abra o segundo pedido da IA, localize a resposta da primeira
 rodada no histórico e confira quais campos ligam a proposta de resolução ao
 segundo pedido. Depois compare a proposta atrasada com o pedido do handoff.
 As identidades coincidem naquele par, mas a rodada já terminou.
+
+A F06 usa campos opcionais aditivos. O simulador lê as categorias ativas em
+`Channel.categories`. A caixa da operação lê também categorias inativas em
+`CaseFilterBrand.categories`, para mostrar atendimentos antigos e alimentar
+o filtro e o formulário de revisão. A edição de equipe usa
+`member_user_ids` e a criação pode definir `brand_ids`. A tela de perfil
+usa as marcas de `Analyst.brand_ids` para carregar os catálogos aplicáveis.
+
+`GET /api/v1/team-members` fornece candidatos às equipes dentro do escopo
+operacional. `GET /api/v1/brands/{brand_id}/queues/{id}/analysts` lista os
+membros da fila candidata para transferência. A disponibilidade e a capacidade
+são reavaliadas pelo comando canônico, com a versão do caso e chave de
+idempotência. `AuditEvent.routing` mostra a fila, a regra e a versão aplicadas
+à classificação inicial. ID e versão ficam nulos quando se usa a fila padrão.

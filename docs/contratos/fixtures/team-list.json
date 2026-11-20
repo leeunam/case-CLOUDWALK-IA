@@ -1,0 +1,15 @@
+{
+  "schema": "../schemas/v1.json#/$defs/TeamList",
+  "data": {
+    "items": [
+      {
+        "id": "00000000-0000-4000-8000-000000000903",
+        "name": "Suporte compartilhado",
+        "version": 2,
+        "member_user_ids": ["00000000-0000-4000-8000-000000000100"],
+        "editable": false
+      }
+    ],
+    "next_cursor": null
+  }
+}

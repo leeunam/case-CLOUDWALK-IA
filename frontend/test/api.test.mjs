@@ -304,3 +304,43 @@ test('paginação deduplica páginas sobrepostas e detecta cursores que não ava
   await assert.rejects(readPages(async () => ({ items: [], next_cursor: 'same' })), ApiError)
   await assert.rejects(readMessages(async () => ({ items: [], next_after_sequence: 0 })), ApiError)
 })
+
+test('configuração envia a última versão publicada nas escritas e mantém CSRF após renovar a sessão', async t => {
+  const { configuration } = await import('../src/api/configuration.ts')
+  const supervisor = { ...session, user: { ...session.user, role: 'supervisor' } }
+  const queue = { id: 'destino', version: 4 }
+  const body = { active: true, name: 'Triagem', team_ids: ['equipe-1', 'equipe-2'] }
+  let writes = 0
+  t.mock.method(globalThis, 'fetch', async (path, options) => {
+    if (path === '/api/v1/session') return Response.json({ ...supervisor, csrf_token: 'rotated' })
+    assert.equal(path, '/api/v1/brands/aurora/queues/destino')
+    assert.equal(options.method, 'PUT')
+    assert.equal(options.credentials, 'same-origin')
+    assert.deepEqual(JSON.parse(options.body), { ...body, expected_version: 4 })
+    assert.equal(options.headers.get('X-CSRF-Token'), writes++ ? 'rotated' : 'initial')
+    return writes === 1
+      ? Response.json({ error: { code: 'csrf_rejected' } }, { status: 403 })
+      : Response.json({ ...queue, ...body, version: 5 })
+  })
+  const result = await configuration.saveQueue(supervisor, 'aurora', body, queue)
+  assert.equal(result.version, 5)
+})
+
+test('correção e recuperação usam caminhos canônicos e chave de idempotência estável', async t => {
+  const calls = []
+  t.mock.method(globalThis, 'fetch', async (path, options) => {
+    assert.equal(options.method, 'POST')
+    assert.equal(options.headers.get('Idempotency-Key'), 'supervisao')
+    assert.equal(options.headers.get('X-CSRF-Token'), 'initial')
+    calls.push([path, JSON.parse(options.body)])
+    return Response.json({ id: 'caso' })
+  })
+  const correction = { expected_version: 2, category: 'conta_digital', priority: 'basic', reason: 'Triagem' }
+  const recovery = { type: 'force_handoff', expected_version: 3, reason: 'Integração indisponível', summary: 'Cliente aguarda' }
+  await staff.command('caso', { ...correction, type: 'classification' }, session, 'supervisao')
+  await staff.command('caso', recovery, session, 'supervisao')
+  assert.deepEqual(calls, [
+    ['/api/v1/cases/caso/classification', correction],
+    ['/api/v1/cases/caso/actions', recovery],
+  ])
+})

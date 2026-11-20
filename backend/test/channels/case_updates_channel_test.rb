@@ -41,6 +41,25 @@ class CaseUpdatesChannelTest < ActionCable::Channel::TestCase
     assert_no_streams
   end
 
+  test "configuração recusa aviso ao analista após revogar acesso à fila" do
+    analyst = Operations::User.find_by!(email: "bia@example.test")
+    session = BrowserAccess::Session.create!(audience: "staff", user: analyst, expires_at: 1.hour.from_now)
+    browser_cookie(staff_session_id: session.id)
+    subscribe case_id: @case_id, audience: "staff"
+    assert subscription.confirmed?
+    subscription.send(:forward_update, @payload)
+    assert_equal [@payload], transmissions
+
+    queue = Attendances::SupportCase.find(@case_id).queue
+    shared = Operations::Team.find_by!(code: "shared")
+    Operations::Configuration.new(@supervisor).save_queue(@brand.id, queue.id, {
+      "name" => queue.name, "active" => true, "team_ids" => [shared.id], "expected_version" => queue.version
+    })
+    subscription.send(:forward_update, @payload)
+    assert_equal [@payload], transmissions
+    assert_no_streams
+  end
+
   test "audiência declarada não troca o papel da sessão" do
     browser_cookie(simulator_session_id: @owner.id)
     subscribe case_id: @case_id, audience: "staff"

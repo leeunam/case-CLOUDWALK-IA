@@ -8,6 +8,7 @@ import { categoryLabels, priorityLabels } from '../simulator/presentation'
 import { errorMessage, useResource } from '../simulator/useResource'
 import { Transcript } from '../Transcript'
 import { useCaseRefresh } from '../useCaseRefresh'
+import { SupervisorActions } from './SupervisorActions'
 import { staffCaseLabels } from './presentation'
 
 const blocks: Record<string, string> = {
@@ -26,6 +27,10 @@ const retryLabels: Record<StaffCommand['type'], string> = {
   reply: 'Confirmar resposta anterior',
   wait_for_customer: 'Confirmar espera anterior',
   resolve: 'Confirmar resolução anterior',
+  classification: 'Confirmar correção anterior',
+  transfer: 'Confirmar transferência anterior',
+  retry_agent: 'Confirmar recuperação anterior',
+  force_handoff: 'Confirmar encaminhamento anterior',
 }
 
 export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
@@ -51,8 +56,10 @@ export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
   const owned = detail?.assignee?.id === session.user?.attendant_id
   const canAct = detail && !error && canHandle(session, detail)
   const switchPending = !!session.operation?.switch_target_brand_id
-  const canConfirm = detail && !error && session.user?.role === 'analyst' &&
-    detail.brand_id === session.operation?.active_brand_id && (owned || detail.status === 'resolved')
+  const supervisor = session.user?.role === 'supervisor'
+  const canConfirm = detail && !error && (supervisor || (
+    session.user?.role === 'analyst' && detail.brand_id === session.operation?.active_brand_id && (owned || detail.status === 'resolved')
+  ))
   const handoff = detail?.handoff
 
   useCaseRefresh(id, detail ? 'staff' : null, 10000, loading, refresh)
@@ -82,6 +89,7 @@ export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
       setPending(null)
       setText('')
       if (confirming) setConfirmation('A tentativa anterior foi confirmada. Confira o estado atual antes de iniciar outra ação.')
+      else if (supervisor) setConfirmation('Ação de supervisão aplicada.')
       refresh()
       onChanged()
     } catch (failure) {
@@ -103,6 +111,7 @@ export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
   }
 
   const category = detail?.classification.category
+  const categoryName = brand?.categories?.find(item => item.key === category)?.name
   const priority = detail?.classification.priority
   return (
     <section className="panel workspace" aria-labelledby="staff-conversation-heading">
@@ -115,7 +124,7 @@ export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
       </div>
       {detail && (
         <div className="case-context">
-          <p>{category ? categoryLabels[category as keyof typeof categoryLabels] ?? category : 'Sem categoria'} · {priority ? priorityLabels[priority] : 'Sem prioridade'}</p>
+          <p>{category ? categoryName ?? categoryLabels[category as keyof typeof categoryLabels] ?? category : 'Sem categoria'} · {priority ? priorityLabels[priority] : 'Sem prioridade'}</p>
           <p className="muted">{detail.assignee?.type === 'ai' ? 'Atendente de IA' : detail.assignee ? owned ? 'Responsável: você' : 'Responsável: outro analista' : 'Sem responsável'}</p>
           {detail.previous_case_id && (
             <button className="text-button" onClick={() => onOpen(detail.previous_case_id!)}>Ver atendimento anterior</button>
@@ -146,7 +155,7 @@ export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
         <div className="conversation-tools">
           {detail?.status === 'waiting_resumption' && <p className="muted">A retomada é automática quando houver capacidade na marca do atendimento.</p>}
           {detail?.status === 'waiting_customer' && <p className="muted">Aguardando a resposta do cliente.</p>}
-          {detail?.status === 'human_active' && !canAct && <p className="muted">As ações exigem o analista responsável na marca em operação.</p>}
+          {detail?.status === 'human_active' && !canAct && !supervisor && <p className="muted">As ações exigem o analista responsável na marca em operação.</p>}
           <button className="secondary" onClick={refresh} disabled={loading}>Atualizar conversa</button>
         </div>
         {commandError && <p className="error" role="alert">{commandError}</p>}
@@ -165,6 +174,9 @@ export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
             </div>
           </div>
         )}
+        {detail && supervisor && !error && !pending &&
+          <SupervisorActions detail={detail} filters={filters} revision={revision}
+            run={command => runCommand({ command, key: crypto.randomUUID() }, false)} />}
         {canAct && !pending && (
           <form className="composer" onSubmit={send}>
             <label htmlFor="staff-reply">Resposta ao cliente</label>

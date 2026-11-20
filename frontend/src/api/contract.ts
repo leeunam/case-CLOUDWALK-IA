@@ -49,6 +49,7 @@ export type ListFilters = {
   brand_id?: string
   queue_id?: string
   status?: CaseStatus | ''
+  integration_status?: StaffCase['integration_status'] | ''
   priority?: Priority | ''
   category?: string
   assignee?: 'me' | 'unassigned' | ''
@@ -56,4 +57,12 @@ export type ListFilters = {
 export type StaffCommand =
   | { type: 'reply' | 'wait_for_customer'; expected_version: number; text: string }
   | { type: 'resolve'; expected_version: number }
+  | { type: 'classification'; expected_version: number; category: string; priority: Priority; reason: string }
+  | { type: 'transfer'; expected_version: number; destination_queue_id: string; destination_assignee_id: string | null; reason: string }
+  | { type: 'retry_agent'; expected_version: number; reason: string }
+  | { type: 'force_handoff'; expected_version: number; reason: string; summary: string }
+export type CaseAuditEvent = {
+  id: string; occurred_at: string; type: string; reason: string | null
+  routing?: { queue_id: string; rule_id: string | null; rule_version: number | null }
+}
 export type MessageList = { items: Message[]; next_after_sequence: number | null }

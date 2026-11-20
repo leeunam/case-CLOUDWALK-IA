@@ -1171,6 +1171,41 @@
               "type": "null"
             }
           ]
+        },
+        "routing": {
+          "type": "object",
+          "required": [
+            "queue_id",
+            "rule_id",
+            "rule_version"
+          ],
+          "properties": {
+            "queue_id": {
+              "$ref": "#/$defs/Uuid"
+            },
+            "rule_id": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/Uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rule_version": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false
@@ -1320,6 +1355,19 @@
       "allOf": [
         {
           "$ref": "#/$defs/TeamFields"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "brand_ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Uuid"
+              },
+              "uniqueItems": true,
+              "minItems": 1
+            }
+          }
         }
       ],
       "unevaluatedProperties": false
@@ -1358,6 +1406,9 @@
             "version": {
               "type": "integer",
               "minimum": 1
+            },
+            "editable": {
+              "type": "boolean"
             }
           },
           "required": [
@@ -1423,6 +1474,12 @@
             "whatsapp",
             "email"
           ]
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CategoryConfig"
+          }
         }
       },
       "additionalProperties": false
@@ -1814,20 +1871,40 @@
     },
     "CaseUpdateSubscription": {
       "type": "object",
-      "required": ["channel", "case_id", "audience"],
+      "required": [
+        "channel",
+        "case_id",
+        "audience"
+      ],
       "properties": {
-        "channel": { "const": "CaseUpdatesChannel" },
-        "case_id": { "$ref": "#/$defs/Uuid" },
-        "audience": { "enum": ["simulator", "staff"] }
+        "channel": {
+          "const": "CaseUpdatesChannel"
+        },
+        "case_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "audience": {
+          "enum": [
+            "simulator",
+            "staff"
+          ]
+        }
       },
       "additionalProperties": false
     },
     "CaseUpdated": {
       "type": "object",
-      "required": ["type", "case_id"],
+      "required": [
+        "type",
+        "case_id"
+      ],
       "properties": {
-        "type": { "const": "case.updated" },
-        "case_id": { "$ref": "#/$defs/Uuid" }
+        "type": {
+          "const": "case.updated"
+        },
+        "case_id": {
+          "$ref": "#/$defs/Uuid"
+        }
       },
       "additionalProperties": false
     },
@@ -1989,6 +2066,13 @@
       "properties": {
         "name": {
           "$ref": "#/$defs/NonEmptyString"
+        },
+        "member_user_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Uuid"
+          },
+          "uniqueItems": true
         }
       }
     },
@@ -2031,6 +2115,13 @@
         },
         "name": {
           "$ref": "#/$defs/NonEmptyString"
+        },
+        "brand_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Uuid"
+          },
+          "uniqueItems": true
         }
       },
       "additionalProperties": false
@@ -2073,6 +2164,12 @@
         },
         "name": {
           "$ref": "#/$defs/NonEmptyString"
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CategoryConfig"
+          }
         }
       },
       "additionalProperties": false

@@ -68,7 +68,7 @@ module Api
         raise WebhookV1::Error.new(422, "invalid_query", "Parâmetro inválido: #{key}.")
       end
 
-      def paginated(relation, order:, scope:)
+      def paginated(relation, order:, scope:, direction: :desc)
         limit = bounded_integer("limit", default: 25, range: 1..100)
         signer = Rails.application.message_verifier("browser-collection")
         purpose = scope.join(":")
@@ -78,9 +78,10 @@ module Api
           invalid_query!("cursor") unless cursor.is_a?(Array) && cursor.size == order.size
           columns = order.join(", ")
           values = (["?"] * order.size).join(", ")
-          relation = relation.where("(#{columns}) < (#{values})", *cursor)
+          comparison = direction == :asc ? ">" : "<"
+          relation = relation.where("(#{columns}) #{comparison} (#{values})", *cursor)
         end
-        rows = relation.order(order.index_with(:desc)).limit(limit + 1).to_a
+        rows = relation.order(order.index_with(direction)).limit(limit + 1).to_a
         items = rows.first(limit)
         if rows.size > limit
           position = order.map do |column|

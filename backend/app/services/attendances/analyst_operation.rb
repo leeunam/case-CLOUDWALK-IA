@@ -32,6 +32,18 @@ module Attendances
       DistributeHumanWorkJob.schedule(operating_brand_id) if operating_brand_id && operating_brand_id != case_brand_id
     end
 
+    def self.reconcile_access!(user)
+      attrs = {}
+      if user.active_brand_id && !allowed_brand?(user, user.active_brand_id)
+        attrs[:active_brand_id] = nil
+      end
+      if user.switch_target_brand_id && !allowed_brand?(user, user.switch_target_brand_id)
+        attrs[:switch_target_brand_id] = nil
+      end
+      update_and_audit!(user, attrs, "analyst.access.revoked") if attrs.any?
+      finish_switch!(user)
+    end
+
     def self.finish_switch!(user)
       target = user.switch_target_brand_id
       return if !target || HumanEligibility.portfolio(user.attendant).where(status: "human_active").exists?

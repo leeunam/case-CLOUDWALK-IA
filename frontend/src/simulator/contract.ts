@@ -1,7 +1,8 @@
 export type ChannelType = 'chat' | 'whatsapp' | 'email'
 
-export type Brand = { id: string; name: string }
-export type Channel = { id: string; brand_id: string; brand_name: string; name: string; type: ChannelType }
+export type CatalogCategory = { key: string; name: string; active: boolean }
+export type Brand = { id: string; name: string; categories?: CatalogCategory[] }
+export type Channel = { id: string; brand_id: string; brand_name: string; name: string; type: ChannelType; categories?: CatalogCategory[] }
 export type Page<T> = { items: T[]; next_cursor: string | null }
 
 export type CaseStatus =
@@ -28,7 +29,7 @@ export type Priority = 'basic' | 'intermediate' | 'advanced' | 'urgent'
 export type SimulatorMessage = {
   text: string
   external_conversation_id?: string
-  category?: Category
+  category?: string
   priority?: Priority
 }
 

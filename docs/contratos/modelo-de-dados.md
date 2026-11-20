@@ -14,8 +14,8 @@ de marca, equipe, fila e responsável para distribuição e retomada.
 | Canal e catálogo | Canal tem uma marca e um tipo. Uma categoria tem uma chave por marca. O campo de prioridade usa o catálogo comum da demo. A identidade da marca chega da credencial do canal. |
 | Pessoas e acesso | `team_memberships` vincula analistas a equipes. `supervisor_brands` autoriza supervisores em marcas explícitas. Atendente humano referencia o usuário. O mock tem identidade de atendente própria. |
 | Capacidade | Uma versão ativa de perfil por analista. A versão guarda limite de carteira e alternativas, cada qual um conjunto de pares de prioridade e categoria com limites inteiros. |
-| Encaminhamento futuro F06 | Regra versionada tem `brand_id`, posição, filtros opcionais e fila de destino na mesma marca por vínculo composto. O Rails registra a regra e versão aplicadas ao caso. |
-| Auditoria de configuração futura F06 | Evento administrativo é persistido na transação da mudança e indexado por marca, tipo, ID do recurso e data. Registra ator, versão e fotografias autorizadas antes e depois. Pode existir antes da abertura de qualquer atendimento. |
+| Encaminhamento F06 | Regra versionada tem `brand_id`, posição, filtros opcionais e fila de destino na mesma marca por vínculo composto. O Rails registra a regra e versão aplicadas ao caso. |
+| Auditoria de configuração F06 | Evento administrativo é persistido na transação da mudança e indexado por marca, tipo, ID do recurso e data. Registra ator, versão e fotografias autorizadas antes e depois. Pode existir antes da abertura de qualquer atendimento. |
 
 ## Atendimento e integração previstos para F02–F04
 
@@ -90,3 +90,19 @@ duas atribuições e observar apenas uma aceita.
   reavalia as filas a cada minuto e identifica casos cujo responsável perdeu
   acesso. Alterações de configuração em F06 devem seguir a mesma ordem de
   bloqueios e solicitar reavaliação após publicar.
+
+### Aplicação na F06
+
+- A mutação administrativa adquire as marcas por UUID antes de publicar
+  vínculos, regras ou perfis. Isso serializa a seleção inicial da fila e
+  mantém estável o escopo das equipes compartilhadas. A remoção de acesso
+  adquire usuários e atendimentos em ordem de UUID para reconciliar a carteira
+  antes do commit.
+- A fila e a equipe têm versão própria. A criação de equipe incrementa
+  a versão de cada marca que recebe a autorização. Revogar o último vínculo
+  deixa a equipe consultável pela marca que a desvinculou para edição e
+  reativação administrativa.
+- O perfil de capacidade mantém as versões anteriores. A trilha administrativa
+  tem uma entrada por marca afetada, com a mesma correlação. Cada entrada de
+  perfil contém apenas os pares de categorias presentes no catálogo daquela
+  marca. A trilha do caso registra a fila, o ID e a versão da regra inicial.

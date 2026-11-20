@@ -10,6 +10,7 @@ module Classification
         category: "Qual é o assunto principal do atendimento relatado?",
         priority: "Que urgência o atendimento exige, considerando o impacto e a necessidade de ação imediata?"
       }.freeze
+      MAX_CATALOG_SIZE = 254
       PROBABILITY_TOLERANCE = 0.01
 
       # Catálogos ativos e já filtrados pelo chamador, em mapas de código para descrição.
@@ -52,7 +53,7 @@ module Classification
       private
 
       def validate_catalog(catalog)
-        if catalog.is_a?(Hash) && catalog.size < 255
+        if catalog.is_a?(Hash) && catalog.size <= MAX_CATALOG_SIZE
           valid_options = catalog.all? do |code, description|
             code.is_a?(String) && code.match?(/\A[a-z][a-z0-9_]*\z/) && code != ABSTENTION &&
               description.is_a?(String) && !description.strip.empty?

@@ -166,6 +166,7 @@ module Attendances
         ActivateClassifiedCase.call(record, updated)
       else
         record.advance!(**updated, classification_version: record.classification_version + 1)
+        DistributeHumanWorkJob.schedule(record.brand_id) if SupportCase::HUMAN_STATUSES.include?(record.status)
       end
 
       record.audit!("case.classification.corrected", actor_type: "supervisor", actor_id: actor.id,

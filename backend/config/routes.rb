@@ -7,6 +7,30 @@ Rails.application.routes.draw do
       resource :session, only: %i[show create destroy]
       patch "session/operation", to: "sessions#update_operation"
       get "case-filters", to: "cases#filters"
+      scope controller: :configuration do
+        get "brands", action: :brands
+        put "brands/:brand_id", action: :update_brand
+        get "teams", action: :teams
+        get "team-members", action: :team_members
+        get "analysts", action: :analysts
+        get "analysts/:analyst_id/capacity-profile", action: :capacity_profile
+        post "analysts/:analyst_id/capacity-profile", action: :create_capacity_profile
+        put "analysts/:analyst_id/capacity-profile", action: :update_capacity_profile
+        post "teams", action: :create_team
+        put "teams/:id", action: :update_team
+        scope "brands/:brand_id" do
+          get "queues", action: :queues
+          post "queues", action: :create_queue
+          get "queues/:id/analysts", action: :queue_analysts
+          put "queues/:id", action: :update_queue
+          get "routing-rules", action: :routing_rules
+          post "routing-rules", action: :create_routing_rule
+          put "routing-rules/:id", action: :update_routing_rule
+          get "configuration-audit", action: :configuration_audit
+          get "catalog", action: :catalog
+          put "catalog", action: :update_catalog
+        end
+      end
       get "channels", to: "channels#index"
       post "simulator/session", to: "simulator#start_session"
       get "simulator/cases", to: "simulator#index"

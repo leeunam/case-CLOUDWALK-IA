@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { ApiError, deliveryUncertain } from '../api/http'
-import type { Category, Channel, Priority, SimulatorCase, SimulatorMessage, SimulatorReceipt, SimulatorRepository } from './contract'
+import type { Channel, Priority, SimulatorCase, SimulatorMessage, SimulatorReceipt, SimulatorRepository } from './contract'
 import { categoryLabels, channelExamples, priorityLabels } from './presentation'
 import { errorMessage } from './useResource'
 
@@ -19,7 +19,11 @@ export function Composer({
 }) {
   const example = channelExamples[channel.type]
   const [text, setText] = useState('')
-  const [category, setCategory] = useState<Category | ''>(example.category)
+  const categories = channel.categories?.filter(item => item.active) ??
+    Object.entries(categoryLabels).map(([key, name]) => ({ key, name, active: true }))
+  const exampleCategory = categories.some(item => item.key === example.category) ? example.category : ''
+  const [category, setCategory] = useState<string>(exampleCategory)
+  const activeCategory = categories.some(item => item.key === category) ? category : ''
   const [priority, setPriority] = useState<Priority | ''>(example.priority)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -44,7 +48,7 @@ export function Composer({
     if (!attempt) {
       const message: SimulatorMessage = { text: text.trim() }
       if (conversation) message.external_conversation_id = conversation.external_conversation_id
-      if (opensCase && category) message.category = category
+      if (opensCase && activeCategory) message.category = activeCategory
       if (opensCase && priority) message.priority = priority
       attempt = { channelId: channel.id, message, key: crypto.randomUUID() }
     }
@@ -76,9 +80,9 @@ export function Composer({
           <div className="fields">
             <label>
               Categoria
-              <select value={category} onChange={event => setCategory(event.target.value as Category | '')} disabled={sending}>
+              <select value={activeCategory} onChange={event => setCategory(event.target.value)} disabled={sending}>
                 <option value="">Não informar</option>
-                {Object.entries(categoryLabels).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+                {categories.map(item => <option key={item.key} value={item.key}>{item.name}</option>)}
               </select>
             </label>
             <label>
@@ -96,7 +100,7 @@ export function Composer({
         {opensCase && !pending && (
           <button className="text-button" type="button" disabled={sending} onClick={() => {
             setText(example.text)
-            setCategory(example.category)
+            setCategory(exampleCategory)
             setPriority(example.priority)
           }}>
             Usar exemplo

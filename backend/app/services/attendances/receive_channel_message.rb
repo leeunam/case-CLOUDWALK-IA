@@ -86,8 +86,12 @@ module Attendances
       return previous if previous && previous.status != "resolved"
 
       brand = @channel.brand
-      queue = brand.support_queues.find_by!(active: true, is_default: true)
       status, classification, invalid_fields = classify(brand)
+      if status == "ai_active"
+        queue, rule = InitialRouting.choose(brand, classification)
+      else
+        queue = brand.support_queues.find_by!(active: true, is_default: true)
+      end
       assignee = Operations::Attendant.find_by!(code: "mock", kind: "ai") if status == "ai_active"
       support_case = conversation.support_cases.create!(
         **classification, brand: brand, channel: @channel, queue: queue, assignee: assignee,
@@ -96,6 +100,7 @@ module Attendances
       )
       support_case.audit!("case.opened", actor_type: "system", from_status: nil, queue_id: queue.id,
                           classification: support_case.classification, previous_case_id: previous&.id)
+      InitialRouting.record!(support_case, rule) if status == "ai_active"
       if status == "classification_pending"
         request = Classification::Request.create!(support_case: support_case,
           classification_version: support_case.classification_version, available_at: Time.current)

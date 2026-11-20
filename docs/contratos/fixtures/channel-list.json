@@ -7,21 +7,57 @@
         "brand_id": "11111111-1111-4111-8111-111111111111",
         "brand_name": "Aurora Pagamentos",
         "name": "Chat",
-        "type": "chat"
+        "type": "chat",
+        "categories": [
+          {
+            "key": "pix",
+            "name": "Pix",
+            "active": true
+          },
+          {
+            "key": "conta_digital",
+            "name": "Conta digital",
+            "active": true
+          }
+        ]
       },
       {
         "id": "00000000-0000-4000-8000-000000000910",
         "brand_id": "22222222-2222-4222-8222-222222222222",
         "brand_name": "Horizonte Negócios",
         "name": "WhatsApp simulado",
-        "type": "whatsapp"
+        "type": "whatsapp",
+        "categories": [
+          {
+            "key": "pix",
+            "name": "Pix",
+            "active": true
+          },
+          {
+            "key": "conta_digital",
+            "name": "Conta digital",
+            "active": true
+          }
+        ]
       },
       {
         "id": "00000000-0000-4000-8000-000000000913",
         "brand_id": "22222222-2222-4222-8222-222222222222",
         "brand_name": "Horizonte Negócios",
         "name": "E-mail simulado",
-        "type": "email"
+        "type": "email",
+        "categories": [
+          {
+            "key": "pix",
+            "name": "Pix",
+            "active": true
+          },
+          {
+            "key": "conta_digital",
+            "name": "Conta digital",
+            "active": true
+          }
+        ]
       }
     ],
     "next_cursor": null

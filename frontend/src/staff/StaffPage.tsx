@@ -6,6 +6,7 @@ import { getSession, staff } from '../api/staff'
 import { categoryLabels, formatTimestamp, priorityLabels } from '../simulator/presentation'
 import { errorMessage, useResource } from '../simulator/useResource'
 import { Topbar } from '../Topbar'
+import { ConfigurationPanel } from '../configuration/ConfigurationPanel'
 import { useOpenCase } from '../useOpenCase'
 import { usePagedCases } from '../usePagedCases'
 import { StaffConversation } from './StaffConversation'
@@ -55,7 +56,8 @@ function CaseList({ filters, catalog, revision, caseId, onOpen }: {
           const brand = catalog?.brands.find(entry => entry.id === item.brand_id)?.name
           const queue = catalog?.queues.find(entry => entry.id === item.queue_id)?.name
           const category = item.classification.category
-          const label = category ? categoryLabels[category as keyof typeof categoryLabels] ?? category : 'Atendimento'
+          const name = catalog?.brands.find(entry => entry.id === item.brand_id)?.categories?.find(entry => entry.key === category)?.name
+          const label = category ? name ?? categoryLabels[category as keyof typeof categoryLabels] ?? category : 'Atendimento'
           return (
             <li key={item.id}>
               <button onClick={() => onOpen(item.id)} aria-current={caseId === item.id ? 'true' : undefined}>
@@ -80,12 +82,20 @@ function Inbox({ session, onSession, refreshSession, onLogout }: {
 }) {
   const [revision, setRevision] = useState(0)
   const [filterRevision, setFilterRevision] = useState(0)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const [filters, setFilters] = useState<ListFilters>({})
   const [caseId, setCaseId] = useOpenCase()
   const [busy, setBusy] = useState(false)
   const [operationError, setOperationError] = useState<string | null>(null)
   const { data: catalog, error: catalogError } = useResource(staff.filters, filterRevision)
   const operation = session.operation
+  const isSupervisor = session.user?.role === 'supervisor'
+  const categories = new Map<string, string>()
+  for (const brand of catalog?.brands ?? []) {
+    if (filters.brand_id && brand.id !== filters.brand_id) continue
+    const options = brand.categories ?? Object.entries(categoryLabels).map(([key, name]) => ({ key, name, active: true }))
+    for (const option of options) if (!categories.has(option.key)) categories.set(option.key, option.name)
+  }
   const refreshInbox = useCallback(() => setRevision(previous => previous + 1), [])
   const refreshAll = useCallback(() => {
     refreshInbox()
@@ -93,11 +103,15 @@ function Inbox({ session, onSession, refreshSession, onLogout }: {
   }, [refreshInbox, refreshSession])
 
   useEffect(() => {
-    const interval = window.setInterval(refreshAll, 15000)
-    window.addEventListener('online', refreshAll)
+    function refreshAccess() {
+      setFilterRevision(value => value + 1)
+      refreshAll()
+    }
+    const interval = window.setInterval(refreshAccess, 15000)
+    window.addEventListener('online', refreshAccess)
     return () => {
       window.clearInterval(interval)
-      window.removeEventListener('online', refreshAll)
+      window.removeEventListener('online', refreshAccess)
     }
   }, [refreshAll])
 
@@ -140,9 +154,12 @@ function Inbox({ session, onSession, refreshSession, onLogout }: {
   return (
     <>
       <div className="page-heading">
-        <h1>Caixa de atendimento</h1>
+        <h1>{isSupervisor ? 'Supervisão' : 'Caixa de atendimento'}</h1>
         <div className="staff-controls">
           <span>{session.user?.name}</span>
+          {isSupervisor && <button className="secondary" type="button" onClick={() => setSettingsOpen(open => !open)}>
+            {settingsOpen ? 'Caixa de atendimento' : 'Configuração operacional'}
+          </button>}
           <button className="secondary" type="button" disabled={busy} onClick={logout}>Sair da operação</button>
         </div>
       </div>
@@ -172,6 +189,7 @@ function Inbox({ session, onSession, refreshSession, onLogout }: {
       )}
       {operationError && <p className="notice catalog-notice" role="alert">{operationError}</p>}
       {catalogError && <p className="notice catalog-notice" role="alert">{catalogError}</p>}
+      {isSupervisor && settingsOpen ? <ConfigurationPanel session={session} onChange={reload} /> :
       <div className="layout">
         <aside className="panel sidebar" aria-labelledby="staff-cases-heading">
           <div className="sidebar-header">
@@ -180,7 +198,7 @@ function Inbox({ session, onSession, refreshSession, onLogout }: {
           </div>
           <div className="case-filters">
             <label>Marca
-              <select value={filters.brand_id ?? ''} onChange={event => setFilters({ ...filters, brand_id: event.target.value, queue_id: '' })}>
+              <select value={filters.brand_id ?? ''} onChange={event => setFilters({ ...filters, brand_id: event.target.value, queue_id: '', category: '' })}>
                 <option value="">Todas</option>
                 {catalog?.brands.map(brand => <option key={brand.id} value={brand.id}>{brand.name}</option>)}
               </select>
@@ -198,6 +216,16 @@ function Inbox({ session, onSession, refreshSession, onLogout }: {
                 {Object.entries(staffCaseLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
               </select>
             </label>
+            {isSupervisor && <div className="configuration-tabs">
+              <button type="button" className="secondary" aria-pressed={filters.status === 'classification_review'}
+                onClick={() => setFilters({ ...filters, status: filters.status === 'classification_review' ? '' : 'classification_review', integration_status: '' })}>
+                Em revisão
+              </button>
+              <button type="button" className="secondary" aria-pressed={filters.integration_status === 'failed'}
+                onClick={() => setFilters({ ...filters, status: '', integration_status: filters.integration_status === 'failed' ? '' : 'failed' })}>
+                Falhas da IA
+              </button>
+            </div>}
             <label>Responsável
               <select value={filters.assignee ?? ''} onChange={event => setFilters({ ...filters, assignee: event.target.value as ListFilters['assignee'] })}>
                 <option value="">Todos</option>
@@ -208,7 +236,7 @@ function Inbox({ session, onSession, refreshSession, onLogout }: {
             <label>Categoria
               <select value={filters.category ?? ''} onChange={event => setFilters({ ...filters, category: event.target.value })}>
                 <option value="">Todas</option>
-                {Object.entries(categoryLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+                {Array.from(categories, ([key, label]) => <option key={key} value={key}>{label}</option>)}
               </select>
             </label>
             <label>Prioridade
@@ -223,7 +251,7 @@ function Inbox({ session, onSession, refreshSession, onLogout }: {
         {caseId
           ? <StaffConversation key={caseId} id={caseId} session={session} filters={catalog} onOpen={setCaseId} onChanged={refreshAll} />
           : <section className="panel workspace-state"><p>Selecione um atendimento para acompanhar a conversa.</p></section>}
-      </div>
+      </div>}
     </>
   )
 }

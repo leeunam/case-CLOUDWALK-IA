@@ -28,7 +28,7 @@ export function deliveryUncertain(error: unknown) {
 }
 
 export async function request<T>(path: string, options: {
-  method?: 'POST' | 'PATCH' | 'DELETE'
+  method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   body?: object
   csrf?: string
   key?: string

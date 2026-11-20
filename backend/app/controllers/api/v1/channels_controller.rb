@@ -16,10 +16,13 @@ module Api
           channels = Operations::Channel.where(active: true, brand_id: brands.select(:id))
         end
 
-        page = paginated(channels.includes(:brand), order: [:id], scope: ["channels", identity.id])
+        page = paginated(channels.includes(brand: :categories), order: [:id], scope: ["channels", identity.id])
         items = page.fetch(:items).map do |channel|
           { id: channel.id, brand_id: channel.brand_id, brand_name: channel.brand.name,
-            name: channel.name, type: channel.kind }
+            name: channel.name, type: channel.kind,
+            categories: channel.brand.categories.select(&:active?).sort_by(&:code).map do |category|
+              Operations::ConfigurationData.category(category)
+            end }
         end
         render json: page.merge(items: items)
       end

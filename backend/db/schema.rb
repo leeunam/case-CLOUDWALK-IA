@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_19_000006) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_20_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -91,6 +91,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000006) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "catalog_version", default: 1, null: false
+    t.integer "version", default: 1, null: false
     t.index ["code"], name: "index_brands_on_code", unique: true
   end
 
@@ -235,6 +237,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000006) do
     t.index ["support_case_id", "classification_version"], name: "unique_classification_request", unique: true
   end
 
+  create_table "configuration_audits", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "actor_id", null: false
+    t.jsonb "after", null: false
+    t.jsonb "before"
+    t.uuid "brand_id", null: false
+    t.uuid "correlation_id", null: false
+    t.datetime "created_at", null: false
+    t.uuid "resource_id", null: false
+    t.string "resource_type", null: false
+    t.datetime "updated_at", null: false
+    t.integer "version", null: false
+    t.index ["actor_id"], name: "index_configuration_audits_on_actor_id"
+    t.index ["brand_id", "created_at", "id"], name: "index_configuration_audits_on_brand_id_and_created_at_and_id"
+    t.index ["brand_id", "resource_type", "resource_id", "created_at", "id"], name: "configuration_audits_by_resource"
+  end
+
   create_table "queue_teams", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "brand_id", null: false
     t.uuid "support_queue_id", null: false
@@ -243,6 +261,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000006) do
     t.datetime "updated_at", null: false
     t.index ["brand_id"], name: "index_queue_teams_on_brand_id"
     t.index ["support_queue_id", "brand_team_id"], name: "index_queue_teams_on_support_queue_id_and_brand_team_id", unique: true
+  end
+
+  create_table "routing_rules", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "active", null: false
+    t.uuid "brand_id", null: false
+    t.string "category"
+    t.datetime "created_at", null: false
+    t.integer "position", null: false
+    t.string "priority"
+    t.uuid "queue_id", null: false
+    t.datetime "updated_at", null: false
+    t.integer "version", default: 1, null: false
+    t.index ["brand_id", "position"], name: "index_routing_rules_on_brand_id_and_position", unique: true, where: "active"
+    t.index ["brand_id"], name: "index_routing_rules_on_brand_id"
+    t.index ["queue_id", "brand_id"], name: "index_routing_rules_on_queue_id_and_brand_id", where: "active"
+    t.check_constraint "position > 0 AND (category IS NOT NULL OR priority IS NOT NULL)", name: "routing_rule_with_filter"
   end
 
   create_table "supervisor_brands", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -296,6 +330,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000006) do
     t.boolean "is_default", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "version", default: 1, null: false
     t.index ["brand_id", "code"], name: "index_support_queues_on_brand_id_and_code", unique: true
     t.index ["brand_id"], name: "index_support_queues_on_brand_id"
     t.index ["brand_id"], name: "one_default_queue_per_brand", unique: true, where: "is_default"
@@ -318,7 +353,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000006) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "orphaned_from_brand_id"
+    t.integer "version", default: 1, null: false
     t.index ["code"], name: "index_teams_on_code", unique: true
+    t.index ["orphaned_from_brand_id"], name: "index_teams_on_orphaned_from_brand_id"
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -357,9 +395,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000006) do
   add_foreign_key "channels", "brands"
   add_foreign_key "classification_attempts", "classification_requests"
   add_foreign_key "classification_requests", "support_cases"
+  add_foreign_key "configuration_audits", "brands"
+  add_foreign_key "configuration_audits", "users", column: "actor_id"
   add_foreign_key "queue_teams", "brand_teams", column: ["brand_team_id", "brand_id"], primary_key: ["id", "brand_id"]
   add_foreign_key "queue_teams", "brands"
   add_foreign_key "queue_teams", "support_queues", column: ["support_queue_id", "brand_id"], primary_key: ["id", "brand_id"]
+  add_foreign_key "routing_rules", "brands"
+  add_foreign_key "routing_rules", "support_queues", column: ["queue_id", "brand_id"], primary_key: ["id", "brand_id"]
   add_foreign_key "supervisor_brands", "brands"
   add_foreign_key "supervisor_brands", "users"
   add_foreign_key "support_cases", "attendants", column: "assignee_id"
@@ -371,6 +413,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000006) do
   add_foreign_key "support_queues", "brands"
   add_foreign_key "team_memberships", "teams"
   add_foreign_key "team_memberships", "users"
+  add_foreign_key "teams", "brands", column: "orphaned_from_brand_id"
   add_foreign_key "users", "brands", column: "active_brand_id"
   add_foreign_key "users", "brands", column: "switch_target_brand_id"
 end
