@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import type { CaseFilters, Session, StaffCommand } from '../api/contract'
 import { ApiError, accessLost, deliveryUncertain } from '../api/http'
@@ -9,6 +9,8 @@ import { errorMessage, useResource } from '../simulator/useResource'
 import { Transcript } from '../Transcript'
 import { useCaseRefresh } from '../useCaseRefresh'
 import { SupervisorActions } from './SupervisorActions'
+import { beginCommandAttempt } from './commandAttempt'
+import type { CommandAttempt } from './commandAttempt'
 import { staffCaseLabels } from './presentation'
 
 const blocks: Record<string, string> = {
@@ -20,8 +22,6 @@ const blocks: Record<string, string> = {
   no_eligible_analyst: 'A fila aguarda um analista elegível.',
   queue_access_revoked: 'O responsável perdeu acesso à fila.',
 }
-
-type Attempt = { command: StaffCommand; key: string }
 
 const retryLabels: Record<StaffCommand['type'], string> = {
   reply: 'Confirmar resposta anterior',
@@ -42,10 +42,12 @@ export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
 }) {
   const [revision, setRevision] = useState(0)
   const [text, setText] = useState('')
-  const [busy, setBusy] = useState(false)
   const [commandError, setCommandError] = useState<string | null>(null)
   const [confirmation, setConfirmation] = useState<string | null>(null)
-  const [pending, setPending] = useState<Attempt | null>(null)
+  const [attempt, setAttempt] = useState<CommandAttempt | null>(null)
+  const latestAttempt = useRef<CommandAttempt | null>(null)
+  const busy = attempt?.status === 'sending' || attempt?.status === 'confirming'
+  const pending = attempt?.status === 'sending' ? null : attempt
   const refresh = useCallback(() => setRevision(value => value + 1), [])
   const load = useCallback(() => staff.getConversation(id), [id])
   const { data, error, loading, replaceData } = useResource(load, revision)
@@ -77,27 +79,31 @@ export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
     const command: StaffCommand = kind === 'resolve'
       ? { type: kind, expected_version: detail.version }
       : { type: kind, expected_version: detail.version, text: body }
-    await runCommand({ command, key: crypto.randomUUID() }, false)
+    await runCommand(command)
   }
 
-  async function runCommand(attempt: Attempt, confirming: boolean) {
-    setBusy(true)
+  function updateAttempt(next: CommandAttempt | null) {
+    latestAttempt.current = next
+    setAttempt(next)
+  }
+
+  async function runCommand(command?: StaffCommand) {
+    if (loading || (!command && !canConfirm)) return false
+    const current = beginCommandAttempt(latestAttempt.current, version, command)
+    if (!current) return false
+
+    updateAttempt(current)
     setCommandError(null)
     setConfirmation(null)
     try {
-      await staff.command(id, attempt.command, session, attempt.key)
-      setPending(null)
-      setText('')
-      if (confirming) setConfirmation('A tentativa anterior foi confirmada. Confira o estado atual antes de iniciar outra ação.')
-      else if (supervisor) setConfirmation('Ação de supervisão aplicada.')
-      refresh()
-      onChanged()
+      await staff.command(id, current.command, session, current.key)
     } catch (failure) {
-      setPending(deliveryUncertain(failure) ? attempt : null)
+      const stillUncertain = deliveryUncertain(failure) || (current.status === 'confirming' && accessLost(failure))
+      updateAttempt(stillUncertain ? { ...current, status: 'uncertain' } : null)
       if (accessLost(failure)) replaceData(null)
       if (failure instanceof ApiError && failure.status === 409) {
         setCommandError(failure.code === 'version_conflict'
-          ? 'O atendimento foi atualizado. Confira o estado atual e tente novamente. Seu rascunho foi preservado.'
+          ? 'O atendimento foi atualizado. Confira o estado atual antes de tentar novamente.'
           : errorMessage(failure))
         refresh()
         onChanged()
@@ -105,9 +111,16 @@ export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
         setCommandError(errorMessage(failure))
         if (accessLost(failure)) { refresh(); onChanged() }
       }
-    } finally {
-      setBusy(false)
+      return false
     }
+
+    updateAttempt(null)
+    setText('')
+    if (current.status === 'confirming') setConfirmation('A tentativa anterior foi confirmada. Confira o estado atual antes de iniciar outra ação.')
+    else if (supervisor) setConfirmation('Ação de supervisão aplicada.')
+    refresh()
+    onChanged()
+    return true
   }
 
   const category = detail?.classification.category
@@ -166,17 +179,18 @@ export function StaffConversation({ id, session, filters, onOpen, onChanged }: {
             {'text' in pending.command && <p>{pending.command.text}</p>}
             <div className="composer-actions staff-actions">
               <button className="primary" type="button" disabled={busy || loading || !canConfirm}
-                onClick={() => void runCommand(pending, true)}>{retryLabels[pending.command.type]}</button>
+                onClick={() => void runCommand()}>{retryLabels[pending.command.type]}</button>
               <button className="secondary" type="button" disabled={busy} onClick={() => {
-                setPending(null)
+                if (latestAttempt.current?.status !== 'uncertain') return
+                updateAttempt(null)
                 setCommandError(null)
               }}>Preparar outra ação</button>
             </div>
           </div>
         )}
-        {detail && supervisor && !error && !pending &&
+        {detail && supervisor && !error &&
           <SupervisorActions detail={detail} filters={filters} revision={revision}
-            run={command => runCommand({ command, key: crypto.randomUUID() }, false)} />}
+            disabled={loading || busy || !!pending} run={runCommand} />}
         {canAct && !pending && (
           <form className="composer" onSubmit={send}>
             <label htmlFor="staff-reply">Resposta ao cliente</label>

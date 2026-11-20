@@ -1195,6 +1195,9 @@ paths:
         '422':
           $ref: '#/components/responses/Error422'
   /api/v1/analysts/{analyst_id}/capacity-profile:
+    description: A leitura e a edição do perfil vigente exigem autorização integral sobre os vínculos atuais do analista
+      e suas categorias. Cada chave deve estar ativa em alguma marca do supervisor ou constar exclusivamente no
+      histórico de suas marcas. A API responde com 403 quando existem alternativas fora desse escopo.
     parameters:
     - name: analyst_id
       in: path
