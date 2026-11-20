@@ -8,14 +8,17 @@ const base = __ENV.F08_API || 'http://api:3000';
 const channels = config.channels;
 const secret = __ENV.CLOUDWALK_CHANNEL_SECRET;
 const scenarios = {};
-const offsets = {};
+const bounds = {};
 let elapsed = 0;
 let offset = 0;
 for (const [index, [rate, seconds]] of config.stages.entries()) {
   const name = `stage_${index}`;
-  offsets[name] = offset;
+  bounds[name] = { offset, count: rate * seconds };
+  // A primeira chegada é imediata. Uma margem menor que meio intervalo
+  // coloca o slot N+1 fora da janela, inclusive quando o k6 o descartaria.
+  const timeUnitNs = Math.round((seconds + Math.min(0.01, 0.5 / rate)) * 1e9);
   scenarios[name] = {
-    executor: 'constant-arrival-rate', exec: 'initial', rate, timeUnit: '1s',
+    executor: 'constant-arrival-rate', exec: 'initial', rate: rate * seconds, timeUnit: `${timeUnitNs}ns`,
     startTime: `${elapsed}s`, duration: `${seconds}s`, gracefulStop: '5s',
     preAllocatedVUs: config.vus, maxVUs: config.vus,
   };
@@ -44,7 +47,14 @@ function accepted(response) {
 }
 
 export function initial() {
-  const item = entries[offsets[exec.scenario.name] + exec.scenario.iterationInTest];
+  const stage = exec.scenario.name;
+  const iteration = exec.scenario.iterationInTest;
+  const { offset, count } = bounds[stage];
+  if (iteration >= count) {
+    log({ type: 'stage_overflow', stage, iteration });
+    return;
+  }
+  const item = entries[offset + iteration];
   const channel = channels[item.brand][item.kind];
   const raw = JSON.stringify(item.initial);
   const sent = Date.now();
@@ -56,7 +66,7 @@ export function initial() {
   });
   const finished = Date.now();
   log({
-    type: 'initial', source_event_id: item.initial.source_event_id, index: item.index, channel_id: channel,
+    type: 'initial', stage, iteration, source_event_id: item.initial.source_event_id, index: item.index, channel_id: channel,
     scenario_start_ms: exec.scenario.startTime, sent_ms: sent, finished_ms: finished, elapsed_ms: finished - sent,
     status: response.status, error_code: response.error_code ?? null, ...accepted(response),
   });

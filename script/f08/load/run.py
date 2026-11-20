@@ -12,10 +12,11 @@ import threading
 import time
 from pathlib import Path
 
-from protocol import DIRECTORY, ROOT, append, now_ms, plan, utc, write_json
+from protocol import DIRECTORY, append, now_ms, plan, utc, write_json
 from report import publish, render_matrix
 
 
+ROOT = DIRECTORY.parents[2]
 PROJECT = "cloudwalk_f08_load"
 BASE = "f23b21e53357f926e8ca1ba3c3a11da7242daf9a"
 SERVICES = ("api", "worker", "outbox", "requests", "events", "mock", "observe")
@@ -47,25 +48,54 @@ class Stack:
         self.compose = ["compose", "-p", PROJECT, "--env-file", str(DIRECTORY / "stack.env"),
                         "-f", "compose.yml", "-f", str(DIRECTORY / "compose.yml")]
 
+    def operation(self, args):
+        command = list(args)
+        if command[:len(self.compose)] == self.compose:
+            command = command[len(self.compose):]
+            while command[:1] == ["--profile"]:
+                command = command[2:]
+            return "compose " + (command[0] if command else "indisponível")
+        return " ".join(command[:2])
+
+    def diagnostic(self, stderr):
+        # Somente causas conhecidas. O stderr do build pode conter comandos, credenciais ou configuração.
+        causes = {"permission denied": "permissão negada", "cannot connect to the docker daemon": "daemon indisponível",
+                  "unauthorized": "autenticação recusada", "pull access denied": "acesso à imagem recusado",
+                  "manifest unknown": "manifesto da imagem ausente", "no space left": "espaço em disco insuficiente",
+                  "no such host": "DNS não resolveu o endereço", "i/o timeout": "timeout de rede",
+                  "connection refused": "conexão recusada", "unhealthy": "verificação de saúde falhou",
+                  "failed to solve": "falha no build", "failed to complete successfully": "serviço de preparação falhou",
+                  "context deadline exceeded": "prazo da operação excedido"}
+        text = stderr.lower()
+        hints = [description for fragment, description in causes.items() if fragment in text]
+        affected = [service for service in (*SERVICES, "generator", "db_setup", "kafka_setup", "db", "kafka")
+                    if f"{PROJECT}-{service}-" in text]
+        if affected:
+            hints.append("serviços citados: " + ", ".join(affected))
+        return "; ".join(hints) or "sem causa reconhecida no diagnóstico"
+
     def command(self, *args, timeout=30, check=True):
         try:
             result = subprocess.run(["docker", *args], cwd=ROOT, env=self.env, capture_output=True,
                                     text=True, timeout=timeout)
         except (OSError, subprocess.TimeoutExpired) as error:
-            raise Blocked(f"Docker {' '.join(args[:2])}: {type(error).__name__}") from error
+            raise Blocked(f"Docker {self.operation(args)}: {type(error).__name__}") from error
         if check and result.returncode:
-            diagnostics = result.stderr.lower()
-            if "permission denied" in diagnostics:
-                raise Blocked("Docker recusou acesso ao daemon ou ao recurso necessário (permission denied)")
-            if "cannot connect to the docker daemon" in diagnostics:
-                raise Blocked("Daemon Docker indisponível")
-            raise Blocked(f"Docker {' '.join(args[:2])} devolveu código {result.returncode}")
+            raise Blocked(f"Docker {self.operation(args)} devolveu código {result.returncode}: "
+                          f"{self.diagnostic(result.stderr)}")
         return result
 
     def call(self, *args, **kwargs):
         return self.command(*self.compose, *args, **kwargs)
 
     def preflight(self):
+        host = self.env.get("DOCKER_HOST")
+        if not host or self.env.get("DOCKER_CONTEXT"):
+            context = self.command("context", "show").stdout.strip()
+            host = self.command("context", "inspect", context,
+                                "--format", "{{.Endpoints.docker.Host}}").stdout.strip()
+        if not host.startswith("unix://"):
+            raise Blocked("O ensaio requer daemon Docker local via socket Unix para comparar recursos do host")
         daemon = json.loads(self.command("info", "--format", "{{json .}}").stdout)
         for kind, arguments in (("contêiner", ("ps", "-aq")), ("rede", ("network", "ls", "-q")),
                                 ("volume", ("volume", "ls", "-q"))):
@@ -121,9 +151,10 @@ class Stack:
             try:
                 ids = self.command("ps", "-q", "--filter", PROJECT_FILTER, timeout=4).stdout.split()
                 fmt = '{{.ID}}\t{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}\t{{.PIDs}}'
-                stats = self.command("stats", "--no-stream", "--no-trunc", "--format", fmt, *ids, timeout=8)
+                lines = (self.command("stats", "--no-stream", "--no-trunc", "--format", fmt, *ids,
+                                      timeout=8).stdout.splitlines() if ids else [])
                 processes = [dict(zip(("id", "container", "cpu_percent", "ram_used_limit", "ram_percent", "pids"),
-                                      line.split("\t"))) for line in stats.stdout.splitlines()] if ids else []
+                                      line.split("\t"))) for line in lines]
                 row = {"containers": processes, "load_average": list(os.getloadavg())}
                 proc_stat = Path("/proc/stat")
                 if proc_stat.exists():
@@ -259,11 +290,11 @@ def round_run(output, config):
         ready = wait_file(output / "ready.json", 150, failure=output / "observer-failure.json")
         manifest["readiness"] = ready
         write_json(output / "config.json", {**config, "channels": ready["channels"]})
-        resource_job = threading.Thread(target=stack.resources, args=(stop,))
-        resource_job.start()
         chat = config["chat"]
         generator = stack.generator("chat.js" if chat else "generate.js")
         started = wait_setup(output, generator)
+        resource_job = threading.Thread(target=stack.resources, args=(stop,))
+        resource_job.start()
         arrival_seconds = chat["ramp_seconds"] + chat["hold_seconds"] if chat else sum(s for _, s in config["stages"])
         window = {"start_ms": started, "arrivals_end_ms": started + arrival_seconds * 1000,
                   "end_ms": started + (arrival_seconds + config["observe_seconds"]) * 1000}
@@ -409,10 +440,18 @@ def main(argv=None):
         except BlockingIOError:
             raise Blocked(f"Já existe um runner {PROJECT} ativo para este usuário") from None
         summaries = []
-        for config in configurations(args):
+        planned = list(configurations(args))
+        for index, config in enumerate(planned):
             config["run_id"] = f"{batch_id}-{config['ordinal']:02}"
             result = round_run(folder / config["run_id"], config)
+            if result.get("cleanup") not in (None, "concluída") and result["state"] != "bloqueado":
+                result.update(state="bloqueado", reason="limpeza interrompida: " + result["cleanup"])
             summaries.append(result)
+            if result["state"] == "bloqueado":
+                for pending in planned[index + 1:]:
+                    summaries.append({"run_id": f"{batch_id}-{pending['ordinal']:02}", "parameters": pending,
+                                      "state": "não executada", "executed": False,
+                                      "reason": f"Interrompida após {config['run_id']}: {result['reason']}"})
             print(f"{config['run_id']} {result['state']} — {folder / config['run_id'] / 'report.md'}", flush=True)
             write_json(folder / "matrix.json", summaries)
             (folder / "matrix.md").write_text(render_matrix(summaries))

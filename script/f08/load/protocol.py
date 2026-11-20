@@ -11,7 +11,6 @@ from urllib.error import HTTPError, URLError
 from urllib.request import ProxyHandler, Request, build_opener
 
 
-ROOT = Path(__file__).resolve().parents[3]
 DIRECTORY = Path(__file__).resolve().parent
 RESULTS = Path("/results")
 API = "http://api:3000"
