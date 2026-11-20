@@ -156,26 +156,37 @@ class ConfigurationDomainRacesTest < ActiveSupport::TestCase
     ready = Queue.new
     workers = []
     held_record.with_lock do
-      connection = ActiveRecord::Base.lease_connection
-      blocker = connection.select_value("SELECT pg_backend_pid()").to_i
-      [first, second].each do |operation|
+      connection = ActiveRecord::Base.lease_connection.raw_connection
+      blocker = connection.backend_pid
+      [first, second].each_with_index do |operation, index|
         workers << Thread.new do
           ActiveRecord::Base.connection_pool.with_connection do |worker_connection|
-            ready << worker_connection.select_value("SELECT pg_backend_pid()").to_i
+            ready << worker_connection.raw_connection.backend_pid
             operation.call
           end
         end
         pid = Timeout.timeout(5) { ready.pop }
-        Timeout.timeout(5) do
-          until connection.select_value("SELECT #{blocker} = ANY(pg_blocking_pids(#{pid}))")
-            sleep 0.01
-          end
-        end
+        wait_for_lock(connection, pid, blocker, index + 1)
         blocker = pid
       end
     end
     Timeout.timeout(10) { workers.each(&:value) }
   ensure
     workers&.each(&:join)
+  end
+
+  def wait_for_lock(connection, pid, blocker, step)
+    query = "SELECT 1 WHERE $1::integer = ANY(pg_blocking_pids($2::integer))"
+    Timeout.timeout(5) do
+      until connection.exec_params(query, [blocker, pid]).ntuples == 1
+        sleep 0.01
+      end
+    end
+  rescue Timeout::Error
+    activity = connection.exec_params(<<~SQL, [pid, blocker]).to_a
+      SELECT pid, state, wait_event_type, wait_event, pg_blocking_pids(pid) AS blockers, left(query, 160) AS query
+        FROM pg_stat_activity WHERE pid IN ($1::integer, $2::integer)
+    SQL
+    flunk "Etapa #{step}: PostgreSQL #{pid} não aguardou #{blocker}. Atividade: #{activity.inspect}"
   end
 end
