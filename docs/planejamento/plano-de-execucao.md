@@ -22,7 +22,10 @@ conjunta passou com 86 testes Rails e 1.065 asserções (uma omissão TypeSafe),
 de robustez dos fluxos F02–F05. A [integração F06/F07-A](../integracao-f06-f07.md)
 registra os resultados e a complementação administrativa da F07, incluindo
 revogação com uma sessão WebSocket já aberta. F06 e F07 têm aceite local
-concluído. Carga, avaliação real do Jev e publicação seguem pendentes.
+concluído. A F08 executou a referência de carga: cinco rodadas aprovadas e
+uma reprovada por encerramento dos consumidores após a retomada do Kafka.
+O [relatório F08](../f08.md) conserva os resultados e o diagnóstico. A correção
+da recuperação, a avaliação real do Jev e a publicação seguem pendentes.
 
 A [passagem da F08](passagem-f08.md) separa o gerador/observador de carga
 do dataset/avaliador Jev, com arquivos próprios e a mesma base Git. A execução
@@ -100,7 +103,7 @@ Evidências mínimas incluem testes automatizados do domínio e integração, ro
 
 **Hipótese principal.** O outbox permite que o Rails mantenha solicitações pendentes durante interrupção temporária do Kafka e conclua o processamento depois da recuperação, sem perda nem duplicação de efeitos em casos aceitos.
 
-1. Usar k6 com taxa de chegadas fixa e dados sintéticos em três canais e duas marcas. Fixar semente e versões, registrar CPU, memória, réplicas, conexões de banco e concorrência dos workers. O ensaio principal usa classificação válida, mock determinístico com latência fixa, e 20% dos casos com segundo turno. Exercitar handoff e carteira em cenário separado com analistas sintéticos e ações roteirizadas.
+1. Usar k6 com taxa de chegadas fixa e dados sintéticos em três canais e duas marcas. Fixar semente e versões, registrar CPU, memória, réplicas, conexões de banco e concorrência dos workers. O ensaio principal usa classificação válida, mock determinístico sem atraso artificial injetado, e 20% dos casos com segundo turno. O tempo real do processamento continua medido. Exercitar handoff e carteira em cenário separado com analistas sintéticos e ações roteirizadas.
 2. Comparar três rodadas de 5 minutos a **5 novos casos/s** com Kafka disponível e três com Kafka interrompido por 30 segundos após o primeiro minuto. Manter os outros parâmetros. Gerar os retornos de cliente em intervalo fixo. Aguardar até dois minutos após o fim da carga para observar o escoamento.
 3. Medir p50/p95 de webhook até aceite e de webhook até primeira resposta persistida, vazão, taxa de erro e iterações descartadas pelo gerador, maior backlog, tempo de recuperação, CPU/RAM e contagem de efeitos duplicados/perdidos por ID. Critério inicial proposto para a carga de referência: p95 do aceite até 500 ms, pelo menos 99% de webhooks aceitos, zero efeitos duplicados ou perdidos entre os casos aceitos e escoamento até o fim da janela de observação. Publicar resultados mesmo quando a meta falhar. Reportar separadamente o tempo de resposta ao cliente durante a falha. [Modelos de carga do k6](https://grafana.com/docs/k6/latest/using-k6/scenarios/concepts/open-vs-closed/)
 4. Aumentar a taxa progressivamente para identificar o primeiro gargalo. Como ensaio exploratório separado, testar **100 → 1.000 → 10.000 conexões de chat** em patamares, com uma mensagem por sessão a cada 100 segundos em média, distribuída ao longo do intervalo. O último patamar equivale a cerca de **100 mensagens/s**. Informar se eram novas conversas ou mensagens de seguimento, quantas conexões ficaram abertas, o patamar efetivamente alcançado e se o gerador virou gargalo. Esse cenário mede conexões e tráfego, enquanto o principal mede novos casos e recuperação. O TAPI não fixa 10 mil conexões ou essa taxa. [Enunciado do TAPI](../../TAPI_Inteli_CloudWalk_HelpDesk_AgentesIA.pdf)
@@ -114,7 +117,7 @@ Evidências mínimas incluem testes automatizados do domínio e integração, ro
 - Scripts de carga, dados sintéticos, resultados, gráficos ou tabelas e metodologia para reproduzir.
 - README com problema, escopo, arquitetura, instalação, execução, modelos e configuração, método experimental, resultados, limitações e evolução.
 
-A versão do Jev e as credenciais necessárias ao ensaio ao vivo serão verificadas em F04. A aplicação local e o experimento de carga de referência rodam com os campos de entrada válidos ou o modo de teste, conforme a evidência desejada. Nenhum resultado de carga ou qualidade está medido nesta fase.
+A versão do Jev e as credenciais necessárias ao ensaio ao vivo têm verificação própria em F04/F08. A aplicação local e o experimento de carga de referência rodam com os campos de entrada válidos ou o modo de teste, conforme a evidência desejada. Os resultados de carga estão em [F08](../f08.md); a qualidade, a latência e o custo reais do Jev ainda não foram medidos. Os cenários exploratórios de aumento de taxa, atendimento humano e dez mil conexões permanecem preparados, sem resultado de capacidade.
 
 ### Publicação da demonstração por URL
 

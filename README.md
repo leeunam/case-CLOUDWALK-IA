@@ -16,7 +16,9 @@ do analista; as fixtures ficam no modo explícito `/?fixture=demo`.
 A F06 fornece configuração administrativa e supervisão. A F07-A verifica os
 cinco cenários de robustez dos fluxos F02–F05 sobre a base integrada da F06.
 A matriz administrativa foi complementada com concorrência no PostgreSQL e
-revogação em REST e WebSocket reais. Carga e publicação continuam no plano.
+revogação em REST e WebSocket reais. A F08 fornece carga e avaliação offline;
+a referência encontrou uma falha de recuperação dos consumidores Kafka.
+A avaliação real do Jev e a publicação continuam pendentes.
 
 Verificação local da F01 em 2026-11-17 passou com cinco testes Rails e quatorze
 asserções, OpenAPI e 43 fixtures, build React/TypeScript, execução de um job
@@ -50,6 +52,15 @@ instalação pelo lockfile e build, 10 testes da ponte, 12 do verificador e
 47 fixtures contratuais. A configuração e a recuperação por supervisão foram
 percorridas no navegador. Resultados, reprodução e limites estão na
 [integração F06/F07-A](docs/integracao-f06-f07.md).
+
+Na F08 de 2026-11-20, os 36 testes da carga e os 15 do avaliador passaram.
+Foram medidas três rodadas por condição: cinco aprovadas e uma reprovada após
+a interrupção do Kafka. Todas as 9.000 entradas iniciais receberam `202`, mas
+1.199 ficaram sem primeira resposta na rodada reprovada. O
+[relatório F08](docs/f08.md) preserva os dados, denominadores e limitações,
+incluindo o [diagnóstico de recuperação](docs/f08-incidente-consumo.md).
+O modo offline não mede a qualidade do Jev real; dez mil conexões de chat
+ainda não foram ensaiadas.
 
 - [Escopo e arquitetura](docs/planejamento/especificacao-mvp.md)
 - [Backlog e critérios de aceite](docs/planejamento/plano-de-execucao.md)

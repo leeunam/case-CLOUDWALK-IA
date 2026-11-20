@@ -1,0 +1,425 @@
+{
+  "schema_version": 1,
+  "run_id": "f08-reference-1795208792430-8b61b6-04",
+  "scenario": "reference",
+  "revision": "dfbcc79f4ced07e5460eb73d06e956d94799d453",
+  "base": "f23b21e53357f926e8ca1ba3c3a11da7242daf9a",
+  "source_sha256": {
+    "script/f08/load/.gitignore": "3bc700f6694d5f65919fafe46d8b37aa1b00ec40adcdd6de5da87df45d1f70bb",
+    "script/f08/load/Dockerfile": "fa8edae20d949b00d737552dd6cebc4f615f793f4d32485b5d764fd2110f819c",
+    "script/f08/load/chat.js": "c09587de9516b5f243dde90427e79030bd55788fe9a91903a3417f6a33487c3e",
+    "script/f08/load/compose.yml": "5e2449807c9a80594187e15e2eb559b8eeb5cb5fe03fb30a19dd17edebae3d56",
+    "script/f08/load/generate.js": "f8015fde7ef7925c0d5db0931740ba1400bb404ed016d98693728230c453053b",
+    "script/f08/load/human.py": "10c609818e3aa09bef00f07d8a617bc4c8087ec61f04ad3e5bdcae179f94f772",
+    "script/f08/load/kafka_capture.py": "f3b0450e506b98d93e21fff1de29cedf9daea01e5bb928e236e31acdb235aa4f",
+    "script/f08/load/kafka_probe.py": "e0eaf2239106f4eae8e4ca06ac3e75ccc439eb2403973c95e0a279f45068992c",
+    "script/f08/load/kafka_reader.py": "39cab4f4bbf413fa42c0177773d7b5e1fe98ed77b963f72644b1138975c8403d",
+    "script/f08/load/observations.sql": "2427ae65742890308345ac80841b6a797531ef82c49bbef32b377a2722b502e8",
+    "script/f08/load/observe.py": "69197b22caa68e1086d40dc267fb958ed5534c8682e75e46ec0fb82458f670a2",
+    "script/f08/load/protocol.py": "19fffaa1e2e46d87f05f09d80fb672a820a9c94bec280d6ee37e40c201775fdf",
+    "script/f08/load/report.py": "50fbb92de6d1ca23619d90bab5e8c1dfc03252f06fa232f14e813bc83b2f8ee7",
+    "script/f08/load/requirements.txt": "53952f78047286129f258a319adc87202c1782765924662bf0b019b989e3e2d0",
+    "script/f08/load/results.schema.json": "27e19ec634b589e1a6f452960cbfce85f6757571d74c2f2fe2b641d532ac29d5",
+    "script/f08/load/run.py": "b3565d76da808945d55389b3c9838e7a79ca53a45ee8f9d42c4e83b20c851cd3",
+    "script/f08/load/snapshot.sql": "48612fc20fb9b430f11352b87a42dcc251419f59c60bafa349d7830683167196",
+    "script/f08/load/stack.env": "670899ceb64c325fda736f3596ef38895ace30e73f9752c56945497f040016bf",
+    "script/f08/load/summary.js": "04e78e7b669e6947b0380776c57af0e0ab8e40f6510f123cf85416ad573c0bd3",
+    "script/f08/load/test_load.py": "76832ec14044d94a67105eb370e2d2df6f49bade7deae7034dfce94bb52f0fd6",
+    "script/f08/load/test_probe.py": "0d1a5f44e8208dc4c9d5ff6c8684268c92ce56a64f852967d3ebcdac4fa2ac24",
+    "script/f08/load/test_wire.js": "5538dc1510b870794c8c5347f8ca3c8fcdfb03077d320d6eb5be820e9d58d360",
+    "script/f08/load/wire.js": "ec1b31e3f59e2d8505f6dd5d1efe038b24cb0a596eb7899c5e61f25ecdd39503"
+  },
+  "started_ms": 1795210165497,
+  "parameters": {
+    "scenario": "reference",
+    "ordinal": 4,
+    "seed": 8026,
+    "stages": [
+      [
+        5,
+        300
+      ]
+    ],
+    "observe_seconds": 120,
+    "vus": 50,
+    "fault_after_seconds": 60,
+    "fault_seconds": 30,
+    "chat": null,
+    "run_id": "f08-reference-1795208792430-8b61b6-04"
+  },
+  "compose_project": "cloudwalk_f08_load",
+  "mock": {
+    "implementation": "integration/agent_flow.py",
+    "artificial_delay": false
+  },
+  "jev": {
+    "configured_mode": "disabled",
+    "credential_present": false
+  },
+  "topology": {
+    "puma_threads": 5,
+    "solid_queue_processes": 1,
+    "solid_queue_threads_per_process": 3,
+    "outbox_processes": 1,
+    "replicas_per_service": 1,
+    "kafka_partitions_per_topic": 3
+  },
+  "runner_host": {
+    "python": "3.11.13",
+    "kernel": "7.0.0-43-generic",
+    "cpu_logical": 12,
+    "architecture": "x86_64",
+    "rlimit_nofile": [
+      524288,
+      524288
+    ]
+  },
+  "observer": {
+    "sql_period_ms": 2000,
+    "eligibility_period_ms": 250,
+    "kafka_period_ms": 5000,
+    "resources_period_ms": 5000,
+    "followup_workers": 32,
+    "kafka_lag_timeout_ms": 8000,
+    "kafka_evidence_timeout_ms": 52000,
+    "kafka_client_scope": "subprocesso por leitura"
+  },
+  "started_at_utc": "2026-11-20T21:29:25.497000+00:00",
+  "compose_version": "5.1.0",
+  "configured_limits": {
+    "api": {
+      "image": null,
+      "cpus": null,
+      "cpuset": null,
+      "mem_limit": null,
+      "mem_reservation": null,
+      "pids_limit": null,
+      "ulimits": null,
+      "deploy": null,
+      "scale": null
+    },
+    "db": {
+      "image": "postgres:17-alpine@sha256:a77aa70e641402a21411b92b721c58d10f23b50ae5fdd2333efd22d166e1e5f7",
+      "cpus": null,
+      "cpuset": null,
+      "mem_limit": null,
+      "mem_reservation": null,
+      "pids_limit": null,
+      "ulimits": null,
+      "deploy": null,
+      "scale": null
+    },
+    "db_setup": {
+      "image": null,
+      "cpus": null,
+      "cpuset": null,
+      "mem_limit": null,
+      "mem_reservation": null,
+      "pids_limit": null,
+      "ulimits": null,
+      "deploy": null,
+      "scale": null
+    },
+    "events": {
+      "image": null,
+      "cpus": null,
+      "cpuset": null,
+      "mem_limit": null,
+      "mem_reservation": null,
+      "pids_limit": null,
+      "ulimits": null,
+      "deploy": null,
+      "scale": null
+    },
+    "generator": {
+      "image": "grafana/k6:2.3.0",
+      "cpus": null,
+      "cpuset": null,
+      "mem_limit": null,
+      "mem_reservation": null,
+      "pids_limit": null,
+      "ulimits": null,
+      "deploy": null,
+      "scale": null
+    },
+    "kafka": {
+      "image": "apache/kafka:4.4.0@sha256:833b867a9585a141da455dc2b57431c65cbccb27f11c91f694444cca9f777e0f",
+      "cpus": null,
+      "cpuset": null,
+      "mem_limit": null,
+      "mem_reservation": null,
+      "pids_limit": null,
+      "ulimits": null,
+      "deploy": null,
+      "scale": null
+    },
+    "kafka_setup": {
+      "image": "apache/kafka:4.4.0@sha256:833b867a9585a141da455dc2b57431c65cbccb27f11c91f694444cca9f777e0f",
+      "cpus": null,
+      "cpuset": null,
+      "mem_limit": null,
+      "mem_reservation": null,
+      "pids_limit": null,
+      "ulimits": null,
+      "deploy": null,
+      "scale": null
+    },
+    "mock": {
+      "image": null,
+      "cpus": null,
+      "cpuset": null,
+      "mem_limit": null,
+      "mem_reservation": null,
+      "pids_limit": null,
+      "ulimits": null,
+      "deploy": null,
+      "scale": null
+    },
+    "observe": {
+      "image": null,
+      "cpus": null,
+      "cpuset": null,
+      "mem_limit": null,
+      "mem_reservation": null,
+      "pids_limit": null,
+      "ulimits": null,
+      "deploy": null,
+      "scale": null
+    },
+    "outbox": {
+      "image": null,
+      "cpus": null,
+      "cpuset": null,
+      "mem_limit": null,
+      "mem_reservation": null,
+      "pids_limit": null,
+      "ulimits": null,
+      "deploy": null,
+      "scale": null
+    },
+    "requests": {
+      "image": null,
+      "cpus": null,
+      "cpuset": null,
+      "mem_limit": null,
+      "mem_reservation": null,
+      "pids_limit": null,
+      "ulimits": null,
+      "deploy": null,
+      "scale": null
+    },
+    "web": {
+      "image": null,
+      "cpus": null,
+      "cpuset": null,
+      "mem_limit": null,
+      "mem_reservation": null,
+      "pids_limit": null,
+      "ulimits": null,
+      "deploy": null,
+      "scale": null
+    },
+    "worker": {
+      "image": null,
+      "cpus": null,
+      "cpuset": null,
+      "mem_limit": null,
+      "mem_reservation": null,
+      "pids_limit": null,
+      "ulimits": null,
+      "deploy": null,
+      "scale": null
+    }
+  },
+  "docker_host": {
+    "ServerVersion": "29.3.0",
+    "OperatingSystem": "Ubuntu 26.04.1 LTS",
+    "OSType": "linux",
+    "Architecture": "x86_64",
+    "NCPU": 12,
+    "MemTotal": 16433455104,
+    "CgroupDriver": "systemd",
+    "CgroupVersion": "2"
+  },
+  "stack_start_requested_ms": 1795210166081,
+  "stack_started_ms": 1795210194319,
+  "images": [
+    {
+      "service": "observe",
+      "image_id": "sha256:bbb026a4f4bc05651f187522075f0048a8c89a47537f5206ec417a8a684b8882",
+      "image": "cloudwalk_f08_load-observe"
+    },
+    {
+      "service": "events",
+      "image_id": "sha256:4b4de3cd856eb6e2d71594c8aa9335abc251f15927f695d7b2d04e0e45cc5249",
+      "image": "cloudwalk_f08_load-events"
+    },
+    {
+      "service": "requests",
+      "image_id": "sha256:d9d3d1325b34477d0d25710a0afb19e7963845e873eca39ce2b5c0c66c37aa8b",
+      "image": "cloudwalk_f08_load-requests"
+    },
+    {
+      "service": "mock",
+      "image_id": "sha256:917ae193c8b68f16801c21f9f7489be3093aed5b912bf3c35a2df10ebdc19311",
+      "image": "cloudwalk_f08_load-mock"
+    },
+    {
+      "service": "api",
+      "image_id": "sha256:7f64514d4a05b5a48aa06c6cf216634ebbba2314375abb97dbd7ac1ba0e6bace",
+      "image": "cloudwalk_f08_load-api"
+    },
+    {
+      "service": "worker",
+      "image_id": "sha256:1a246ab0b12c30e72a4a91832161c5d1a1fe00e461e1e3f3a5796fe6e25385fb",
+      "image": "cloudwalk_f08_load-worker"
+    },
+    {
+      "service": "outbox",
+      "image_id": "sha256:495f5cdab45a54c35276a98a8cdd26f0ebab2cbdb2525930544b712878ec26b5",
+      "image": "cloudwalk_f08_load-outbox"
+    },
+    {
+      "service": "kafka_setup",
+      "image_id": "sha256:106771d53c40556b88a51d942728f038a1edb99e69cd242faee9956516484da6",
+      "image": "apache/kafka:4.4.0@sha256:833b867a9585a141da455dc2b57431c65cbccb27f11c91f694444cca9f777e0f"
+    },
+    {
+      "service": "db_setup",
+      "image_id": "sha256:57e49618dc7c250674d96a5fded685475d533cabda019ae0cc670e5f0cd5d182",
+      "image": "cloudwalk_f08_load-db_setup"
+    },
+    {
+      "service": "db",
+      "image_id": "sha256:6b75136145ddabf3d9a4b69660402082de7c56b734cfe50555b0674774dd742a",
+      "image": "postgres:17-alpine@sha256:a77aa70e641402a21411b92b721c58d10f23b50ae5fdd2333efd22d166e1e5f7"
+    },
+    {
+      "service": "kafka",
+      "image_id": "sha256:106771d53c40556b88a51d942728f038a1edb99e69cd242faee9956516484da6",
+      "image": "apache/kafka:4.4.0@sha256:833b867a9585a141da455dc2b57431c65cbccb27f11c91f694444cca9f777e0f"
+    }
+  ],
+  "generator_image_id": "sha256:fc863de07aa1dbdd9f797fd561ca8614777a1c8dde0b021d97dc863127b6203e",
+  "k6_version": "k6 v2.3.0 (commit/e088784614, go1.27.1, linux/amd64)",
+  "readiness": {
+    "channels": {
+      "aurora": {
+        "chat": "3a8bdf2b-488a-4dd3-8b31-9c954a4c0cc1",
+        "whatsapp": "8c7e32a5-6005-43bb-9a43-965fc7f2bc0d",
+        "email": "1f89c416-e104-4605-9000-a5b97d4cae4b"
+      },
+      "horizonte": {
+        "chat": "76e0694c-0371-454e-b0e2-e0f970e203df",
+        "whatsapp": "f3bec89f-e071-402c-aa61-ff581895f6fd",
+        "email": "e3ee6efa-7043-4222-87bc-a9e1078d1fda"
+      }
+    },
+    "readiness_started_ms": 1795210194226,
+    "warmup_started_ms": 1795210195968,
+    "warmup_finished_ms": 1795210197171,
+    "warmup_case_id": "aaf3daa5-a200-4356-9667-0e244dffd1d1",
+    "versions": {
+      "psycopg": "3.2.10",
+      "confluent_kafka": "2.12.2",
+      "librdkafka": "2.12.1",
+      "postgres": 170012
+    }
+  },
+  "window": {
+    "start_ms": 1795210197795,
+    "arrivals_end_ms": 1795210497795,
+    "end_ms": 1795210617795
+  },
+  "cutoff_observed_ms": 1795210617795,
+  "k6_exit": 0,
+  "observation": {
+    "kafka_records": {
+      "expected_offsets": 1916,
+      "records_read": 1916,
+      "complete": true,
+      "started_ms": 1795210618249,
+      "finished_ms": 1795210618476,
+      "cost_ms": 227,
+      "timeout_ms": 52000,
+      "attempts": [
+        {
+          "phase": "final_offsets",
+          "attempt": 1,
+          "started_ms": 1795210618360,
+          "request_timeout_ms": 6000,
+          "status": "started"
+        },
+        {
+          "phase": "final_offsets",
+          "attempt": 1,
+          "started_ms": 1795210618360,
+          "request_timeout_ms": 6000,
+          "status": "fixed",
+          "finished_ms": 1795210618365
+        },
+        {
+          "phase": "read_records",
+          "attempt": 1,
+          "status": "started",
+          "started_ms": 1795210618365
+        },
+        {
+          "phase": "read_records",
+          "attempt": 1,
+          "status": "complete",
+          "started_ms": 1795210618365,
+          "finished_ms": 1795210618476,
+          "records_read": 1916
+        }
+      ]
+    }
+  },
+  "fault": {
+    "stop_requested_ms": 1795210257795,
+    "stopped_observed_ms": 1795210258975,
+    "stopped_state": {
+      "Status": "exited",
+      "StartedAt": "2026-11-20T21:29:30.433834725Z",
+      "FinishedAt": "2026-11-20T21:30:58.854624464Z"
+    },
+    "start_requested_ms": 1795210289162,
+    "start_returned_ms": 1795210289598,
+    "started_state": {
+      "Status": "running",
+      "StartedAt": "2026-11-20T21:31:29.377781499Z",
+      "FinishedAt": "2026-11-20T21:30:58.854624464Z"
+    }
+  },
+  "cleanup": "concluída",
+  "finished_ms": 1795210626366,
+  "finished_at_utc": "2026-11-20T21:37:06.366000+00:00",
+  "artifacts": [
+    "config.json",
+    "consumer-states-diagnostic.json",
+    "events-diagnostic.log",
+    "fault.json",
+    "finish.json",
+    "followup-samples.jsonl",
+    "followups.jsonl",
+    "k6-console.jsonl",
+    "k6-summary.json",
+    "kafka-baseline.json",
+    "kafka-capture-attempts.jsonl",
+    "kafka-lag.jsonl",
+    "kafka-offset-range.json",
+    "kafka-records.jsonl",
+    "manifest.json",
+    "mock-diagnostic.log",
+    "observed.json",
+    "persistence.json",
+    "plan.json",
+    "ready.json",
+    "reconciliation.jsonl",
+    "report.json",
+    "report.md",
+    "resources.jsonl",
+    "sql-samples.jsonl",
+    "window.json"
+  ]
+}

@@ -1,0 +1,2898 @@
+{
+  "schema_version": 1,
+  "run_id": "f08-reference-1795208792430-8b61b6-01",
+  "revision": "dfbcc79f4ced07e5460eb73d06e956d94799d453",
+  "scenario": "reference",
+  "parameters": {
+    "scenario": "reference",
+    "ordinal": 1,
+    "seed": 8026,
+    "stages": [
+      [
+        5,
+        300
+      ]
+    ],
+    "observe_seconds": 120,
+    "vus": 50,
+    "fault_after_seconds": null,
+    "fault_seconds": null,
+    "chat": null,
+    "run_id": "f08-reference-1795208792430-8b61b6-01"
+  },
+  "units": {
+    "epoch_timestamps": "ms UTC",
+    "latency": "ms",
+    "rates": "por segundo",
+    "counts": "unidades",
+    "acceptance_ratio": "fração do plano"
+  },
+  "state": "aprovado",
+  "reason": null,
+  "measurement_gaps": [],
+  "observed_failures": [],
+  "cleanup": "concluída",
+  "goals": {
+    "p95_aceite_ate_500_ms": true,
+    "aceite_inicial_minimo_99_pct_do_plano": true,
+    "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+    "escoamento_na_janela": true,
+    "todos_segundos_turnos_enviados_e_concluidos": true,
+    "jev_sem_solicitacoes_ou_tentativas": true
+  },
+  "planned_inputs": 1500,
+  "initial": {
+    "planned": 1500,
+    "offered": 1500,
+    "http_202": 1500,
+    "accepted_with_ids": 1500,
+    "acceptance_of_planned": 1.0,
+    "acceptance_of_offered": 1.0,
+    "non_202": 0,
+    "latency_accept": {
+      "unit": "ms",
+      "n": 1500,
+      "p50": 80,
+      "p95": 142
+    },
+    "latency_persisted": {
+      "unit": "ms",
+      "n": 1500,
+      "p50": 312.594970703125,
+      "p95": 433.05908203125
+    },
+    "negative_clock_deltas": 0,
+    "statuses": {
+      "202": 1500
+    },
+    "error_codes": {
+      "0": 1500
+    },
+    "timeouts": 0,
+    "states": {
+      "concluído": 1500
+    }
+  },
+  "followups": {
+    "planned": 300,
+    "offered": 300,
+    "http_202": 300,
+    "accepted_with_ids": 300,
+    "acceptance_of_planned": 1.0,
+    "acceptance_of_offered": 1.0,
+    "non_202": 0,
+    "latency_accept": {
+      "unit": "ms",
+      "n": 300,
+      "p50": 81.357054,
+      "p95": 159.667586
+    },
+    "latency_persisted": {
+      "unit": "ms",
+      "n": 300,
+      "p50": 337.947021484375,
+      "p95": 477.94189453125
+    },
+    "negative_clock_deltas": 0,
+    "statuses": {
+      "202": 300
+    },
+    "error_codes": {},
+    "timeouts": 0,
+    "states": {
+      "concluído": 300
+    },
+    "unissued_reasons": {},
+    "send_delay_after_target": {
+      "unit": "ms",
+      "n": 300,
+      "p50": 150.27099609375,
+      "p95": 260.89794921875
+    },
+    "visibility_observation_delay": {
+      "unit": "ms",
+      "n": 300,
+      "p50": 166.762939453125,
+      "p95": 287.912109375
+    }
+  },
+  "generator_accounting": {
+    "planned": 1500,
+    "http_attempt_logs": 1500,
+    "unique_initial_ids": 1500,
+    "planned_not_offered": 0,
+    "suppressed_stage_overflow": 0,
+    "raw_dropped_iterations": 0
+  },
+  "k6": {
+    "iterations": {
+      "count": 1500,
+      "rate": 4.9998928807116245
+    },
+    "http_reqs": {
+      "count": 1500,
+      "rate": 4.9998928807116245
+    },
+    "http_req_failed": {
+      "rate": 0,
+      "passes": 0,
+      "fails": 1500
+    },
+    "http_req_duration": {
+      "avg": 83.08216327066673,
+      "min": 17.776423,
+      "med": 79.94680650000001,
+      "max": 202.082029,
+      "p(90)": 126.11526260000001,
+      "p(95)": 141.14104615
+    },
+    "vus": {
+      "value": 1,
+      "min": 0,
+      "max": 1
+    },
+    "vus_max": {
+      "value": 50,
+      "min": 50,
+      "max": 50
+    }
+  },
+  "dropped_iterations": 0,
+  "stages": [
+    {
+      "target_cases_per_s": 5,
+      "seconds": 300,
+      "planned": 1500,
+      "offered": 1500,
+      "http_202": 1500,
+      "accepted_with_ids": 1500,
+      "acceptance_of_planned": 1.0,
+      "acceptance_of_offered": 1.0,
+      "non_202": 0,
+      "latency_accept": {
+        "unit": "ms",
+        "n": 1500,
+        "p50": 80,
+        "p95": 142
+      },
+      "latency_persisted": {
+        "unit": "ms",
+        "n": 1500,
+        "p50": 312.594970703125,
+        "p95": 433.05908203125
+      },
+      "negative_clock_deltas": 0,
+      "statuses": {
+        "202": 1500
+      },
+      "error_codes": {
+        "0": 1500
+      },
+      "timeouts": 0,
+      "states": {
+        "concluído": 1500
+      },
+      "max_outbox_pending": 3,
+      "max_cases_waiting_processing": 4,
+      "max_consumer_lag": 2,
+      "offered_per_s": 5.0,
+      "accepted_per_s": 5.0
+    }
+  ],
+  "first_stage_with_shortfall": null,
+  "arrival_clock": {
+    "per_stage_first_iteration_schedule_ms": [
+      1795208816988
+    ],
+    "k6_setup_anchor_ms": 1795208816988
+  },
+  "rates": {
+    "arrival_seconds": 300,
+    "offered_initial_per_s": 5.0,
+    "accepted_initial_per_s": 5.0
+  },
+  "completions": {
+    "observation_seconds_including_load": 420.0,
+    "ai_turns_in_window": 1800,
+    "resolved_cases_in_window": 300,
+    "ai_turns_per_s": 4.285714285714286,
+    "resolved_cases_per_s": 0.7142857142857143
+  },
+  "per_second_counts": [
+    {
+      "second": 0,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 4
+    },
+    {
+      "second": 1,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 5
+    },
+    {
+      "second": 2,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 5
+    },
+    {
+      "second": 3,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 5
+    },
+    {
+      "second": 4,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 6
+    },
+    {
+      "second": 5,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 6,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 7,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 8,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 9,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 10,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 11,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5
+    },
+    {
+      "second": 12,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 8,
+      "cases_resolved": 2
+    },
+    {
+      "second": 13,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 4
+    },
+    {
+      "second": 14,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 2
+    },
+    {
+      "second": 15,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 16,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 17,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 4
+    },
+    {
+      "second": 18,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 19,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 20,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 21,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 22,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 23,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 6,
+      "cases_resolved": 2
+    },
+    {
+      "second": 24,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5
+    },
+    {
+      "second": 25,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 2
+    },
+    {
+      "second": 26,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 27,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 28,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5
+    },
+    {
+      "second": 29,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 30,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 31,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 32,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 33,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 34,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 35,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 36,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 37,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 2
+    },
+    {
+      "second": 38,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 39,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 40,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 41,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5
+    },
+    {
+      "second": 42,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 43,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 44,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 45,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 46,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 47,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 2
+    },
+    {
+      "second": 48,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 49,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 50,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 51,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 52,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 53,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 4
+    },
+    {
+      "second": 54,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 55,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 56,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 57,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 58,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 59,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 2
+    },
+    {
+      "second": 60,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 61,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 62,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 63,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 64,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 65,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 66,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 67,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 68,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 69,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 70,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 71,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 72,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 73,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 74,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 75,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5
+    },
+    {
+      "second": 76,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 77,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 78,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 8,
+      "cases_resolved": 1
+    },
+    {
+      "second": 79,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 80,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 81,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 82,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 83,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 7,
+      "cases_resolved": 2
+    },
+    {
+      "second": 84,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 85,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5
+    },
+    {
+      "second": 86,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 87,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 2
+    },
+    {
+      "second": 88,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 89,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 90,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 91,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 92,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 93,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 94,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 95,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 96,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 97,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 98,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 99,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5
+    },
+    {
+      "second": 100,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 2
+    },
+    {
+      "second": 101,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 102,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 103,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 104,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 105,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 4,
+      "cases_resolved": 1
+    },
+    {
+      "second": 106,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 107,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 108,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 109,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 110,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 4
+    },
+    {
+      "second": 111,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 2
+    },
+    {
+      "second": 112,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 113,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 114,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 115,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5
+    },
+    {
+      "second": 116,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 117,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 2
+    },
+    {
+      "second": 118,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 119,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 120,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 121,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 122,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 4,
+      "cases_resolved": 1
+    },
+    {
+      "second": 123,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 124,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 125,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 4
+    },
+    {
+      "second": 126,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 2
+    },
+    {
+      "second": 127,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5
+    },
+    {
+      "second": 128,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 129,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 130,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 131,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 132,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 133,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 134,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 135,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 136,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 137,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 138,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 139,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 140,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 8,
+      "cases_resolved": 2
+    },
+    {
+      "second": 141,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 3
+    },
+    {
+      "second": 142,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 8,
+      "cases_resolved": 2
+    },
+    {
+      "second": 143,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 4
+    },
+    {
+      "second": 144,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 145,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 146,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 147,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 148,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 149,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 150,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 151,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 152,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 153,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 154,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 155,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 156,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 157,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 158,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 159,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 160,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 161,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 162,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 163,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 164,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 165,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 166,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 167,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 7,
+      "cases_resolved": 2
+    },
+    {
+      "second": 168,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6
+    },
+    {
+      "second": 169,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 170,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 171,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 2
+    },
+    {
+      "second": 172,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 4
+    },
+    {
+      "second": 173,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 174,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 175,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 176,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 177,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 4,
+      "cases_resolved": 1
+    },
+    {
+      "second": 178,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 179,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 2
+    },
+    {
+      "second": 180,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 181,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 182,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 183,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 184,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 185,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 5
+    },
+    {
+      "second": 186,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 187,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 188,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 189,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 190,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 191,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 2
+    },
+    {
+      "second": 192,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 193,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 194,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 195,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 196,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 197,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 4
+    },
+    {
+      "second": 198,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 199,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 200,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 201,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 202,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 203,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 204,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 205,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 206,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 207,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 208,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 209,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 210,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 211,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 212,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 213,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 214,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 215,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 216,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 2
+    },
+    {
+      "second": 217,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 5
+    },
+    {
+      "second": 218,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 219,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 220,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 7,
+      "cases_resolved": 2
+    },
+    {
+      "second": 221,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 222,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5
+    },
+    {
+      "second": 223,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 224,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 225,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 226,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 227,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 8,
+      "cases_resolved": 1
+    },
+    {
+      "second": 228,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 4,
+      "cases_resolved": 1
+    },
+    {
+      "second": 229,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 230,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 8,
+      "cases_resolved": 1
+    },
+    {
+      "second": 231,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 232,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 233,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 234,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 235,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 236,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 237,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 238,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 239,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 6,
+      "cases_resolved": 2
+    },
+    {
+      "second": 240,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 241,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 242,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 243,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 244,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 245,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 246,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6
+    },
+    {
+      "second": 247,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 248,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 249,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 2
+    },
+    {
+      "second": 250,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 4
+    },
+    {
+      "second": 251,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 252,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 253,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 254,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 255,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 256,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 257,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 7,
+      "cases_resolved": 2
+    },
+    {
+      "second": 258,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 259,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 260,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 261,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 4,
+      "cases_resolved": 1
+    },
+    {
+      "second": 262,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 263,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 6
+    },
+    {
+      "second": 264,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 265,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 8,
+      "cases_resolved": 1
+    },
+    {
+      "second": 266,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 267,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 268,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 269,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 270,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 271,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 4,
+      "cases_resolved": 1
+    },
+    {
+      "second": 272,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 273,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 274,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 275,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 276,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 277,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 278,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 279,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 280,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 281,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 6,
+      "cases_resolved": 2
+    },
+    {
+      "second": 282,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 283,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 284,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5
+    },
+    {
+      "second": 285,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 2
+    },
+    {
+      "second": 286,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 287,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 288,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 289,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 290,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 291,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5
+    },
+    {
+      "second": 292,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 293,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 294,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 295,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 2,
+      "turns_completed": 5,
+      "cases_resolved": 1
+    },
+    {
+      "second": 296,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 297,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 7,
+      "cases_resolved": 1
+    },
+    {
+      "second": 298,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 299,
+      "initial_offered": 5,
+      "initial_202": 5,
+      "followups_sent": 1,
+      "turns_completed": 6,
+      "cases_resolved": 1
+    },
+    {
+      "second": 300,
+      "followups_sent": 1,
+      "turns_completed": 2,
+      "cases_resolved": 1
+    },
+    {
+      "second": 301,
+      "followups_sent": 1,
+      "turns_completed": 1,
+      "cases_resolved": 1
+    },
+    {
+      "second": 302,
+      "followups_sent": 1,
+      "turns_completed": 1,
+      "cases_resolved": 1
+    },
+    {
+      "second": 303,
+      "followups_sent": 1,
+      "turns_completed": 1,
+      "cases_resolved": 1
+    },
+    {
+      "second": 304,
+      "followups_sent": 1,
+      "turns_completed": 1,
+      "cases_resolved": 1
+    },
+    {
+      "second": 305,
+      "followups_sent": 1,
+      "turns_completed": 1,
+      "cases_resolved": 1
+    }
+  ],
+  "kafka": {
+    "completed_turns_missing_causal_pair": 0,
+    "repeated_records_observed": 0,
+    "repeated_ids": [],
+    "distinct_dead_letter_event_ids": 0,
+    "dead_letter_records_observed": 0,
+    "evidence": {
+      "expected_offsets": 3600,
+      "records_read": 3600,
+      "complete": true,
+      "started_ms": 1795209237472,
+      "finished_ms": 1795209237781,
+      "cost_ms": 309,
+      "timeout_ms": 52000,
+      "attempts": [
+        {
+          "phase": "final_offsets",
+          "attempt": 1,
+          "started_ms": 1795209237608,
+          "request_timeout_ms": 6000,
+          "status": "started"
+        },
+        {
+          "phase": "final_offsets",
+          "attempt": 1,
+          "started_ms": 1795209237608,
+          "request_timeout_ms": 6000,
+          "status": "fixed",
+          "finished_ms": 1795209237614
+        },
+        {
+          "phase": "read_records",
+          "attempt": 1,
+          "status": "started",
+          "started_ms": 1795209237614
+        },
+        {
+          "phase": "read_records",
+          "attempt": 1,
+          "status": "complete",
+          "started_ms": 1795209237614,
+          "finished_ms": 1795209237781,
+          "records_read": 3600
+        }
+      ]
+    }
+  },
+  "http": {
+    "initial_and_followup_reqs": 1800,
+    "initial_and_followup_non_202": 0
+  },
+  "resources": {
+    "expected_services": [
+      "api",
+      "worker",
+      "outbox",
+      "requests",
+      "events",
+      "mock",
+      "db",
+      "kafka",
+      "generator"
+    ],
+    "missing_services": [],
+    "missing_host": [],
+    "sample_errors": {},
+    "samples_in_window": 84,
+    "sufficient": true,
+    "per_service": {
+      "generator": {
+        "samples": 61,
+        "cpu_percent_peak": 3.04,
+        "ram_bytes_peak": 291608986,
+        "ram_limit_bytes_observed": [
+          0,
+          16428249907
+        ]
+      },
+      "observe": {
+        "samples": 84,
+        "cpu_percent_peak": 18.81,
+        "ram_bytes_peak": 51432653,
+        "ram_limit_bytes_observed": [
+          16428249907
+        ]
+      },
+      "events": {
+        "samples": 84,
+        "cpu_percent_peak": 6.0,
+        "ram_bytes_peak": 43148902,
+        "ram_limit_bytes_observed": [
+          16428249907
+        ]
+      },
+      "mock": {
+        "samples": 84,
+        "cpu_percent_peak": 5.4,
+        "ram_bytes_peak": 41607496,
+        "ram_limit_bytes_observed": [
+          16428249907
+        ]
+      },
+      "requests": {
+        "samples": 84,
+        "cpu_percent_peak": 5.12,
+        "ram_bytes_peak": 41523610,
+        "ram_limit_bytes_observed": [
+          16428249907
+        ]
+      },
+      "worker": {
+        "samples": 84,
+        "cpu_percent_peak": 1.51,
+        "ram_bytes_peak": 199648870,
+        "ram_limit_bytes_observed": [
+          16428249907
+        ]
+      },
+      "api": {
+        "samples": 84,
+        "cpu_percent_peak": 73.6,
+        "ram_bytes_peak": 113351066,
+        "ram_limit_bytes_observed": [
+          16428249907
+        ]
+      },
+      "outbox": {
+        "samples": 84,
+        "cpu_percent_peak": 31.84,
+        "ram_bytes_peak": 86979379,
+        "ram_limit_bytes_observed": [
+          16428249907
+        ]
+      },
+      "db": {
+        "samples": 84,
+        "cpu_percent_peak": 42.73,
+        "ram_bytes_peak": 122683392,
+        "ram_limit_bytes_observed": [
+          16428249907
+        ]
+      },
+      "kafka": {
+        "samples": 84,
+        "cpu_percent_peak": 233.61,
+        "ram_bytes_peak": 548929536,
+        "ram_limit_bytes_observed": [
+          16428249907
+        ]
+      }
+    },
+    "host_cpu_busy_percent_peak": 65.46937359014402,
+    "host_ram_used_bytes_peak": 8964915200
+  },
+  "integrity": {
+    "confirmed_losses": 0,
+    "duplicated_effect_identities": 0,
+    "persisted_without_http_202": 0,
+    "not_reconciled_http_202": 0
+  },
+  "backlog": {
+    "max_outbox_pending": 3,
+    "max_outbox_failed": 0,
+    "max_cases_waiting_processing": 4,
+    "max_cases_failed": 0,
+    "max_cases_waiting_human": 0,
+    "max_cases_human_active": 0,
+    "max_cases_waiting_customer": 0,
+    "max_consumer_lag": 2,
+    "last_sql_in_window": {
+      "sample_ms": 1795209235418,
+      "cost_ms": 3,
+      "db_clock_ms": 1795209235419.38,
+      "outbox_pending": 0,
+      "outbox_failed": 0,
+      "cases_waiting_processing": 0,
+      "cases_failed": 0,
+      "cases_waiting_human": 0,
+      "cases_human_active": 0,
+      "cases_waiting_customer": 0,
+      "cases_resolved": 300,
+      "classification_requests": 0,
+      "classification_attempts": 0,
+      "db_client_connections": {
+        "cloudwalk_development": {
+          "idle": 6,
+          "active": 1
+        },
+        "cloudwalk_development_queue": {
+          "idle": 6
+        }
+      }
+    },
+    "last_kafka_lag_in_window": {
+      "sample_ms": 1795209233853,
+      "cost_ms": 119,
+      "partitions": [
+        {
+          "topic": "agent.requests",
+          "group": "mock-agent-v1",
+          "partition": 0,
+          "end_offset": 634,
+          "committed_next": 634,
+          "start_offset": 0,
+          "effective_next": 634,
+          "lag": 0
+        },
+        {
+          "topic": "agent.requests",
+          "group": "mock-agent-v1",
+          "partition": 1,
+          "end_offset": 570,
+          "committed_next": 570,
+          "start_offset": 0,
+          "effective_next": 570,
+          "lag": 0
+        },
+        {
+          "topic": "agent.requests",
+          "group": "mock-agent-v1",
+          "partition": 2,
+          "end_offset": 597,
+          "committed_next": 597,
+          "start_offset": 0,
+          "effective_next": 597,
+          "lag": 0
+        },
+        {
+          "topic": "agent.events",
+          "group": "platform-agent-events-v1",
+          "partition": 0,
+          "end_offset": 634,
+          "committed_next": 634,
+          "start_offset": 0,
+          "effective_next": 634,
+          "lag": 0
+        },
+        {
+          "topic": "agent.events",
+          "group": "platform-agent-events-v1",
+          "partition": 1,
+          "end_offset": 570,
+          "committed_next": 570,
+          "start_offset": 0,
+          "effective_next": 570,
+          "lag": 0
+        },
+        {
+          "topic": "agent.events",
+          "group": "platform-agent-events-v1",
+          "partition": 2,
+          "end_offset": 597,
+          "committed_next": 597,
+          "start_offset": 0,
+          "effective_next": 597,
+          "lag": 0
+        }
+      ],
+      "total_lag": 0
+    },
+    "last_kafka_lag_available_near_end": true,
+    "latest_required_work_ms": 1795209122690.732,
+    "pending_outboxes_at_snapshot": 0,
+    "pending_cases_at_snapshot": 0
+  },
+  "outage": null,
+  "observer": {
+    "sql_cost": {
+      "unit": "ms",
+      "n": 208,
+      "p50": 4,
+      "p95": 9
+    },
+    "kafka_cost": {
+      "unit": "ms",
+      "n": 84,
+      "p50": 128,
+      "p95": 203
+    },
+    "resources_cost": {
+      "unit": "ms",
+      "n": 85,
+      "p50": 2113,
+      "p95": 2180
+    },
+    "followup_query_cost": {
+      "unit": "ms",
+      "n": 1127,
+      "p50": 17,
+      "p95": 42
+    },
+    "sql_sample_errors": 0,
+    "kafka_samples_unavailable": 0,
+    "db_clock_max_abs_delta_ms": 10.681884765625,
+    "db_client_connections_peak": 14,
+    "resource_samples": 85,
+    "snapshot_ms": 1795209237033
+  },
+  "human": null,
+  "chat": null,
+  "window_utc": {
+    "start_ms": "2026-11-20T21:06:56.988000+00:00",
+    "arrivals_end_ms": "2026-11-20T21:11:56.988000+00:00",
+    "end_ms": "2026-11-20T21:13:56.988000+00:00"
+  }
+}

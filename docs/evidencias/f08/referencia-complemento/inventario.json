@@ -1,0 +1,477 @@
+[
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/config.json",
+    "bytes": 677,
+    "sha256": "626a395e190b1f672cf0d325f223ddfcabdea69b986dded3e1836be3c5de4736"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/finish.json",
+    "bytes": 29,
+    "sha256": "006ec4e86a0455561717a37ef22395ea11263407cd2f704e089ec69991bcc5c0"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/followup-samples.jsonl",
+    "bytes": 61288,
+    "sha256": "727912f0540d56c642e8f7c906ac36c9c6c4525b91d82dcd14a844d34ca0f7c4"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/followups.jsonl",
+    "bytes": 162036,
+    "sha256": "634fde4a0df402fcf2830bf4b87a8927b4999097d400cae51f99acd297e37829"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/k6-console.jsonl",
+    "bytes": 629777,
+    "sha256": "dccdf9af4377af43676d684be4aeeaeb7c9d3755101bcbfaba62e9c6102535df"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/k6-summary.json",
+    "bytes": 387,
+    "sha256": "18998ae6e79d5efa74814acc070cf99bf93bd457ed16699ecf25cdaae7093f14"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/kafka-baseline.json",
+    "bytes": 681,
+    "sha256": "bbcce132a5257fc8a78008d25c2869ee4da8804dac88d086cb27ae6be46aae7d"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/kafka-capture-attempts.jsonl",
+    "bytes": 461,
+    "sha256": "b7d1d17cb424c2eaf1193c7a1a9581d30db3972f2eca221bb929ee10aa3bfefe"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/kafka-lag.jsonl",
+    "bytes": 83096,
+    "sha256": "59a3b32c8a703def3721af144dd727220dcc3476e1a6d0498020fb59e778e8a8"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/kafka-offset-range.json",
+    "bytes": 988,
+    "sha256": "e0d2fa84eacadb43adaea2359a6f48d613a817c7becbc6e9be2f667cb618f3cb"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/kafka-records.jsonl",
+    "bytes": 1443544,
+    "sha256": "5715175187b07bdb7b2104d738a3ddbe3c988e96dbce6992d5ce5c55dac1a94d"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/manifest.json",
+    "bytes": 12648,
+    "sha256": "08e4865dcc37744c33fa6dde899db3b63e76c5c4f7b76ff9b7a10ed28f7f1540"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/observed.json",
+    "bytes": 969,
+    "sha256": "00323e38226a3adae9a5af284dce980b9d0dc5f40893c5f98aaf83998700a010"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/persistence.json",
+    "bytes": 6890577,
+    "sha256": "30efc49ea1432e7452a115f7f8c71685283a4ea69590bf2a98731ae1a5b2472d"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/plan.json",
+    "bytes": 810343,
+    "sha256": "786f2788b4e08732209b444c98a9769ba74b80ce13838482fdeeceb2d8dc173c"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/ready.json",
+    "bytes": 712,
+    "sha256": "ca68fc9a9854fd68d1adf980e781c1c2b5c4a1e76306eb93fe7c20e2dfdc6b08"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/reconciliation.jsonl",
+    "bytes": 3790795,
+    "sha256": "aa5cd575e443346881cae60887dadec9f94ed7b6939cd41148815842a1f7d92f"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/report.json",
+    "bytes": 61412,
+    "sha256": "086cbdb91d1d778ec77509a67dfe9388f226c9014873450651dd4829e15f7d47"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/report.md",
+    "bytes": 1589,
+    "sha256": "6a87dec0ef4ddefa2310615d8fe382623b364bb7dc1c6ff6fe8262ee45ef18ff"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/resources.jsonl",
+    "bytes": 192344,
+    "sha256": "f29245b3db0ddc276d0a8f7f8a84151a62ea92d79c651416ecf66dfeaba50e69"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/sql-samples.jsonl",
+    "bytes": 88761,
+    "sha256": "a033e51f12e475019b37d1f9591f8236fd17c68a274158a57f69f08330d8014c"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-01/window.json",
+    "bytes": 95,
+    "sha256": "d31d8166bf17889bfc0702d4383e7617e2b5309b3cf60440f84e5ed2f4319f1a"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/config.json",
+    "bytes": 673,
+    "sha256": "3ba5274a2f8fc0fc636f93230dac7d22a96499fb78fe6aff9fd75ca668d37130"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/fault.json",
+    "bytes": 463,
+    "sha256": "2f2660071107fd07a906d9d897739b6db2ca671c47ddd9e3c6727b71238ea386"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/finish.json",
+    "bytes": 29,
+    "sha256": "9f5acf136e0ba48fd33d753e0c41b585ee935323adb764ec4fbcc7b76a5ce855"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/followup-samples.jsonl",
+    "bytes": 62216,
+    "sha256": "68165264dfe76b40bfa1772700b21aa5dc67687a0462c0ebc112cd23d88a0241"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/followups.jsonl",
+    "bytes": 161962,
+    "sha256": "0224b24674c2e57cacb43bc8e880695d205112ad8a3eeb2d91ee3918cdac351d"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/k6-console.jsonl",
+    "bytes": 629533,
+    "sha256": "bbe3da29c13583a858da5e0fb2735b7c114247aa775b7352c88a7f14ae9bf10a"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/k6-summary.json",
+    "bytes": 383,
+    "sha256": "9e7707762b899a9192b5a71ce18e6874f3d7ace8f0d9509fa2a2a47581a0dab0"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/kafka-baseline.json",
+    "bytes": 681,
+    "sha256": "33f88297036ff762c0da9b2a56d316ed0c86a909e8c84be234b526b279039bb0"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/kafka-capture-attempts.jsonl",
+    "bytes": 461,
+    "sha256": "b27c1403f50131f672b0c75c8a10003a3243f155c7b76f2f43e8393808ac22f4"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/kafka-lag.jsonl",
+    "bytes": 77778,
+    "sha256": "c50d71c4d4f373fce0a92f832a264dc71882a9452fb746aa9013eff1f008c14a"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/kafka-offset-range.json",
+    "bytes": 988,
+    "sha256": "c2e51554726292f19297f203ea34e2b51f408ef8e199b502d9ebdd3c069fac04"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/kafka-records.jsonl",
+    "bytes": 1443544,
+    "sha256": "36acc271a2ddda88d203bf03e1d9c637f11c9a6877ae8771ff3559ff95689fab"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/manifest.json",
+    "bytes": 13167,
+    "sha256": "6bf143852747b6eb61fdb7069a8e3ed4f632b4a501afcd918185a5a9d4d0c26c"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/observed.json",
+    "bytes": 969,
+    "sha256": "caa16039fc25d1d97437d3f82c0e6600171215d032d753dfbe8191076d3e9b41"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/persistence.json",
+    "bytes": 6890583,
+    "sha256": "8e1481c36a897190f7d9175fadbe116915ebdab44010fce0af57bf960d9f53cc"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/plan.json",
+    "bytes": 810343,
+    "sha256": "888bd2716cd16fb67406a67c62c9fa5e7de24496af3e6d2fb16e34fd781706f9"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/ready.json",
+    "bytes": 712,
+    "sha256": "4b466067250ca0c4c0dd12cacb711a60b3c9c2ef7524263131a2cd5d4e889fb7"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/reconciliation.jsonl",
+    "bytes": 3790469,
+    "sha256": "d1bcb239213510a51939d7d3763ffdbcf3ea2f756cd9b0f95ad5d7108ffb15c4"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/report.json",
+    "bytes": 58770,
+    "sha256": "cf625adfe72a11a9300374c65a73c053def8780759c6d03506d66c5a703e097c"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/report.md",
+    "bytes": 1761,
+    "sha256": "59d2f3c0e82d305e7aa9a6a373da2b2c35a208dc74f73fd798b55adfef2f3eb4"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/resources.jsonl",
+    "bytes": 188841,
+    "sha256": "de425376d2d40be2799907265cd2a0424699ea6c5ba3129a20b9c2f2111d6fdf"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/sql-samples.jsonl",
+    "bytes": 88500,
+    "sha256": "4dbf2953a219f7f11de4f09ac9f16d2fd4c2923a85af0c8d9cadb13be91593d8"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-02/window.json",
+    "bytes": 95,
+    "sha256": "e197b673d0852a4d8c9777dc724d4d49d59928bcd463d9f294edfdd096385dfd"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/config.json",
+    "bytes": 677,
+    "sha256": "82e59a6e55d79b9ba264d0a1c8cfd28c02237cea93e7257f7cdcb42ee0dec093"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/finish.json",
+    "bytes": 29,
+    "sha256": "3061f1b67739b773fba77e525177d61829fee0440d788b46b7f1aaea09d4c1f8"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/followup-samples.jsonl",
+    "bytes": 60902,
+    "sha256": "25f7ff4f2a79a86f80b019341009ec171a8f3e4a1e4d0e4a6ca5dcd956e743bc"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/followups.jsonl",
+    "bytes": 162040,
+    "sha256": "365b045ef1df464370208f3520a491342e7e09d87af01a9d41064ed440ae9413"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/k6-console.jsonl",
+    "bytes": 630057,
+    "sha256": "a3f14914bb32c94f5a613e94afc62dea95abc5a9ca7e9a67b408ecfe4fbe1673"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/k6-summary.json",
+    "bytes": 383,
+    "sha256": "24d5f9b17f5afc0bbd0afe198b3c1dbe7bd21e6277700d0635ed45fcccbc1158"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/kafka-baseline.json",
+    "bytes": 681,
+    "sha256": "bbcce132a5257fc8a78008d25c2869ee4da8804dac88d086cb27ae6be46aae7d"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/kafka-capture-attempts.jsonl",
+    "bytes": 461,
+    "sha256": "4a8fb6ca974a7736b0a591c818f8c629d5b5886252a29b9bb6b2425876a75826"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/kafka-lag.jsonl",
+    "bytes": 83123,
+    "sha256": "af1b21df7412dace81f9011f303eb16fcc2c8484eebc1452adb412495a216deb"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/kafka-offset-range.json",
+    "bytes": 988,
+    "sha256": "68071f66d7948654a12b5f2df53cc45e1bb406da0e62c84be9e5a11de77d8768"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/kafka-records.jsonl",
+    "bytes": 1443544,
+    "sha256": "ea5c030d4c029d6105a9eaad6b16926577d4d83943c7a9a02f1f2faddbe14606"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/manifest.json",
+    "bytes": 12648,
+    "sha256": "da7759e515cc9e46132cddc086458c3094f15b84f287e62f3db003ab11d5d056"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/observed.json",
+    "bytes": 969,
+    "sha256": "5bdf26190f7611d469a288ced54416d65ab1810b5a67c94430a1b19977804f2f"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/persistence.json",
+    "bytes": 6890597,
+    "sha256": "2ce1341b5c268b291133ea003ddc3845160947fd60303219e979726a66b038cc"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/plan.json",
+    "bytes": 810343,
+    "sha256": "301ca4dae4f919043f35ea451b3ddbebe26caf3a70b5740b25b6506be4f03c45"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/ready.json",
+    "bytes": 712,
+    "sha256": "9b6ee2c01c1f46b94402764a6448af7a56a1ad68618a95bba81c0e10ae4f6e35"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/reconciliation.jsonl",
+    "bytes": 3791114,
+    "sha256": "f6649e1d1edd64a9e5e3034c3a19376ba606059090b82a2e8a0b051d8eb3d4c5"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/report.json",
+    "bytes": 61166,
+    "sha256": "4f1178165cbb93a60f9a9aff00d783074fa3fe247db068dbdf57bf4ad27d9590"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/report.md",
+    "bytes": 1589,
+    "sha256": "101c7cc6edf67bcda58929b93569838a3c5a2affcc16753975ef153951302701"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/resources.jsonl",
+    "bytes": 192418,
+    "sha256": "1439e482267af7fac3ba1918a368f1016ff4283b0fb41b6396a443b61b933ad6"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/sql-samples.jsonl",
+    "bytes": 89002,
+    "sha256": "90f5ecb60ad13d61d8a215d67e18566b7114807235136d6f67d9255f3010161d"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-03/window.json",
+    "bytes": 95,
+    "sha256": "f560844f27a95d069730d8f1a6d36d226d3f429dd0e05784762adc633a380ae8"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/config.json",
+    "bytes": 673,
+    "sha256": "ca2460e2a4d83abb7894b86f445acbf1ed0a6b261fcf6d34db58bab244fea98b"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/consumer-states-diagnostic.json",
+    "bytes": 920,
+    "sha256": "28501ed5b33ca42244b78f84f0a32d792afc5df3803c3bfc2c380f7d93411796"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/events-diagnostic.log",
+    "bytes": 53519,
+    "sha256": "25ae1f7ab79471f082ff2f4851ac7cd2a10600528732e4f10e72f52860919ab1"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/fault.json",
+    "bytes": 463,
+    "sha256": "2488b137f45c7297a02c4cd81352d4e71d2c775873c83234e09471311663a18d"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/finish.json",
+    "bytes": 29,
+    "sha256": "4d8a69b7c4d2ae4525b6a579d8c0cd0f0390abcef0155ce80e6e874ceab75f55"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/followup-samples.jsonl",
+    "bytes": 86236,
+    "sha256": "08118165ef4979bb4a48bc5289919077bfcba9a0eced9b55a56efa6c450890c4"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/followups.jsonl",
+    "bytes": 32406,
+    "sha256": "d1cf6a0ea9d2102a0da33e9f7e43ed5ce45352f54965906defcc56277b90583b"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/k6-console.jsonl",
+    "bytes": 629811,
+    "sha256": "a3617cf621685ed42ec62efc04e97acc7dd3142d7abb5f6a8d655e913ea13a0e"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/k6-summary.json",
+    "bytes": 377,
+    "sha256": "23c9e055a560cc46f59f566e730fa427de3648d939a1a6a1a0ec330fccc1aa5b"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/kafka-baseline.json",
+    "bytes": 681,
+    "sha256": "33f88297036ff762c0da9b2a56d316ed0c86a909e8c84be234b526b279039bb0"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/kafka-capture-attempts.jsonl",
+    "bytes": 461,
+    "sha256": "e1142ee2d8196815bb9da4ae84a9815f41ad2b0ec9b3484e886de190309db061"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/kafka-lag.jsonl",
+    "bytes": 78302,
+    "sha256": "d5fe777b87a5a804afcc894c8e4571bfb8dd8eb8f6c6cad2fbdd57363663b760"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/kafka-offset-range.json",
+    "bytes": 988,
+    "sha256": "ac093cd7df1ef957bcf2925c6e8ad04efe4a9c886d8286e6384961111d5235e6"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/kafka-records.jsonl",
+    "bytes": 748506,
+    "sha256": "e183a153c21178c9aaf22d5bac7e9db86eb79bddcd8bb710c699f98e7bda4aff"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/manifest.json",
+    "bytes": 13262,
+    "sha256": "f4125ebb4ea27bf4c27e6365ab026874d5b5ef3db15f0daa10947cba5b08baa5"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/mock-diagnostic.log",
+    "bytes": 63803,
+    "sha256": "63c2c1f0e31934d6b667319954d5629555e7a801faae419a9af65943be2bbf63"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/observed.json",
+    "bytes": 969,
+    "sha256": "ebaea49dbc4e04145a41815d67346a205a94779b6afcdda88840f9a90238e7e5"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/persistence.json",
+    "bytes": 5944692,
+    "sha256": "4d78fe4e987ee77350e6609c068850d15141e4413f988c90b69ab66e03e7b156"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/plan.json",
+    "bytes": 810343,
+    "sha256": "36b313a4ab686f477cee8a971b48b4563afc0b0fac0f3ce54d69910e6bb4fefe"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/ready.json",
+    "bytes": 712,
+    "sha256": "dab5cf9633c289dcce652142877cc914b23892d4b9580c69c612a648e2321daf"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/reconciliation.jsonl",
+    "bytes": 3488809,
+    "sha256": "815675a06265e7983abab6b6913a7a5322181fb277cb08e865318c8bb31b7f8b"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/report.json",
+    "bytes": 43624,
+    "sha256": "53043cb52988989d1bc6672a27aca5e3b6699abaf46293b5d00a905fd2ab069a"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/report.md",
+    "bytes": 1869,
+    "sha256": "cca8dc64bb3f5832ccb97ce7871acc3f257369d84b42a4645f6736c01df93e98"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/resources.jsonl",
+    "bytes": 164652,
+    "sha256": "ea6555ab9518ac0a5135e5e9e5814e396bf665dac557d2b4885ddd4c584e9cc3"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/sql-samples.jsonl",
+    "bytes": 89033,
+    "sha256": "f520ffb86a9b6ef021be76b3b1292644b43ee573b917bb15f083ebeb9dbfa931"
+  },
+  {
+    "path": "f08-reference-1795208792430-8b61b6-04/window.json",
+    "bytes": 95,
+    "sha256": "c873ba888d540999c88d8ca66d3702ed67e873909ddc4c7e89da2d2bf0b098e0"
+  },
+  {
+    "path": "matrix.json",
+    "bytes": 14896,
+    "sha256": "f5b3c251c42bfb23b08a318e29d5a74c1b87f46d9469600c30723ba2f3e816a6"
+  },
+  {
+    "path": "matrix.md",
+    "bytes": 790,
+    "sha256": "50f403fb388cc10e932e51eb1bd99795c1840b8fb47f0e2acb3cba77c8706120"
+  }
+]

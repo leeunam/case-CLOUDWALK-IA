@@ -1,0 +1,39 @@
+{
+  "sample_ms": 1795210555560,
+  "consumers": [
+    {
+      "service": "mock",
+      "container_id": "1d8f253d8386",
+      "state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-20T21:29:52.921901533Z",
+        "FinishedAt": "2026-11-20T21:31:42.965516037Z"
+      }
+    },
+    {
+      "service": "events",
+      "container_id": "5efdea572169",
+      "state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 1,
+        "Error": "",
+        "StartedAt": "2026-11-20T21:29:52.925029168Z",
+        "FinishedAt": "2026-11-20T21:31:41.295771676Z"
+      }
+    }
+  ]
+}
