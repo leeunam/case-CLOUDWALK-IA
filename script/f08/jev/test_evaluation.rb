@@ -23,6 +23,15 @@ class F08JevTest < Minitest::Test
     assert_equal Digest::SHA256.file(CATALOG_PATH).hexdigest, @dataset.metadata.dig(:catalog, :sha256)
   end
 
+  def test_reviewed_labels_expect_abstention_in_the_affected_fields
+    cases = @dataset.cases.to_h { |entry| [entry.fetch("id"), entry] }
+    assert_equal({ "category" => ABSTENTION }, cases.dig("jev-001", "expected"))
+    assert_equal({ "priority" => ABSTENTION }, cases.dig("jev-041", "expected"))
+    assert_equal "ambiguo", cases.dig("jev-001", "stratum")
+    assert_equal "ambiguo", cases.dig("jev-041", "stratum")
+    assert_equal "provisional", @dataset.metadata.dig(:dataset, :review)
+  end
+
   def test_validation_rejects_duplicate_ids_and_normalized_texts
     reject_dataset(/IDs duplicados/) { |cases| cases[1]["id"] = cases[0]["id"] }
     reject_dataset(/relatos duplicados/) { |cases| cases[1]["text"] = "  #{cases[0]["text"].upcase}  " }
@@ -32,8 +41,8 @@ class F08JevTest < Minitest::Test
     reject_dataset(/rótulo fora do catálogo/) { |cases| cases[0]["expected"]["category"] = "outro" }
     reject_dataset(/campo recebido fora do catálogo/) { |cases| cases[0]["received"]["priority"] = "" }
     reject_dataset(/campos .* inconsistentes/) { |cases| cases[0]["missing"] = %w[category priority] }
-    reject_dataset(/abstenção e estrato inconsistentes/) { |cases| cases[0]["expected"]["category"] = ABSTENTION }
-    reject_dataset(/prioridade e estrato inconsistentes/) { |cases| cases[0]["stratum"] = "urgente" }
+    reject_dataset(/abstenção e estrato inconsistentes/) { |cases| cases[0]["stratum"] = "rotina" }
+    reject_dataset(/prioridade e estrato inconsistentes/) { |cases| cases[3]["stratum"] = "urgente" }
     reject_dataset(/distribuição esperada/) { |cases| cases.pop }
   end
 

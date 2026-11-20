@@ -9,12 +9,12 @@ retentativa de job ou encaminhamento do atendimento.
 ## Conjunto e rótulos
 
 [Dataset](../script/f08/jev/dataset.json) e [catálogo](../script/f08/jev/catalog.json)
-estão na versão 1.0.0. São 60 relatos novos e sintéticos em português, com 20
-por máscara de omissão. Os três grupos se alternam na ordem do arquivo, e cada
-relato tem ID, texto, campos recebidos, campos omitidos, rótulos esperados,
-estrato e justificativa. O validador confere os códigos e as descrições do
-snapshot contra o catálogo do produto. O snapshot usa as categorias das
-marcas do seed e as prioridades do contrato v1.
+estão nas versões 1.1.0 e 1.0.0, respectivamente. São 60 relatos sintéticos
+em português, com 20 por máscara de omissão. Os três grupos se alternam na
+ordem do arquivo. Cada relato tem ID, texto, campos recebidos, campos omitidos,
+rótulos esperados, estrato e justificativa. O validador confere os códigos e
+as descrições do snapshot contra o catálogo do produto. O snapshot usa as
+categorias das marcas do seed e as prioridades do contrato v1.
 
 Use o assunto em que o problema ocorreu ou sobre o qual o cliente pede
 orientação. Uma venda aprovada com crédito ausente trata de repasse, uma
@@ -29,16 +29,29 @@ perda continuada ou um compromisso iminente sem alternativa podem justificar
 Marque `informacao_insuficiente` para o campo que o relato não permite decidir.
 Assunto desconhecido pode coexistir com urgência clara, como em `jev-027`.
 Expressões de pressa, isoladamente, são evidência insuficiente de impacto.
+Um QR por si só deixa o meio de pagamento indeterminado. Para decidir a
+prioridade de um reembolso isolado ainda pendente, considere o prazo e as
+consequências para a operação ou o cliente.
 `rotina` indica relatos determináveis sem urgência imediata, incluindo casos
 `advanced`. `ambiguo` indica pelo menos um campo com abstenção esperada, mesmo
-quando o outro campo é urgente. Há 35 relatos de rotina, 13 urgentes e 12
+quando o outro campo é urgente. Há 33 relatos de rotina, 13 urgentes e 14
 ambíguos. O recorte de prioridade urgente tem 10 relatos com prioridade omitida
 e esperada como `urgent`, independentemente do estrato.
 
-Os rótulos foram escritos antes do primeiro ensaio e seguem provisórios até a
-revisão humana no chat central. Registre o SHA-256 exato da versão revisada.
-A amostra tem distribuição de omissões planejada, poucas categorias, um
-rótulo por campo e texto sintético. As proporções medem esse conjunto e têm
+Em 20/11/2026, a revisão humana confirmou duas abstenções mantendo os
+textos originais.
+
+- `jev-001` recebe `informacao_insuficiente` em categoria. O QR deixa o
+  meio de pagamento em aberto.
+- `jev-041` recebe `informacao_insuficiente` em prioridade. O impacto e o
+  prazo do reembolso específico permanecem indeterminados.
+
+O SHA-256 da versão 1.1.0 é
+`0e7e4c342c2a39cefd89855d8c0513f447d7878303eb4091488ca8af78928880`.
+O conjunto segue provisório enquanto os demais rótulos aguardam revisão
+humana no chat central. Os rótulos antecedem a avaliação ao vivo. A amostra
+tem distribuição de omissões planejada, poucas categorias, um rótulo por
+campo e texto sintético. As proporções medem esse conjunto e têm
 generalização limitada para atendimentos reais ou catálogos por marca.
 
 ## Como rodar
@@ -143,8 +156,8 @@ externa foi feita e os números descrevem a fixture e o avaliador.
 
 | Campo | Acerto na resposta | Acerto aplicado | Cobertura automática | Abstenções |
 | --- | --- | --- | --- | --- |
-| Categoria | 18/34 | 8/34 | 8/40 | 22/40 |
-| Prioridade | 2/33 | 2/33 | 2/40 | 37/40 |
+| Categoria | 18/33 | 8/33 | 8/40 | 22/40 |
+| Prioridade | 2/32 | 2/32 | 2/40 | 37/40 |
 
 As 10 omissões rotuladas como urgentes seguiram para revisão na fixture.
 A execução ao vivo aguarda revisão humana e orçamento no chat central.
