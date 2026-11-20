@@ -13,8 +13,10 @@ atendente simulado, com consulta autenticada do histórico. A F03 fornece o
 atendimento humano. A F04 integra o complemento de classificação em jobs e a
 correção por supervisão. A F05 usa Rails e Action Cable no simulador e na caixa
 do analista; as fixtures ficam no modo explícito `/?fixture=demo`.
-Configurações administrativas, robustez completa, carga e publicação continuam
-nas frentes F06–F10 do plano.
+A F06 fornece configuração administrativa e supervisão. A F07-A verifica os
+cinco cenários de robustez dos fluxos F02–F05 sobre a base integrada da F06.
+O fechamento da matriz administrativa da F07, carga e publicação continuam
+no plano.
 
 Verificação local da F01 em 2026-11-17 passou com cinco testes Rails e quatorze
 asserções, OpenAPI e 43 fixtures, build React/TypeScript, execução de um job
@@ -41,6 +43,13 @@ fixtures e transporte simulado naquela primeira fatia. Os resultados da
 conclusão dos jobs e da conexão real da interface estão na
 [integração F04/F05](docs/integracao-f04-f05.md). O ensaio TypeSafe ao vivo
 continua dependendo de `TYPESAFE_API_KEY`.
+
+Na integração F06/F07-A de 2026-11-20, passaram 86 testes Rails com 1.065
+asserções (uma omissão da chamada TypeSafe real), 24 testes frontend com
+instalação pelo lockfile e build, 10 testes da ponte, 12 do verificador e
+47 fixtures contratuais. A configuração e a recuperação por supervisão foram
+percorridas no navegador. Resultados, reprodução e limites estão na
+[integração F06/F07-A](docs/integracao-f06-f07.md).
 
 - [Escopo e arquitetura](docs/planejamento/especificacao-mvp.md)
 - [Backlog e critérios de aceite](docs/planejamento/plano-de-execucao.md)

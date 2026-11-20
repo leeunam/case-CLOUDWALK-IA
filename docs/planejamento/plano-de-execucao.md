@@ -13,9 +13,15 @@ humana, espera, retomada, resolução, reentrega após resposta perdida, conflit
 de versão e recuperação após reiniciar a API. A
 [integração F04/F05](../integracao-f04-f05.md) registra evidências e limites.
 A F04 tem implementação e verificação local concluídas; seu aceite ao vivo
-ainda depende da credencial. F06–F10 continuam conforme o backlog abaixo;
-a bateria completa de robustez, carga, avaliação do Jev e publicação não
-foi concluída por esta rodada.
+ainda depende da credencial.
+
+A F06 está implementada e verificada localmente, incluindo configuração,
+supervisão, migração e duas corridas de configuração no PostgreSQL. A base
+conjunta passou com 86 testes Rails e 1.065 asserções (uma omissão TypeSafe),
+24 testes frontend e build pelo lockfile. A F07-A fornece cinco cenários reais
+de robustez dos fluxos F02–F05. A [integração F06/F07-A](../integracao-f06-f07.md)
+registra os resultados e distingue essa fatia do fechamento administrativo
+da F07. Carga, avaliação real do Jev e publicação seguem pendentes.
 
 ## 1. Ordem de trabalho
 
