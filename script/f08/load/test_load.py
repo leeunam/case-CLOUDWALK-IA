@@ -360,6 +360,15 @@ class ReconciliationTests(unittest.TestCase):
             self.assertIs(report["goals"]["escoamento_na_janela"], False)
             self.assertIn("escoamento_na_janela", str(report["observed_failures"]))
 
+    def test_missing_timestamp_for_completed_turn_leaves_drain_unknown(self):
+        self.case["turns"][0]["completed_ms"] = None
+        report, row = self.aggregate()
+        self.assertEqual(row["state"], "concluído")
+        self.assertEqual(report["state"], "bloqueado")
+        self.assertIsNone(report["goals"]["escoamento_na_janela"])
+        self.assertIn("carimbos de efeitos", str(report["measurement_gaps"]))
+        self.assertEqual(report["observed_failures"], [])
+
     def test_unproven_or_short_intervention_blocks_and_transient_reads_can_recover(self):
         fault = {"stopped_state": {"Status": "exited", "FinishedAt": "1970-01-01T00:00:00.100+00:00"},
                  "started_state": {"Status": "running", "StartedAt": "1970-01-01T00:00:02.100+00:00"}}

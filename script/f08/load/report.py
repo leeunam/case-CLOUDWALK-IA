@@ -438,8 +438,9 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
     duplicates = Counter((row["topic"], row["event_id"]) for row in kafka if row["event_id"]
                          and row["topic"] != "agent.failures")
     measured_turns = [row for row in reconciled if row["http_status"] == 202 or row["case_id"]]
-    all_completed_by_deadline = all(row["state"] == "concluído" and in_window(row["last_effect_ms"])
-                                    for row in measured_turns)
+    missing_effect_times = [row for row in measured_turns if row["state"] == "concluído" and row["last_effect_ms"] is None]
+    known_turns_on_time = all(row["state"] == "concluído" and (row["last_effect_ms"] is None or
+                              in_window(row["last_effect_ms"])) for row in measured_turns)
     latest_work = max([window.get("arrivals_end_ms", 0)] +
                       [row["last_effect_ms"] for row in measured_turns if row["last_effect_ms"] is not None])
     initial_metrics, second_metrics = times(initial), times(second)
@@ -455,12 +456,15 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
     sql_final = tail_sql_fresh and tail["sample_ms"] >= tail_after
     lag_final = tail_lag_fresh and tail_lag["sample_ms"] >= tail_after
     backlog_drained = all_measured(
-        (all_completed_by_deadline and not outbox_final and not dangling_cases) if snapshot else None,
+        (known_turns_on_time and not outbox_final and not dangling_cases) if snapshot else None,
+        None if missing_effect_times else True,
         all(tail[k] == 0 for k in ("outbox_pending", "cases_waiting_processing", "outbox_failed", "cases_failed"))
         if sql_final else None,
         tail_lag["total_lag"] == 0 if lag_final else None,
     )
     if window and not config["chat"]:
+        if missing_effect_times:
+            gaps.append(f"carimbos de efeitos indisponíveis para {len(missing_effect_times)} turnos concluídos")
         if not sql_final:
             gaps.append("leitura SQL final indisponível ou fora do intervalo exigido")
         if not lag_final:
