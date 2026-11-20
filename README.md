@@ -60,7 +60,8 @@ a interrupção do Kafka. Todas as 9.000 entradas iniciais receberam `202`, mas
 [relatório F08](docs/f08.md) preserva os dados, denominadores e limitações,
 incluindo o [diagnóstico de recuperação](docs/f08-incidente-consumo.md).
 O modo offline não mede a qualidade do Jev real; dez mil conexões de chat
-ainda não foram ensaiadas.
+ainda não foram ensaiadas. Dois casos limite do analisador seguem
+documentados para correção antes dos próximos ensaios.
 
 - [Escopo e arquitetura](docs/planejamento/especificacao-mvp.md)
 - [Backlog e critérios de aceite](docs/planejamento/plano-de-execucao.md)

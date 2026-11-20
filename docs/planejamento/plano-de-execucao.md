@@ -26,6 +26,10 @@ concluído. A F08 executou a referência de carga: cinco rodadas aprovadas e
 uma reprovada por encerramento dos consumidores após a retomada do Kafka.
 O [relatório F08](../f08.md) conserva os resultados e o diagnóstico. A correção
 da recuperação, a avaliação real do Jev e a publicação seguem pendentes.
+Antes de novas medições, corrigir também os dois casos limite registrados
+em F08: carimbo ausente junto de publicação tardia e atribuição SQL de uma
+escrita de chat persistida após timeout HTTP. Os resultados atuais foram
+conferidos com os dados completos e permanecem publicados.
 
 A [passagem da F08](passagem-f08.md) separa o gerador/observador de carga
 do dataset/avaliador Jev, com arquivos próprios e a mesma base Git. A execução
