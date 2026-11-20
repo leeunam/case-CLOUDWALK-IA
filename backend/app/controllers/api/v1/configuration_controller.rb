@@ -64,7 +64,17 @@ module Api
         events = Operations::ConfigurationAudit.where(brand: brand)
         events = events.where(resource_type: type) if type
         events = events.where(resource_id: id) if id
-        list(events, "configuration_audit", brand.id, type, id, order: %i[created_at id], &:contract_data)
+        profile_codes = nil
+        list(events, "configuration_audit", brand.id, type, id, order: %i[created_at id]) do |row|
+          data = row.contract_data
+          if row.resource_type == "capacity_profile"
+            profile_codes ||= scope.visible_profile_category_codes(brand_ids: brand.id)
+            %w[before after].each do |field|
+              data[field] = Operations::ConfigurationData.scoped_profile_snapshot(data[field], profile_codes)
+            end
+          end
+          data
+        end
       end
 
       def catalog
@@ -93,8 +103,10 @@ module Api
       end
 
       def capacity_profile
-        analyst = scope.analysts.find(path_id(:analyst_id))
-        render json: Operations::ConfigurationData.profile(analyst.capacity_profiles.find_by!(active: true))
+        profile = Operations::CapacityProfile.where(user_id: scope.analysts.select(:id))
+                                             .find_by!(user_id: path_id(:analyst_id), active: true)
+        scope.authorize_profile!(profile)
+        render json: Operations::ConfigurationData.profile(profile)
       end
 
       def create_capacity_profile

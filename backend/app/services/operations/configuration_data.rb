@@ -35,5 +35,14 @@ module Operations
       { id: profile.id, analyst_id: profile.user_id, version: profile.version,
         portfolio_limit: profile.portfolio_limit, alternatives: profile.alternatives }
     end
+
+    def self.scoped_profile_snapshot(snapshot, codes)
+      return unless snapshot
+
+      snapshot = snapshot.with_indifferent_access
+      snapshot.merge(alternatives: snapshot.fetch(:alternatives).filter_map do |alternative|
+        alternative.select { |pair| codes.include?(pair.fetch("category")) }.presence
+      end)
+    end
   end
 end

@@ -28,6 +28,20 @@ module Operations
       raise WebhookV1::Error.new(403, "forbidden", "A alteração exige autorização nas marcas afetadas.")
     end
 
+    def authorize_profile!(profile)
+      codes = profile.alternatives.flatten.pluck("category").uniq
+      return if (codes - visible_profile_category_codes(codes: codes)).empty?
+
+      raise WebhookV1::Error.new(403, "forbidden", "Perfil indisponível para esta supervisão.")
+    end
+
+    def visible_profile_category_codes(brand_ids: brands.select(:id), codes: nil)
+      catalog = codes ? Category.where(code: codes) : Category.all
+      supervised = catalog.where(brand_id: brand_ids)
+      outside = catalog.where.not(brand_id: brand_ids)
+      supervised.where(active: true).or(supervised.where.not(code: outside.select(:code))).distinct.pluck(:code)
+    end
+
     def analysts(brand: nil, profile: true)
       authorized_links = BrandTeam.where(brand_id: brand ? brand.id : brands.select(:id))
       members = TeamMembership.where(team_id: authorized_links.select(:team_id))

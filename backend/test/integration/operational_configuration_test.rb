@@ -180,6 +180,83 @@ class OperationalConfigurationTest < ActionDispatch::IntegrationTest
     assert_equal 2, @brand.reload.catalog_version
   end
 
+  test "revogar o último vínculo fora do escopo protege o perfil inteiro" do
+    alex = Operations::User.find_by!(email: "alex@example.test")
+    foreign_category = @other.categories.create!(code: "conta_horizonte", name: "Conta Horizonte")
+    token = login(@supervisor.email)
+    path = "/api/v1/analysts/#{alex.id}/capacity-profile"
+    local_pair = { priority: "basic", category: "pix", limit: 1 }
+    alternatives = [[local_pair], [local_pair.merge(category: foreign_category.code, limit: 2)]]
+    put path, params: { expected_version: 1, portfolio_limit: 2, alternatives: alternatives },
+      as: :json, headers: headers(token)
+    assert_response 200
+    published = response.parsed_body
+
+    retained_members = @shared.team_memberships.where.not(user_id: alex.id).pluck(:user_id)
+    put "/api/v1/teams/#{@shared.id}", params: {
+      name: @shared.name, expected_version: @shared.version, member_user_ids: retained_members
+    }, as: :json, headers: headers(token)
+    assert_response 200
+
+    limited = login(@limited.email)
+    get "/api/v1/analysts"
+    assert_response 200
+    entry = response.parsed_body.fetch("items").find { |item| item.fetch("user_id") == alex.id }
+    assert_equal [@brand.id], entry.fetch("brand_ids")
+    get path
+    assert_response 403
+    assert_equal({ "error" => { "code" => "forbidden", "message" => "Perfil indisponível para esta supervisão." } },
+      response.parsed_body)
+
+    @brand.categories.create!(code: foreign_category.code, name: "Chave histórica Aurora", active: false)
+    get path
+    assert_response 403
+    assert_not_includes response.body, foreign_category.code
+
+    # Simula a projeção antiga feita quando o catálogo histórico compartilhava a chave.
+    legacy = Operations::ConfigurationAudit.find_by!(brand: @brand, resource_type: "capacity_profile",
+                                                    resource_id: alex.id, version: 2)
+    legacy.update_column(:after, published)
+
+    audit_count = Operations::ConfigurationAudit.count
+    assert_no_difference -> { alex.capacity_profiles.count } do
+      put path, params: { expected_version: 2, portfolio_limit: 1, alternatives: [[local_pair]] },
+        as: :json, headers: headers(limited)
+      assert_response 403
+      post path, params: { portfolio_limit: 1, alternatives: [[local_pair]] }, as: :json, headers: headers(limited)
+      assert_response 403
+    end
+    assert_equal audit_count, Operations::ConfigurationAudit.count
+
+    local_path = "/api/v1/analysts/#{@bia.id}/capacity-profile"
+    get local_path
+    assert_response 200
+    put local_path, params: { expected_version: 1, portfolio_limit: 1, alternatives: [[local_pair]] },
+      as: :json, headers: headers(limited)
+    assert_response 200
+    assert_equal 2, response.parsed_body.fetch("version")
+
+    token = login(@supervisor.email)
+    get path
+    assert_response 200
+    assert_equal published, response.parsed_body
+    put path, params: { expected_version: 2, portfolio_limit: 1, alternatives: [[local_pair]] },
+      as: :json, headers: headers(token)
+    assert_response 200
+    assert_equal 3, response.parsed_body.fetch("version")
+
+    repair = Operations::ConfigurationAudit.find_by!(brand: @brand, resource_type: "capacity_profile",
+                                                    resource_id: alex.id, version: 3)
+    assert_equal [[local_pair.stringify_keys]], repair.before.fetch("alternatives")
+
+    login(@limited.email)
+    get "#{@base}/configuration-audit", params: { resource_type: "capacity_profile", resource_id: alex.id }
+    assert_response 200
+    assert_not_includes response.body, foreign_category.code
+    assert_equal [3, 2], response.parsed_body.fetch("items").pluck("version")
+    assert_equal published, legacy.reload.after
+  end
+
   test "revogar equipe de uma fila retira leitura e preserva espera sem responsável" do
     active = receive
     active.advance!(status: "human_active", assignee: @bia.attendant)

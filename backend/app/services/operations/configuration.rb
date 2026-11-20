@@ -183,6 +183,7 @@ module Operations
         @scope.authorize_all!(brand_ids)
         user.lock!
         previous = user.capacity_profiles.find_by(active: true)
+        @scope.authorize_profile!(previous) if previous
         if create
           if previous
             raise WebhookV1::Error.new(409, "profile_exists", "Já existe um perfil ativo para este analista.")
@@ -200,9 +201,9 @@ module Operations
         profile = user.capacity_profiles.create!(version: version, portfolio_limit: limit, alternatives: alternatives)
         after = ConfigurationData.profile(profile)
         Brand.where(id: brand_ids).each do |brand|
-          codes = brand.categories.pluck(:code)
-          audit!([brand.id], "capacity_profile", scoped_profile_snapshot(before, codes),
-                 scoped_profile_snapshot(after, codes), resource_id: user.id)
+          codes = @scope.visible_profile_category_codes(brand_ids: brand.id)
+          audit!([brand.id], "capacity_profile", ConfigurationData.scoped_profile_snapshot(before, codes),
+                 ConfigurationData.scoped_profile_snapshot(after, codes), resource_id: user.id)
           Attendances::DistributeHumanWorkJob.schedule(brand.id)
         end
         after
@@ -294,14 +295,6 @@ module Operations
         alternative.map { |pair| pair.values_at("priority", "category", "limit") }.sort
       end
       invalid!("O perfil contém alternativas repetidas.") if normalized.uniq.size != normalized.size
-    end
-
-    def scoped_profile_snapshot(snapshot, codes)
-      return unless snapshot
-
-      snapshot.merge(alternatives: snapshot.fetch(:alternatives).filter_map do |alternative|
-        alternative.select { |pair| codes.include?(pair.fetch("category")) }.presence
-      end)
     end
 
     def reconcile!(brand_ids, user_ids:, queue_ids: nil)

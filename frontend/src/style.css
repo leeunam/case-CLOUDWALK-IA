@@ -217,6 +217,7 @@ textarea::placeholder { color: var(--muted); }
 }
 .configuration-form { margin-block: .75rem 1.25rem; }
 .configuration-form > fieldset { padding: 0; border: 0; margin: 0 0 .85rem; min-width: 0; }
+.supervisor-action-fields { padding: 0; border: 0; margin: 0; min-width: 0; }
 .configuration-form label, .configuration-panel section > label, .configuration-panel > label {
   display: block;
   margin-block: .45rem;
