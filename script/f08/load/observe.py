@@ -8,10 +8,11 @@ from decimal import Decimal
 from importlib.metadata import version
 from urllib.request import urlopen
 
+from kafka_capture import CAPTURE_SECONDS
 from kafka_probe import KafkaProbeError, probe, sample_kafka
 
 from human import exercise_human
-from protocol import API, BRANDS, DIRECTORY, KINDS, PIX, RESULTS, append, bytes_json, now_ms, webhook, write_json
+from protocol import API, BRANDS, DIRECTORY, KINDS, PIX, RESULTS, append, bytes_json, now_ms, rows, webhook, write_json
 
 
 SQL_SAMPLE = (DIRECTORY / "observations.sql").read_text()
@@ -192,10 +193,25 @@ def main():
             kafka_job.result()
         start = now_ms()
         try:
-            evidence = probe("records", timeout=52)
+            evidence = probe("records", timeout=CAPTURE_SECONDS)
         except KafkaProbeError as error:
-            evidence = {"complete": False, "error": str(error)}
-        evidence["cost_ms"] = now_ms() - start
+            fixed = RESULTS / "kafka-offset-range.json"
+            bounds = json.loads(fixed.read_text())["partitions"] if fixed.exists() else None
+            evidence = {"complete": False, "error": str(error),
+                        "expected_offsets": sum(r["end"] - r["start"] for r in bounds) if bounds is not None else None,
+                        "records_read": sum(1 for _ in rows(RESULTS / "kafka-records.jsonl"))}
+        finished = now_ms()
+        journal = RESULTS / "kafka-capture-attempts.jsonl"
+        attempts = list(rows(journal))
+        if attempts and attempts[-1]["status"] == "started":
+            terminal = {**attempts[-1], "status": "complete" if evidence["complete"] else "incomplete",
+                        "finished_ms": finished, "records_read": evidence["records_read"]}
+            if evidence.get("error"):
+                terminal["error"] = evidence["error"]
+            append(journal, terminal)
+            attempts.append(terminal)
+        evidence.update(started_ms=start, finished_ms=finished, cost_ms=finished - start,
+                        timeout_ms=CAPTURE_SECONDS * 1000, attempts=attempts)
         write_json(RESULTS / "observed.json", {"kafka_records": evidence})
 
 

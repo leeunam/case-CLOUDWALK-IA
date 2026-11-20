@@ -17,7 +17,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 from protocol import BRANDS, DIRECTORY, KINDS, append, bytes_json, plan, write_json
-from report import chat_summary, distribution, human_summary, index_cases, publish, reconcile, resource_summary, times
+from report import chat_summary, distribution, human_summary, index_cases, publish, reconcile, render, resource_summary, times
 from run import Blocked, arguments, configurations, console, main, Stack
 
 
@@ -242,6 +242,14 @@ class ReconciliationTests(unittest.TestCase):
                 self.assertEqual(summary["kafka"]["completed_turns_missing_causal_pair"], 1)
                 self.assertEqual(row["state"], "concluído")
                 self.assertEqual(summary["integrity"]["confirmed_losses"], 0)
+
+    def test_markdown_discloses_failed_post_window_attempt_after_success(self):
+        capture = {"complete": True, "expected_offsets": 3, "records_read": 3, "attempts": [
+            {"phase": "final_offsets", "status": "failed", "attempt": 1, "kafka_name": "_TIMED_OUT"},
+            {"phase": "final_offsets", "status": "fixed", "attempt": 2}]}
+        summary, _ = self.aggregate(capture=capture)
+        self.assertEqual(summary["state"], "aprovado")
+        self.assertIn("consulta de offsets 1 falhou (_TIMED_OUT)", render(summary))
 
     def test_incomplete_kafka_terminal_counts_block_even_when_records_match_turn(self):
         for capture in ({"complete": True}, {"complete": True, "records_read": 1, "expected_offsets": 1}):
