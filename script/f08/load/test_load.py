@@ -18,7 +18,7 @@ from unittest.mock import Mock, patch
 
 from protocol import BRANDS, DIRECTORY, KINDS, append, bytes_json, plan, write_json
 from report import chat_summary, distribution, human_summary, index_cases, publish, reconcile, render, resource_summary, times
-from run import Blocked, arguments, configurations, console, main, Stack
+from run import Blocked, arguments, configurations, console, main, round_run, Stack, RESERVATION
 
 
 class PlanningTests(unittest.TestCase):
@@ -79,8 +79,78 @@ class RunnerTests(unittest.TestCase):
         stack.env.pop("DOCKER_CONTEXT", None)
         stack.env["DOCKER_HOST"] = "tcp://remote.example.invalid"
         with patch.object(stack, "command") as command, self.assertRaisesRegex(Blocked, "daemon Docker local"):
-            stack.preflight()
+            stack.local_daemon()
         command.assert_not_called()
+
+    def test_daemon_reservation_excludes_another_uid_through_cleanup(self):
+        config = dict(next(configurations(arguments(["smoke"]))), run_id="f08-reservation")
+        owner = "a" * 64
+        reserve = None
+        contender_reports = []
+        operations = []
+        def daemon(stack, *args, **kwargs):
+            nonlocal reserve
+            uid = stack.env["F08_UID"]
+            if args[0] == "create":
+                self.assertEqual(args[1:3], ("--name", RESERVATION))
+                if reserve:
+                    return Mock(stdout="", stderr="name already in use", returncode=1)
+                reserve = owner
+                return Mock(stdout=reserve, returncode=0)
+            if args[:2] == ("container", "inspect"):
+                return Mock(stdout=reserve)
+            if args[:2] == ("container", "rm"):
+                self.assertEqual(args[2], owner)
+                reserve = None
+            operations.append((uid, args[:2]))
+            return Mock(stdout="")
+        def contender(stack):
+            with patch("run.os.getuid", return_value=2000):
+                contender_reports.append(round_run(stack.output.parent / "other", config))
+        def compose(stack, *args, **kwargs):
+            if args[0] == "up":
+                raise Blocked("falha durante criação")
+            if args[0] == "down":
+                self.assertEqual(reserve, owner)
+            operations.append((stack.env["F08_UID"], args[:1]))
+        with tempfile.TemporaryDirectory() as tmp, patch("run.os.getuid", return_value=1000), \
+                patch.object(Stack, "command", daemon), patch.object(Stack, "require_empty", contender), \
+                patch.object(Stack, "call", compose), patch.object(Stack, "local_daemon", return_value={}), patch.object(Stack, "configuration", return_value={}):
+            first = round_run(Path(tmp) / "first", config)
+        self.assertEqual(first["cleanup"], "concluída")
+        self.assertEqual(first["state"], "bloqueado")
+        self.assertIn("falha durante criação", first["reason"])
+        self.assertIn("já existe", contender_reports[0]["reason"])
+        self.assertIsNone(contender_reports[0]["cleanup"])
+        self.assertEqual([uid for uid, cmd in operations if cmd in (("down",), ("container", "rm"))], ["1000", "1000"])
+        self.assertIsNone(reserve)
+
+    def test_cleanup_respects_creation_and_reservation_identity(self):
+        config = dict(next(configurations(arguments(["smoke"]))), run_id="f08-reservation")
+        for failure in ("pull", "preflight", "foreign"):
+            with self.subTest(failure=failure), tempfile.TemporaryDirectory() as tmp:
+                stack = Stack(Path(tmp))
+                with patch("run.Stack", return_value=stack), patch.object(stack, "command") as command, \
+                        patch.object(stack, "configuration", return_value={}), patch.object(stack, "local_daemon", return_value={}), \
+                        patch.object(stack, "require_empty") as empty, patch.object(stack, "reserve") as reserve, \
+                        patch.object(stack, "call") as compose:
+                    reserve.return_value = "a" * 64
+                    command.return_value.stdout = "b" * 64
+                    if failure == "pull":
+                        compose.side_effect = Blocked("pull")
+                    elif failure == "preflight":
+                        empty.side_effect = Blocked("rede preexistente")
+                    else:
+                        compose.side_effect = [None, Blocked("up")]
+                    report = round_run(Path(tmp) / "one", config)
+                    self.assertEqual(report["state"], "bloqueado")
+                    self.assertFalse(any(call.args[0] == "down" for call in compose.call_args_list))
+                    removes = [call.args for call in command.call_args_list if call.args[:2] == ("container", "rm")]
+                    self.assertEqual(removes, [("container", "rm", "a" * 64)] if failure == "preflight" else [])
+                    if failure == "pull":
+                        reserve.assert_not_called()
+                    if failure == "foreign":
+                        self.assertIn("proprietário", report["cleanup"])
 
     def test_human_active_profile_is_checked_independently_of_portfolio(self):
         events = [{"state": "human_active", "active_work": count, "portfolio": 2, "portfolio_limit": 6,
@@ -173,11 +243,11 @@ class ReconciliationTests(unittest.TestCase):
         self.assertTrue(different["identity_inconsistent"])
 
     def aggregate(self, *, sql=None, lag=None, records=None, resources=None, cleanup="concluída", mode="smoke",
-                  fault=None, earlier_lag=(), capture=None):
+                  fault=None, earlier_lag=(), earlier_sql=(), capture=None, snapshot=True, fault_seconds=None):
         entries = plan("test", 1, [(1, 1)])
         entry = entries[0]
         config = next(configurations(arguments(["smoke", "--rate", "1", "--seconds", "1"])))
-        config["scenario"] = mode
+        config.update(scenario=mode, fault_seconds=fault_seconds)
         manifest = {"cleanup": cleanup, "run_id": "f08-test", "revision": "a" * 40, "scenario": mode, "parameters": config,
                     "window": {"start_ms": 10, "arrivals_end_ms": 1010, "end_ms": 6010}, "k6_exit": 0,
                     "observation": {"kafka_records": {"complete": True}}}
@@ -191,8 +261,11 @@ class ReconciliationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary)
             write_json(output / "ready.json", {"channels": {entry["brand"]: {entry["kind"]: "channel"}}})
-            write_json(output / "persistence.json", {"sample_ms": 6011, "cases": [self.case]})
+            if snapshot:
+                write_json(output / "persistence.json", {"sample_ms": 6011, "cases": [self.case]})
             write_json(output / "k6-summary.json", {"iterations": {"count": 1}})
+            for sample in earlier_sql:
+                append(output / "sql-samples.jsonl", sample)
             append(output / "sql-samples.jsonl", {"sample_ms": 5000, "cost_ms": 1,
                    "outbox_pending": 0, "outbox_failed": 0, "cases_waiting_processing": 0, "cases_failed": 0,
                    "cases_waiting_human": 0, "cases_human_active": 0, "cases_waiting_customer": 0,
@@ -262,17 +335,64 @@ class ReconciliationTests(unittest.TestCase):
             with self.subTest(field=field):
                 old = self.case["turns"][0][field]
                 self.case["turns"][0][field] = 9000
-                self.assertFalse(self.aggregate()[0]["goals"]["escoamento_na_janela"])
+                self.assertIs(self.aggregate()[0]["goals"]["escoamento_na_janela"], False)
                 self.case["turns"][0][field] = old
-        for changes in ({"sql": {"outbox_pending": 1}}, {"lag": {"sample_ms": 6009, "cost_ms": 2}},
+        self.assertIs(self.aggregate(sql={"outbox_pending": 1})[0]["goals"]["escoamento_na_janela"], False)
+        for changes in ({"lag": {"sample_ms": 6009, "cost_ms": 2}},
                         {"lag": {"sample_ms": 300}}, {"sql": {"sample_ms": 6010, "cost_ms": 1}}):
             with self.subTest(changes=changes):
-                self.assertFalse(self.aggregate(**changes)[0]["goals"]["escoamento_na_janela"])
+                self.assertIsNone(self.aggregate(**changes)[0]["goals"]["escoamento_na_janela"])
         self.assertTrue(self.aggregate(lag={"sample_ms": 6009, "cost_ms": 1})[0]["goals"]["escoamento_na_janela"])
 
+    def test_missing_final_measurements_block_without_erasing_independent_failures(self):
+        for options, gap in (({"lag": {"total_lag": None}}, "lag"), ({"sql": {"error": "timeout"}}, "SQL"),
+                             ({"snapshot": False}, "persistência")):
+            with self.subTest(options=options):
+                report, _ = self.aggregate(**options)
+                self.assertEqual(report["state"], "bloqueado")
+                self.assertTrue(any(gap in item for item in report["measurement_gaps"]))
+                self.assertIsNone(report["goals"]["escoamento_na_janela"])
+                self.assertEqual(report["observed_failures"], [])
+        for sql, lag in (({"outbox_pending": 1}, {"total_lag": None}),
+                         ({"error": "timeout"}, {"total_lag": 1})):
+            report, _ = self.aggregate(sql=sql, lag=lag)
+            self.assertEqual(report["state"], "bloqueado")
+            self.assertIs(report["goals"]["escoamento_na_janela"], False)
+            self.assertIn("escoamento_na_janela", str(report["observed_failures"]))
+
+    def test_unproven_or_short_intervention_blocks_and_transient_reads_can_recover(self):
+        fault = {"stopped_state": {"Status": "exited", "FinishedAt": "1970-01-01T00:00:00.100+00:00"},
+                 "started_state": {"Status": "running", "StartedAt": "1970-01-01T00:00:02.100+00:00"}}
+        for options in ({"fault": {}}, {"fault": fault, "fault_seconds": 3},
+                        {"fault": {**fault, "error": "partida falhou"}},
+                        {"fault": {**fault, "started_state": {**fault["started_state"], "Status": "exited"}}}):
+            report, _ = self.aggregate(**{"fault_seconds": 1, **options})
+            self.assertEqual(report["state"], "bloqueado")
+            self.assertTrue(report["measurement_gaps"])
+            self.assertEqual(report["observed_failures"], [])
+        report, _ = self.aggregate(fault=fault, fault_seconds=2,
+            earlier_lag=[{"sample_ms": 200, "cost_ms": 70, "total_lag": None}],
+            earlier_sql=[{"sample_ms": 200, "cost_ms": 70, "error": "timeout"}])
+        self.assertEqual(report["state"], "aprovado")
+        self.assertEqual(report["observer"]["sql_sample_errors"], 1)
+        self.assertEqual(report["observer"]["kafka_samples_unavailable"], 1)
+
+    def test_unattributed_customer_and_ai_messages_fail_integrity_without_claiming_a_cause(self):
+        for author in ("customer", "ai"):
+            self.case["messages"].append({"id": "extra-" + author, "sequence": 3, "author": author,
+                                          "source_event_id": "new-" + author, "created_ms": 401})
+        report, row = self.aggregate()
+        self.assertEqual(report["state"], "reprovado")
+        self.assertIs(report["goals"]["efeitos_sem_duplicacao_ou_perda_entre_aceitos"], False)
+        self.assertEqual([(m["case_id"], m["id"]) for m in report["integrity"]["unattributed_messages"]],
+                         [("case", "extra-customer"), ("case", "extra-ai")])
+        self.assertEqual(report["integrity"]["unattributed_message_count"], 2)
+        self.assertEqual(report["integrity"]["duplicated_effect_identities"], 0)
+        self.assertEqual(row["state"], "concluído")
+
     def test_recovery_witness_uses_completed_kafka_and_sql_reads(self):
-        parameters = {"fault": {"stopped_state": {"FinishedAt": "1970-01-01T00:00:00.010+00:00"},
-                                "started_state": {"StartedAt": "1970-01-01T00:00:00.100+00:00"}},
+        parameters = {"fault": {"stopped_state": {"Status": "exited", "FinishedAt": "1970-01-01T00:00:00.010+00:00"},
+                                "started_state": {"Status": "running", "StartedAt": "1970-01-01T00:00:00.100+00:00"}},
                       "earlier_lag": [{"sample_ms": 200, "cost_ms": 100, "total_lag": 2}],
                       "sql": {"sample_ms": 5000, "cost_ms": 20}}
         late = self.aggregate(**parameters, lag={"sample_ms": 4900, "cost_ms": 101})[0]
