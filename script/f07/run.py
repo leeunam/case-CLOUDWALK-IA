@@ -6,9 +6,11 @@ import fcntl
 import json
 import os
 import secrets
+import selectors
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 PROJECT = "cloudwalk_f07_a"
@@ -71,7 +73,8 @@ def require_fresh(env):
 def control(message, env):
     action = message["action"]
     service = message.get("service")
-    if action in {"stop", "start", "state"} and service in CONTROLLED_SERVICES:
+    if ((action in {"stop", "start", "state"} and service in CONTROLLED_SERVICES)
+            or (action == "state" and service == "worker")):
         if action == "state":
             rows = invoke(COMPOSE + ["ps", "-a", "--format", "json", service], env,
                           "estado do serviço", capture=True)
@@ -103,35 +106,71 @@ def control(message, env):
     raise StackUnavailable("operação de controle desconhecida")
 
 
+def protocol_lines(stream, *, lifetime, idle=240):
+    end = time.monotonic() + lifetime
+    last_line = time.monotonic()
+    pending = bytearray()
+    with selectors.DefaultSelector() as selector:
+        selector.register(stream, selectors.EVENT_READ)
+        while True:
+            remaining = min(end, last_line + idle) - time.monotonic()
+            if remaining <= 0 or not selector.select(remaining):
+                raise StackUnavailable("Prazo de execução ou inatividade do verificador esgotado")
+            part = os.read(stream.fileno(), 65536)
+            if not part:
+                if pending:
+                    raise StackUnavailable("Verificador encerrou com mensagem incompleta")
+                return
+            pending.extend(part)
+            while b"\n" in pending:
+                line, _, pending = pending.partition(b"\n")
+                if line.strip():
+                    if len(line) > 2_000_000:
+                        raise StackUnavailable("Mensagem extensa demais no protocolo do verificador")
+                    yield line
+                    last_line = time.monotonic()
+            if len(pending) > 2_000_000:
+                raise StackUnavailable("Mensagem extensa demais no protocolo do verificador")
+
+
+def stop_probe(process):
+    if process.poll() is None:
+        process.terminate()
+        try:
+            process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait(timeout=5)
+
+
 def probe(scenarios, report, env):
     args = COMPOSE + ["run", "--no-deps", "--rm", "-T", "-i", "probe",
                       "python", "-B", "/f07/scenarios.py", *scenarios]
-    with subprocess.Popen(args, cwd=ROOT, env=env, text=True, bufsize=1,
-                          stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=sys.stderr) as process:
+    process = subprocess.Popen(args, cwd=ROOT, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=sys.stderr)
+    try:
+        for line in protocol_lines(process.stdout, lifetime=300 + 600 * len(scenarios)):
+            message = json.loads(line)
+            if "action" in message:
+                try:
+                    response = {"ok": True, "result": control(message, env)}
+                except (StackUnavailable, ValueError) as error:
+                    response = {"ok": False, "reason": str(error)}
+                process.stdin.write(json.dumps(response).encode() + b"\n")
+                process.stdin.flush()
+            elif "result" in message:
+                result = message["result"]
+                report["scenarios"][result["id"]] = result
+                print(f"{result['id']} {result['status']}: {result['reason']}", file=sys.stderr)
+            else:
+                raise StackUnavailable("mensagem inesperada do verificador")
+        if process.wait(timeout=15):
+            raise StackUnavailable("processo de verificação terminou com erro; confira stderr")
+    finally:
         try:
-            for line in process.stdout:
-                if not line.strip():
-                    continue
-                message = json.loads(line)
-                if "action" in message:
-                    try:
-                        response = {"ok": True, "result": control(message, env)}
-                    except (StackUnavailable, ValueError) as error:
-                        response = {"ok": False, "reason": str(error)}
-                    process.stdin.write(json.dumps(response) + "\n")
-                    process.stdin.flush()
-                elif "result" in message:
-                    result = message["result"]
-                    report["scenarios"][result["id"]] = result
-                    print(f"{result['id']} {result['status']}: {result['reason']}", file=sys.stderr)
-                else:
-                    raise StackUnavailable("mensagem inesperada do verificador")
-            if process.wait(timeout=15):
-                raise StackUnavailable("processo de verificação terminou com erro; confira stderr")
+            stop_probe(process)
         finally:
-            if process.poll() is None:
-                process.terminate()
-                process.wait(timeout=10)
+            process.stdin.close()
+            process.stdout.close()
 
 
 def main():

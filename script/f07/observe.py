@@ -2,6 +2,7 @@
 
 import json
 import os
+import socket
 import time
 import uuid
 from dataclasses import dataclass
@@ -187,20 +188,32 @@ class Database:
             options="-c default_transaction_read_only=on -c statement_timeout=4000",
         )
 
-    def query(self, sql, *params):
-        return self.connection.execute(sql, params).fetchone()[0]
+    def query(self, sql, *params, missing=None, optional=False):
+        row = self.connection.execute(sql, params).fetchone()
+        if row is None:
+            if optional:
+                return None
+            raise Blocked(f"Linha ausente no PostgreSQL: {missing}")
+        return row[0]
 
-    def channel(self, brand, kind="chat"):
+    def connected(self, service, database):
+        address = socket.gethostbyname(service)
+        return self.query("""
+            SELECT EXISTS (SELECT FROM pg_stat_activity WHERE client_addr = %s::inet AND datname = %s)
+        """, address, database)
+
+    def channel(self, brand, kind="chat", *, optional=False):
         return self.query("""
             SELECT c.id::text FROM channels c JOIN brands b ON b.id = c.brand_id
             WHERE b.code = %s AND c.kind = %s AND c.active
-        """, brand, kind)
+        """, brand, kind, missing=f"canal ativo {brand}/{kind}", optional=optional)
 
     def entry(self, event_id):
         return self.query("SELECT count(*) FROM channel_entries WHERE source_event_id = %s", event_id)
 
     def request_body(self, event_id):
-        return self.query("SELECT body::jsonb FROM agent_outboxes WHERE event_id = %s", event_id)
+        return self.query("SELECT body::jsonb FROM agent_outboxes WHERE event_id = %s", event_id,
+                          missing=f"outbox do evento {event_id}")
 
     def receipt(self, event_id):
         return self.query("""
@@ -217,7 +230,7 @@ class Database:
             WHERE c.simulator_session_id = ANY(%s::uuid[])
         """, list(identities))
 
-    def case(self, case_id):
+    def case(self, case_id, *, optional=False):
         row = self.query("""
             SELECT jsonb_build_object(
                 'id', c.id, 'correlation_id', c.correlation_id, 'brand_id', c.brand_id, 'status', c.status,
@@ -236,7 +249,7 @@ class Database:
                      'claimed', o.claim_token IS NOT NULL) ORDER BY o.created_at, o.id), '[]')
                      FROM agent_outboxes o JOIN agent_turns t ON o.agent_turn_id = t.id WHERE t.support_case_id = c.id)
             ) FROM support_cases c WHERE c.id = %s
-        """, case_id)
+        """, case_id, missing=f"atendimento {case_id}", optional=optional)
         if row is not None:
             row["message_count"] = len(row["messages"])
             row["audit_count"] = len(row["audits"])

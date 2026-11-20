@@ -4,8 +4,8 @@ import hashlib
 import hmac
 import json
 import os
+import socket
 import sys
-import time
 import traceback
 import uuid
 from pathlib import Path
@@ -42,6 +42,19 @@ def host(action, **options):
     if not response["ok"]:
         raise Blocked(response["reason"])
     return response["result"]
+
+
+def ack_command(verb):
+    try:
+        with socket.create_connection(("ack-gate", 8081), timeout=18) as control:
+            control.sendall(verb.encode("ascii") + b"\n")
+            with control.makefile("rb") as stream:
+                state = json.loads(stream.readline(2048))
+    except (OSError, ValueError) as error:
+        raise Blocked(f"Controle do ACK indisponível durante {verb}: {type(error).__name__}") from error
+    if "error" in state:
+        raise Blocked(f"Gate em {state['phase']} durante {verb}: {state['error']}")
+    return state
 
 
 def types(state):
@@ -82,7 +95,13 @@ class Trial:
 
         until("ponte HTTP pronta", bridge_ready)
         until("tópicos Kafka com três líderes", self.kafka.topics_ready)
-        until("canais e demais dados sintéticos preparados", lambda: self.db.channel("aurora"))
+        for brand, kind in (("aurora", "chat"), ("aurora", "whatsapp"), ("horizonte", "chat")):
+            until(f"canal ativo do seed {brand}/{kind}", lambda: self.db.channel(brand, kind, optional=True))
+        for service, database in (("worker", "cloudwalk_development_queue"), ("outbox", "cloudwalk_development")):
+            state = host("state", service=service)
+            if state["State"] != "running":
+                raise Blocked(f"{service} indisponível na preparação: {state}")
+            until(f"{service} conectado a {database}", lambda: self.db.connected(service, database))
         for topic in GROUPS:
             self.group_ready(topic)
 
@@ -132,7 +151,8 @@ class Trial:
         return browser, browser.login(name, self.passwords)
 
     def await_case(self, case_id, description, predicate):
-        return until(description, lambda: self.db.case(case_id), lambda row: bool(row) and predicate(row))
+        return until(f"{description} (atendimento {case_id})", lambda: self.db.case(case_id, optional=True),
+                     lambda row: bool(row) and predicate(row))
 
     def applied_pair(self, case_id):
         request = self.record("agent.requests", case_id)
@@ -451,17 +471,21 @@ def isolation(t, e):
                 verify(frame.get("type") == "disconnect" and frame.get("reason") == "unauthorized",
                        "Cookie revogado abriu nova conexão Cable")
                 e["cable_after_logout"] = {"type": frame["type"], "reason": frame["reason"]}
-            before_correction = t.db.case(case_id)
-            correction = {"expected_version": before_correction["version"], "category": "payouts", "priority": "basic",
-                          "reason": "Correção sintética para verificar revogação da assinatura."}
-            supervisor.call(staff_path + "/classification", target=WRITER, payload=correction,
-                            headers=supervisor.write_headers(f"f07-{uid()}"))
-            e["logout_positive_control"] = control.update(control_stream, case_id)
-            observed_after = int(time.time())
-            e["old_socket_observation"] = reconnected.revoked_stream_observation(revoked_stream, observed_after)
-            e["before_outbox_restart"] = t.db.case(case_id)
-            verify(len(audit(e["before_outbox_restart"], "case.classification.corrected")) == 1,
-                   "Controle de revogação sem alteração auditada")
+            controls = e["logout_positive_controls"] = []
+            for category in ("payouts", "pix", "payouts"):
+                version = t.db.case(case_id)["version"]
+                correction = {"expected_version": version, "category": category, "priority": "basic",
+                              "reason": "Correção sintética para verificar revogação da assinatura."}
+                supervisor.call(staff_path + "/classification", target=WRITER, payload=correction,
+                                headers=supervisor.write_headers(f"f07-{uid()}"))
+                notice = control.update(control_stream, case_id)
+                state = t.db.case(case_id)
+                verify(state["version"] == version + 1 and state["category"] == category and
+                       len(audit(state, "case.classification.corrected")) == len(controls) + 1,
+                       "Controle de revogação sem alteração correspondente na auditoria")
+                controls.append({"notice": notice, "version": state["version"], "category": category})
+            e["old_socket_observation"] = reconnected.revoked_stream_observation(revoked_stream)
+            e["before_outbox_restart"] = state
     finally:
         host("start", service="outbox")
     e["after_outbox_restart"] = t.await_case(
@@ -512,12 +536,32 @@ def failure_offset(t, e):
     first = failed_body()
     arm("failure-publishable", first)
     first_before = e["publishable_before"] = get_offsets()
-    first_record = make(first)
-    e["publishable_input"] = {**first_record.position(), "event_id": first["event_id"]}
-    after_first = e["publishable_after"] = t.consumed(first_record)
+    _, failure_start = t.kafka.bounds("agent.failures", partition)
+    ack_command("arm")
+    try:
+        first_record = make(first)
+        e["publishable_input"] = {**first_record.position(), "event_id": first["event_id"]}
+        held = e["ack_held"] = ack_command("wait")
+        if held["phase"] != "held":
+            raise Blocked(f"Janela do ACK encerrada antes da observação: {held}")
+        during = e["offset_while_ack_held"] = get_offsets()
+        _, failure_end = t.kafka.bounds("agent.failures", partition)
+        e["failure_watermarks_while_ack_held"] = {"partition": partition, "before": failure_start, "held": failure_end}
+        released = e["ack_released"] = ack_command("release")
+        verify(released["phase"] == "released" and released["commits_before_ack"] == 0 and
+               during["committed_next_offset"] == first_record.offset and during["backlog"] == 1 and
+               failure_end == failure_start + 1,
+               "Publicação ou offset divergente enquanto o ACK de agent.failures estava retido")
+        after_first = e["publishable_after"] = t.consumed(first_record)
+        final = e["ack_after_commit"] = ack_command("status")
+        verify(final["produce_requests"] == 1 and final["commits_after_ack"] == 1,
+               "A ponte não fez exatamente um Produce e um OffsetCommit após a liberação")
+    finally:
+        ack_command("cancel")
     first_messages = failures(first_record)
     first_http = e["publishable_http"] = t.history("failure-publishable")
-    verify(len(first_messages) == 1 and [row["downstream"] for row in first_http] == [503] * 3 and
+    verify(len(first_messages) == 1 and first_messages[0].partition == partition and
+           first_messages[0].offset == failure_start and [row["downstream"] for row in first_http] == [503] * 3 and
            first_before["committed_next_offset"] == first_record.offset and
            after_first["committed_next_offset"] == first_record.offset + 1 and after_first["backlog"] == 0,
            "Retentativas, publicação da falha ou offset fora da origem esperada")
@@ -629,4 +673,3 @@ def main(selected):
 
 if __name__ == "__main__":
     main(sys.argv[1:])
-

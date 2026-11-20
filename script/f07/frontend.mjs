@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { createSimulatorApi } from '/app/src/api/simulator.ts'
 import { deliveryUncertain } from '/app/src/api/http.ts'
-import { staff } from '/app/src/api/staff.ts'
+import { getSession, staff } from '/app/src/api/staff.ts'
 
 const plan = JSON.parse(process.argv[2])
 const nativeFetch = globalThis.fetch
@@ -35,16 +35,16 @@ async function attempt(callback) {
 const api = createSimulatorApi()
 const send = key => api.sendMessage(plan.channel, plan.message, key)
 await api.listCases()
-const identityA = (await staff.getSession()).user
+const identityA = (await getSession()).user
 assert.equal(identityA.role, 'simulator')
 const firstLost = await attempt(() => send(plan.same))
 const repeated = await attempt(() => send(plan.same))
 const secondLost = await attempt(() => send(plan.changed))
-await staff.logout(await staff.getSession())
+await staff.logout(await getSession())
 // O cliente invalida seu cache ao receber a primeira recusa após logout.
 const afterLogout = await attempt(() => api.listCases())
 await api.listCases()
-const identityB = (await staff.getSession()).user
+const identityB = (await getSession()).user
 const switchedRetry = await attempt(() => send(plan.changed))
 const newSend = await attempt(() => send(plan.fresh))
 

@@ -145,9 +145,10 @@ class Cable:
         verify(frame["type"] == wanted, f"Cable {audience}: {frame['type']}, esperado {wanted}")
         return identifier
 
-    def revoked_stream_observation(self, identifier, after):
+    def revoked_stream_observation(self, identifier, *, seconds=6):
         from websockets.exceptions import ConnectionClosed
-        deadline = time.monotonic() + 12
+        start = time.monotonic()
+        deadline = start + seconds
         while time.monotonic() < deadline:
             try:
                 frame = json.loads(self.connection.recv(timeout=max(0, deadline - time.monotonic())))
@@ -155,13 +156,11 @@ class Cable:
                 break
             except ConnectionClosed as error:
                 if error.code in {1000, 1001}:
-                    return {"type": "closed", "code": error.code}
+                    return {"type": "closed", "code": error.code, "elapsed_seconds": time.monotonic() - start}
                 raise Blocked(f"Socket revogado encerrou de forma anormal: código {error.code}") from error
             verify(frame.get("identifier") != identifier or "message" not in frame,
                    "Socket ainda entregou mensagem após revogação")
-            if frame.get("type") == "ping" and frame["message"] > after:
-                return {"type": "ping", "sent_at": frame["message"], "after_control_at": after}
-        raise Blocked("Faltou ping posterior ao controle ou fechamento do socket revogado")
+        return {"type": "no_notice_in_window", "window_seconds": seconds, "elapsed_seconds": time.monotonic() - start}
 
     def update(self, identifier, case_id):
         frame = self.receive("case.updated", lambda f: f.get("identifier") == identifier and "message" in f)

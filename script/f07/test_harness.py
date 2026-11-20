@@ -3,6 +3,8 @@
 import contextlib
 import io
 import json
+import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -108,6 +110,31 @@ class RunnerTest(unittest.TestCase):
         ):
             exit_code = run.main()
         return exit_code, json.loads(output.getvalue()), recorded
+
+    def test_partial_line_cannot_block_idle_timeout(self):
+        reader, writer = os.pipe()
+        with os.fdopen(reader, "rb") as stream, os.fdopen(writer, "wb", buffering=0) as source:
+            source.write(b'{"result"')
+            with self.assertRaisesRegex(run.StackUnavailable, "Prazo"):
+                list(run.protocol_lines(stream, lifetime=1, idle=0.03))
+
+    def test_complete_lines_cannot_extend_absolute_lifetime(self):
+        reader, writer = os.pipe()
+        with os.fdopen(reader, "rb") as stream, os.fdopen(writer, "wb", buffering=0) as source:
+            source.write(b'{}\n')
+            lines = run.protocol_lines(stream, lifetime=0.03, idle=1)
+            self.assertEqual(next(lines), b'{}')
+            with self.assertRaisesRegex(run.StackUnavailable, "Prazo"):
+                next(lines)
+
+    def test_force_stop_after_grace_period(self):
+        process = Mock()
+        process.poll.return_value = None
+        process.wait.side_effect = [subprocess.TimeoutExpired("probe", 5), -9]
+        run.stop_probe(process)
+        process.terminate.assert_called_once()
+        process.kill.assert_called_once()
+        self.assertEqual([call.kwargs for call in process.wait.call_args_list], [{"timeout": 5}, {"timeout": 5}])
 
     def test_daemon_block_has_five_structured_results_and_no_stack_operations(self):
         code, report, operations = self.run_with()

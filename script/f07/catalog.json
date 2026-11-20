@@ -31,7 +31,7 @@
     "id": "05",
     "name": "falhas_antes_do_offset",
     "precondition": "Grupo estável, callback HTTP retorna 503 seletivo e Kafka confirma pedidos/leituras do ensaio.",
-    "action": "Esgotar retentativas, rejeitar publicação em agent.failures no próprio Kafka, restaurar tópico e grupo.",
-    "outcome": "Falha tem origem exata, offset fica pendente sob rejeição e o mesmo registro é reentregue após recuperação."
+    "action": "Esgotar retentativas, reter e liberar o ACK de agent.failures, rejeitar outra publicação no broker e restaurar tópico e grupo.",
+    "outcome": "Offset pendente durante ACK retido avança após liberação. Sob rejeição, o mesmo registro é reentregue na recuperação com origem exata."
   }
 }
