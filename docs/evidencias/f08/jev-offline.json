@@ -1,0 +1,2353 @@
+{
+  "dataset": {
+    "version": "1.1.0",
+    "sha256": "0e7e4c342c2a39cefd89855d8c0513f447d7878303eb4091488ca8af78928880",
+    "review": "provisional",
+    "language": "pt-BR"
+  },
+  "catalog": {
+    "version": "1.0.0",
+    "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271"
+  },
+  "report_version": "1.1.0",
+  "run_id": "8315b27b-06e7-4c75-a8b4-4f5080663e24",
+  "started_at": "2026-11-20T20:31:22Z",
+  "mode": "offline",
+  "scenario": "classificacao_de_campos_omitidos",
+  "ruby": "3.4.12",
+  "git_revision": "27c6b9bfdfdb16151a825e9f70912fe5ccdbdbc7",
+  "git_dirty": true,
+  "selection": {
+    "total_cases": 60,
+    "by_missing": {
+      "category": 20,
+      "priority": 20,
+      "category+priority": 20
+    },
+    "by_stratum": {
+      "ambiguo": 14,
+      "urgente": 13,
+      "rotina": 33
+    }
+  },
+  "status": "completed",
+  "measurement": {
+    "status": "not_measured",
+    "reason": "offline_mode",
+    "evaluable_cases": null
+  },
+  "parameters": {
+    "limit": 60,
+    "concurrency": 1,
+    "attempts_per_case": 1,
+    "requested_model": "jev-fixture",
+    "timeout_seconds": null,
+    "budget_reference": null
+  },
+  "metrics": {
+    "by_field": {
+      "category": {
+        "missing": 40,
+        "labeled": 33,
+        "expected_abstentions": 7,
+        "raw_accuracy": {
+          "count": 18,
+          "denominator": 33,
+          "fraction": 0.5454545454545454
+        },
+        "raw_accuracy_given_choice": {
+          "count": 18,
+          "denominator": 18,
+          "fraction": 1.0
+        },
+        "applied_accuracy": {
+          "count": 8,
+          "denominator": 33,
+          "fraction": 0.24242424242424243
+        },
+        "automatic_coverage": {
+          "count": 8,
+          "denominator": 40,
+          "fraction": 0.2
+        },
+        "coverage_blocked_after_choice": 10,
+        "abstentions": {
+          "count": 22,
+          "denominator": 40,
+          "fraction": 0.55
+        },
+        "correct_abstentions": {
+          "count": 7,
+          "denominator": 7,
+          "fraction": 1.0
+        },
+        "undue_abstentions": {
+          "count": 15,
+          "denominator": 33,
+          "fraction": 0.45454545454545453
+        },
+        "automatic_on_expected_abstention": {
+          "count": 0,
+          "denominator": 7,
+          "fraction": 0.0
+        },
+        "invalid_responses": {
+          "count": 0,
+          "denominator": 40,
+          "fraction": 0.0
+        },
+        "transport_failures": {
+          "count": 0,
+          "denominator": 40,
+          "fraction": 0.0
+        },
+        "unavailable": {
+          "count": 0,
+          "denominator": 40,
+          "fraction": 0.0
+        }
+      },
+      "priority": {
+        "missing": 40,
+        "labeled": 32,
+        "expected_abstentions": 8,
+        "raw_accuracy": {
+          "count": 2,
+          "denominator": 32,
+          "fraction": 0.0625
+        },
+        "raw_accuracy_given_choice": {
+          "count": 2,
+          "denominator": 3,
+          "fraction": 0.6666666666666666
+        },
+        "applied_accuracy": {
+          "count": 2,
+          "denominator": 32,
+          "fraction": 0.0625
+        },
+        "automatic_coverage": {
+          "count": 2,
+          "denominator": 40,
+          "fraction": 0.05
+        },
+        "coverage_blocked_after_choice": 1,
+        "abstentions": {
+          "count": 37,
+          "denominator": 40,
+          "fraction": 0.925
+        },
+        "correct_abstentions": {
+          "count": 8,
+          "denominator": 8,
+          "fraction": 1.0
+        },
+        "undue_abstentions": {
+          "count": 29,
+          "denominator": 32,
+          "fraction": 0.90625
+        },
+        "automatic_on_expected_abstention": {
+          "count": 0,
+          "denominator": 8,
+          "fraction": 0.0
+        },
+        "invalid_responses": {
+          "count": 0,
+          "denominator": 40,
+          "fraction": 0.0
+        },
+        "transport_failures": {
+          "count": 0,
+          "denominator": 40,
+          "fraction": 0.0
+        },
+        "unavailable": {
+          "count": 0,
+          "denominator": 40,
+          "fraction": 0.0
+        }
+      }
+    },
+    "urgent_priority": {
+      "automatic_urgent": {
+        "count": 0,
+        "denominator": 10,
+        "fraction": 0.0
+      },
+      "automatic_non_urgent": {
+        "count": 0,
+        "denominator": 10,
+        "fraction": 0.0
+      },
+      "abstention_or_review": {
+        "count": 10,
+        "denominator": 10,
+        "fraction": 1.0
+      },
+      "invalid_response": {
+        "count": 0,
+        "denominator": 10,
+        "fraction": 0.0
+      },
+      "transport_failure": {
+        "count": 0,
+        "denominator": 10,
+        "fraction": 0.0
+      }
+    },
+    "cases": {
+      "total": 60,
+      "automatic": {
+        "count": 9,
+        "denominator": 60,
+        "fraction": 0.15
+      },
+      "review": 51,
+      "outcomes": {
+        "abstention": 51,
+        "complete": 9
+      }
+    },
+    "channel_fields_preserved": {
+      "count": 40,
+      "denominator": 40,
+      "fraction": 1.0
+    },
+    "requests": 60,
+    "questions": 80,
+    "returned_models": [
+      "jev-fixture"
+    ],
+    "provider_latency_ms": {
+      "samples": 0,
+      "p50": null,
+      "p95": null
+    },
+    "provider_cost": {
+      "status": "not_measured",
+      "amount": null,
+      "currency": null
+    }
+  },
+  "cases": [
+    {
+      "id": "jev-001",
+      "stratum": "ambiguo",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "informacao_insuficiente",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-002",
+      "stratum": "urgente",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "urgent",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-003",
+      "stratum": "urgente",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "pix",
+          "observed_choice": "pix",
+          "raw_status": "choice",
+          "applied": null
+        },
+        "priority": {
+          "expected": "urgent",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-004",
+      "stratum": "rotina",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "payouts",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-005",
+      "stratum": "rotina",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "basic",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-006",
+      "stratum": "rotina",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "terminal",
+          "observed_choice": "terminal",
+          "raw_status": "choice",
+          "applied": null
+        },
+        "priority": {
+          "expected": "basic",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-007",
+      "stratum": "rotina",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "terminal",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-008",
+      "stratum": "rotina",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "intermediate",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-009",
+      "stratum": "rotina",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "payouts",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        },
+        "priority": {
+          "expected": "advanced",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information",
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-010",
+      "stratum": "urgente",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "pix",
+          "observed_choice": "pix",
+          "raw_status": "choice",
+          "applied": "pix"
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "complete",
+      "issues": {},
+      "outcome": "complete",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-011",
+      "stratum": "rotina",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "intermediate",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-012",
+      "stratum": "rotina",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "terminal",
+          "observed_choice": "terminal",
+          "raw_status": "choice",
+          "applied": null
+        },
+        "priority": {
+          "expected": "intermediate",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-013",
+      "stratum": "ambiguo",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "informacao_insuficiente",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-014",
+      "stratum": "rotina",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "advanced",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-015",
+      "stratum": "ambiguo",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "informacao_insuficiente",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        },
+        "priority": {
+          "expected": "basic",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information",
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-016",
+      "stratum": "rotina",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "payouts",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-017",
+      "stratum": "urgente",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "urgent",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-018",
+      "stratum": "urgente",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "payouts",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        },
+        "priority": {
+          "expected": "urgent",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information",
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-019",
+      "stratum": "rotina",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "terminal",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-020",
+      "stratum": "rotina",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "advanced",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-021",
+      "stratum": "rotina",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "pix",
+          "observed_choice": "pix",
+          "raw_status": "choice",
+          "applied": null
+        },
+        "priority": {
+          "expected": "intermediate",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-022",
+      "stratum": "rotina",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "pix",
+          "observed_choice": "pix",
+          "raw_status": "choice",
+          "applied": "pix"
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "complete",
+      "issues": {},
+      "outcome": "complete",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-023",
+      "stratum": "ambiguo",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "informacao_insuficiente",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-024",
+      "stratum": "ambiguo",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "terminal",
+          "observed_choice": "terminal",
+          "raw_status": "choice",
+          "applied": null
+        },
+        "priority": {
+          "expected": "informacao_insuficiente",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-025",
+      "stratum": "urgente",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "terminal",
+          "observed_choice": "terminal",
+          "raw_status": "choice",
+          "applied": "terminal"
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "complete",
+      "issues": {},
+      "outcome": "complete",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-026",
+      "stratum": "rotina",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "basic",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-027",
+      "stratum": "ambiguo",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "informacao_insuficiente",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        },
+        "priority": {
+          "expected": "urgent",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information",
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-028",
+      "stratum": "ambiguo",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "informacao_insuficiente",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-029",
+      "stratum": "ambiguo",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "informacao_insuficiente",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-030",
+      "stratum": "rotina",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "payouts",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        },
+        "priority": {
+          "expected": "basic",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information",
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-031",
+      "stratum": "rotina",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "payouts",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-032",
+      "stratum": "urgente",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "urgent",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-033",
+      "stratum": "rotina",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "pix",
+          "observed_choice": "pix",
+          "raw_status": "choice",
+          "applied": null
+        },
+        "priority": {
+          "expected": "advanced",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-034",
+      "stratum": "rotina",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "terminal",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-035",
+      "stratum": "rotina",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "advanced",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-036",
+      "stratum": "urgente",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "terminal",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        },
+        "priority": {
+          "expected": "urgent",
+          "observed_choice": "advanced",
+          "raw_status": "choice",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-037",
+      "stratum": "urgente",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "payouts",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-038",
+      "stratum": "rotina",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "basic",
+          "observed_choice": "basic",
+          "raw_status": "choice",
+          "applied": "basic"
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "complete",
+      "issues": {},
+      "outcome": "complete",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-039",
+      "stratum": "ambiguo",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "informacao_insuficiente",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        },
+        "priority": {
+          "expected": "informacao_insuficiente",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information",
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-040",
+      "stratum": "rotina",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "pix",
+          "observed_choice": "pix",
+          "raw_status": "choice",
+          "applied": "pix"
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "complete",
+      "issues": {},
+      "outcome": "complete",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-041",
+      "stratum": "ambiguo",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "informacao_insuficiente",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-042",
+      "stratum": "rotina",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "pix",
+          "observed_choice": "pix",
+          "raw_status": "choice",
+          "applied": null
+        },
+        "priority": {
+          "expected": "basic",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-043",
+      "stratum": "ambiguo",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "informacao_insuficiente",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-044",
+      "stratum": "ambiguo",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "informacao_insuficiente",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-045",
+      "stratum": "rotina",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "payouts",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        },
+        "priority": {
+          "expected": "intermediate",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information",
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-046",
+      "stratum": "rotina",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "terminal",
+          "observed_choice": "terminal",
+          "raw_status": "choice",
+          "applied": "terminal"
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "complete",
+      "issues": {},
+      "outcome": "complete",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-047",
+      "stratum": "urgente",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "urgent",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-048",
+      "stratum": "rotina",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "terminal",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        },
+        "priority": {
+          "expected": "advanced",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information",
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-049",
+      "stratum": "rotina",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "payouts",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-050",
+      "stratum": "rotina",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "basic",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-051",
+      "stratum": "urgente",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "pix",
+          "observed_choice": "pix",
+          "raw_status": "choice",
+          "applied": null
+        },
+        "priority": {
+          "expected": "urgent",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-052",
+      "stratum": "urgente",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "pix",
+          "observed_choice": "pix",
+          "raw_status": "choice",
+          "applied": "pix"
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "complete",
+      "issues": {},
+      "outcome": "complete",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-053",
+      "stratum": "rotina",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "intermediate",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-054",
+      "stratum": "ambiguo",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "payouts",
+          "observed_choice": "payouts",
+          "raw_status": "choice",
+          "applied": null
+        },
+        "priority": {
+          "expected": "informacao_insuficiente",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-055",
+      "stratum": "rotina",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "terminal",
+          "observed_choice": "terminal",
+          "raw_status": "choice",
+          "applied": "terminal"
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "complete",
+      "issues": {},
+      "outcome": "complete",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-056",
+      "stratum": "rotina",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "advanced",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-057",
+      "stratum": "rotina",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "terminal",
+          "observed_choice": "terminal",
+          "raw_status": "choice",
+          "applied": "terminal"
+        },
+        "priority": {
+          "expected": "basic",
+          "observed_choice": "basic",
+          "raw_status": "choice",
+          "applied": "basic"
+        }
+      },
+      "channel_preservation": {},
+      "status": "complete",
+      "issues": {},
+      "outcome": "complete",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-058",
+      "stratum": "rotina",
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "payouts",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "review",
+      "issues": {
+        "category": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-059",
+      "stratum": "urgente",
+      "missing": [
+        "priority"
+      ],
+      "fields": {
+        "priority": {
+          "expected": "urgent",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "category": true
+      },
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    },
+    {
+      "id": "jev-060",
+      "stratum": "ambiguo",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "pix",
+          "observed_choice": "pix",
+          "raw_status": "choice",
+          "applied": null
+        },
+        "priority": {
+          "expected": "informacao_insuficiente",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null
+    }
+  ],
+  "offline_controls": [
+    {
+      "id": "entrada-completa",
+      "stratum": null,
+      "missing": [],
+      "fields": {},
+      "channel_preservation": {
+        "category": true,
+        "priority": true
+      },
+      "status": "complete",
+      "issues": {},
+      "outcome": "complete",
+      "request_count": 0,
+      "questions": [],
+      "model": null,
+      "http_status": null,
+      "provider_latency_ms": null,
+      "passed": true
+    },
+    {
+      "id": "entrada-invalida",
+      "stratum": null,
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "pix",
+          "observed_choice": null,
+          "raw_status": "unavailable",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "priority": "invalid_input"
+      },
+      "outcome": "other_review",
+      "request_count": 0,
+      "questions": [],
+      "model": null,
+      "http_status": null,
+      "provider_latency_ms": null,
+      "passed": true
+    },
+    {
+      "id": "campo-preservado",
+      "stratum": null,
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "pix",
+          "observed_choice": "pix",
+          "raw_status": "choice",
+          "applied": "pix"
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "complete",
+      "issues": {},
+      "outcome": "complete",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null,
+      "passed": true
+    },
+    {
+      "id": "abstencao-parcial",
+      "stratum": null,
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "fields": {
+        "category": {
+          "expected": "pix",
+          "observed_choice": "pix",
+          "raw_status": "choice",
+          "applied": null
+        },
+        "priority": {
+          "expected": "informacao_insuficiente",
+          "observed_choice": "informacao_insuficiente",
+          "raw_status": "abstention",
+          "applied": null
+        }
+      },
+      "channel_preservation": {},
+      "status": "review",
+      "issues": {
+        "priority": "insufficient_information"
+      },
+      "outcome": "abstention",
+      "request_count": 1,
+      "questions": [
+        "category",
+        "priority"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null,
+      "passed": true
+    },
+    {
+      "id": "saida-invalida",
+      "stratum": null,
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "pix",
+          "observed_choice": null,
+          "raw_status": "invalid_response",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "review",
+      "issues": {
+        "category": "invalid_response"
+      },
+      "outcome": "invalid_response",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": "jev-fixture",
+      "http_status": null,
+      "provider_latency_ms": null,
+      "passed": true
+    },
+    {
+      "id": "erro-rede",
+      "stratum": null,
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "pix",
+          "observed_choice": null,
+          "raw_status": "transport_failure",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "review",
+      "issues": {
+        "provider": "network_error"
+      },
+      "outcome": "transport_failure",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": null,
+      "http_status": null,
+      "provider_latency_ms": null,
+      "passed": true
+    },
+    {
+      "id": "timeout",
+      "stratum": null,
+      "missing": [
+        "category"
+      ],
+      "fields": {
+        "category": {
+          "expected": "pix",
+          "observed_choice": null,
+          "raw_status": "transport_failure",
+          "applied": null
+        }
+      },
+      "channel_preservation": {
+        "priority": true
+      },
+      "status": "review",
+      "issues": {
+        "provider": "timeout"
+      },
+      "outcome": "transport_failure",
+      "request_count": 1,
+      "questions": [
+        "category"
+      ],
+      "model": null,
+      "http_status": null,
+      "provider_latency_ms": null,
+      "passed": true
+    }
+  ],
+  "finished_at": "2026-11-20T20:31:22Z"
+}
