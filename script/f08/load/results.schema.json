@@ -31,7 +31,7 @@
             "state": {"enum": ["aprovado", "reprovado", "bloqueado"]},
             "reason": {"type": ["string", "null"]},
             "observed_failures": {"type": "array", "items": {"type": "string"}},
-            "goals": {"type": "object", "additionalProperties": {"type": "boolean"}},
+            "goals": {"type": "object", "additionalProperties": {"type": ["boolean", "null"]}},
             "initial": {"type": ["object", "null"]},
             "followups": {"type": ["object", "null"]}
           }

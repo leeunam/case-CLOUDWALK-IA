@@ -1,10 +1,10 @@
 """Runner no host. Cria uma pilha privada por rodada e preserva os artefatos."""
 import argparse
-import fcntl
 import hashlib
 import json
 import os
 import platform
+import re
 import resource
 import secrets
 import subprocess
@@ -20,6 +20,7 @@ ROOT = DIRECTORY.parents[2]
 PROJECT = "cloudwalk_f08_load"
 BASE = "f23b21e53357f926e8ca1ba3c3a11da7242daf9a"
 SERVICES = ("api", "worker", "outbox", "requests", "events", "mock", "observe")
+RESERVATION = PROJECT + "_reservation"
 PROJECT_FILTER = f"label=com.docker.compose.project={PROJECT}"
 CREDENTIALS = ("POSTGRES_PASSWORD", "F08_RAILS_SECRET", "CLOUDWALK_CHANNEL_SECRET",
                "CLOUDWALK_AGENT_REQUESTS_SECRET", "CLOUDWALK_AGENT_EVENTS_SECRET")
@@ -88,7 +89,7 @@ class Stack:
     def call(self, *args, **kwargs):
         return self.command(*self.compose, *args, **kwargs)
 
-    def preflight(self):
+    def local_daemon(self):
         host = self.env.get("DOCKER_HOST")
         if not host or self.env.get("DOCKER_CONTEXT"):
             context = self.command("context", "show").stdout.strip()
@@ -96,7 +97,26 @@ class Stack:
                                 "--format", "{{.Endpoints.docker.Host}}").stdout.strip()
         if not host.startswith("unix://"):
             raise Blocked("O ensaio requer daemon Docker local via socket Unix para comparar recursos do host")
+        self.env.pop("DOCKER_CONTEXT", None)
+        self.env["DOCKER_HOST"] = host
         daemon = json.loads(self.command("info", "--format", "{{json .}}").stdout)
+        return {key: daemon.get(key) for key in ("ServerVersion", "OperatingSystem", "OSType", "Architecture",
+                                                 "NCPU", "MemTotal", "CgroupDriver", "CgroupVersion")}
+
+    def reserve(self):
+        # O daemon arbitra o nome entre todas as contas. O contêiner nunca é iniciado.
+        result = self.command("create", "--name", RESERVATION, "--network", "none", "grafana/k6:2.3.0",
+                              "version", check=False)
+        if result.returncode:
+            if "already in use" in result.stderr.lower():
+                raise Blocked(f"Reserva {RESERVATION} já existe neste daemon; preservada")
+            raise Blocked("Falha ao reservar o projeto no daemon: " + self.diagnostic(result.stderr))
+        identifier = result.stdout.strip()
+        if not re.fullmatch("[0-9a-f]{64}", identifier):
+            raise Blocked("Daemon não confirmou o ID do contêiner de reserva")
+        return identifier
+
+    def require_empty(self):
         for kind, arguments in (("contêiner", ("ps", "-aq")), ("rede", ("network", "ls", "-q")),
                                 ("volume", ("volume", "ls", "-q"))):
             if self.command(*arguments, "--filter", PROJECT_FILTER).stdout.strip():
@@ -109,8 +129,6 @@ class Stack:
         ):
             if names.intersection(self.command(*args).stdout.split()):
                 raise Blocked(f"{kind} preexistente com nome reservado ao ensaio; preservado")
-        return {key: daemon.get(key) for key in ("ServerVersion", "OperatingSystem", "OSType", "Architecture",
-                                                 "NCPU", "MemTotal", "CgroupDriver", "CgroupVersion")}
 
     def configuration(self):
         config = json.loads(self.call("--profile", "load", "--profile", "unused", "config", "--format", "json").stdout)
@@ -254,7 +272,8 @@ def round_run(output, config):
     stack = Stack(output)
     stop = threading.Event()
     resource_job = fault_job = generator = None
-    started_stack = False
+    reservation = None
+    creation_requested = False
     fault = {}
     manifest = {
         "schema_version": 1, "run_id": config["run_id"], "scenario": config["scenario"],
@@ -279,10 +298,12 @@ def round_run(output, config):
     try:
         manifest["compose_version"] = stack.command("compose", "version", "--short").stdout.strip()
         manifest["configured_limits"] = stack.configuration()
-        manifest["docker_host"] = stack.preflight()
-        started_stack = True
-        manifest["stack_start_requested_ms"] = now_ms()
+        manifest["docker_host"] = stack.local_daemon()
         stack.call("--profile", "load", "pull", "generator", timeout=300)
+        reservation = stack.reserve()
+        stack.require_empty()
+        manifest["stack_start_requested_ms"] = now_ms()
+        creation_requested = True
         stack.call("up", "-d", "--build", "--wait", "--wait-timeout", "150", *SERVICES, timeout=900)
         manifest["stack_started_ms"] = now_ms()
         manifest["images"] = stack.images()
@@ -332,9 +353,14 @@ def round_run(output, config):
         for job in (fault_job, resource_job):
             if job:
                 job.join()
-        if started_stack:
+        if reservation:
             try:
-                stack.call("down", "-v", "--remove-orphans", "--timeout", "5", timeout=45)
+                if creation_requested:
+                    owner = stack.command("container", "inspect", "--format", "{{.Id}}", RESERVATION).stdout.strip()
+                    if owner != reservation:
+                        raise Blocked("Reserva mudou de proprietário; limpeza da pilha interrompida")
+                    stack.call("down", "-v", "--remove-orphans", "--timeout", "5", timeout=45)
+                stack.command("container", "rm", reservation)
                 manifest["cleanup"] = "concluída"
             except Blocked as error:
                 manifest["cleanup"] = str(error)
@@ -435,30 +461,24 @@ def main(argv=None):
     batch_id = f"f08-{args.mode}-{now_ms()}-{secrets.token_hex(3)}"
     folder = output / batch_id
     folder.mkdir(mode=0o700)
-    lock_path = Path(f"/tmp/{PROJECT}-{os.getuid()}.lock")
-    with lock_path.open("a") as lock:
-        try:
-            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
-            raise Blocked(f"Já existe um runner {PROJECT} ativo para este usuário") from None
-        summaries = []
-        planned = list(configurations(args))
-        for index, config in enumerate(planned):
-            config["run_id"] = f"{batch_id}-{config['ordinal']:02}"
-            result = round_run(folder / config["run_id"], config)
-            if result.get("cleanup") not in (None, "concluída") and result["state"] != "bloqueado":
-                result.update(state="bloqueado", reason="limpeza interrompida: " + result["cleanup"])
-            summaries.append(result)
-            if result["state"] == "bloqueado":
-                for pending in planned[index + 1:]:
-                    summaries.append({"run_id": f"{batch_id}-{pending['ordinal']:02}", "parameters": pending,
-                                      "state": "não executada", "executed": False,
-                                      "reason": f"Interrompida após {config['run_id']}: {result['reason']}"})
-            print(f"{config['run_id']} {result['state']} — {folder / config['run_id'] / 'report.md'}", flush=True)
-            write_json(folder / "matrix.json", summaries)
-            (folder / "matrix.md").write_text(render_matrix(summaries))
-            if result["state"] == "bloqueado" or result.get("cleanup") not in (None, "concluída"):
-                break
+    summaries = []
+    planned = list(configurations(args))
+    for index, config in enumerate(planned):
+        config["run_id"] = f"{batch_id}-{config['ordinal']:02}"
+        result = round_run(folder / config["run_id"], config)
+        if result.get("cleanup") not in (None, "concluída") and result["state"] != "bloqueado":
+            result.update(state="bloqueado", reason="limpeza interrompida: " + result["cleanup"])
+        summaries.append(result)
+        if result["state"] == "bloqueado":
+            for pending in planned[index + 1:]:
+                summaries.append({"run_id": f"{batch_id}-{pending['ordinal']:02}", "parameters": pending,
+                                  "state": "não executada", "executed": False,
+                                  "reason": f"Interrompida após {config['run_id']}: {result['reason']}"})
+        print(f"{config['run_id']} {result['state']} — {folder / config['run_id'] / 'report.md'}", flush=True)
+        write_json(folder / "matrix.json", summaries)
+        (folder / "matrix.md").write_text(render_matrix(summaries))
+        if result["state"] == "bloqueado" or result.get("cleanup") not in (None, "concluída"):
+            break
     return 0 if all(row["state"] == "aprovado" for row in summaries) else 1
 
 

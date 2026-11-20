@@ -7,7 +7,7 @@ import uuid
 from collections import Counter, defaultdict
 from datetime import datetime
 
-from protocol import append, bytes_json, rows, utc, write_json
+from protocol import bytes_json, rows, utc, write_json
 
 
 def load(path, default):
@@ -20,12 +20,33 @@ def distribution(values):
             **{f"p{p}": data[math.ceil(len(data) * p / 100) - 1] if data else None for p in (50, 95)}}
 
 
+def all_measured(*checks):
+    """Uma contraprova basta, enquanto a aprovação exige todas as observações."""
+    if False in checks:
+        return False
+    return None if None in checks else True
+
+
 def index_cases(cases):
     result = defaultdict(list)
     for case in cases:
         for entry in case["entries"] or []:
             result[(case["channel_id"], entry["source_event_id"])].append((case, entry))
     return result
+
+
+def turn_messages(case, source):
+    messages = case.get("messages") or []
+    customer = [message for message in messages if message["author"] == "customer"
+                and message["source_event_id"] == source]
+    turns = [turn for turn in case.get("turns") or [] if customer and turn["through_sequence"] == customer[0]["sequence"]]
+    turn = turns[0] if turns else {}
+    result_id = turn.get("result_event_id")
+    expected_result_id = (str(uuid.uuid5(uuid.NAMESPACE_URL, "cloudwalk:mock-agent-v1:" + turn["request_event_id"]))
+                          if turn else None)
+    replies = [message for message in messages if message["author"] == "ai"
+               and message["source_event_id"] is not None and message["source_event_id"] in {result_id, expected_result_id}]
+    return customer, turns, expected_result_id, replies
 
 
 def reconcile(body, channel, attempt, persisted, failures, snapshot, *, human=False):
@@ -36,16 +57,9 @@ def reconcile(body, channel, attempt, persisted, failures, snapshot, *, human=Fa
     planned_digest = hashlib.sha256(bytes_json(body)).hexdigest()
     matching = persisted.get((channel, source), [])
     case, entry = matching[0] if matching else ({}, {})
-    messages = case.get("messages") or []
-    customer = [message for message in messages if message["author"] == "customer"
-                and message["source_event_id"] == source]
-    turns = [turn for turn in case.get("turns") or [] if customer and turn["through_sequence"] == customer[0]["sequence"]]
+    customer, turns, expected_result_id, replies = turn_messages(case, source)
     turn = turns[0] if turns else {}
     result_id = turn.get("result_event_id")
-    expected_result_id = (str(uuid.uuid5(uuid.NAMESPACE_URL, "cloudwalk:mock-agent-v1:" + turn["request_event_id"]))
-                          if turn else None)
-    replies = [message for message in messages if message["author"] == "ai"
-               and message["source_event_id"] in {result_id, expected_result_id}]
     case_audits = case.get("audits") or []
     audits = [audit for audit in case_audits if expected_result_id and audit["event_id"] == expected_result_id]
     types = Counter(audit["type"] for audit in audits)
@@ -165,17 +179,34 @@ def evidence(output, manifest, plan, events):
                 two["reason"] = ("primeira_resposta_ausente_na_janela" if not one["ai_message_ids"] else
                                  "primeira_resposta_observada_tarde_ou_envio_não_executado")
             observations.append(two)
-    known_entry_ids = {(row["channel_id"], row["source_event_id"]) for row in observations}
+    attributed = defaultdict(set)
+    known_entries = {(row["channel_id"], row["source_event_id"]) for row in observations}
+    for row in observations:
+        attributed[row["case_id"]].update(row["customer_message_ids"], row["ai_message_ids"])
+    # Chat e atendimento humano também geram entradas fora do plano do k6.
+    extra_sources = defaultdict(set)
+    for event in events:
+        if event["type"] == "chat_write":
+            extra_sources[event.get("case_id")].add(event["source_event_id"])
+    for event in rows(output / "human.jsonl"):
+        if event.get("operation") == "retorno_cliente":
+            case_id = event["case_id"]
+            extra_sources[case_id].add(f"{manifest['run_id']}-{case_id}-2")
     for case in cases:
-        # No cenário humano, a entrada adicional tem sua própria identidade e transições.
-        if manifest["scenario"] != "human":
-            case["unplanned_entries"] = [entry["source_event_id"] for entry in case["entries"] or []
-                                         if (case["channel_id"], entry["source_event_id"]) not in known_entry_ids]
-    with (output / "reconciliation.jsonl").open("w"):
-        pass
+        case_id = case["case_id"]
+        entry_ids = {entry["source_event_id"] for entry in case["entries"] or []}
+        for source in extra_sources[case_id] & entry_ids:
+            customer, _, _, replies = turn_messages(case, source)
+            attributed[case_id].update(m["id"] for m in customer[:1] + replies[:1])
+            known_entries.add((case["channel_id"], source))
+        case["unplanned_entries"] = sorted(source for source in entry_ids
+                                          if (case["channel_id"], source) not in known_entries)
+        case["unattributed_messages"] = [
+            {"case_id": case_id, **{k: message[k] for k in ("id", "sequence", "author", "source_event_id")}}
+            for message in case["messages"] or [] if message["author"] in ("customer", "ai")
+            and message["id"] not in attributed[case_id]]
     for row in observations:
         row["kafka_offsets"] = kafka_offsets(row, records_by_id)
-        append(output / "reconciliation.jsonl", row)
     return observations, kafka, cases
 
 
@@ -395,8 +426,8 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
     fault = manifest.get("fault", {})
     stopped = docker_ms(fault.get("stopped_state", {}).get("FinishedAt"))
     started = docker_ms(fault.get("started_state", {}).get("StartedAt"))
-    ready = next((row["sample_ms"] + row["cost_ms"] for row in lag
-                  if started and row["sample_ms"] >= started and row["total_lag"] is not None), None)
+    ready = next((row["sample_ms"] + row["cost_ms"] for row in lag_good
+                  if started and row["sample_ms"] >= started), None)
     drained = next((row["sample_ms"] + row["cost_ms"] for row in good if ready and row["sample_ms"] >= ready
                     and row["outbox_pending"] == row["cases_waiting_processing"] == row["outbox_failed"] == 0
                     and any(point["total_lag"] == 0 and point["sample_ms"] >= ready
@@ -407,8 +438,9 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
     duplicates = Counter((row["topic"], row["event_id"]) for row in kafka if row["event_id"]
                          and row["topic"] != "agent.failures")
     measured_turns = [row for row in reconciled if row["http_status"] == 202 or row["case_id"]]
-    all_completed_by_deadline = all(row["state"] == "concluído" and in_window(row["last_effect_ms"])
-                                    for row in measured_turns)
+    missing_effect_times = [row for row in measured_turns if row["state"] == "concluído" and row["last_effect_ms"] is None]
+    known_turns_on_time = all(row["state"] == "concluído" and (row["last_effect_ms"] is None or
+                              in_window(row["last_effect_ms"])) for row in measured_turns)
     latest_work = max([window.get("arrivals_end_ms", 0)] +
                       [row["last_effect_ms"] for row in measured_turns if row["last_effect_ms"] is not None])
     initial_metrics, second_metrics = times(initial), times(second)
@@ -416,12 +448,30 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
     outbox_final = [turn for case in cases for turn in case["turns"] or []
                     if turn["outbox_event_id"] and turn["published_ms"] is None and turn["failed_ms"] is None]
     dangling_cases = [case for case in cases if case["integration_status"] in {"pending_delivery", "awaiting_result"}]
-    backlog_drained = (bool(snapshot) and all_completed_by_deadline and not outbox_final and not dangling_cases
-                       and tail_sql_fresh and tail["sample_ms"] >= latest_work
-                       and tail["outbox_pending"] == tail["cases_waiting_processing"] == tail["outbox_failed"] == 0
-                       and tail_lag_fresh and tail_lag["sample_ms"] >= latest_work and tail_lag["total_lag"] == 0)
     failures = []
     gaps = []
+    # Um efeito fora do prazo é prova independente mesmo se faltar uma leitura final.
+    # Nesse caso, a última leitura dentro da janela não poderia suceder o efeito.
+    tail_after = latest_work if latest_work <= window.get("end_ms", 0) else window.get("arrivals_end_ms", 0)
+    sql_final = tail_sql_fresh and tail["sample_ms"] >= tail_after
+    lag_final = tail_lag_fresh and tail_lag["sample_ms"] >= tail_after
+    backlog_drained = all_measured(
+        (known_turns_on_time and not outbox_final and not dangling_cases) if snapshot else None,
+        None if missing_effect_times else True,
+        all(tail[k] == 0 for k in ("outbox_pending", "cases_waiting_processing", "outbox_failed", "cases_failed"))
+        if sql_final else None,
+        tail_lag["total_lag"] == 0 if lag_final else None,
+    )
+    if window and not config["chat"]:
+        if missing_effect_times:
+            gaps.append(f"carimbos de efeitos indisponíveis para {len(missing_effect_times)} turnos concluídos")
+        if not sql_final:
+            gaps.append("leitura SQL final indisponível ou fora do intervalo exigido")
+        if not lag_final:
+            gaps.append("leitura final de lag indisponível ou fora do intervalo exigido")
+    unattributed = [message for case in cases for message in case["unattributed_messages"]]
+    unplanned = [{"case_id": case["case_id"], "source_event_id": source}
+                 for case in cases for source in case["unplanned_entries"]]
     resource_metrics = resource_summary([row for row in resources if sampled_in_window(row)])
     if window and not snapshot:
         gaps.append("snapshot de persistência indisponível")
@@ -447,20 +497,27 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
                 item["case_id"] != item["stored_case_id"] or item["correlation_id"] != item["stored_correlation_id"])
                 for item in chat["traffic_reconciliation"]):
             failures.append("escritas 202 de chat sem efeito único reconciliado")
+        if unattributed or unplanned:
+            failures.append("mensagens ou entradas SQL de chat sem atribuição")
     else:
         chat = None
-        clean_effects = all(row["state"] != "inconsistente" for row in accepted) and not any(
-            case.get("unplanned_entries") for case in cases)
+        clean_effects = all(row["state"] != "inconsistente" for row in accepted) and not unattributed and not unplanned
+        classification_used = any(row["classification_requests"] or row["classification_attempts"] for row in good)
+        second_completed = (second_metrics["planned"] == second_metrics["states"].get("concluído", 0)
+                            if snapshot or not second else None)
+        p95 = initial_metrics["latency_accept"]["p95"]
+        if initial_metrics["http_202"] > initial_metrics["latency_accept"]["n"]:
+            gaps.append("latência de aceite ausente em recibos 202")
+            p95 = None
         goals = {
-            "p95_aceite_ate_500_ms": initial_metrics["latency_accept"]["p95"] is not None
-            and initial_metrics["latency_accept"]["p95"] <= 500,
+            "p95_aceite_ate_500_ms": p95 <= 500 if p95 is not None else None,
             "aceite_inicial_minimo_99_pct_do_plano": (initial_metrics["acceptance_of_planned"] or 0) >= 0.99,
-            "efeitos_sem_duplicacao_ou_perda_entre_aceitos": bool(snapshot and accepted and clean_effects),
+            "efeitos_sem_duplicacao_ou_perda_entre_aceitos": (clean_effects if snapshot and
+                                                            (accepted or not clean_effects) else None),
             "escoamento_na_janela": backlog_drained,
-            "todos_segundos_turnos_enviados_e_concluidos": second_metrics["planned"] == second_metrics["http_202"]
-            == second_metrics["states"].get("concluído", 0),
-            "jev_sem_solicitacoes_ou_tentativas": tail.get("classification_requests") == 0
-            and tail.get("classification_attempts") == 0,
+            "todos_segundos_turnos_enviados_e_concluidos": all_measured(
+                second_metrics["planned"] == second_metrics["http_202"], second_completed),
+            "jev_sem_solicitacoes_ou_tentativas": all_measured(not classification_used, True if sql_final else None),
         }
         if initial_metrics["offered"] != len(plan):
             failures.append("gerador não ofereceu todas as entradas planejadas; conferir iterações descartadas")
@@ -468,27 +525,30 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
             failures.append("entradas iniciais repetidas no registro do gerador")
         if initial_metrics["accepted_with_ids"] != initial_metrics["http_202"]:
             failures.append("recibo 202 sem IDs")
-        if any(not passed for passed in goals.values()):
-            failures.append("metas do ensaio não atingidas: " + ", ".join(name for name, passed in goals.items() if not passed))
+        missed = [name for name, passed in goals.items() if passed is False]
+        if missed:
+            failures.append("metas do ensaio não atingidas: " + ", ".join(missed))
     human = human_summary(list(rows(output / "human.jsonl")), cases, window) if config["scenario"] == "human" else None
-    if human and (human["resolved"] != len(plan) or human["above_portfolio_limit"]
+    if human and ((snapshot and human["resolved"] != len(plan)) or human["above_portfolio_limit"]
                   or human["above_active_profile"] or human["operation_errors"]):
         failures.append("roteiro humano incompleto ou ação, perfil ou carteira fora do esperado")
     if not k6 or manifest.get("k6_exit") != 0:
-        failures.append("k6 sem encerramento normal ou métricas")
-    if unsafe_sql or (output / "observer-errors.jsonl").exists():
-        failures.append("observador SQL registrou erros")
+        gaps.append("k6 sem encerramento normal ou métricas")
+    if (output / "observer-errors.jsonl").exists():
+        gaps.append("observador de elegibilidade de continuações registrou erros")
     capture = manifest.get("observation", {}).get("kafka_records", {})
     if (capture.get("complete") is not True or type(capture.get("expected_offsets")) is not int
             or type(capture.get("records_read")) is not int
             or capture["expected_offsets"] != capture["records_read"] or capture["records_read"] != len(kafka)):
         gaps.append("leitura de eventos Kafka incompleta")
-    if config["fault_seconds"] and (not ready or not stopped or fault.get("error")):
-        failures.append("parada/partida/prontidão Kafka sem evidência completa")
+    if config["fault_seconds"] and (not ready or not in_window(stopped) or not in_window(started)
+                                    or fault.get("stopped_state", {}).get("Status") != "exited"
+                                    or fault.get("started_state", {}).get("Status") != "running" or fault.get("error")):
+        gaps.append("parada/partida/prontidão Kafka sem evidência completa")
     elif config["fault_seconds"] and started - stopped < config["fault_seconds"] * 1000:
-        failures.append("interrupção Kafka menor que a solicitada")
+        gaps.append("interrupção Kafka menor que a solicitada")
     if any(row["negative_clock_deltas"] for row in (initial_metrics, second_metrics)):
-        failures.append("carimbos UTC produziram latências negativas; verifique sincronização de relógio")
+        gaps.append("carimbos UTC produziram latências negativas; verifique sincronização de relógio")
     initial_in_fault = [row for row in initial if stopped and row["sent_ms"] and
                         stopped <= row["sent_ms"] < (ready or window["end_ms"])]
     phase_start = 0
@@ -571,7 +631,8 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
                  "initial_and_followup_non_202": initial_metrics["non_202"] + second_metrics["non_202"]}
         if window and not chat else None,
         "resources": resource_metrics if window else None,
-        "integrity": {"confirmed_losses": sum(row["confirmed_loss"] for row in accepted),
+        "integrity": {"unattributed_messages": unattributed, "unattributed_message_count": len(unattributed),
+                      "unplanned_entries": unplanned, "confirmed_losses": sum(row["confirmed_loss"] for row in accepted),
                       "duplicated_effect_identities": sum(row["duplicate_effect"] for row in accepted),
                       "persisted_without_http_202": sum(bool(row["case_id"]) and row["http_status"] != 202
                                                       for row in reconciled),
@@ -637,7 +698,8 @@ def render(report):
         ("Vazão", "rates", ("offered_initial_per_s", "accepted_initial_per_s")),
         ("Conclusões", "completions", ("ai_turns_in_window", "resolved_cases_in_window",
                                        "ai_turns_per_s", "resolved_cases_per_s")),
-        ("Persistência", "integrity", ("confirmed_losses", "duplicated_effect_identities", "not_reconciled_http_202")),
+        ("Persistência", "integrity", ("confirmed_losses", "duplicated_effect_identities", "unattributed_message_count",
+                                       "not_reconciled_http_202")),
         ("Recursos", "resources", ("host_cpu_busy_percent_peak", "host_ram_used_bytes_peak")),
         ("Kafka", "kafka", ("repeated_records_observed", "dead_letter_records_observed")),
         ("Backlog", "backlog", ("max_outbox_pending", "max_outbox_failed", "max_consumer_lag",
@@ -651,6 +713,8 @@ def render(report):
             values = report[metric]
             content.extend(["", f"## {title}", "", "| Indicador | Valor |", "| --- | ---: |"])
             for name in facts:
+                if name not in values:  # Relatórios anteriores à reconciliação inversa.
+                    continue
                 value = values[name]
                 value = "indisponível" if value is None else f"{value:.2f}" if isinstance(value, float) else value
                 content.append(f"| `{name}` | {value} |")
@@ -661,6 +725,9 @@ def render(report):
 
 def publish(output, manifest, plan, events):
     reconciled, kafka, cases = evidence(output, manifest, plan, events)
+    with (output / "reconciliation.jsonl").open("wb") as stream:
+        for row in reconciled:
+            stream.write(bytes_json(row) + b"\n")
     summary = {"schema_version": 1, "run_id": manifest["run_id"], "revision": manifest["revision"],
                "scenario": manifest["scenario"], "parameters": manifest["parameters"], "units": {
                    "epoch_timestamps": "ms UTC", "latency": "ms", "rates": "por segundo", "counts": "unidades",
