@@ -53,7 +53,7 @@ instalação pelo lockfile e build, 10 testes da ponte, 12 do verificador e
 percorridas no navegador. Resultados, reprodução e limites estão na
 [integração F06/F07-A](docs/integracao-f06-f07.md).
 
-Na F08 de 2026-11-20, os 36 testes da carga e os 15 do avaliador passaram.
+Na F08 de 2026-11-20, os 42 testes da carga e os 15 do avaliador passaram.
 Foram medidas três rodadas por condição: cinco aprovadas e uma reprovada após
 a interrupção do Kafka. Todas as 9.000 entradas iniciais receberam `202`, mas
 1.199 ficaram sem primeira resposta na rodada reprovada. O
