@@ -5,21 +5,15 @@ import os
 import time
 from concurrent.futures import ThreadPoolExecutor
 from decimal import Decimal
-from urllib.error import URLError
+from importlib.metadata import version
 from urllib.request import urlopen
 
-from confluent_kafka import Consumer, TopicPartition, version as kafka_version
-from confluent_kafka.admin import AdminClient, OffsetSpec
-from psycopg import connect, __version__ as psycopg_version
-from psycopg.rows import dict_row
+from kafka_probe import KafkaProbeError, probe, sample_kafka
 
 from human import exercise_human
 from protocol import API, BRANDS, DIRECTORY, KINDS, PIX, RESULTS, append, bytes_json, now_ms, webhook, write_json
 
 
-KAFKA = "kafka:9092"
-GROUPS = {"agent.requests": "mock-agent-v1", "agent.events": "platform-agent-events-v1"}
-TOPICS = (*GROUPS, "agent.failures")
 SQL_SAMPLE = (DIRECTORY / "observations.sql").read_text()
 SQL_SNAPSHOT = (DIRECTORY / "snapshot.sql").read_text()
 SQL_FOLLOWUPS = """
@@ -45,6 +39,9 @@ def plain(value):
 
 
 def database():
+    from psycopg import connect
+    from psycopg.rows import dict_row
+
     return connect(host="db", dbname="cloudwalk_development", user=os.environ["POSTGRES_USER"],
                    password=os.environ["POSTGRES_PASSWORD"], autocommit=True, connect_timeout=5,
                    options="-c default_transaction_read_only=on -c statement_timeout=3000",
@@ -64,55 +61,13 @@ def discover(db):
     return channels
 
 
-def kafka_client():
-    return AdminClient({"bootstrap.servers": KAFKA, "socket.timeout.ms": 2500})
-
-
-def kafka_sample(admin, groups=True):
-    from confluent_kafka import ConsumerGroupTopicPartitions
-    partitions = [TopicPartition(topic, partition) for topic in TOPICS for partition in range(3)]
-    latest = admin.list_offsets({part: OffsetSpec.latest() for part in partitions}, request_timeout=3)
-    offsets = {(part.topic, part.partition): future.result(4).offset for part, future in latest.items()}
-    result = []
-    if groups:
-        oldest = admin.list_offsets({part: OffsetSpec.earliest() for part in partitions}, request_timeout=3)
-        starts = {(part.topic, part.partition): future.result(4).offset for part, future in oldest.items()}
-        requests = [ConsumerGroupTopicPartitions(group) for group in GROUPS.values()]
-        # A API administrativa aceita exatamente um grupo por chamada nesta versão.
-        for request in requests:
-            future = admin.list_consumer_group_offsets([request], request_timeout=3)[request.group_id]
-            committed = {(p.topic, p.partition): p.offset for p in future.result(4).topic_partitions if not p.error}
-            for (topic, partition), end in offsets.items():
-                if GROUPS.get(topic) != request.group_id:
-                    continue
-                position = committed.get((topic, partition), -1)
-                earliest = starts[(topic, partition)]
-                effective_next = max(earliest, position)
-                result.append({"topic": topic, "group": request.group_id, "partition": partition,
-                               "end_offset": end, "committed_next": position if position >= 0 else None,
-                               "start_offset": earliest, "effective_next": effective_next,
-                               "lag": max(0, end - effective_next)})
-    return offsets, result
-
-
-def kafka_ready(admin):
-    groups = admin.describe_consumer_groups(list(GROUPS.values()), request_timeout=3)
-    for topic, group in GROUPS.items():
-        members = groups[group].result(4).members
-        assigned = {(p.topic, p.partition) for member in members if member.assignment
-                    for p in member.assignment.topic_partitions}
-        if not {(topic, i) for i in range(3)} <= assigned:
-            return False
-    return True
-
-
-def readiness(db, admin, channels, config):
+def readiness(db, channels, config):
     started = now_ms()
     until = time.monotonic() + 90
     while time.monotonic() < until:
         try:
             with urlopen(f"{API}/api/v1/health", timeout=3) as response:
-                if response.status == 200 and kafka_ready(admin):
+                if response.status == 200 and probe("ready", timeout=min(6, until - time.monotonic()))["ready"]:
                     break
         except Exception:  # Daemon e grupos ainda podem estar iniciando.
             pass
@@ -130,70 +85,19 @@ def readiness(db, admin, channels, config):
     until = time.monotonic() + 45
     while time.monotonic() < until:
         if db.execute(SQL_FOLLOWUPS, ([warm_source],)).fetchone():
-            baseline, lag = kafka_sample(admin)
-            if all(row["lag"] == 0 for row in lag):
+            try:
+                sample = probe("sample", timeout=min(8, until - time.monotonic()))
+            except KafkaProbeError:
+                time.sleep(0.5)
+                continue
+            if all(row["lag"] == 0 for row in sample["partitions"]):
+                write_json(RESULTS / "kafka-baseline.json", sample["offsets"])
                 return {"readiness_started_ms": started, "warmup_started_ms": warmed,
                         "warmup_finished_ms": now_ms(), "warmup_case_id": warm["case_id"],
-                        "versions": {"psycopg": psycopg_version, "confluent_kafka": kafka_version()[0],
-                                     "postgres": db.info.server_version}}, baseline
+                        "versions": {"psycopg": version("psycopg"), **sample["versions"],
+                                     "postgres": db.info.server_version}}
         time.sleep(0.5)
     raise RuntimeError("Aquecimento sem resposta persistida e offsets confirmados em 45 s")
-
-
-def sample_kafka(admin):
-    start = now_ms()
-    try:
-        _, lag = kafka_sample(admin)
-        row = {"partitions": lag}
-        row["total_lag"] = sum(item["lag"] for item in lag) if all(item["lag"] is not None for item in lag) else None
-    except Exception as error:
-        row = {"partitions": None, "total_lag": None, "error": type(error).__name__}
-    append(RESULTS / "kafka-lag.jsonl", {"sample_ms": start, "cost_ms": now_ms() - start, **row})
-
-
-def kafka_records(admin, baseline, run_id):
-    """Leitura por offsets fixos do fim do ensaio, sem grupo operacional ou commits."""
-    ends, _ = kafka_sample(admin, groups=False)
-    consumer = Consumer({"bootstrap.servers": KAFKA, "group.id": f"{run_id}-evidence",
-                         "enable.auto.commit": False, "enable.partition.eof": True,
-                         "auto.offset.reset": "error", "socket.timeout.ms": 2500})
-    outstanding = {key: end - 1 for key, end in ends.items() if end > baseline[key]}
-    consumer.assign([TopicPartition(topic, part, baseline[(topic, part)]) for topic, part in outstanding])
-    counts = {"expected_offsets": sum(ends[key] - baseline[key] for key in ends), "records_read": 0}
-    deadline = time.monotonic() + 45
-    try:
-        while outstanding and time.monotonic() < deadline:
-            record = consumer.poll(0.5)
-            if record is None or record.error():
-                continue
-            key = (record.topic(), record.partition())
-            if key not in outstanding or record.offset() > outstanding[key]:
-                continue
-            counts["records_read"] += 1
-            try:
-                body = json.loads(record.value())
-            except (TypeError, ValueError):
-                body = {}
-            if not isinstance(body, dict):
-                body = {}
-            row = {name: body.get(name) for name in ("event_id", "event_type", "occurred_at", "case_id",
-                                                    "correlation_id", "turn_id")}
-            payload = body.get("payload") or {}
-            if isinstance(payload, dict):
-                row["request_event_id"] = payload.get("request_event_id")
-                row["origin_event_id"] = payload.get("event_id") or payload.get("original_event_id")
-            origin = body.get("origin")
-            if isinstance(origin, dict):
-                row["origin"] = {key: origin.get(key) for key in ("topic", "partition", "offset", "group")}
-            append(RESULTS / "kafka-records.jsonl", {
-                "topic": key[0], "partition": key[1], "offset": record.offset(), **row,
-            })
-            if record.offset() == outstanding[key]:
-                del outstanding[key]
-    finally:
-        consumer.close()
-    counts["complete"] = not outstanding and counts["records_read"] == counts["expected_offsets"]
-    return counts
 
 
 class Followups:
@@ -239,10 +143,9 @@ class Followups:
 def main():
     config = json.loads((RESULTS / "config.json").read_text())
     plan = json.loads((RESULTS / "plan.json").read_text())
-    admin = kafka_client()
     with database() as db, ThreadPoolExecutor(max_workers=2) as housekeeping:
         channels = discover(db)
-        ready, baseline = readiness(db, admin, channels, config)
+        ready = readiness(db, channels, config)
         write_json(RESULTS / "ready.json", {"channels": channels, **ready})
         armed_at = now_ms()
         followups = Followups(plan)
@@ -265,7 +168,7 @@ def main():
                 append(RESULTS / "sql-samples.jsonl", {"sample_ms": start, "cost_ms": now_ms() - start, **record})
                 next_sql = clock + 2000
             if clock >= next_kafka and (kafka_job is None or kafka_job.done()):
-                kafka_job = housekeeping.submit(sample_kafka, admin)
+                kafka_job = housekeeping.submit(sample_kafka, RESULTS)
                 next_kafka = clock + 5000
             if clock >= next_followup and (deadline is None or clock < deadline):
                 start = now_ms()
@@ -287,10 +190,12 @@ def main():
             human_job.result()
         if kafka_job is not None:
             kafka_job.result()
+        start = now_ms()
         try:
-            evidence = kafka_records(admin, baseline, config["run_id"])
-        except Exception as error:
-            evidence = {"complete": False, "error": type(error).__name__}
+            evidence = probe("records", timeout=52)
+        except KafkaProbeError as error:
+            evidence = {"complete": False, "error": str(error)}
+        evidence["cost_ms"] = now_ms() - start
         write_json(RESULTS / "observed.json", {"kafka_records": evidence})
 
 

@@ -268,7 +268,9 @@ def round_run(output, config):
                         "cpu_logical": os.cpu_count(), "architecture": platform.machine(),
                         "rlimit_nofile": list(resource.getrlimit(resource.RLIMIT_NOFILE))},
         "observer": {"sql_period_ms": 2000, "eligibility_period_ms": 250, "kafka_period_ms": 5000,
-                     "resources_period_ms": 5000, "followup_workers": 32},
+                     "resources_period_ms": 5000, "followup_workers": 32,
+                     "kafka_lag_timeout_ms": 8000, "kafka_evidence_timeout_ms": 52000,
+                     "kafka_client_scope": "subprocesso por leitura"},
     }
     manifest["started_at_utc"] = utc(manifest["started_ms"])
     entries = plan(config["run_id"], config["seed"], config["stages"], human=config["scenario"] == "human")
@@ -311,7 +313,7 @@ def round_run(output, config):
         manifest["cutoff_observed_ms"] = now_ms()
         manifest["k6_exit"] = generator.wait(timeout=35)
         write_json(output / "finish.json", {"at_ms": now_ms()})
-        manifest["observation"] = wait_file(output / "observed.json", 65, failure=output / "observer-failure.json")
+        manifest["observation"] = wait_file(output / "observed.json", 80, failure=output / "observer-failure.json")
         if fault_job:
             fault_job.join(timeout=35)
             manifest["fault"] = fault
