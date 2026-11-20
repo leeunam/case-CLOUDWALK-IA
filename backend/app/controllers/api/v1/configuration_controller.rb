@@ -64,17 +64,7 @@ module Api
         events = Operations::ConfigurationAudit.where(brand: brand)
         events = events.where(resource_type: type) if type
         events = events.where(resource_id: id) if id
-        profile_codes = nil
-        list(events, "configuration_audit", brand.id, type, id, order: %i[created_at id]) do |row|
-          data = row.contract_data
-          if row.resource_type == "capacity_profile"
-            profile_codes ||= scope.visible_profile_category_codes(brand_ids: brand.id)
-            %w[before after].each do |field|
-              data[field] = Operations::ConfigurationData.scoped_profile_snapshot(data[field], profile_codes)
-            end
-          end
-          data
-        end
+        list(events, "configuration_audit", brand.id, type, id, order: %i[created_at id], &:contract_data)
       end
 
       def catalog

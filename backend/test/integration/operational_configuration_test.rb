@@ -247,14 +247,64 @@ class OperationalConfigurationTest < ActionDispatch::IntegrationTest
 
     repair = Operations::ConfigurationAudit.find_by!(brand: @brand, resource_type: "capacity_profile",
                                                     resource_id: alex.id, version: 3)
-    assert_equal [[local_pair.stringify_keys]], repair.before.fetch("alternatives")
+    assert_not repair.before.key?("alternatives")
+    assert_equal [[local_pair.stringify_keys]], repair.after.fetch("alternatives")
 
-    login(@limited.email)
-    get "#{@base}/configuration-audit", params: { resource_type: "capacity_profile", resource_id: alex.id }
+    limited = login(@limited.email)
+    audit_params = { resource_type: "capacity_profile", resource_id: alex.id }
+    get "#{@base}/configuration-audit", params: audit_params
     assert_response 200
     assert_not_includes response.body, foreign_category.code
     assert_equal [3, 2], response.parsed_body.fetch("items").pluck("version")
+
+    get "#{@base}/catalog"
+    assert_response 200
+    catalog = response.parsed_body
+    categories = catalog.fetch("categories").map do |item|
+      item.fetch("key") == foreign_category.code ? item.merge("active" => true) : item
+    end
+    put "#{@base}/catalog", as: :json, headers: headers(limited),
+      params: { expected_version: catalog.fetch("version"), categories: categories }
+    assert_response 200
+    get "#{@base}/configuration-audit", params: audit_params
+    assert_response 200
+    assert_not_includes response.body, foreign_category.code
+    assert_not_includes response.body, Operations::ConfigurationAudit::PROFILE_SCOPE_KEY
+    visible_repair, visible_legacy = response.parsed_body.fetch("items")
+    assert_equal [[local_pair.stringify_keys]], visible_repair.dig("after", "alternatives")
+    assert_not visible_legacy.fetch("after").key?("alternatives")
     assert_equal published, legacy.reload.after
+  end
+
+  test "auditoria usa a projeção da publicação anterior mesmo se uma marca adotar a categoria depois" do
+    alex = Operations::User.find_by!(email: "alex@example.test")
+    foreign = @other.categories.create!(code: "conta_horizonte", name: "Conta Horizonte")
+    local_pair = { priority: "basic", category: "pix", limit: 1 }
+    foreign_pair = local_pair.merge(category: foreign.code, limit: 2)
+    token = login(@supervisor.email)
+    path = "/api/v1/analysts/#{alex.id}/capacity-profile"
+    put path, params: { expected_version: 1, portfolio_limit: 2, alternatives: [[local_pair], [foreign_pair]] },
+      as: :json, headers: headers(token)
+    assert_response 200
+
+    @brand.categories.create!(code: foreign.code, name: "Nova categoria Aurora", active: true)
+    put path, params: { expected_version: 2, portfolio_limit: 1, alternatives: [[local_pair]] },
+      as: :json, headers: headers(token)
+    assert_response 200
+
+    filters = { resource_type: "capacity_profile", resource_id: alex.id }
+    get "#{@base}/configuration-audit", params: filters
+    assert_response 200
+    assert_not_includes response.body, foreign.code
+    latest, previous = response.parsed_body.fetch("items")
+    assert_equal previous.fetch("after"), latest.fetch("before")
+    assert_equal [[local_pair.stringify_keys]], latest.dig("before", "alternatives")
+
+    get "/api/v1/brands/#{@other.id}/configuration-audit", params: filters
+    assert_response 200
+    latest, previous = response.parsed_body.fetch("items")
+    assert_equal previous.fetch("after"), latest.fetch("before")
+    assert_equal [[local_pair.stringify_keys], [foreign_pair.stringify_keys]], latest.dig("before", "alternatives")
   end
 
   test "revogar equipe de uma fila retira leitura e preserva espera sem responsável" do

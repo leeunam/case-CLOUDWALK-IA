@@ -104,5 +104,7 @@ duas atribuições e observar apenas uma aceita.
   reativação administrativa.
 - O perfil de capacidade mantém as versões anteriores. A trilha administrativa
   tem uma entrada por marca afetada, com a mesma correlação. Cada entrada de
-  perfil contém apenas os pares de categorias presentes no catálogo daquela
-  marca. A trilha do caso registra a fila, o ID e a versão da regra inicial.
+  perfil conserva a projeção das alternativas autorizadas para aquela marca
+  na publicação. Para registros antigos sem escopo verificado, a consulta
+  retorna os demais campos e omite `alternatives`. A trilha do caso registra
+  a fila, o ID e a versão da regra inicial.
