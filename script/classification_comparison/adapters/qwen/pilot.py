@@ -57,6 +57,34 @@ def authorized_cap(manifest, *, scope, identity, protocol_sha256, pilot_sha256):
     return cap
 
 
+def single_case_id(settings, development_ids):
+    case_id = settings.get("case_id")
+    if not isinstance(case_id, str) or not case_id or case_id not in development_ids:
+        raise Blocked("case_id deve identificar um relato da divisão de desenvolvimento")
+    limits = ("development_cases", "max_cases", "max_requests", "concurrency")
+    if any(type(settings.get(key)) is not int or settings[key] != 1 for key in limits):
+        raise Blocked("piloto de um relato exige limites de casos, requisições e concorrência iguais a 1")
+    return case_id
+
+
+def billable_output_ceiling(settings):
+    max_tokens = settings["max_tokens"]
+    limit = settings.get("billable_output_token_ceiling", max_tokens)
+    if type(limit) is not int or limit < max_tokens:
+        raise Blocked("limite de saída faturável deve ser inteiro e cobrir max_tokens")
+    return limit
+
+
+def checked_reasoning(settings):
+    if "reasoning" not in settings:
+        return None
+    value = settings["reasoning"]
+    if ("case_id" not in settings or not isinstance(value, dict)
+            or value.keys() != {"enabled"} or value["enabled"] is not False):
+        raise Blocked('piloto de um relato aceita reasoning somente como {"enabled": false}')
+    return {"enabled": False}
+
+
 class Budget:
     def __init__(self, settings, cap, development_ids, control_ids, has_credential):
         self.cap = money(settings.get("budget_usd"))
@@ -78,11 +106,13 @@ class Budget:
         self.max_cases = settings["max_cases"]
         self.max_requests = settings["max_requests"]
         self.max_tokens = settings["max_tokens"]
+        self.billable_output_token_ceiling = billable_output_ceiling(settings)
+        self.reasoning = checked_reasoning(settings)
         self.input_ceiling = settings["input_token_ceiling"]
         # Reserva o pior caso, incluindo eventual cobrança adicional de cache.
         self.per_request = (
             self.input_ceiling * (price["input"] + price["cache_read"] + price["cache_write"])
-            + self.max_tokens * price["output"]
+            + self.billable_output_token_ceiling * price["output"]
         ) / 1_000_000
         if (len(self.allowed) > min(self.max_cases, self.max_requests)
                 or len(self.allowed) * self.per_request > self.cap):
@@ -114,5 +144,6 @@ class Budget:
         observed = money(usage["observed_api_usd"])
         self.stopped = (observed is not None and observed > self.per_request) or any(
             usage[field] is not None and usage[field] > limit
-            for field, limit in (("input_tokens", self.input_ceiling), ("output_tokens", self.max_tokens))
+            for field, limit in (("input_tokens", self.input_ceiling),
+                                 ("output_tokens", self.billable_output_token_ceiling))
         )

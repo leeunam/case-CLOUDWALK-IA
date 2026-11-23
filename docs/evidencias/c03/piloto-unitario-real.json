@@ -1,0 +1,54 @@
+{
+  "task": "C03-P1",
+  "status": "single_live_probe_completed_not_final_comparison",
+  "code_revision": "7f641fd092f7b385ad2c1ce89e6ece98840679c6",
+  "case_id": "jev-003",
+  "report": "script/classification_comparison/adapters/qwen/evidencia-unitaria-real-01/report.json",
+  "requests": 1,
+  "questions": 2,
+  "controls": 0,
+  "expected": {
+    "category": "pix",
+    "priority": "urgent"
+  },
+  "applied": {
+    "category": "pix",
+    "priority": "urgent"
+  },
+  "elapsed_ms": 1826.172556997335,
+  "temperature_state": "unknown",
+  "input_tokens": 1098,
+  "output_tokens": 20,
+  "estimated_api_usd": 0.00051765,
+  "ipc_observed_api_usd": null,
+  "billing_ui": {
+    "source": "https://feita.ai/logs",
+    "date": "2026-11-23",
+    "total_requests_displayed": 1,
+    "model": "qwen/qwen3.8-27b",
+    "status": "OK",
+    "input_tokens_display": "1.1K",
+    "output_tokens_display": 20,
+    "api": "chat",
+    "cost_usd_display": "0.000518",
+    "cost_display_decimal_places": 6,
+    "credits_equivalent_approx": "0.0518",
+    "provider_duration_seconds_display": 1.6,
+    "scope": "only experiment row; account balance and key labels not stored"
+  },
+  "human_total_cap_usd": "10.00",
+  "operational_cap_usd": "1.50",
+  "initial_reservation_usd": "1.4004736",
+  "conservative_accounted_cost_usd": "0.000519",
+  "remaining_authorized_budget_lower_bound_usd": "9.999481",
+  "retries": 0,
+  "holdout_calls": 0,
+  "validation": "schema, sources, hashes, canonical projection, decisions, metrics and no credential in output files verified",
+  "limitations": [
+    "one synthetic development case",
+    "no final accuracy or urgency-safety claim",
+    "provider thermal state unknown",
+    "original IPC cost remains unavailable; separate UI receipt rounded",
+    "effective reasoning setting not independently reported by gateway"
+  ]
+}

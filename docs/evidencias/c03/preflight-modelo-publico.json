@@ -1,0 +1,84 @@
+{
+  "http_status": 200,
+  "content_type": "application/json; charset=UTF-8",
+  "body_bytes": 545010,
+  "found": 1,
+  "model": [
+    {
+      "id": "qwen/qwen3.8-27b",
+      "name": "Qwen3.8 27B",
+      "maker": "qwen",
+      "makerName": "Qwen",
+      "type": "llm",
+      "description": "Qwen3.8 27B is an open-weight dense vision-language model from Qwen. It is suited for coding, professional workflows, research, multimodal interaction, and long-running agent tasks, with flexible thinking that can be...",
+      "api": "chat",
+      "apis": [
+        "chat",
+        "completions",
+        "messages",
+        "responses"
+      ],
+      "prices": [
+        {
+          "label": "Input",
+          "unit": "1M tokens",
+          "usd": 0.425
+        },
+        {
+          "label": "Cache read",
+          "unit": "1M tokens",
+          "usd": 0.085
+        },
+        {
+          "label": "Cache write",
+          "unit": "1M tokens",
+          "usd": 0.53125
+        },
+        {
+          "label": "Output",
+          "unit": "1M tokens",
+          "usd": 2.55
+        }
+      ],
+      "contextWindow": 1024000,
+      "maxOutput": 131072,
+      "vision": true,
+      "reasoning": true,
+      "inputModalities": [
+        "text",
+        "image",
+        "video"
+      ],
+      "outputModalities": [
+        "text"
+      ],
+      "supportedParameters": [
+        "frequency_penalty",
+        "include_reasoning",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "reasoning_effort",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_a",
+        "top_k",
+        "top_logprobs",
+        "top_p"
+      ],
+      "created": 1786722910,
+      "status": "unknown",
+      "uptime": null,
+      "latencyMs": null
+    }
+  ]
+}

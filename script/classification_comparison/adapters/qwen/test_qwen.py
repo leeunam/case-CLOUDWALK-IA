@@ -13,6 +13,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import adapter
+import single_pilot
 import transport
 from adapter import Adapter, HERE, MODEL, VERSION, c01, decode, request_body, usage_from
 from common import decide
@@ -65,6 +66,7 @@ class AdapterTest(unittest.TestCase):
         self.assertEqual(schema["schema"]["properties"]["priority"]["enum"], ["basic", "urgent", c01.ABSTENTION])
         self.assertEqual(request["model"], MODEL)
         self.assertEqual(request["max_tokens"], 64)
+        self.assertNotIn("reasoning", request)
         context = decode(request["messages"][1]["content"])
         self.assertEqual(set(context), {"text", "brand", "catalog", "missing", "received"})
         self.assertEqual(context["catalog"], self.item["catalog"])
@@ -331,6 +333,149 @@ class PilotTest(unittest.TestCase):
         rejected = candidate.classify(dict(item.item, id="control"))
         self.assertEqual(rejected["requests"], 0)
         gateway.assert_called_once()
+
+
+class SinglePilotTest(unittest.TestCase):
+    def setUp(self):
+        self.work = Path(self.enterContext(tempfile.TemporaryDirectory(dir=HERE)))
+        self.identity = c01.read(HERE / "real.json")["identity"]
+
+    def configuration(self, **changes):
+        pilot, authorization = self.work / "pilot.json", self.work / "auth.json"
+        settings = dict(setup_limits(), case_id="jev-003", max_cases=1, max_requests=1, usage_cost_unit=None)
+        pilot.write_text(json.dumps(settings | changes), encoding="utf-8")
+        pilot_sha256 = c01.digest(pilot)
+        authorization.write_text(json.dumps({
+            "authorized": True, "scope": "synthetic", "budget_cap_usd": "10", "model": MODEL,
+            "model_identity_sha256": identity_digest(self.identity), "pilot_sha256": pilot_sha256,
+            "protocol_sha256": c01.digest(c01.PLAN / "protocolo-comparacao.json"),
+        }), encoding="utf-8")
+        return SimpleNamespace(pilot=pilot, pilot_sha256=pilot_sha256, authorization=authorization,
+                               authorization_sha256=c01.digest(authorization), dry_run=False,
+                               output=self.work / "result")
+
+    def test_invalid_case_or_limits_stop_before_credentials(self):
+        cases = ({"case_id": value} for value in (None, False, 3, [], ["jev-003", "jev-003"], "", " ",
+                                                   "jev-012", "ctl-duplo", "jev-inexistente"))
+        limits = ({field: value} for field in ("development_cases", "max_cases", "max_requests", "concurrency")
+                  for value in (None, True, 2))
+        output_limits = ({"billable_output_token_ceiling": value} for value in (None, True, 127, 128.0, "128"))
+        reasoning = ({"reasoning": value} for value in (None, False, [], {}, {"enabled": True}, {"enabled": 0},
+                                                         {"enabled": False, "effort": "high"}))
+        financial = ({"token_limits_confirmed": False}, {"tariff_verified": False})
+        for changes in (*cases, *limits, *output_limits, *reasoning, *financial):
+            with self.subTest(changes=changes):
+                credential = Mock(return_value=True)
+                with self.assertRaises(Blocked):
+                    adapter.pilot_budget(self.configuration(**changes), "synthetic", self.identity, credential)
+                credential.assert_not_called()
+
+    def test_budget_accepts_one_id_once_before_transport(self):
+        args = self.configuration()
+        credential = Mock(return_value=True)
+        budget = adapter.pilot_budget(args, "synthetic", self.identity, credential)
+        credential.assert_called_once()
+        self.assertEqual(budget.allowed, {"jev-003"})
+        self.assertEqual(budget.billable_output_token_ceiling, budget.max_tokens)
+        for other in ("jev-004", "jev-012", "ctl-duplo"):
+            with self.assertRaises(Blocked):
+                budget.reserve(other, 1)
+        budget.reserve("jev-003", 1)
+        with self.assertRaises(Blocked):
+            budget.reserve("jev-003", 1)
+        self.assertEqual(budget.requests, 1)
+
+    def test_budget_reserves_and_checks_billable_output_separately(self):
+        args = self.configuration(input_token_ceiling=1024000, billable_output_token_ceiling=131072,
+                                  tariff=dict(PUBLIC_TARIFF, cache_write="0.53125"), budget_usd="2")
+        budget = adapter.pilot_budget(args, "synthetic", self.identity, lambda: True)
+        self.assertEqual(budget.max_tokens, 128)
+        self.assertEqual(budget.per_request, Decimal("1.4004736"))
+        for count, stopped in ((129, False), (131072, False), (131073, True)):
+            budget.observe(dict(observed_api_usd=None, input_tokens=1000, output_tokens=count))
+            self.assertEqual(budget.stopped, stopped)
+
+    def test_dry_run_uses_disabled_example_without_starting_adapter(self):
+        args = SimpleNamespace(pilot=HERE / "piloto-unitario-exemplo.json", authorization=None,
+                               output=self.work / "plan", dry_run=True)
+        with (patch.object(single_pilot, "run_batch") as batch,
+              patch.object(single_pilot, "pilot_budget") as budget):
+            single_pilot.run(args)
+            batch.assert_not_called()
+            budget.assert_not_called()
+        self.assertEqual({file.name for file in args.output.iterdir()}, {"invocation.json", "inputs.jsonl", "plan.json"})
+        plan = c01.read(args.output / "plan.json")
+        self.assertEqual(plan["selected_ids"], ["jev-003"])
+        self.assertEqual((plan["max_requests"], plan["max_tokens"], plan["reservation_usd"]), (1, 128, None))
+        self.assertEqual(plan["billable_output_token_ceiling"], 128)
+        self.assertEqual(plan["reasoning"], {"enabled": False})
+        self.assertLessEqual(plan["request_body_bytes"], c01.read(args.pilot)["input_token_ceiling"])
+
+    def test_live_runner_refuses_unconfirmed_or_synthetic_authorization(self):
+        with patch.object(single_pilot, "run_batch") as batch:
+            args = self.configuration()
+            with self.assertRaisesRegex(Blocked, "escopo"):
+                single_pilot.run(args)
+            with self.assertRaisesRegex(Blocked, "autorização sem hash"):
+                single_pilot.run(SimpleNamespace(**(vars(args) | {"authorization": None})))
+            unconfirmed = self.configuration(tariff_verified=False)
+            with self.assertRaisesRegex(Blocked, "tarifa"):
+                single_pilot.run(unconfirmed, synthetic_adapter=["-c", "raise AssertionError"])
+            batch.assert_not_called()
+            self.assertFalse(args.output.exists())
+
+    def test_c02_one_request_no_controls_and_no_retry_after_timeout(self):
+        launcher = (
+            f"import sys; sys.path.insert(0, {str(HERE)!r})\n"
+            "import adapter\n"
+            "from common import decode, encode\n"
+            "from fixture import fake_gateway\n"
+            "def reject_live(): raise AssertionError('transporte real instanciado')\n"
+            "adapter.FeitaTransport = reject_live\n"
+            "def reply(body, deadline, dispatched):\n"
+            "    request = decode(body)\n"
+            "    assert request['reasoning'] == {'enabled': False}\n"
+            "    assert request['max_tokens'] == 128\n"
+            "    status, raw = fake_gateway(body, deadline, dispatched)\n"
+            "    response = decode(raw)\n"
+            "    response['usage'] = {'cost': 0.01, 'prompt_tokens': 1000, 'completion_tokens': 129}\n"
+            "    return status, encode(response)\n"
+            "def timeout(body, deadline, dispatched):\n"
+            "    reply(body, deadline, dispatched)\n"
+            "    raise TimeoutError\n"
+        )
+        for gateway in ("reply", "timeout"):
+            with self.subTest(gateway=gateway):
+                args = self.configuration(reasoning={"enabled": False}, billable_output_token_ceiling=256)
+                args.output = self.work / gateway
+                synthetic = ["-c", launcher + f"adapter.main(synthetic_transport={gateway})"]
+                single_pilot.run(args, synthetic_adapter=synthetic)
+                report = c01.read(args.output / "report.json")
+                self.assertEqual(report["planned_ids"], ["jev-003"])
+                self.assertEqual(report["completed_ids"], ["jev-003"])
+                self.assertEqual(report["control_ids"], [])
+                self.assertEqual(report["injected_controls"], {"count": 0, "ids": []})
+                self.assertEqual(report["identity"]["mode"], "real")
+                self.assertEqual(report["eligibility"], "inconclusive")
+                self.assertEqual([report["usage"][key]["value"] for key in ("attempts", "requests", "questions")], [1, 1, 2])
+                obs, = c01.read_records(args.output / "observations.jsonl")
+                self.assertEqual(obs["temperature_state"], "unknown")
+                self.assertIsNone(report["usage"]["observed_api_usd"]["value"])
+                if gateway == "timeout":
+                    self.assertEqual(obs["choices"]["priority"]["reason"], "timeout")
+                else:
+                    self.assertEqual(report["usage"]["output_tokens"]["value"], 129)
+                    self.assertAlmostEqual(report["usage"]["estimated_api_usd"]["value"], 0.00075395)
+                self.assertTrue(c01.read(args.output / "invocation.json")["synthetic_transport"])
+                journal = args.output / "journal.jsonl"
+                self.assertEqual([event["event"] for event in c01.read_records(journal)],
+                                 ["planned", "dispatch_started", "dispatched", "completed", "finished"])
+                existing = journal.read_bytes()
+                with patch.object(single_pilot, "run_batch") as batch:
+                    with self.assertRaises(FileExistsError):
+                        single_pilot.run(args, synthetic_adapter=synthetic)
+                    batch.assert_not_called()
+                self.assertEqual(journal.read_bytes(), existing)
 
 
 class IPCTest(unittest.TestCase):
