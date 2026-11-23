@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 
 from fixture import fake_gateway
-from pilot import Blocked, Budget, PUBLIC_TARIFF, money, rates
+from pilot import Blocked, Budget, PUBLIC_TARIFF, authorized_cap, money, rates
 from transport import FeitaTransport
 
 HERE = Path(__file__).resolve().parent
@@ -94,13 +94,15 @@ def interpretation(response, fields, catalog):
     first, = candidates if isinstance(candidates, list) and len(candidates) == 1 else (None,)
     message = first.get("message") if isinstance(first, dict) else None
     if not isinstance(message, dict):
+        if isinstance(first, dict) and first.get("finish_reason") == "content_filter":
+            return choices_for(fields, "abstained", "policy")
         return choices_for(fields, "invalid", "missing_output")
-    if metadata(message.get("refusal")) or first.get("finish_reason") == "content_filter":
-        return choices_for(fields, "abstained", "policy")
     content = message.get("content")
+    result = parse_object(content)
+    if metadata(message.get("refusal")) or first.get("finish_reason") == "content_filter":
+        return {field: choice("abstained", (result or {}).get(field), "policy") for field in fields}
     if content is None:
         return choices_for(fields, "invalid", "missing_output")
-    result = parse_object(content)
     if result is None:
         return choices_for(fields, "invalid", "invalid_output")
     if result.keys() - set(fields) or first.get("finish_reason") == "length":
@@ -146,7 +148,7 @@ class Adapter:
 
         obs = {"contract_version": VERSION, "id": item["id"], "run_id": self.run_id, "attempt": 1,
                "origin": "candidate", "identity": self.identity, "returned_model": None, "weights_revision": None,
-               "temperature_state": "warm" if self.budget else "unknown",
+               "temperature_state": "unknown",
                "elapsed_ms": None, "load_ms": None, "inference_ms": None}
 
         try:
@@ -156,10 +158,10 @@ class Adapter:
             if self.budget:
                 self.budget.reserve(item["id"], len(body))
             status, data = self.transport(body, deadline, dispatched)
-            if time.monotonic() >= deadline:
-                raise TimeoutError
             parsed = parse_object(data)
             response = parsed or {}
+            if time.monotonic() >= deadline:
+                raise TimeoutError
             if status != 200:
                 detail = "rate_limit (HTTP 429)" if status == 429 else f"HTTP {status}"
                 print(f"Feita {item['id']}: {detail}", file=sys.stderr)
@@ -202,10 +204,17 @@ class Adapter:
         return obs
 
 
-def pilot_budget(path, sha256):
-    if path is None or not sha256 or c01.digest(path) != sha256:
+def pilot_budget(args, scope, identity, has_credential):
+    path = args.pilot
+    if path is None or not args.pilot_sha256 or c01.digest(path) != args.pilot_sha256:
         raise Blocked("configuração de piloto sem hash correspondente")
-    protocol = c01.read(c01.PLAN / "protocolo-comparacao.json")
+    authorization = args.authorization
+    if authorization is None or not args.authorization_sha256 or c01.digest(authorization) != args.authorization_sha256:
+        raise Blocked("manifesto de autorização sem hash correspondente")
+    protocol_path = c01.PLAN / "protocolo-comparacao.json"
+    cap = authorized_cap(c01.read(authorization), scope=scope, identity=identity,
+                         protocol_sha256=c01.digest(protocol_path), pilot_sha256=args.pilot_sha256)
+    protocol = c01.read(protocol_path)
     settings = c01.read(path)
     split = c01.read(c01.PLAN / "divisao-dados.json")
     development = [case for cases in split["development"].values() for case in cases]
@@ -218,8 +227,7 @@ def pilot_budget(path, sha256):
                 fields, invalid, _ = c01.normalize_input(item, item["catalog"])
                 if fields and not invalid:
                     controls.append(item["id"])
-    return Budget(settings, protocol["execution"], development, controls,
-                  lambda: bool(os.environ.get("FEITA_API_KEY", "").strip()))
+    return Budget(settings, cap, development, controls, has_credential)
 
 
 def atomic(path, payload):
@@ -229,31 +237,41 @@ def atomic(path, payload):
     temp.replace(target)
 
 
-def main():
+def main(*, synthetic_transport=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pilot", type=Path)
     parser.add_argument("--pilot-sha256")
+    parser.add_argument("--authorization", type=Path)
+    parser.add_argument("--authorization-sha256")
     parser.add_argument("--preflight", action="store_true")
     args = parser.parse_args()
+    scope = "synthetic" if synthetic_transport is not None else "live"
+
+    def has_credential():
+        return scope == "synthetic" or bool(os.environ.get("FEITA_API_KEY", "").strip())
+
     try:
         if args.preflight:
-            budget = pilot_budget(args.pilot, args.pilot_sha256)
+            identity = c01.read(HERE / "real.json")["identity"]
+            budget = pilot_budget(args, scope, identity, has_credential)
             print(encode({"state": "ready", "pilot_requests": len(budget.allowed),
                           "reservation_usd": str(len(budget.allowed) * budget.per_request)}))
             return
         identity = decode(os.environ["CLASSIFICATION_IDENTITY"])
         if identity["requested_model"] != MODEL or os.environ["CLASSIFICATION_CONTRACT_VERSION"] != VERSION:
             raise Blocked("identidade ou versão IPC incompatível")
-        budget = pilot_budget(args.pilot, args.pilot_sha256) if identity["mode"] == "real" else None
-        if identity["mode"] not in ("real", "fixture") or (not budget and args.pilot):
+        budget = pilot_budget(args, scope, identity, has_credential) if identity["mode"] == "real" else None
+        if identity["mode"] not in ("real", "fixture") or (not budget and (args.pilot or args.authorization or synthetic_transport is not None)):
             raise Blocked("modo incompatível com a configuração")
         timeout = int(os.environ["CLASSIFICATION_TIMEOUT_MS"])
         if timeout != 5000:
             raise Blocked("prazo da C02 deve ser de 5 s")
         instructions = "\n\n".join(Path(os.environ[key]).read_text(encoding="utf-8")
                                      for key in ("CLASSIFICATION_PROMPT", "CLASSIFICATION_RUBRIC"))
-        adapter = Adapter(identity, os.environ["CLASSIFICATION_RUN_ID"], instructions,
-                          FeitaTransport() if budget else fake_gateway, budget, timeout)
+        gateway = fake_gateway
+        if budget:
+            gateway = synthetic_transport if synthetic_transport is not None else FeitaTransport()
+        adapter = Adapter(identity, os.environ["CLASSIFICATION_RUN_ID"], instructions, gateway, budget, timeout)
         atomic(os.environ["CLASSIFICATION_READY_FILE"], {"runtime": platform.python_version(),
                                                          "hardware": platform.machine()})
         for line in sys.stdin.buffer:

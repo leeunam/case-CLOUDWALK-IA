@@ -2,6 +2,7 @@
 import json
 from datetime import date
 from decimal import Decimal, InvalidOperation
+from hashlib import sha256
 from pathlib import Path
 
 
@@ -38,11 +39,26 @@ def rates(tariff):
     return values
 
 
+def identity_digest(identity):
+    content = json.dumps(identity, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
+    return sha256(content.encode("utf-8")).hexdigest()
+
+
+def authorized_cap(manifest, *, scope, identity, protocol_sha256, pilot_sha256):
+    if not isinstance(manifest, dict) or manifest.get("authorized") is not True:
+        raise Blocked("manifesto sem autorização de execução")
+    bindings = {"scope": scope, "model": identity["requested_model"], "model_identity_sha256": identity_digest(identity),
+                "protocol_sha256": protocol_sha256, "pilot_sha256": pilot_sha256}
+    if any(manifest.get(field) != expected for field, expected in bindings.items()):
+        raise Blocked("manifesto incompatível com escopo, modelo, protocolo ou piloto")
+    cap = money(manifest.get("budget_cap_usd"))
+    if cap is None or cap <= 0:
+        raise Blocked("manifesto sem teto positivo")
+    return cap
+
+
 class Budget:
-    def __init__(self, settings, execution, development_ids, control_ids, has_credential):
-        if execution.get("paid_execution_authorized") is not True:
-            raise Blocked("execução paga sem autorização no protocolo")
-        cap = money(execution.get("budget_cap_usd"))
+    def __init__(self, settings, cap, development_ids, control_ids, has_credential):
         self.cap = money(settings.get("budget_usd"))
         if cap is None or self.cap is None or not 0 < self.cap <= cap:
             raise Blocked("teto ausente ou acima do orçamento autorizado")
@@ -71,12 +87,12 @@ class Budget:
         if (len(self.allowed) > min(self.max_cases, self.max_requests)
                 or len(self.allowed) * self.per_request > self.cap):
             raise Blocked("reserva prevista do piloto excede os limites")
-        # A primeira inspeção do ambiente ocorre após todos os gates anteriores.
-        if not has_credential():
-            raise Blocked("credencial local Feita ausente")
         self.cost_unit = settings.get("usage_cost_unit")
         if self.cost_unit not in (None, "USD"):
             raise Blocked("unidade de usage.cost incompatível")
+        # A primeira inspeção do ambiente ocorre após todos os gates anteriores.
+        if not has_credential():
+            raise Blocked("credencial local Feita ausente")
         self.seen = set()
         self.requests = 0
         self.reserved = Decimal(0)

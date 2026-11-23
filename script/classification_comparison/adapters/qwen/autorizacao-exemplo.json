@@ -1,0 +1,9 @@
+{
+  "scope": "live",
+  "model": "qwen/qwen3.8-27b",
+  "authorized": false,
+  "budget_cap_usd": null,
+  "protocol_sha256": "eb9bdbb786037bac864f3155ff6dfbb45feb83dfdb99958f463b6896a614dced",
+  "pilot_sha256": "93de7c786b8c471d74e879ebe4331ae882235aeea84fb79c4658d936153e09e9",
+  "model_identity_sha256": "2074baae4713f2d97847b7f3eb3b975216928ff423ab412c83882f0df497f42a"
+}

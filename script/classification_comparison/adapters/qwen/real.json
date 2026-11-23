@@ -7,7 +7,11 @@
     "--pilot",
     "script/classification_comparison/adapters/qwen/piloto.json",
     "--pilot-sha256",
-    "93de7c786b8c471d74e879ebe4331ae882235aeea84fb79c4658d936153e09e9"
+    "93de7c786b8c471d74e879ebe4331ae882235aeea84fb79c4658d936153e09e9",
+    "--authorization",
+    "script/classification_comparison/adapters/qwen/autorizacao-exemplo.json",
+    "--authorization-sha256",
+    "7556fcfc89a1b8e16f64486bca366aee2a1811ba0f595e6544e6a1f1513fa79a"
   ],
   "identity": {
     "mode": "real",

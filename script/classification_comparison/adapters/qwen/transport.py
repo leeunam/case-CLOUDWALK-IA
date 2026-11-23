@@ -3,6 +3,7 @@ import http.client
 import multiprocessing
 import os
 import time
+from contextlib import closing
 
 HOST = "api.feita.ai"
 PATH = "/gateway/v1/chat/completions"
@@ -15,7 +16,8 @@ def post(pipe, body, deadline):
         if not key or not key.strip():
             pipe.send(("error", "credential"))
             return
-        with http.client.HTTPSConnection(HOST, timeout=max(0.001, deadline - time.monotonic())) as connection:
+        timeout = max(0.001, deadline - time.monotonic())
+        with closing(http.client.HTTPSConnection(HOST, timeout=timeout)) as connection:
             connection.connect()
             if time.monotonic() >= deadline:
                 raise TimeoutError
@@ -26,7 +28,7 @@ def post(pipe, body, deadline):
             })
             response = connection.getresponse()
             data = response.read(BODY_LIMIT + 1)
-            pipe.send(("response", (response.status, data if len(data) <= BODY_LIMIT else b"")))
+        pipe.send(("response", (response.status, data if len(data) <= BODY_LIMIT else b"")))
     except TimeoutError:
         pipe.send(("error", "timeout"))
     except (OSError, ValueError, http.client.HTTPException):

@@ -5,14 +5,16 @@ import sys
 import tempfile
 import time
 import unittest
+from decimal import Decimal
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import transport
 from adapter import Adapter, HERE, MODEL, VERSION, c01, decode, request_body, usage_from
 from common import decide
 from fixture import completion
-from pilot import Blocked, Budget, PUBLIC_TARIFF
+from pilot import Blocked, Budget, PUBLIC_TARIFF, authorized_cap, identity_digest
 
 IDENTITY = c01.read(HERE / "fixture.json")["identity"]
 
@@ -28,9 +30,8 @@ def setup_limits(**options):
             "tariff": PUBLIC_TARIFF, "budget_usd": "1", "usage_cost_unit": "USD", **options}
 
 
-def budget(settings, has_credential=lambda: True, **execution):
-    return Budget(settings, {"paid_execution_authorized": True, "budget_cap_usd": "1", **execution},
-                  ["dev", "other-dev"], ["control"], has_credential)
+def budget(settings, has_credential=lambda: True):
+    return Budget(settings, Decimal("1"), ["dev", "other-dev"], ["control"], has_credential)
 
 
 class AdapterTest(unittest.TestCase):
@@ -109,6 +110,22 @@ class AdapterTest(unittest.TestCase):
         data["choices"][0]["message"].pop("refusal")
         self.assertEqual(self.classify(json.dumps(data).encode())["choices"]["category"]["reason"], "missing_output")
 
+    def test_policy_refusal_preserves_raw_fields_and_never_applies_them(self):
+        for finish_reason, message, expected in (
+            ("stop", {"refusal": "recusa", "content": '{"category":"pix","priority":"urgent"}'}, ("pix", "urgent")),
+            ("content_filter", {"content": '{"category":"pix"}'}, ("pix", None)),
+            ("content_filter", None, (None, None)),
+        ):
+            with self.subTest(finish_reason=finish_reason, raw=expected):
+                response = {"model": MODEL, "choices": [{"finish_reason": finish_reason, "message": message}]}
+                obs = self.classify(json.dumps(response).encode())
+                self.assertEqual([obs["choices"][field]["raw"] for field in self.item["missing"]], list(expected))
+                for choice in obs["choices"].values():
+                    self.assertEqual((choice["status"], choice["reason"]), ("abstained", "policy"))
+                decision = decide(self.item, obs, self.item["catalog"], "run")
+                self.assertEqual(decision["outcome"], "review")
+                self.assertTrue(all(field["applied"] is None for field in decision["fields"].values()))
+
     def test_ineligible_input_never_dispatches(self):
         transport = Mock()
         candidate = Adapter(IDENTITY, "run", "rubrica", transport)
@@ -151,6 +168,37 @@ class AdapterTest(unittest.TestCase):
             obs = self.classify(completion(MODEL, '{"category":"pix","priority":"basic"}'))
         self.assertEqual(obs["choices"]["category"]["reason"], "timeout")
 
+    def test_post_uses_original_https_connection_and_closes_it_on_success_and_failure(self):
+        for fail in (False, True):
+            with self.subTest(fail=fail):
+                socket_methods = {"connect": Mock(side_effect=OSError if fail else None), "request": Mock(),
+                                  "getresponse": Mock(return_value=Mock(status=200, read=Mock(return_value=b"{}"))),
+                                  "close": Mock()}
+                pipe = Mock()
+
+                def send(event):
+                    if event[0] == "response":
+                        socket_methods["close"].assert_called_once()
+
+                pipe.send.side_effect = send
+                environment = SimpleNamespace(environ={"FEITA_API_KEY": "sintetica"})
+                with patch.object(transport, "os", environment), patch.multiple(
+                    transport.http.client.HTTPSConnection, **socket_methods
+                ):
+                    transport.post(pipe, b"{}", time.monotonic() + 1)
+                socket_methods["connect"].assert_called_once()
+                socket_methods["close"].assert_called_once()
+                pipe.close.assert_called_once()
+                if fail:
+                    socket_methods["request"].assert_not_called()
+                    pipe.send.assert_called_once_with(("error", "transport"))
+                else:
+                    method, path = socket_methods["request"].call_args.args
+                    self.assertEqual((method, path), ("POST", transport.PATH))
+                    self.assertEqual(socket_methods["request"].call_args.kwargs["body"], b"{}")
+                    self.assertEqual([call.args[0] for call in pipe.send.call_args_list],
+                                     [("dispatch", None), ("response", (200, b"{}"))])
+
     def test_worker_is_killed_on_absolute_timeout_without_http(self):
         dispatched = Mock()
         with patch.object(transport, "post", hanging_worker):
@@ -177,8 +225,6 @@ class PilotTest(unittest.TestCase):
         def inaccessible_credential():
             raise AssertionError("ambiente consultado antes da autorização")
 
-        with self.assertRaisesRegex(Blocked, "sem autorização"):
-            budget(setup_limits(), has_credential=inaccessible_credential, paid_execution_authorized=False)
         for changes, expected in (
             ({"budget_usd": None}, "teto"), ({"tariff_verified": False}, "tarifa"),
             ({"tariff": None}, "tarifa"), ({"concurrency": 2}, "concorrência"),
@@ -191,6 +237,65 @@ class PilotTest(unittest.TestCase):
                     budget(setup_limits(**changes), has_credential=inaccessible_credential)
         with self.assertRaisesRegex(Blocked, "credencial local"):
             budget(setup_limits(), has_credential=lambda: False)
+
+    def test_authorization_binds_scope_identity_protocol_pilot_and_positive_cap(self):
+        scope = "synthetic"
+        identity = dict(IDENTITY, mode="real")
+        binding = dict(scope=scope, identity=identity, protocol_sha256="protocol", pilot_sha256="pilot")
+        manifest = dict(scope=scope, model=MODEL, model_identity_sha256=identity_digest(identity),
+                        protocol_sha256="protocol", pilot_sha256="pilot", authorized=True, budget_cap_usd="1")
+        self.assertEqual(authorized_cap(manifest, **binding), Decimal(1))
+        for field in ("scope", "model", "model_identity_sha256", "protocol_sha256", "pilot_sha256", "budget_cap_usd",
+                      "authorized"):
+            with self.subTest(field=field), self.assertRaises(Blocked):
+                authorized_cap(dict(manifest, **{field: None}), **binding)
+        with self.assertRaises(Blocked):
+            authorized_cap(manifest, **dict(binding, identity=dict(identity, adapter_version="changed")))
+
+    def test_late_billable_response_keeps_usage_and_stops_next_request(self):
+        policy = budget(setup_limits())
+        item = AdapterTest()
+        item.setUp()
+
+        def respond(body, deadline, dispatched):
+            dispatched()
+            return 200, completion(MODEL, '{"category":"pix","priority":"urgent"}',
+                                   usage={"cost": 2, "prompt_tokens": 1, "completion_tokens": 10})
+
+        gateway = Mock(side_effect=respond)
+        candidate = Adapter(dict(IDENTITY, mode="real"), "run", "rubrica", gateway, policy)
+        with patch("adapter.time.monotonic", side_effect=[100, 100.001, 104.960]):
+            obs = candidate.classify(item.item)
+        self.assertEqual(policy.reserved, Decimal("0.0086544"))
+        self.assertTrue(policy.stopped)
+        self.assertEqual(obs["temperature_state"], "unknown")
+        self.assertEqual(obs["returned_model"], MODEL)
+        self.assertEqual(obs["choices"]["category"]["reason"], "timeout")
+        self.assertEqual(obs["requests"], 1)
+        self.assertEqual(obs["request_usage"][0]["observed_api_usd"], 2)
+        self.assertEqual(obs["request_usage"][0]["input_tokens"], 1)
+        self.assertEqual(obs["request_usage"][0]["output_tokens"], 10)
+        blocked = candidate.classify(dict(item.item, id="control"))
+        self.assertEqual(blocked["requests"], 0)
+        self.assertEqual(blocked["temperature_state"], "unknown")
+        gateway.assert_called_once()
+
+    def test_timeout_without_body_keeps_reservation_and_unknown_usage(self):
+        policy = budget(setup_limits())
+        item = AdapterTest()
+        item.setUp()
+
+        def timeout(body, deadline, dispatched):
+            dispatched()
+            raise TimeoutError
+
+        candidate = Adapter(dict(IDENTITY, mode="real"), "run", "rubrica", timeout, policy)
+        obs = candidate.classify(item.item)
+        self.assertEqual(obs["request_usage"], [{"input_tokens": None, "output_tokens": None,
+                          "observed_api_usd": None, "estimated_api_usd": None, "tariff": None}])
+        self.assertEqual(policy.reserved, policy.per_request)
+        self.assertEqual(policy.requests, 1)
+        self.assertFalse(policy.stopped)
 
     def test_budget_reserves_before_transport_and_rejects_repeat_or_holdout(self):
         policy = budget(setup_limits())
@@ -268,14 +373,57 @@ class IPCTest(unittest.TestCase):
             self.assertEqual(c01.read(final), {"peak_memory_bytes": None})
             self.assertEqual(decode(result.stdout)["id"], item.item["id"])
 
-    def test_repository_preflight_stops_before_create_ready_or_call(self):
-        settings = HERE / "piloto.json"
-        command = [sys.executable, "-B", str(HERE / "adapter.py"), "--preflight", "--pilot", str(settings),
-                   "--pilot-sha256", c01.digest(settings)]
-        result = subprocess.run(command, capture_output=True, text=True, timeout=10)
+    def test_repository_preflight_blocks_disabled_manifest(self):
+        command = c01.read(HERE / "real.json")["command"] + ["--preflight"]
+        result = subprocess.run(command, cwd=c01.ROOT, capture_output=True, text=True, timeout=10)
         self.assertEqual(result.returncode, 2)
         self.assertEqual(result.stdout, "")
-        self.assertIn("execução paga sem autorização no protocolo", result.stderr)
+        self.assertIn("manifesto sem autorização de execução", result.stderr)
+
+    def test_c02_authorized_synthetic_pilot_with_original_source_hashes(self):
+        locked = c01.read(HERE.parents[1] / "sources.lock.json")
+        self.assertEqual({path: c01.digest(c01.ROOT / path) for path in locked}, locked)
+        with tempfile.TemporaryDirectory(dir=HERE) as scratch:
+            work = Path(scratch)
+            pilot, authorization, config, output = [work / name for name in ("pilot", "auth", "config", "result")]
+            pilot.write_text(json.dumps(setup_limits(max_cases=9, max_requests=9)))
+            candidate = c01.read(HERE / "real.json")
+            approval = {"scope": "synthetic", "model": MODEL, "authorized": True, "budget_cap_usd": "1",
+                        "model_identity_sha256": identity_digest(candidate["identity"]),
+                        "protocol_sha256": c01.digest(c01.PLAN / "protocolo-comparacao.json"),
+                        "pilot_sha256": c01.digest(pilot)}
+            authorization.write_text(json.dumps(approval))
+            arguments = ["--pilot", str(pilot), "--pilot-sha256", c01.digest(pilot),
+                         "--authorization", str(authorization), "--authorization-sha256", c01.digest(authorization)]
+            refused = subprocess.run([sys.executable, "-B", str(HERE / "adapter.py"), *arguments, "--preflight"],
+                                     cwd=c01.ROOT, capture_output=True, text=True, timeout=10)
+            self.assertEqual(refused.returncode, 2)
+            self.assertIn("manifesto incompatível com escopo", refused.stderr)
+            launcher = (
+                f"import sys; sys.path.insert(0, {str(HERE)!r})\n"
+                "import adapter\n"
+                "from fixture import fake_gateway\n"
+                "def reject_live(): raise AssertionError('transporte real instanciado')\n"
+                "adapter.FeitaTransport = reject_live\n"
+                "adapter.main(synthetic_transport=fake_gateway)\n"
+            )
+            candidate["command"] = [sys.executable, "-B", "-c", launcher, *arguments]
+            config.write_text(json.dumps(candidate))
+            cli = [sys.executable, "-B", "script/classification_comparison/run.py", "--mode", "real", "--config",
+                   str(config), "--split", "development", "--limit", "1", "--output", str(output)]
+            result = subprocess.run(cli, cwd=c01.ROOT, capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = c01.read(output / "report.json")
+            self.assertEqual(report["usage"]["requests"]["value"], 9)
+            self.assertEqual(report["eligibility"], "inconclusive")
+            self.assertIsNone(report["gates"]["warm_total_latency_p95_ms_max"]["value"])
+            observations = list(map(decode, (output / "observations.jsonl").read_bytes().split(b"\n")[:-1]))
+            for observation in observations:
+                if observation["origin"] == "candidate":
+                    self.assertEqual(observation["temperature_state"], "unknown")
+                    self.assertGreater(observation["elapsed_ms"], 0)
+                    self.assertIsNone(observation["inference_ms"])
+        self.assertEqual({path: c01.digest(c01.ROOT / path) for path in locked}, locked)
 
 
 if __name__ == "__main__":
