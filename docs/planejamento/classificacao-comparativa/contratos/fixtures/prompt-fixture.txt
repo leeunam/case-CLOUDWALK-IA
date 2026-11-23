@@ -1,0 +1,1 @@
+Prompt ilustrativo 1.0.0. Responda pelos campos ausentes conforme catálogo e rubrica comum. Sem exemplos. Esta fixture é estática.

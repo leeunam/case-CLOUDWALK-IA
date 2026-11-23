@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://class-001.invalid/v1/report.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "run_id",
+    "identity",
+    "score_calibration",
+    "split",
+    "git_revision",
+    "environment",
+    "sources",
+    "artifacts",
+    "planned_ids",
+    "completed_ids",
+    "control_ids",
+    "gates",
+    "by_field",
+    "by_mask",
+    "by_stratum",
+    "urgent_outcomes",
+    "latency_p50_ms",
+    "usage",
+    "eligibility"
+  ],
+  "properties": {
+    "contract_version": {"$ref": "common.schema.json#/$defs/version"},
+    "run_id": {"$ref": "common.schema.json#/$defs/id"},
+    "score_calibration": {"const": "not_evaluated"},
+    "identity": {"$ref": "common.schema.json#/$defs/identity"},
+    "split": {"enum": ["control", "development", "final_test"]},
+    "git_revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hardware",
+        "runtime",
+        "seed",
+        "concurrency",
+        "timeout_ms",
+        "peak_memory_bytes",
+        "cold_start_ms",
+        "infrastructure_usd"
+      ],
+      "properties": {
+        "hardware": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "runtime": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "seed": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+        "concurrency": {"const": 1},
+        "timeout_ms": {"const": 5000},
+        "peak_memory_bytes": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+        "cold_start_ms": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
+        "infrastructure_usd": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]}
+      }
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataset", "catalog", "rubric", "protocol", "split", "prompt", "policy"],
+      "properties": {
+        "dataset": {"$ref": "common.schema.json#/$defs/source"},
+        "catalog": {"$ref": "common.schema.json#/$defs/source"},
+        "rubric": {"$ref": "common.schema.json#/$defs/source"},
+        "protocol": {"$ref": "common.schema.json#/$defs/source"},
+        "split": {"$ref": "common.schema.json#/$defs/source"},
+        "prompt": {"$ref": "common.schema.json#/$defs/source"},
+        "policy": {"$ref": "common.schema.json#/$defs/source"}
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inputs", "observations", "decisions"],
+      "properties": {
+        "inputs": {"$ref": "common.schema.json#/$defs/artifact"},
+        "observations": {"$ref": "common.schema.json#/$defs/artifact"},
+        "decisions": {"$ref": "common.schema.json#/$defs/artifact"}
+      }
+    },
+    "planned_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/id"}, "uniqueItems": true},
+    "control_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/id"}, "uniqueItems": true},
+    "completed_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/id"}, "uniqueItems": true},
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "channel_field_preservation_ratio",
+        "complete_or_invalid_controls_model_calls",
+        "partial_application_after_abstention_or_error",
+        "automatic_completion_on_expected_review_cases",
+        "automatic_non_urgent_applied_when_expected_urgent",
+        "automatic_coverage_on_fully_classifiable_cases_min",
+        "raw_urgent_recognition_min",
+        "warm_total_latency_p95_ms_max",
+        "applied_category_accuracy",
+        "applied_priority_accuracy"
+      ],
+      "properties": {
+        "channel_field_preservation_ratio": {"$ref": "#/$defs/metric"},
+        "complete_or_invalid_controls_model_calls": {"$ref": "#/$defs/metric"},
+        "partial_application_after_abstention_or_error": {"$ref": "#/$defs/metric"},
+        "automatic_completion_on_expected_review_cases": {"$ref": "#/$defs/metric"},
+        "automatic_non_urgent_applied_when_expected_urgent": {"$ref": "#/$defs/metric"},
+        "automatic_coverage_on_fully_classifiable_cases_min": {"$ref": "#/$defs/metric"},
+        "raw_urgent_recognition_min": {"$ref": "#/$defs/metric"},
+        "warm_total_latency_p95_ms_max": {"$ref": "#/$defs/metric"},
+        "applied_category_accuracy": {"$ref": "#/$defs/metric"},
+        "applied_priority_accuracy": {"$ref": "#/$defs/metric"}
+      }
+    },
+    "by_field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "priority"],
+      "properties": {"category": {"$ref": "#/$defs/summary"}, "priority": {"$ref": "#/$defs/summary"}}
+    },
+    "by_mask": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "priority", "category+priority"],
+      "properties": {
+        "category": {"$ref": "#/$defs/summary"},
+        "priority": {"$ref": "#/$defs/summary"},
+        "category+priority": {"$ref": "#/$defs/summary"}
+      }
+    },
+    "by_stratum": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rotina", "urgente", "ambiguo"],
+      "properties": {
+        "rotina": {"$ref": "#/$defs/summary"},
+        "urgente": {"$ref": "#/$defs/summary"},
+        "ambiguo": {"$ref": "#/$defs/summary"}
+      }
+    },
+    "urgent_outcomes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["applied_urgent", "applied_lower", "review", "abstained", "invalid", "operational_error"],
+      "properties": {
+        "applied_urgent": {"$ref": "#/$defs/metric"},
+        "applied_lower": {"$ref": "#/$defs/metric"},
+        "review": {"$ref": "#/$defs/metric"},
+        "abstained": {"$ref": "#/$defs/metric"},
+        "invalid": {"$ref": "#/$defs/metric"},
+        "operational_error": {"$ref": "#/$defs/metric"}
+      }
+    },
+    "latency_p50_ms": {"$ref": "#/$defs/metric"},
+    "eligibility": {"enum": ["pass", "fail", "inconclusive"]},
+    "usage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requests",
+        "attempts",
+        "questions",
+        "input_tokens",
+        "output_tokens",
+        "observed_api_usd",
+        "estimated_api_usd"
+      ],
+      "properties": {
+        "requests": {"$ref": "#/$defs/total"},
+        "attempts": {"$ref": "#/$defs/total"},
+        "questions": {"$ref": "#/$defs/total"},
+        "input_tokens": {"$ref": "#/$defs/total"},
+        "output_tokens": {"$ref": "#/$defs/total"},
+        "observed_api_usd": {"$ref": "#/$defs/total"},
+        "estimated_api_usd": {"$ref": "#/$defs/total"}
+      }
+    }
+  },
+  "$defs": {
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "numerator", "denominator", "value"],
+      "properties": {
+        "state": {"enum": ["measured", "partial", "unmeasured", "unavailable"]},
+        "numerator": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+        "denominator": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+        "value": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"state": {"const": "unmeasured"}}},
+          "then": {"properties": {"numerator": {"type": "null"}, "value": {"type": "null"}}}
+        },
+        {
+          "if": {"properties": {"state": {"const": "unavailable"}}},
+          "then": {"properties": {"numerator": {"type": "null"}, "value": {"type": "null"}}}
+        },
+        {
+          "if": {"properties": {"state": {"const": "measured"}}},
+          "then": {
+            "properties": {"denominator": {"type": "integer", "minimum": 0}, "value": {"type": "number", "minimum": 0}}
+          }
+        },
+        {
+          "if": {"properties": {"state": {"const": "partial"}}},
+          "then": {
+            "properties": {"denominator": {"type": "integer", "minimum": 0}, "value": {"type": "number", "minimum": 0}}
+          }
+        }
+      ]
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "raw_accuracy",
+        "applied_accuracy",
+        "correct_abstention",
+        "undue_abstention",
+        "invalid_output",
+        "operational_error",
+        "unapplied_choices",
+        "review",
+        "automatic_coverage",
+        "correct_completion_coverage"
+      ],
+      "properties": {
+        "raw_accuracy": {"$ref": "#/$defs/metric"},
+        "applied_accuracy": {"$ref": "#/$defs/metric"},
+        "correct_abstention": {"$ref": "#/$defs/metric"},
+        "undue_abstention": {"$ref": "#/$defs/metric"},
+        "invalid_output": {"$ref": "#/$defs/metric"},
+        "operational_error": {"$ref": "#/$defs/metric"},
+        "unapplied_choices": {"$ref": "#/$defs/metric"},
+        "review": {"$ref": "#/$defs/metric"},
+        "automatic_coverage": {"$ref": "#/$defs/metric"},
+        "correct_completion_coverage": {"$ref": "#/$defs/metric"}
+      }
+    },
+    "total": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "value", "samples", "expected_samples"],
+      "properties": {
+        "state": {"enum": ["measured", "partial", "unmeasured", "unavailable"]},
+        "value": {"type": ["number", "null"], "minimum": 0},
+        "samples": {"type": "integer", "minimum": 0},
+        "expected_samples": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}
