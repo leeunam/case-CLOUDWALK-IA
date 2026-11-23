@@ -1,0 +1,25 @@
+{
+  "scope": "development_only",
+  "profile": "D",
+  "cpu_affinity": [
+    0,
+    2
+  ],
+  "previous_allowed_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "reason": "Two distinct physical cores with nominal max frequency 4700000kHz; isolate process placement after timeout in unrestricted runs",
+  "system_settings_changed": false,
+  "code_revision": "bf837b38abc91f92bf17300eebe60be76adfff87"
+}

@@ -1,0 +1,6 @@
+Loading weights:   0%|          | 0/227 [00:00<?, ?it/s]Loading weights:   3%|▎         | 7/227 [00:00<00:03, 60.31it/s]Loading weights: 100%|██████████| 227/227 [00:00<00:00, 1862.83it/s]
+[transformers] You are using a model of type `GLiClass` to instantiate a model of type ``. This may be expected if you are loading a checkpoint that shares a subset of the architecture (e.g., loading a `sam2_video` checkpoint into `Sam2Model`), but is otherwise not supported and can yield errors. Please verify that the checkpoint is compatible with the model you are instantiating.
+C04 tokens do contexto: 1416/2048
+[transformers] `use_return_dict` is deprecated! Use `return_dict` instead!
+C04 tokens do contexto: 1296/2048
+{"worker_user_cpu_s": 37.456585, "worker_system_cpu_s": 10.526471, "peak_memory_bytes": 2532913152}

@@ -1,0 +1,18 @@
+{
+  "version": "1.3.0-dev.b",
+  "score_kind": "ranking",
+  "pipeline_threshold": 0.0,
+  "abstention_code": "informacao_insuficiente",
+  "tie": "abstain",
+  "examples": [],
+  "max_tokens": 2048,
+  "threads": 4,
+  "seed": 0,
+  "case_timeout_ms": 5000,
+  "response_reserve_ms": 150,
+  "max_worker_rss_bytes": 6442450944,
+  "context_format": "full_common_rubric_and_catalog",
+  "context_profile": "development_extension",
+  "label_representation": "descriptive",
+  "forward_layout": "separate"
+}

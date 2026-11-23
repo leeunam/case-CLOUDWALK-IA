@@ -1,0 +1,26 @@
+{
+  "contract_version": "1.1.0",
+  "identity": {
+    "mode": "fixture",
+    "provider": "fixture",
+    "requested_model": "gliclass-fake",
+    "expected_returned_model": "gliclass-fake",
+    "adapter_version": "1.1.0",
+    "policy_version": "1.1.0"
+  },
+  "command": [
+    "python3",
+    "-B",
+    "script/classification_comparison/adapters/gliclass/fake_runtime.py"
+  ],
+  "prompt": {
+    "path": "script/classification_comparison/adapters/gliclass/prompt.json",
+    "version": "1.1.0",
+    "sha256": "4d391db33a41240d0acd24a518afa569c1176b48875c474334edf056bd786ad9"
+  },
+  "policy": {
+    "path": "script/classification_comparison/adapters/gliclass/policy.json",
+    "version": "1.1.0",
+    "sha256": "e8209fa628518c2650030fa78b2cfa30700a47bd0c78ba897acac990afaebf02"
+  }
+}

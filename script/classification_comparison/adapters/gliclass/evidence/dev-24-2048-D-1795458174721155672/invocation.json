@@ -1,0 +1,12 @@
+{
+  "command": "rtk proxy python3 -B script/classification_comparison/run.py --mode real --split development --config script/classification_comparison/adapters/gliclass/real-dev-d.json --output NOVO_DIRETORIO --limit 24",
+  "config_sha256": "3f9186d50e13245e7122f23baa62452829fd82cdc0dcc961a36439bd4099dff3",
+  "contract_version": "1.1.0",
+  "control_policy": {
+    "path": "docs/planejamento/classificacao-comparativa/contratos/politica-controles.json",
+    "version": "1.0.0",
+    "sha256": "2611786ddde1eb2b064b02f7dda7bb7a0aae06cc8f127a9fc7e8fec14e937fb7"
+  },
+  "attempts": 1,
+  "concurrency": 1
+}

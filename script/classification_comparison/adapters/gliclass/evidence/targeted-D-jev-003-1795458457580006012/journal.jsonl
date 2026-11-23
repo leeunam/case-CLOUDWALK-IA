@@ -1,0 +1,34 @@
+{"event": "planned", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "plan": {"path": "script/classification_comparison/adapters/gliclass/evidence/targeted-D-jev-003-1795458457580006012/plan.json", "sha256": "872be179170d50d237288b36197ab29c18cb9eb5a79cfc6ca52f34d0d1fec745"}}
+{"event": "dispatch_started", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "jev-003", "attempt": 1}
+{"event": "dispatched", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "jev-003", "attempt": 1}
+{"event": "completed", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "jev-003", "attempts": 1}
+{"event": "completed", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-completo", "attempts": 0}
+{"event": "dispatch_started", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-simples", "attempt": 1}
+{"event": "dispatched", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-simples", "attempt": 1}
+{"event": "completed", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-simples", "attempts": 1}
+{"event": "dispatch_started", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-duplo", "attempt": 1}
+{"event": "dispatched", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-duplo", "attempt": 1}
+{"event": "completed", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-duplo", "attempts": 1}
+{"event": "completed", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-invalido", "attempts": 0}
+{"event": "dispatch_started", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-sem-assunto", "attempt": 1}
+{"event": "dispatched", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-sem-assunto", "attempt": 1}
+{"event": "completed", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-sem-assunto", "attempts": 1}
+{"event": "dispatch_started", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-saida-invalida", "attempt": 1}
+{"event": "dispatched", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-saida-invalida", "attempt": 1}
+{"event": "completed", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-saida-invalida", "attempts": 1}
+{"event": "dispatch_started", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-timeout", "attempt": 1}
+{"event": "dispatched", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-timeout", "attempt": 1}
+{"event": "completed", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-timeout", "attempts": 1}
+{"event": "dispatch_started", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-saida-ausente", "attempt": 1}
+{"event": "dispatched", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-saida-ausente", "attempt": 1}
+{"event": "completed", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-saida-ausente", "attempts": 1}
+{"event": "dispatch_started", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-versao", "attempt": 1}
+{"event": "dispatched", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-versao", "attempt": 1}
+{"event": "completed", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-versao", "attempts": 1}
+{"event": "completed", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-catalogo", "attempts": 0}
+{"event": "completed", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-tipo", "attempts": 0}
+{"event": "dispatch_started", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-politica", "attempt": 1}
+{"event": "dispatched", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-politica", "attempt": 1}
+{"event": "completed", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-politica", "attempts": 1}
+{"event": "completed", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "id": "ctl-injetado-aplicacao-parcial", "attempts": 1}
+{"event": "finished", "run_id": "c04-targeted-74c39b460ba84bd597b403a8772f7a54", "decisions": 14}
