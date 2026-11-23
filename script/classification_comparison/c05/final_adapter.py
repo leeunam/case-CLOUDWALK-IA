@@ -79,37 +79,34 @@ def observed_cost(raw, settings, run_id, case_id, reservation):
     if not isinstance(usage, dict):
         return result
     violations = []
-    tokens = []
     for field, limit in (("prompt_tokens", "billable_input_token_ceiling"),
                          ("completion_tokens", "billable_output_token_ceiling")):
         count = integer(usage.get(field))
-        tokens.append(count)
         if count is not None and count > settings[limit]:
             violations.append(f"{field}={count} acima do teto faturável {settings[limit]}")
 
     # Só o uso atribuído à resposta corrente, com unidade documentada, concilia.
     candidates = {}
-    if None not in tokens:
-        if (settings["usage_cost_unit"] == "USD" and usage.get("cost_unit", "USD") == "USD"
-                and usage.get("currency", "USD") == "USD"):
-            observed = nonnegative_decimal(usage.get("cost"))
-            if observed is not None:
-                candidates["cost_usd"] = observed
+    if (settings["usage_cost_unit"] == "USD" and usage.get("cost_unit", "USD") == "USD"
+            and usage.get("currency", "USD") == "USD"):
+        observed = nonnegative_decimal(usage.get("cost"))
+        if observed is not None:
+            candidates["cost_usd"] = observed
 
-        conversion = settings["usage_credits"]
-        if conversion and conversion["confirmed"] and usage.get("credits_unit", "credits") == "credits":
-            credits = nonnegative_decimal(usage.get("credits"))
-            if credits is not None:
-                components = credits.as_tuple()
-                # Deslocamento decimal exato para a taxa documentada de US$ 0,01 por crédito.
-                try:
-                    converted = Decimal((components.sign, components.digits,
-                                         components.exponent + USD_PER_CREDIT.as_tuple().exponent))
-                except InvalidOperation:
-                    converted = None
-                if converted is not None:
-                    candidates["converted_credits_usd"] = converted
-                    result.evidence["credits"] = str(credits)
+    conversion = settings["usage_credits"]
+    if conversion and conversion["confirmed"] and usage.get("credits_unit", "credits") == "credits":
+        credits = nonnegative_decimal(usage.get("credits"))
+        if credits is not None:
+            components = credits.as_tuple()
+            # Deslocamento decimal exato para a taxa documentada de US$ 0,01 por crédito.
+            try:
+                converted = Decimal((components.sign, components.digits,
+                                     components.exponent + USD_PER_CREDIT.as_tuple().exponent))
+            except InvalidOperation:
+                converted = None
+            if converted is not None:
+                candidates["converted_credits_usd"] = converted
+                result.evidence["credits"] = str(credits)
 
     verified = []
     for name, candidate in candidates.items():
@@ -124,7 +121,7 @@ def observed_cost(raw, settings, run_id, case_id, reservation):
         result.amount = max(verified)
         request_id = response.get("id")
         if isinstance(request_id, str) and request_id.strip():
-            result.receipt = f"gateway:{request_id}"
+            result.receipt = f"gateway:{request_id.strip()}"
         else:
             result.receipt = f"gateway:{run_id}/{case_id}:{sha256(raw).hexdigest()}"
     return result
@@ -151,7 +148,7 @@ def serve(args, transport=None):
     def capture(body, deadline, dispatched):
         nonlocal captured
         result = gateway(body, deadline, dispatched)
-        if time.monotonic() < deadline and result[0] == 200:
+        if time.monotonic() < deadline:
             captured = result[1]
         return result
 

@@ -55,6 +55,14 @@ def run_scenario(scenario):
             dispatched()
             os._exit(9)
         status, response = fixture_gateway(body, deadline, dispatched)
+        if scenario == "charged-without-counter":
+            obj = decode(response)
+            obj["usage"]["cost"] = "2.25"
+            del obj["usage"]["completion_tokens"]
+            response = encode(obj).encode("utf-8")
+        if scenario == "charged-http-error":
+            obj = {"error": {"message": "synthetic response"}, "usage": {"credits": "225"}}
+            status, response = 500, encode(obj).encode("utf-8")
         if scenario == "no-usage":
             obj = decode(response)
             del obj["usage"]
@@ -165,7 +173,7 @@ class AccountTest(TestCase):
             account.reserve("run", case, PER_REQUEST)
             account.mark_dispatched("run", case)
         receipt = {"unit": "USD", "cost_usd": "0.000123456789012345678901234567",
-                   "run_id": "run", "case_id": "case-a", "reference": "synthetic invoice/01"}
+                   "run_id": "run", "case_id": "case-a", "reference": "  synthetic invoice/01\t"}
         for altered in ({"unit": "credits"}, {"cost_usd": "-1"}, {"cost_usd": "NaN"}, {"reference": ""}):
             with self.assertRaises(BudgetError):
                 account.reconcile(dict(receipt, **altered))
@@ -176,7 +184,9 @@ class AccountTest(TestCase):
         with self.assertRaisesRegex(BudgetError, "já conciliada"):
             account.reconcile(receipt)
         with self.assertRaisesRegex(BudgetError, "já atribuído"):
-            account.reconcile(dict(receipt, case_id="case-b"))
+            account.reconcile(dict(receipt, case_id="case-b", reference="synthetic invoice/01 "))
+        settled, pending = account.status()["reservations"]
+        self.assertEqual((settled["receipt"], pending["state"]), ("synthetic invoice/01", "dispatched"))
 
 
     def test_dashboard_receipt_preserves_original_gateway_attribution(self):
@@ -191,7 +201,78 @@ class AccountTest(TestCase):
         row = account.status()["reservations"][0]
         self.assertEqual((row["prior_observed"], row["prior_receipt"]), ("0.25", "gateway:one"))
         with self.assertRaisesRegex(BudgetError, "já atribuído"):
-            account.stage("run", "case-b", amount=Decimal("0.25"), evidence="gateway:one")
+            account.stage("run", "case-b", amount=Decimal("0.25"), evidence="\tgateway:one\u00a0")
+
+
+    def test_late_receipt_above_reservation_is_recorded_without_second_settlement(self):
+        account = self.account(previous="8")
+        claim(account, "run", ("case-a", "case-b"))
+        account.reserve("run", "case-a", PER_REQUEST)
+        account.mark_dispatched("run", "case-a")
+        account.stage("run", "case-a", amount=Decimal("0.001"), evidence="gateway:one")
+        account.complete_case("run", "case-a")
+
+        receipt = {"unit": "USD", "cost_usd": "2.25", "run_id": "run", "case_id": "case-a",
+                   "reference": "  invoice/late-revision "}
+        with self.assertRaisesRegex(BudgetError, "acima da reserva"):
+            account.reconcile(receipt)
+        reopened = Account(self.path, account.id, "fixture")
+        status = reopened.status()
+        self.assertEqual(status["accounted_usd"], "10.25")
+        self.assertEqual(status["available_usd"], "-0.25")
+        self.assertIn("acima do teto", status["frozen_reason"])
+        original, = status["reservations"]
+        self.assertEqual((original["observed"], original["receipt"]), ("0.001", "gateway:one"))
+        correction, = status["receipt_corrections"]
+        self.assertEqual((correction["observed"], correction["receipt"]), ("2.25", "invoice/late-revision"))
+        with self.assertRaisesRegex(BudgetError, "já conciliada"):
+            reopened.reconcile(receipt)
+        with self.assertRaisesRegex(BudgetError, "conta congelada"):
+            reopened.reserve("run", "case-b", PER_REQUEST)
+
+    def test_late_increase_within_case_reservation_can_break_global_cap(self):
+        account = self.account(previous="8")
+        claim(account, "run", ("case-a", "case-b", "case-c"))
+        for case in ("case-a", "case-b"):
+            account.reserve("run", case, PER_REQUEST)
+            if case == "case-a":
+                account.mark_dispatched("run", case)
+                account.stage("run", case, amount=Decimal("0.001"), evidence="gateway:one")
+                account.complete_case("run", case)
+        receipt = {"unit": "USD", "run_id": "run", "case_id": "case-a",
+                   "cost_usd": "0.25", "reference": "invoice/revision-1"}
+        account.reconcile(receipt)
+        self.assertEqual(account.status()["accounted_usd"], "9.6504736")
+        self.assertIsNone(account.status()["frozen_reason"])
+        account.mark_dispatched("run", "case-b")
+        with self.assertRaisesRegex(BudgetError, "já atribuído"):
+            account.reconcile(dict(receipt, case_id="case-b", reference=" invoice/revision-1 "))
+        with self.assertRaisesRegex(BudgetError, "acima do teto global"):
+            account.reconcile(dict(receipt, cost_usd="1.00", reference="invoice/revision-2"))
+        status = account.status()
+        self.assertEqual(status["accounted_usd"], "10.4004736")
+        self.assertEqual([row["observed"] for row in status["receipt_corrections"]], ["0.25", "1.00"])
+        self.assertIn("acima do teto", status["frozen_reason"])
+        with self.assertRaisesRegex(BudgetError, "conta congelada"):
+            account.reserve("run", "case-c", PER_REQUEST)
+
+    def test_v1_receipts_keep_attribution_and_normalize_on_upgrade(self):
+        account = self.account()
+        claim(account, "run", ("case-a", "case-b"))
+        for case in ("case-a", "case-b"):
+            account.reserve("run", case, PER_REQUEST)
+            account.mark_dispatched("run", case)
+        account.stage("run", "case-a", amount=Decimal("0.25"), evidence="gateway:one")
+        account.complete_case("run", "case-a")
+        with account.transaction() as db:
+            db.execute("DROP TABLE receipt_corrections")
+            db.execute("UPDATE reservations SET receipt = ' gateway: one ' WHERE case_id = 'case-a'")
+            db.execute("PRAGMA user_version = 1")
+
+        reopened = Account(self.path, account.id, "fixture")
+        self.assertEqual(reopened.status()["reservations"][0]["receipt"], "gateway:one")
+        with self.assertRaisesRegex(BudgetError, "já atribuído"):
+            reopened.stage("run", "case-b", amount=Decimal("0.25"), evidence="gateway:one ")
 
     def test_over_reservation_reconciliation_ledgers_cost_and_freezes_after_restart(self):
         account = self.account(previous="8")
@@ -404,6 +485,41 @@ class ExecutorTest(TestCase):
         self.assertIn("acima da reserva", status["frozen_reason"])
         self.assertEqual(status["accounted_usd"], "1.500519000000000000000000000001")
 
+
+
+    def test_documented_usd_with_missing_token_counter_still_freezes_and_preserves_evidence(self):
+        account, args = self.setup_run(previous="7.10")
+        with self.assertRaisesRegex(BudgetError, "acima da reserva"):
+            run_evaluation(args, fixture_command=self.command("charged-without-counter"))
+        interrupted = self.prefix(args, completed=1)
+        self.assertEqual(len(interrupted["dispatched_ids"]), 1)
+        status = account.status()
+        self.assertEqual(status["accounted_usd"], "9.35")
+        self.assertIn("acima da reserva", status["frozen_reason"])
+        row, = status["reservations"]
+        self.assertEqual(row["gateway_usage"], {"cost_usd": "2.25"})
+        observation, = c01.read_records(args.output / "verified_observations.jsonl")
+        usage, = observation["request_usage"]
+        self.assertIsNone(usage["output_tokens"])
+        self.assertEqual(usage["observed_api_usd"], 2.25)
+
+    def test_documented_credits_in_http_error_freeze_without_hiding_operational_error(self):
+        config = self.scratch / "credits-only.json"
+        settings = dict(c01.read(FIXTURE), usage_credits=CREDIT_CONVERSION,
+                        usage_cost_unit=None, usage_cost_reference=None)
+        config.write_text(encode(settings), encoding="utf-8")
+        account, args = self.setup_run(previous="7.10", config=config)
+        with self.assertRaisesRegex(BudgetError, "acima da reserva"):
+            run_evaluation(args, fixture_command=self.command("charged-http-error"))
+        self.prefix(args, completed=1)
+        status = account.status()
+        self.assertEqual(status["accounted_usd"], "9.35")
+        self.assertIn("acima da reserva", status["frozen_reason"])
+        row, = status["reservations"]
+        self.assertEqual(row["gateway_usage"], {"credits": "225", "converted_credits_usd": "2.25"})
+        observation, = c01.read_records(args.output / "verified_observations.jsonl")
+        self.assertEqual({choice["reason"] for choice in observation["choices"].values()}, {"transport"})
+        self.assertEqual(observation["request_usage"][0]["observed_api_usd"], 2.25)
 
     def test_last_dispatch_violation_cannot_publish_complete_evidence(self):
         account, args = self.setup_run()
