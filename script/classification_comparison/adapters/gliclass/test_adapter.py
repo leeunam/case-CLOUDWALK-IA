@@ -13,7 +13,10 @@ from unittest.mock import Mock, patch
 
 from adapter import ABSTENTION, FIELDS, ROOT, Context, Worker, choice_from_output, infer, observe
 from fake_runtime import load_fake
-from model import FILES, ContextOverflow, FullTokenizer, HERE, LABEL_SEPARATOR, PINS, load_pipeline, snapshot_manifest, verify_snapshot
+from model import (
+    FILES, HERE, LABEL_SEPARATOR, RUNTIME_LOCK, ContextOverflow, FullTokenizer,
+    load_pipeline, locked_versions, snapshot_manifest, verify_runtime, verify_snapshot,
+)
 
 
 ENV = {
@@ -41,6 +44,9 @@ def load_with_failure(policy, on_forward):
     def pipeline(text, labels, **options):
         if text == "Teste de preparação":
             raise ContextOverflow("tokenizer recusou antes do forward")
+        if text == "Teste de prazo na preparação":
+            time.sleep(1)
+            raise AssertionError("preparação sintética deve ser interrompida no prazo")
         priority = options["prompt"].startswith("Determine a prioridade")
         if text == "Teste parcial" and priority:
             on_forward()
@@ -177,7 +183,7 @@ class AdapterTest(unittest.TestCase):
         experimental = json.loads((HERE / "policy-dev-2048.json").read_text())
         for policy, expected in ((self.context.policy, 512), (experimental, 2048)):
             with self.subTest(limit=expected), patch.dict(os.environ), patch.dict(sys.modules, modules), \
-                    patch("model.verify_snapshot"), patch("model.metadata.version", side_effect=PINS.__getitem__):
+                    patch("model.verify_snapshot"), patch("model.metadata.version", side_effect=locked_versions().__getitem__):
                 _, info = load_pipeline(policy)
                 guarded_tokenizer = pipeline.call_args.args[1]
                 self.assertEqual(info["configured_context_tokens"], expected)
@@ -202,7 +208,7 @@ class AdapterTest(unittest.TestCase):
                 }
                 callback = Mock()
                 with patch.dict(os.environ), patch.dict(sys.modules, modules), patch("model.verify_snapshot"), \
-                        patch("model.metadata.version", side_effect=PINS.__getitem__):
+                        patch("model.metadata.version", side_effect=locked_versions().__getitem__):
                     load_pipeline(profile_context(profile).policy, callback)
                     self.assertEqual(os.environ["OMP_NUM_THREADS"], str(threads))
                 torch.set_num_threads.assert_called_once_with(threads)
@@ -212,6 +218,32 @@ class AdapterTest(unittest.TestCase):
                 callback.assert_not_called()
                 model.register_forward_pre_hook.call_args.args[0](model, ())
                 callback.assert_called_once_with()
+
+    def test_runtime_lock_matches_the_first_pilot_resolution(self):
+        archived = HERE / "evidence/dev-3-2048-1795456352366675284/runtime-freeze.txt"
+        lock = [line for line in RUNTIME_LOCK.read_text().splitlines() if not line.startswith("#")]
+        self.assertEqual([pin for pin in lock if not pin.startswith("setuptools==")], archived.read_text().splitlines())
+        self.assertEqual(locked_versions()["setuptools"], "65.5.0")
+        self.assertRegex(next(pin for pin in lock if pin.startswith("torch @ ")), r"#sha256=[a-f0-9]{64}$")
+        self.assertEqual(locked_versions()["torch"], "2.12.0+cpu")
+        self.assertEqual(locked_versions()["tokenizers"], "0.22.2")
+
+    def test_runtime_rejects_tokenizer_drift_before_loading_the_snapshot(self):
+        pinned = locked_versions()
+        with patch("model.metadata.version", side_effect=pinned.__getitem__):
+            self.assertEqual(verify_runtime(), pinned)
+        divergent = dict(pinned, tokenizers="0.23.0")
+        with patch.dict(os.environ), patch("model.metadata.version", side_effect=divergent.__getitem__), \
+                patch("model.verify_snapshot") as snapshot:
+            with self.assertRaisesRegex(ValueError, r"tokenizers==0\.23\.0, esperado 0\.22\.2"):
+                load_pipeline(self.context.policy)
+            snapshot.assert_not_called()
+
+    def test_runtime_rejects_incompatible_platform(self):
+        with patch("model.platform.machine", return_value="aarch64"), patch("model.metadata.version") as version:
+            with self.assertRaisesRegex(ValueError, "CPython 3.11 em Linux x86_64"):
+                verify_runtime()
+            version.assert_not_called()
 
     def test_snapshot_rejects_substitution_with_unchanged_size(self):
         public = snapshot_manifest()
@@ -426,17 +458,12 @@ class AdapterTest(unittest.TestCase):
                     self.assertEqual({choice["status"] for choice in observations["ctl-duplo"]["choices"].values()},
                                      {"predicted"})
 
-    def test_grouped_timeout_and_preprocessing_do_not_invent_forwards(self):
+    def test_grouped_forward_timeout_preserves_usage(self):
         context = profile_context("C")
         context = replace(context, policy=dict(context.policy, case_timeout_ms=250, response_reserve_ms=30))
         worker = self.worker(load_with_failure, context)
         worker.receive(time.monotonic() + 2)
         identity = {"mode": "real"}  # Exercita a telemetria real com o pipeline sintético.
-        before_forward = observe(dict(self.item, text="Teste de preparação"), worker, context,
-                                 identity, "run", "fake", None)
-        self.assertEqual((before_forward["requests"], before_forward["questions"]), (0, 0))
-        self.assertEqual(before_forward["temperature_state"], "unknown")
-        self.assertEqual(before_forward["request_usage"], [])
         timed_out = observe(dict(self.item, text="Teste de prazo"), worker, context, identity, "run", "fake", None)
         self.assertEqual((timed_out["requests"], timed_out["questions"]), (1, 2))
         self.assertEqual(len(timed_out["request_usage"]), 1)
@@ -449,6 +476,51 @@ class AdapterTest(unittest.TestCase):
         after = observe(self.item, worker, context, identity, "run", "fake", None)
         self.assertEqual((after["requests"], after["questions"]), (0, 0))
         self.assertEqual(after["temperature_state"], "unknown")
+
+    def test_c02_counts_ready_worker_errors_and_timeouts_before_forward(self):
+        context = profile_context("C")
+        context = replace(context, policy=dict(context.policy, case_timeout_ms=250, response_reserve_ms=30))
+        worker = self.worker(load_with_failure, context)
+        self.assertIn("warmup_ms", worker.receive(time.monotonic() + 2))
+        scenarios = (
+            ("preparation-error", "Teste de preparação", "warm", "adapter_error"),
+            ("preparation-timeout", "Teste de prazo na preparação", "warm", "timeout"),
+            ("after-death", "Caso depois do worker encerrado", "unknown", "adapter_error"),
+        )
+        inputs, observations = [], []
+        for item_id, message, temperature, reason in scenarios:
+            with self.subTest(case=item_id):
+                item = dict(self.item, id=item_id, text=message)
+                result = observe(item, worker, context, {"mode": "real"}, "run", "fake", None)
+                inputs.append(item)
+                observations.append(result)
+                self.assertEqual(result["temperature_state"], temperature)
+                self.assertEqual((result["requests"], result["questions"], result["request_usage"]), (0, 0, []))
+                self.assertEqual(result["attempt"], 1)
+                self.assertGreater(result["elapsed_ms"], 0)
+                self.assertIsNone(result["inference_ms"])
+                self.assertEqual({choice["reason"] for choice in result["choices"].values()}, {reason})
+                self.assert_review_without_application(item, result["choices"])
+                if reason == "timeout":
+                    worker.process.join(timeout=1)
+                    self.assertFalse(worker.process.is_alive())
+
+        with patch.object(sys, "path", [str(HERE.parents[1]), *sys.path]):
+            from common import decide
+            from metrics import summarize
+        cases = {item["id"]: dict(item, expected={"category": "pix", "priority": "basic"}, stratum="rotina")
+                 for item in inputs}
+        decisions = [decide(item, result, context.catalog, "run")
+                     for item, result in zip(inputs, observations, strict=True)]
+        elapsed = [obs["elapsed_ms"] for obs in observations[:2]]
+        for completed, expected_state in ((list(cases)[:2], "measured"), (list(cases), "partial")):
+            summary = summarize(cases, inputs, observations, decisions, context.catalog, completed, fixture=False)
+            p50 = summary["latency_p50_ms"]
+            p95 = summary["gates"]["warm_total_latency_p95_ms_max"]
+            self.assertEqual((p50["state"], p50["denominator"], p50["value"]),
+                             (expected_state, 2, min(elapsed)))
+            self.assertEqual((p95["state"], p95["denominator"], p95["value"]),
+                             (expected_state, 2, max(elapsed)))
 
     def test_grouped_worker_exit_retains_attempt_and_forward_audit(self):
         context = profile_context("C")

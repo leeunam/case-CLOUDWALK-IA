@@ -1,10 +1,13 @@
 """Runtime CPU para a revisão pública fixada no C04."""
+import argparse
 import hashlib
 from importlib import metadata
 import json
 import os
 from pathlib import Path
+import platform
 import sys
+from urllib.parse import unquote, urlsplit
 
 HERE = Path(__file__).resolve().parent
 MODEL = "knowledgator/gliclass-multilang-mini"
@@ -15,7 +18,7 @@ MANIFEST = HERE / "snapshot-manifest.json"
 FILES = ("model.safetensors", "config.json", "tokenizer.json", "tokenizer_config.json",
          "special_tokens_map.json", "spm.model", "added_tokens.json")
 LABEL_SEPARATOR = "."
-PINS = {"gliclass": "0.1.22", "torch": "2.12.0+cpu", "transformers": "5.8.1"}
+RUNTIME_LOCK = HERE / "requirements.txt"
 
 
 class ContextOverflow(ValueError):
@@ -76,15 +79,49 @@ def manifest_sha256():
     return hashlib.sha256(MANIFEST.read_bytes()).hexdigest()
 
 
+def verify_platform():
+    if (platform.system() != "Linux" or platform.machine() != "x86_64" or
+            platform.python_implementation() != "CPython" or sys.version_info[:2] != (3, 11)):
+        raise ValueError("runtime C04 exige CPython 3.11 em Linux x86_64")
+
+
+def locked_versions():
+    versions = {}
+    for pin in RUNTIME_LOCK.read_text(encoding="utf-8").splitlines():
+        if not pin or pin.startswith("#"):
+            continue
+        if " @ " in pin:
+            name, url = pin.split(" @ ")
+            # A referência direta do PyTorch inclui a versão +cpu no nome do wheel.
+            wheel = Path(unquote(urlsplit(url).path)).name
+            version = wheel.split("-")[1]
+        else:
+            name, version = pin.split("==")
+        versions[name] = version
+    return versions
+
+
+def verify_runtime():
+    verify_platform()
+    installed = {}
+    for name, expected in locked_versions().items():
+        try:
+            actual = metadata.version(name)
+        except metadata.PackageNotFoundError:
+            raise ValueError(f"runtime incompleto: {name}=={expected} ausente") from None
+        if actual != expected:
+            raise ValueError(f"runtime divergente: {name}=={actual}, esperado {expected}")
+        installed[name] = actual
+    return installed
+
+
 def load_pipeline(policy, on_forward=None):
     os.environ.update(HF_HOME=str(HERE / ".cache" / "hf"), HF_HUB_OFFLINE="1",
                       TRANSFORMERS_OFFLINE="1", HF_HUB_DISABLE_IMPLICIT_TOKEN="1",
                       TOKENIZERS_PARALLELISM="false", CUDA_VISIBLE_DEVICES="",
                       OMP_NUM_THREADS=str(policy["threads"]), MKL_NUM_THREADS=str(policy["threads"]),
                       OPENBLAS_NUM_THREADS=str(policy["threads"]))
-    installed = {name: metadata.version(name) for name in PINS}
-    if installed != PINS:
-        raise ValueError(f"runtime diverge das versões fixadas: {installed}")
+    installed = verify_runtime()
     digest = verify_snapshot()
     import torch
     from gliclass import GLiClassModel, ZeroShotClassificationPipeline
@@ -120,5 +157,12 @@ def load_pipeline(policy, on_forward=None):
 
 
 if __name__ == "__main__":
-    print(json.dumps({"model": MODEL, "revision": REVISION, "weights_sha256": verify_snapshot(),
-                      "snapshot_manifest_sha256": manifest_sha256()}))
+    parser = argparse.ArgumentParser(description="Verifica o runtime local do GLiClass.")
+    parser.add_argument("--check-runtime", action="store_true", help="Verifica apenas versões instaladas.")
+    args = parser.parse_args()
+    runtime = verify_runtime()
+    result = {"runtime": runtime}
+    if not args.check_runtime:
+        result.update(model=MODEL, revision=REVISION, weights_sha256=verify_snapshot(),
+                      snapshot_manifest_sha256=manifest_sha256())
+    print(json.dumps(result))

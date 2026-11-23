@@ -284,6 +284,7 @@ def observe(item, worker, context, identity, run_id, model, revision):
     requests = questions = 0
     started_groups = 0
     durations = []
+    dispatched = False
     unavailable = None
     for fields in context.groups(item["missing"]):
         if unavailable is None:
@@ -298,6 +299,7 @@ def observe(item, worker, context, identity, run_id, model, revision):
         forwarded = False
         try:
             worker.requests.send(context.request(item, fields))
+            dispatched = True
             event, payload = worker.receive(deadline)
             while event == "forward":
                 requests += 1
@@ -324,7 +326,7 @@ def observe(item, worker, context, identity, run_id, model, revision):
     inference_ms = sum(durations) if real and started_groups and len(durations) == started_groups else None
     return dict(contract_version=VERSION, id=item["id"], run_id=run_id, attempt=1, origin="candidate",
                 identity=identity, returned_model=model, weights_revision=revision, choices=choices,
-                temperature_state="warm" if real and requests else "unknown",
+                temperature_state="warm" if real and dispatched else "unknown",
                 elapsed_ms=(time.monotonic() - started) * 1000 if real else None,
                 load_ms=None, inference_ms=inference_ms, requests=requests, questions=questions,
                 request_usage=[dict(LOCAL_USAGE, observed_api_usd=0 if real else None)
