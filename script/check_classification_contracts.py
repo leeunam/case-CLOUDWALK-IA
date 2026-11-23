@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PLAN = ROOT / "docs/planejamento/classificacao-comparativa"
 CONTRACTS = PLAN / "contratos"
 FIXTURES = CONTRACTS / "fixtures"
+CONTROL_POLICY = CONTRACTS / "politica-controles.json"
 FIELDS = ("category", "priority")
 KINDS = {"inputs": "input", "observations": "observation", "decisions": "decision"}
 ABSTENTION = "informacao_insuficiente"
@@ -127,13 +128,18 @@ def verify_choice(choice, codes, case_id):
 
 def verify_observation(obs, missing, report, catalog):
     case_id = obs["id"]
-    require(obs["identity"] == report["identity"] and obs["run_id"] == report["run_id"],
+    injected = case_id in report["injected_controls"]["ids"]
+    require(obs["origin"] == ("injected_control" if injected else "candidate"), "observation_origin", case_id)
+    identity = report["injected_controls"]["identity"] if injected else report["identity"]
+    require(obs["identity"] == identity and obs["run_id"] == report["run_id"],
             "observation_identity", case_id)
     choices = obs["choices"]
     require(set(choices) == set(missing), "requested_fields", case_id)
     for field, choice in choices.items():
         verify_choice(choice, catalog[field], case_id)
-    identity = obs["identity"]
+    if injected:
+        # Structure has already ruled out inference, scores, usage and model identity.
+        return
     pins = (("expected_returned_model", "returned_model"), ("expected_weights_revision", "weights_revision"))
     expected = [(identity[pin], obs[actual]) for pin, actual in pins if identity.get(pin) is not None]
     mismatch = any(actual is not None and actual != pin for pin, actual in expected)
@@ -210,6 +216,7 @@ def verify_metric(metric, operation, name):
 
 
 def verify_usage(report, observations):
+    observations = [obs for obs in observations if obs["origin"] == "candidate"]
     requests = [row for obs in observations for row in obs["request_usage"]]
     counts = {"attempts": len(observations), "requests": len(requests),
               "questions": sum(obs["questions"] for obs in observations)}
@@ -354,15 +361,47 @@ def verify_sources(report, protocol, split):
             "policy_version", report["run_id"])
 
 
+def verify_injected_controls(report, indexed):
+    inventory = report["injected_controls"]
+    policy = read(CONTROL_POLICY)
+    ids = [i for i in report["control_ids"] if i in policy["controls"]]
+    require(inventory["ids"] == ids and inventory["count"] == len(ids), "injected_inventory", report["run_id"])
+    observed_ids = [i for i, obs in indexed["observations"].items() if obs["origin"] == "injected_control"]
+    require(observed_ids == ids, "observation_origin", report["run_id"])
+    if not ids:
+        return
+    source = inventory["policy"]
+    require(source["path"] == str(CONTROL_POLICY.relative_to(ROOT)), "control_policy_path", source["path"])
+    source_path(source)
+    require(inventory["identity"] == policy["identity"] and source["version"] == policy["identity"]["policy_version"],
+            "control_policy_identity", report["run_id"])
+    for i in ids:
+        spec = policy["controls"][i]
+        item = indexed["inputs"][i]
+        obs = indexed["observations"][i]
+        require(item["text"] == spec["text"] and item["received"] == spec["received"], "control_policy_input", i)
+        # A null or absent score both describe absence of a score in the wire format.
+        choices = {f: {k: v for k, v in ch.items() if k != "score"} for f, ch in obs["choices"].items()}
+        require(choices == spec["choices"], "control_policy_choices", i)
+
+
+def has_required_controls(report, decisions):
+    reasons = {decisions[i]["reason"] for i in report["control_ids"]}
+    mixed = any(decisions[i]["outcome"] == "review" and
+                any(f["status"] == "predicted" for f in decisions[i]["fields"].values())
+                for i in report["injected_controls"]["ids"])
+    return {"channel_complete", "invalid_input"} <= reasons and mixed
+
+
 def verify_run(bundle, validation, protocol, split, catalog, dataset):
     report = bundle["report"]
     structure(validation, "report", report)
+    require(report["contract_version"] == protocol["contract_version"], "protocol_contract_version", report["run_id"])
     verify_sources(report, protocol, split)
     inventory = report["artifacts"]
     require(len({a["path"] for a in inventory.values()}) == len(inventory), "duplicate_artifact", report["run_id"])
     indexed = {}
-    for entry in inventory.values():
-        source_path(entry)
+    paths = {kind: source_path(entry) for kind, entry in inventory.items()}
     for kind, schema_name in KINDS.items():
         records = bundle[kind]
         for row in records:
@@ -386,16 +425,13 @@ def verify_run(bundle, validation, protocol, split, catalog, dataset):
         require(list(indexed[kind]) == order, "stream_ids", kind)
     observations = indexed["observations"]
     require(list(observations) == [i for i in order if i in observations], "stream_ids", "observations")
+    verify_injected_controls(report, indexed)
     for i in order:
         item = indexed["inputs"][i]
         if i in completed:
             require(all(item[k] == dataset[i][k] for k in ("received", "missing", "text")) and
                     item["catalog"] == catalog, "dataset_projection", i)
         verify_case(item, observations.get(i), indexed["decisions"][i], report, catalog)
-    reasons = {indexed["decisions"][i]["reason"] for i in controls}
-    partial_control = any(indexed["decisions"][i]["outcome"] == "review" and
-                          any(f["status"] == "predicted" for f in indexed["decisions"][i]["fields"].values())
-                          for i in controls)
     warm_samples = sum(observations[i]["temperature_state"] == "warm" and observations[i]["elapsed_ms"] is not None
                        for i in completed)
     if split_name == "final_test":
@@ -409,21 +445,28 @@ def verify_run(bundle, validation, protocol, split, catalog, dataset):
             if metric["state"] in ("measured", "partial"):
                 require(metric["denominator"] <= warm_samples, "latency_denominator", report["run_id"])
     full = (report["identity"]["mode"] == "real" and split_name == "final_test" and completed == planned
-            and {"channel_complete", "invalid_input"} <= reasons and partial_control and warm_samples == len(completed)
+            and has_required_controls(report, indexed["decisions"]) and warm_samples == len(completed)
             and any(c["status"] != "error" for i in completed for c in observations[i]["choices"].values()))
     verify_usage(report, list(observations.values()))
     verify_metrics(report, protocol, full, dataset, indexed["decisions"])
+    for kind, path in paths.items():
+        # Compare JSON types too: Python considers False == 0 and True == 1.
+        require(json.dumps(bundle[kind], sort_keys=True) == json.dumps(read_records(path), sort_keys=True),
+                "artifact_records", kind)
 
 
-def load_bundle(validation):
-    report = read(FIXTURES / "report.json")
+def read_records(path):
+    with path.open(encoding="utf-8", newline="\n") as lines:
+        return [json.loads(line, object_pairs_hook=unique_properties, parse_constant=reject_constant,
+                           parse_float=finite_float) for line in lines]
+
+
+def load_bundle(validation, report_path=FIXTURES / "report.json"):
+    report = read(report_path)
     structure(validation, "report", report)
     bundle = {"report": report}
     for kind, entry in report["artifacts"].items():
-        path = source_path(entry)
-        with path.open(encoding="utf-8", newline="\n") as lines:
-            bundle[kind] = [json.loads(line, object_pairs_hook=unique_properties, parse_constant=reject_constant,
-                                       parse_float=finite_float) for line in lines]
+        bundle[kind] = read_records(source_path(entry))
     return bundle
 
 

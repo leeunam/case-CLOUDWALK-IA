@@ -204,5 +204,192 @@
       }
     ],
     "expected_error": "applied_accuracy_mismatch"
+  },
+  {
+    "id": "injecao-com-requests",
+    "changes": [
+      {"path": ["observations", 8, "requests"], "value": 1}
+    ],
+    "expected_error": "schema/observation/requests/const"
+  },
+  {
+    "id": "injecao-com-questions",
+    "changes": [
+      {"path": ["observations", 8, "questions"], "value": 2}
+    ],
+    "expected_error": "schema/observation/questions/const"
+  },
+  {
+    "id": "injecao-com-request_usage",
+    "changes": [
+      {"path": ["observations", 8, "request_usage"], "value": [{"input_tokens": 1, "output_tokens": 3, "estimated_api_usd": null, "observed_api_usd": 0.01, "tariff": null}]}
+    ],
+    "expected_error": "schema/observation/request_usage/maxItems"
+  },
+  {
+    "id": "injecao-com-returned_model",
+    "changes": [
+      {"path": ["observations", 8, "returned_model"], "value": "modelo-sintetico-v1"}
+    ],
+    "expected_error": "schema/observation/returned_model/type"
+  },
+  {
+    "id": "injecao-com-weights_revision",
+    "changes": [
+      {"path": ["observations", 8, "weights_revision"], "value": "abc"}
+    ],
+    "expected_error": "schema/observation/weights_revision/type"
+  },
+  {
+    "id": "injecao-com-load_ms",
+    "changes": [
+      {"path": ["observations", 8, "load_ms"], "value": 4}
+    ],
+    "expected_error": "schema/observation/load_ms/type"
+  },
+  {
+    "id": "injecao-com-inference_ms",
+    "changes": [
+      {"path": ["observations", 8, "inference_ms"], "value": 8}
+    ],
+    "expected_error": "schema/observation/inference_ms/type"
+  },
+  {
+    "id": "injecao-com-elapsed_ms",
+    "changes": [
+      {"path": ["observations", 8, "elapsed_ms"], "value": 10}
+    ],
+    "expected_error": "schema/observation/elapsed_ms/type"
+  },
+  {
+    "id": "injecao-com-temperature_state",
+    "changes": [
+      {"path": ["observations", 8, "temperature_state"], "value": "warm"}
+    ],
+    "expected_error": "schema/observation/temperature_state/const"
+  },
+  {
+    "id": "injecao-com-score",
+    "changes": [
+      {"path": ["observations", 8, "choices", "category", "score"], "value": {"kind": "provider_probability", "value": 0.95}}
+    ],
+    "expected_error": "schema/observation/choices/category/score/type"
+  },
+  {
+    "id": "injecao-sem-policy",
+    "changes": [
+      {"path": ["report", "injected_controls"], "value": {"count": 1, "ids": ["ctl-injetado-aplicacao-parcial"], "identity": {"mode": "fixture", "name": "controle-aplicacao-parcial", "policy_version": "1.0.0"}}}
+    ],
+    "expected_error": "schema/report/injected_controls/required"
+  },
+  {
+    "id": "injecao-sem-identity",
+    "changes": [
+      {"path": ["report", "injected_controls"], "value": {"count": 1, "ids": ["ctl-injetado-aplicacao-parcial"], "policy": {"path": "docs/planejamento/classificacao-comparativa/contratos/politica-controles.json", "version": "1.0.0", "sha256": "2611786ddde1eb2b064b02f7dda7bb7a0aae06cc8f127a9fc7e8fec14e937fb7"}}}
+    ],
+    "expected_error": "schema/report/injected_controls/required"
+  },
+  {
+    "id": "injecao-com-hash-incorreto",
+    "changes": [
+      {"path": ["report", "injected_controls", "policy", "sha256"], "value": "0000000000000000000000000000000000000000000000000000000000000000"}
+    ],
+    "expected_error": "artifact_hash"
+  },
+  {
+    "id": "injecao-com-politica-do-candidato",
+    "changes": [
+      {"path": ["report", "injected_controls", "policy"], "value": {"path": "docs/planejamento/classificacao-comparativa/contratos/fixtures/politica-fixture.txt", "sha256": "ffb343939bfd6c6f934960c20b1002e1ceed54f42847f44eb52352bf43c6e053", "version": "1.0.0"}}
+    ],
+    "expected_error": "control_policy_path"
+  },
+  {
+    "id": "injecao-com-versao-incorreta",
+    "changes": [
+      {"path": ["report", "injected_controls", "policy", "version"], "value": "9.0.0"}
+    ],
+    "expected_error": "control_policy_identity"
+  },
+  {
+    "id": "injecao-com-identidade-divergente",
+    "changes": [
+      {"path": ["observations", 8, "identity", "name"], "value": "outra-fixture"}
+    ],
+    "expected_error": "observation_identity"
+  },
+  {
+    "id": "injecao-com-escolha-divergente",
+    "changes": [
+      {"path": ["observations", 8, "choices", "category", "raw"], "value": "terminal"}
+    ],
+    "expected_error": "control_policy_choices"
+  },
+  {
+    "id": "injecao-com-texto-divergente",
+    "changes": [
+      {"path": ["inputs", 12, "text"], "value": "Outra entrada"}
+    ],
+    "expected_error": "control_policy_input"
+  },
+  {
+    "id": "injecao-contada-duas-vezes",
+    "changes": [
+      {"path": ["report", "injected_controls", "count"], "value": 2}
+    ],
+    "expected_error": "injected_inventory"
+  },
+  {
+    "id": "injecao-no-dataset",
+    "changes": [
+      {"path": ["report", "control_ids", 12], "value": "jev-004"},
+      {"path": ["report", "injected_controls", "ids", 0], "value": "jev-004"},
+      {"path": ["inputs", 12, "id"], "value": "jev-004"},
+      {"path": ["observations", 8, "id"], "value": "jev-004"},
+      {"path": ["decisions", 12, "id"], "value": "jev-004"}
+    ],
+    "expected_error": "dataset_as_control"
+  },
+  {
+    "id": "injecao-marcada-como-candidato",
+    "changes": [
+      {"path": ["observations", 8, "origin"], "value": "candidate"},
+      {"path": ["observations", 8, "identity"], "value": {"mode": "fixture", "provider": "fixture", "requested_model": "modelo-sintetico-v1", "adapter_version": "1.0.0", "policy_version": "1.0.0", "expected_returned_model": "modelo-sintetico-v1"}}
+    ],
+    "expected_error": "observation_origin"
+  },
+  {
+    "id": "candidato-reetiquetado-como-injecao",
+    "changes": [
+      {"path": ["report", "injected_controls", "ids"], "value": ["ctl-simples", "ctl-injetado-aplicacao-parcial"]},
+      {"path": ["report", "injected_controls", "count"], "value": 2},
+      {"path": ["observations", 0, "origin"], "value": "injected_control"},
+      {"path": ["observations", 0, "identity"], "value": {"mode": "fixture", "name": "controle-aplicacao-parcial", "policy_version": "1.0.0"}},
+      {"path": ["observations", 0, "requests"], "value": 0},
+      {"path": ["observations", 0, "questions"], "value": 0},
+      {"path": ["observations", 0, "request_usage"], "value": []},
+      {"path": ["observations", 0, "returned_model"], "value": null}
+    ],
+    "expected_error": "injected_inventory"
+  },
+  {
+    "id": "uso-inclui-tentativa-injetada",
+    "changes": [
+      {"path": ["report", "usage", "attempts"], "value": {"state": "measured", "value": 9, "samples": 9, "expected_samples": 9}}
+    ],
+    "expected_error": "usage_sample"
+  },
+  {
+    "id": "uso-inclui-chamada-injetada",
+    "changes": [
+      {"path": ["report", "usage", "requests", "value"], "value": 10}
+    ],
+    "expected_error": "usage_state"
+  },
+  {
+    "id": "artefato-com-origem-diferente",
+    "changes": [
+      {"path": ["observations", 0, "elapsed_ms"], "value": 4}
+    ],
+    "expected_error": "artifact_records"
   }
 ]

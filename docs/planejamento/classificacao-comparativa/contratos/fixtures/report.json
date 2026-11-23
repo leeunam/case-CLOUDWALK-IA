@@ -1,5 +1,5 @@
 {
-  "contract_version": "1.0.0",
+  "contract_version": "1.1.0",
   "run_id": "fixture-c01",
   "score_calibration": "not_evaluated",
   "identity": {
@@ -11,7 +11,7 @@
     "expected_returned_model": "modelo-sintetico-v1"
   },
   "split": "control",
-  "git_revision": "2c749bc245bf84735f8f98d3b55a004d869721ee",
+  "git_revision": "e5404a5038a8bc28007e0bcb8d7fcba0c5b58997",
   "environment": {
     "hardware": "fixture estática",
     "runtime": "JSON estático",
@@ -40,7 +40,7 @@
     },
     "protocol": {
       "path": "docs/planejamento/classificacao-comparativa/protocolo-comparacao.json",
-      "sha256": "cfdfce669e8c625e65a00b7b4f09e20412f5ef71e45d595c2ec76c435f35a68d",
+      "sha256": "e1085c328f9f3aee49fff17ee881734a56f3f428b215761c706cff0405f17f1b",
       "version": "1.0.0"
     },
     "split": {
@@ -62,15 +62,15 @@
   "artifacts": {
     "inputs": {
       "path": "docs/planejamento/classificacao-comparativa/contratos/fixtures/inputs.jsonl",
-      "sha256": "40e696fc144a4657c1bb795259050d0102abdd14969424091f05e71c093cb779"
+      "sha256": "78773100a5c1b20a8b94d66a832372f20e18be3676f16af083d14f8cf66a7744"
     },
     "observations": {
       "path": "docs/planejamento/classificacao-comparativa/contratos/fixtures/observations.jsonl",
-      "sha256": "3e86f181725c5aa8769edd9e86f6fd1f6855d3f74d497dd77da9841541ff0985"
+      "sha256": "889f4b743f790e358077cb882f13dc22c69b7566ddb2b5d70c6b75151772744a"
     },
     "decisions": {
       "path": "docs/planejamento/classificacao-comparativa/contratos/fixtures/decisions.jsonl",
-      "sha256": "5cf5877768dbfd505279af246c107d840682d619689a54bcc2a6c16f4fd693a2"
+      "sha256": "139b0f849e0c2247f6aaf764ee54f05b96678e8030081ccfb35e3404fa1e1cfa"
     }
   },
   "planned_ids": [],
@@ -87,8 +87,25 @@
     "ctl-versao",
     "ctl-catalogo",
     "ctl-tipo",
-    "ctl-politica"
+    "ctl-politica",
+    "ctl-injetado-aplicacao-parcial"
   ],
+  "injected_controls": {
+    "count": 1,
+    "ids": [
+      "ctl-injetado-aplicacao-parcial"
+    ],
+    "identity": {
+      "mode": "fixture",
+      "name": "controle-aplicacao-parcial",
+      "policy_version": "1.0.0"
+    },
+    "policy": {
+      "path": "docs/planejamento/classificacao-comparativa/contratos/politica-controles.json",
+      "version": "1.0.0",
+      "sha256": "2611786ddde1eb2b064b02f7dda7bb7a0aae06cc8f127a9fc7e8fec14e937fb7"
+    }
+  },
   "gates": {
     "channel_field_preservation_ratio": {"state": "unmeasured", "numerator": null, "denominator": null, "value": null},
     "complete_or_invalid_controls_model_calls": {"state": "unmeasured", "numerator": null, "denominator": null, "value": null},
