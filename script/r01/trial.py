@@ -9,10 +9,12 @@ import sys
 import tempfile
 import time
 import uuid
+from collections import Counter
 from contextlib import ExitStack
+from importlib.metadata import version
 from pathlib import Path
 
-from confluent_kafka import libversion, version
+from confluent_kafka import libversion
 from http_client import REQUESTS
 from observe import GROUPS, Blocked, Database, Kafka, until, verify
 from scenarios import Trial, audit, json_bytes, types
@@ -65,6 +67,19 @@ def drained(t):
     return offsets if all(x["backlog"] == 0 for x in offsets) else None
 
 
+def wait_recovery(label, sample, deadline, check_observers):
+    while True:
+        result = sample()
+        now = time.monotonic()
+        if result and now <= deadline:
+            return result
+        if now >= deadline:
+            # Uma consulta indisponível impede atribuir a demora ao consumidor.
+            check_observers()
+            raise AssertionError(f"Prazo de {DRAIN_SECONDS}s excedido: {label}")
+        time.sleep(min(0.2, deadline - now))
+
+
 def transfer(t, role, directory, stack):
     topic = TOPIC[role]
     group = GROUPS[topic]
@@ -82,10 +97,19 @@ def transfer(t, role, directory, stack):
     original = until("efeito aceito por A", a.events, timeout=30)[0]
     start = time.monotonic()
 
-    def wait(label, condition):
-        return until(label, condition, timeout=max(0, DRAIN_SECONDS - (time.monotonic() - start)))
-
     p, n = original["partition"], original["offset"]
+
+    def check_observers():
+        offset = t.kafka.offsets(group, topic, p)
+        case = t.db.case(case_id)
+        if t.http.call("/api/v1/health", expected=(200, 503)).get("status") != "ok":
+            raise Blocked("Rails indisponível ao verificar o prazo")
+        emit("prazo_recuperacao", role=role, deadline=DRAIN_SECONDS, offset=offset,
+             case_id=case_id, status=case["status"])
+
+    def wait(label, condition):
+        return wait_recovery(label, condition, start + DRAIN_SECONDS, check_observers)
+
     before = t.kafka.offsets(group, topic, p)
     verify((before["committed_next_offset"] in (None, n)) and before["backlog"] >= 1, "offset inicial inesperado")
     # A escreveu o efeito e parou antes de o processo poder confirmar.
@@ -112,6 +136,7 @@ def transfer(t, role, directory, stack):
         return row if row["status"] == "resolved" else None
     row = wait("resolução", resolved)
     offsets = wait("lag zero nos dois grupos", lambda: drained(t))
+    elapsed = time.monotonic() - start
     later = a.events()[-1]
     marker = f"particao={p} offset={later['offset']} proximo={later['offset'] + 1}"
     verify(any("primeiro progresso" in line and marker in line for line in a.log.read_text().splitlines())
@@ -125,35 +150,77 @@ def transfer(t, role, directory, stack):
     verify(len(receipts) == 1 and receipts[0]["disposition"] == "applied" and
            receipts[0]["sha256"] == hashlib.sha256(replies[0].raw).hexdigest(),
            "recibo persistido difere do retorno confirmado")
-    verify(time.monotonic() - start <= DRAIN_SECONDS, "drenagem fora da janela")
     emit("recuperado", role=role, member=new_id, progress=later, offsets=offsets, case=row, agent_receipts=receipts,
-         elapsed=time.monotonic()-start, deadline=DRAIN_SECONDS)
+         elapsed=elapsed, deadline=DRAIN_SECONDS)
+
+
+def canonical_results(t, row, expected):
+    case_id = row["id"]
+    requests = [entry["event_id"] for entry in row["outbox"]]
+    verify(Counter(requests) == Counter(expected.keys()), f"outbox divergente no caso {case_id}")
+    rounds = {}
+    for record in t.kafka.records("agent.events", key=case_id):
+        event = record.data
+        request_id = event["payload"]["request_event_id"]
+        verify(event["case_id"] == case_id and request_id in expected, f"retorno inesperado: {event['event_id']}")
+        identity = (event["event_id"], hashlib.sha256(record.raw).hexdigest())
+        verify(rounds.setdefault(request_id, identity) == identity, f"reentrega divergente: {request_id}")
+    verify(rounds.keys() == expected.keys(), f"retorno ausente no caso {case_id}")
+    verify(len({event_id for event_id, _ in rounds.values()}) == len(expected), "ID de resultado reutilizado")
+
+    ai = [m["event_id"] for m in row["messages"] if m["type"] == "ai"]
+    discarded = [a["event_id"] for a in audit(row, "agent.result.discarded")]
+    evidence = []
+    for disposition, observed in (("applied", ai), ("discarded", discarded)):
+        ids = [rounds[req][0] for req in expected if expected[req] == disposition]
+        verify(Counter(observed) == Counter(ids), f"{disposition} divergente no caso {case_id}: {observed}")
+    applied_audit = [a["event_id"] for a in audit(row, "agent.reply.proposed")]
+    verify(Counter(applied_audit) == Counter(ai), f"auditoria da resposta aplicada divergente: {case_id}")
+    for request_id, (event_id, digest) in rounds.items():
+        receipts = t.db.receipt(event_id)
+        verify(len(receipts) == 1 and receipts[0]["event_id"] == event_id and
+               receipts[0]["disposition"] == expected[request_id] and receipts[0]["sha256"] == digest,
+               f"recibo divergente para solicitação {request_id}, resultado {event_id}")
+        evidence.append({"request_event_id": request_id, "receipt": receipts[0]})
+    return evidence
 
 
 def canonical(t, directory, stack):
     channel = t.db.channel("aurora")
     cases = [t.send(channel, json_bytes(t.input()))["case_id"] for _ in range(2)]
     # A ponte publica normalmente. Os dois grupos estão ausentes até a expiração real.
+    expired = {}
     supervisor, _ = t.staff("supervisor")
     for case_id, action in zip(cases, ["retry_agent", "force_handoff"]):
         row = until("timeout do produto", lambda: t.db.case(case_id),
                     lambda x: x["integration_status"] == "failed" and bool(audit(x, "agent.result.expired")), timeout=90)
+        verify(len(row["outbox"]) == 1, f"rodada inicial ambígua: {case_id}")
+        expired[case_id] = row["outbox"][0]["event_id"]
+        verify([a["event_id"] for a in audit(row, "agent.result.expired")] == [expired[case_id]],
+               f"expiração de outra solicitação: {case_id}")
         command = {"type": action, "expected_version": row["version"], "reason": "Recuperação R01"}
         if action == "force_handoff":
             command["summary"] = "Cliente aguarda retorno"
         supervisor.call(f"/api/v1/cases/{case_id}/actions", payload=command,
                         headers=supervisor.write_headers(str(uuid.uuid4())))
     human = until("responsável humano", lambda: t.db.case(cases[1]), lambda x: x["status"] == "human_active")
+    retry_id, handoff_id = cases
+    published = until("publicação da nova rodada", lambda: t.db.case(retry_id),
+                      lambda x: len(x["outbox"]) == 2 and all(entry["published"] for entry in x["outbox"]))
+    fresh = [entry["event_id"] for entry in published["outbox"] if entry["event_id"] != expired[retry_id]]
+    verify(len(fresh) == 1, f"retry sem nova solicitação distinta: {retry_id}")
     for role in TOPIC:
         spawn(stack, directory, role, "canonical")
-    retried = until("nova rodada aplicada", lambda: t.db.case(cases[0]), lambda x: types(x) == ["customer", "ai"])
+    # Primeiro escoa requests, depois events. Os efeitos precedem os commits dos dois grupos.
     offsets = until("drenagem após ação canônica", lambda: drained(t))
-    assigned = t.db.case(cases[1])
-    verify(len(retried["outbox"]) == 2 and len(audit(retried, "agent.result.discarded")) == 1 and
-           len(audit(assigned, "agent.result.discarded")) == 1 and
+    retried, assigned = t.db.case(retry_id), t.db.case(handoff_id)
+    verify(types(retried) == ["customer", "ai"] and
            all(human[k] == assigned[k] for k in ("assignee_id", "assignment_generation", "messages", "status")),
-           "retorno obsoleto ou recuperação incompleta")
-    emit("recuperacao_canonica", retry=retried, handoff=assigned, offsets=offsets)
+           "histórico do retry ou atribuição humana alterada")
+    retry_rounds = canonical_results(t, retried, {expired[retry_id]: "discarded", fresh[0]: "applied"})
+    handoff_rounds = canonical_results(t, assigned, {expired[handoff_id]: "discarded"})
+    emit("recuperacao_canonica", retry=retried, handoff=assigned, offsets=offsets,
+         retry_rounds=retry_rounds, handoff_rounds=handoff_rounds)
 
 
 def main():
@@ -164,7 +231,7 @@ def main():
     emit("parametros", drain_seconds=DRAIN_SECONDS, session_ms=6000, heartbeat_ms=1500, partitions=3,
          roles=list(TOPIC), classification="pronta", agent="mock determinístico", processes="A, B e acompanhante",
          cpu_affinity=len(os.sched_getaffinity(0)), limits=limits, python=platform.python_version(),
-         confluent_kafka=version()[0], librdkafka=libversion()[0])
+         confluent_kafka=version("confluent-kafka"), librdkafka=libversion()[0])
     t = Trial(Database(), Kafka())
     try:
         until("tópicos com líderes", t.kafka.topics_ready)

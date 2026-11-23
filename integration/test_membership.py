@@ -139,3 +139,56 @@ class CoordinatorTest(unittest.TestCase):
             flow.process_record(consumer, Mock(), Mock(), "group", effect)
         effect.assert_called_once()
         consumer.commit.assert_not_called()
+
+
+class PollTest(unittest.TestCase):
+    def exercise(self, name, *, partition=1, offset=17, fatal=False, safe=False):
+        error = Mock()
+        error.name.return_value = name
+        error.code.return_value = -170
+        error.fatal.return_value = fatal
+        error.__str__ = lambda _: "diagnóstico do broker"
+        notice = Mock()
+        notice.topic.return_value = flow.EVENTS if partition == 1 else None
+        notice.partition.return_value = partition
+        notice.offset.return_value = offset
+        notice.error.return_value = error
+        next_record = Mock()
+        next_record.topic.return_value = flow.EVENTS
+        next_record.partition.return_value = 1
+        next_record.offset.return_value = 18
+        next_record.error.return_value = None
+        consumer, handle, publisher = Mock(), Mock(), Mock()
+        consumer.poll.side_effect = [notice, next_record, EndTrial()]
+        consumer.assignment.return_value = [SimpleNamespace(topic=flow.EVENTS, partition=1)]
+        consumer.commit.return_value = [SimpleNamespace(error=None)]
+        driver = SimpleNamespace(Consumer=Mock(return_value=consumer), KafkaException=BrokerException)
+        with (patch.dict(sys.modules, {"confluent_kafka": driver}), self.assertLogs(level="WARNING") as logs,
+              self.assertRaises(EndTrial if safe else BrokerException)):
+            flow.consume(flow.EVENTS, "grupo", handle, publisher, "broker")
+        diagnostic = logs.output[0]
+        for field in ("classe=aviso" if safe else "classe=interromper", "grupo=grupo", f"topico={notice.topic()}",
+                      f"particao={partition}", f"offset={offset}", f"codigo={name}", "numero=-170",
+                      "causa=diagnóstico do broker"):
+            self.assertIn(field, diagnostic)
+        publisher.publish.assert_not_called()
+        consumer.close.assert_called_once()
+        if safe:
+            handle.assert_called_once_with(next_record)
+            consumer.commit.assert_called_once_with(message=next_record, asynchronous=False)
+        else:
+            consumer.poll.assert_called_once()
+            handle.assert_not_called()
+            consumer.commit.assert_not_called()
+
+    def test_localized_poll_error_never_reaches_offset_18(self):
+        for code in ("_NOT_IMPLEMENTED", "_TRANSPORT"):
+            with self.subTest(code=code):
+                self.exercise(code)
+
+    def test_only_known_nonfatal_notices_allow_progress(self):
+        self.exercise("_PARTITION_EOF", safe=True)
+        self.exercise("_TRANSPORT", partition=None, offset=None, safe=True)
+        self.exercise("_ALL_BROKERS_DOWN", partition=-1, offset=-1, safe=True)
+        self.exercise("_PARTITION_EOF", fatal=True)
+        self.exercise("_UNKNOWN", partition=-1, offset=-1)

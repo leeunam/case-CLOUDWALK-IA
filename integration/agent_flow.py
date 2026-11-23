@@ -322,12 +322,18 @@ def consume(topic, group, handle, publisher, brokers):
                 record = consumer.poll(1)
                 if record is None:
                     continue
-                if record.error():
-                    if record.error().fatal() or record.error().name() in {
-                        "GROUP_AUTHORIZATION_FAILED", "TOPIC_AUTHORIZATION_FAILED", "CLUSTER_AUTHORIZATION_FAILED",
-                    }:
-                        raise KafkaException(record.error())
-                    logging.warning("erro de consumo no grupo %s: %s", group, record.error())
+                error = record.error()
+                if error is not None:
+                    name = error.name()
+                    partition, offset = record.partition(), record.offset()
+                    global_notice = (partition is None or partition < 0) and (offset is None or offset < 0)
+                    safe = not error.fatal() and (name == "_PARTITION_EOF" or
+                           (global_notice and name in {"_TRANSPORT", "_ALL_BROKERS_DOWN"}))
+                    logging.warning("poll classe=%s grupo=%s topico=%s particao=%s offset=%s codigo=%s numero=%s causa=%s",
+                                    "aviso" if safe else "interromper", group, record.topic(), partition, offset,
+                                    name, error.code(), error)
+                    if not safe:
+                        raise KafkaException(error)
                     continue
                 try:
                     process_record(consumer, publisher, record, group, handle)
