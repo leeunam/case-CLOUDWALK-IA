@@ -3,6 +3,7 @@ import unittest
 from contextlib import redirect_stderr
 from email.message import Message
 from io import BytesIO, StringIO
+from types import SimpleNamespace
 from unittest.mock import Mock, call, patch
 
 from agent_flow import (
@@ -200,6 +201,7 @@ class AgentFlowTest(unittest.TestCase):
 
     def test_failures_are_confirmed_before_the_consumer_commits(self):
         trace = Mock()
+        trace.consumer.assignment.return_value = [SimpleNamespace(topic=EVENTS, partition=1)]
         trace.consumer.commit.return_value = []
         trace.handle.side_effect = OSError("temporarily unavailable")
         record = self.record(self.result, EVENTS)

@@ -242,6 +242,10 @@ def publish_failure(publisher, record, group, message):
 
 def process_record(consumer, publisher, record, group, handle, *, pause=time.sleep):
     """Conclui este registro antes de buscar o seguinte."""
+    member = consumer.memberid()
+    if not member:
+        raise MembershipLost("registro recebido sem membro vigente")
+    generation = consumer.consumer_group_metadata()
     for attempt in range(3):
         try:
             handle(record)
@@ -255,37 +259,109 @@ def process_record(consumer, publisher, record, group, handle, *, pause=time.sle
             else:
                 pause(attempt + 1)
 
-    # message= confirma offset + 1 apenas na partição deste registro.
-    commits = consumer.commit(message=record, asynchronous=False)
+    # O coordenador arbitra a corrida restante entre esta leitura e o commit.
+    if consumer.memberid() != member or consumer.consumer_group_metadata() != generation:
+        raise MembershipLost("membro ou geração alterados durante o efeito")
+    if not any(p.topic == record.topic() and p.partition == record.partition() for p in consumer.assignment()):
+        raise MembershipLost("partição fora da atribuição vigente")
+    try:
+        commits = consumer.commit(message=record, asynchronous=False)
+    except Exception as exc:
+        from confluent_kafka import KafkaException
+        if not isinstance(exc, KafkaException):
+            raise
+        classify_commit_error(exc.args[0], group, record)
+        raise
     for commit in commits:
         if commit.error:
-            raise RuntimeError(str(commit.error))
+            classify_commit_error(commit.error, group, record)
+            from confluent_kafka import KafkaException
+            raise KafkaException(commit.error)
+
+
+class MembershipLost(RuntimeError):
+    """O cliente atual não pode continuar do cursor local."""
+
+
+def classify_commit_error(error, group, record):
+    membership = not error.fatal() and error.name() in {
+        "UNKNOWN_MEMBER_ID", "ILLEGAL_GENERATION", "REBALANCE_IN_PROGRESS",
+        "_ASSIGNMENT_LOST", "_MAX_POLL_EXCEEDED",
+    }
+    logging.warning("commit recusado classe=%s grupo=%s topico=%s particao=%d offset=%d codigo=%s numero=%s causa=%s",
+                    "associacao" if membership else "interromper", group, record.topic(),
+                    record.partition(), record.offset(), error.name(), error.code(), error)
+    if membership:
+        raise MembershipLost(str(error))
+
+
+def poll_error_action(error, partition, offset):
+    if error.fatal():
+        return "interromper"
+    name = error.name()
+    if name == "_PARTITION_EOF":
+        return "aviso"
+    global_notice = (partition is None or partition < 0) and (offset is None or offset < 0)
+    if global_notice:
+        if name == "_MAX_POLL_EXCEEDED":
+            return "reingresso"
+        if name in {"_TRANSPORT", "_ALL_BROKERS_DOWN"}:
+            return "aviso"
+    return "interromper"
 
 
 def consume(topic, group, handle, publisher, brokers):
-    from confluent_kafka import Consumer
+    from confluent_kafka import Consumer, KafkaException
 
-    consumer = Consumer({
-        "bootstrap.servers": brokers,
-        "group.id": group,
-        "auto.offset.reset": "earliest",
-        "enable.auto.commit": False,
-        "enable.auto.offset.store": False,
-    })
-    consumer.subscribe([topic])
-    try:
-        while True:
-            record = consumer.poll(1)
-            if record is None:
-                continue
-            if record.error():
-                logging.warning("erro de consumo no grupo %s: %s", group, record.error())
-                continue
-            # Se falhar ao publicar a falha ou confirmar o offset, o processo sai.
-            # O reinício retoma do último offset confirmado sem ultrapassar a lacuna.
-            process_record(consumer, publisher, record, group, handle)
-    finally:
-        consumer.close()
+    config = {
+        "bootstrap.servers": brokers, "group.id": group, "auto.offset.reset": "earliest",
+        "enable.auto.commit": False, "enable.auto.offset.store": False,
+    }
+    while True:
+        consumer = Consumer(config)
+        first_progress = set()
+
+        def assigned(client, partitions):
+            first_progress.update(p.partition for p in partitions)
+            logging.info("atribuicao grupo=%s membro=%s topico=%s particoes=%s", group,
+                         client.memberid(), topic, [p.partition for p in partitions])
+
+        def removed(client, partitions):
+            first_progress.difference_update(p.partition for p in partitions)
+            logging.info("retirada grupo=%s membro=%s topico=%s particoes=%s", group,
+                         client.memberid(), topic, [p.partition for p in partitions])
+
+        try:
+            consumer.subscribe([topic], on_assign=assigned, on_revoke=removed, on_lost=removed)
+            while True:
+                record = consumer.poll(1)
+                if record is None:
+                    continue
+                error = record.error()
+                if error is not None:
+                    partition, offset = record.partition(), record.offset()
+                    action = poll_error_action(error, partition, offset)
+                    logging.warning("poll grupo=%s classe=%s topico=%s particao=%s offset=%s codigo=%s numero=%s causa=%s",
+                                    group, action, record.topic(), partition, offset, error.name(), error.code(), error)
+                    if action == "reingresso":
+                        break
+                    if action == "interromper":
+                        raise KafkaException(error)
+                    continue
+                try:
+                    process_record(consumer, publisher, record, group, handle)
+                except MembershipLost as error:
+                    logging.warning("reingresso grupo=%s topico=%s particao=%d offset=%d causa=%s",
+                                    group, topic, record.partition(), record.offset(), error)
+                    break
+                if record.partition() in first_progress:
+                    first_progress.remove(record.partition())
+                    logging.info("primeiro progresso grupo=%s membro=%s topico=%s particao=%d offset=%d proximo=%d",
+                                 group, consumer.memberid(), topic, record.partition(), record.offset(), record.offset() + 1)
+        finally:
+            consumer.close()
+        # Nenhum seek/commit no membro antigo. Nova assinatura parte do offset do grupo.
+        time.sleep(1)
 
 
 def main():

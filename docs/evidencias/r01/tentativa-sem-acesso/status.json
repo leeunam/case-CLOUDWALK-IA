@@ -1,0 +1,7 @@
+{
+  "result": "blocked_before_stack_creation",
+  "reason": "Python subprocess denied Docker socket; no services created",
+  "code_revision": "3c0920372714236a069027f0a3705d5a87eac413",
+  "project": "cloudwalk_r01_aa4a95852ada",
+  "cleanup_verified_no_containers": true
+}
