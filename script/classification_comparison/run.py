@@ -15,31 +15,55 @@ import uuid
 sys.dont_write_bytecode = True
 from common import HERE, c01, decide, decode, encode, preflight, project
 from metrics import eligibility, summarize
+from journal import Journal, inventory, sync_directory
 
 
 def write_json(path, value):
-    path.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    temp = path.with_suffix(".tmp")
+    with temp.open("x", encoding="utf-8") as file:
+        json.dump(value, file, ensure_ascii=False, indent=2, allow_nan=False)
+        file.write("\n")
+        file.flush()
+        os.fsync(file.fileno())
+    temp.replace(path)
+    sync_directory(path.parent)
 
 
-def inventory(path):
-    return dict(path=str(path.relative_to(c01.ROOT)), sha256=c01.digest(path))
+class ResponseStream:
+    def __init__(self, stdout):
+        self.stdout = stdout
+        self.pending = bytearray()
+
+    def record(self, deadline):
+        while True:
+            end = self.pending.find(b"\n")
+            if end >= 0:
+                line = self.pending[:end].removesuffix(b"\r")
+                del self.pending[:end + 1]
+                return decode(line.decode("utf-8"))
+            remaining = deadline - time.monotonic()
+            if remaining <= 0 or not select.select([self.stdout], [], [], remaining)[0]:
+                raise TimeoutError("adaptador silencioso ou registro incompleto")
+            chunk = os.read(self.stdout.fileno(), 65536)
+            if not chunk:
+                raise ValueError("EOF antes de uma observação terminada por LF")
+            self.pending.extend(chunk)
+
+    def finish(self):
+        if self.pending or not select.select([self.stdout], [], [], 5)[0] or os.read(self.stdout.fileno(), 1):
+            raise ValueError("stdout adicional ou sem EOF após a última observação")
 
 
-def exchange(proc, item):
-    proc.stdin.write((encode(item) + "\n").encode("utf-8"))
+def exchange(proc, item, responses, journal):
+    if responses.pending or select.select([proc.stdout], [], [], 0)[0]:
+        raise ValueError("stdout inesperado ou fechado antes do próximo despacho")
+    payload = (encode(item) + "\n").encode("utf-8")
+    journal.begin_dispatch(item["id"])
+    proc.stdin.write(payload)
     proc.stdin.flush()
-    # LF is the only record separator. Bound the entire read, even for partial writes.
+    journal.sent()
     deadline = time.monotonic() + 5.25
-    line = bytearray()
-    while not line.endswith(b"\n"):
-        remaining = deadline - time.monotonic()
-        if remaining <= 0 or not select.select([proc.stdout], [], [], remaining)[0]:
-            raise TimeoutError(f"sem observação para {item['id']}")
-        chunk = os.read(proc.stdout.fileno(), 65536)
-        if not chunk:
-            raise ValueError(f"observação incompleta para {item['id']}")
-        line.extend(chunk)
-    obs = decode(line.decode("utf-8"))
+    obs = responses.record(deadline)
     if not isinstance(obs, dict) or obs.get("id") != item["id"]:
         raise ValueError(f"ID de resposta divergente para {item['id']}")
     if time.monotonic() > deadline - .25 and not any(
@@ -48,12 +72,13 @@ def exchange(proc, item):
     return obs
 
 
-def run_batch(inputs, config, report, catalog, validation, output):
-    obs_rows, decisions = [], []
+def run_batch(inputs, config, report, catalog, validation, journal):
     with tempfile.TemporaryDirectory() as scratch:
         ready = Path(scratch) / "ready.json"
+        final = Path(scratch) / "final.json"
         env = dict(os.environ, CLASSIFICATION_IDENTITY=encode(config["identity"]),
-                   CLASSIFICATION_TIMEOUT_MS="5000", CLASSIFICATION_RUN_ID=report["run_id"], CLASSIFICATION_READY_FILE=str(ready),
+                   CLASSIFICATION_FINAL_FILE=str(final), CLASSIFICATION_TIMEOUT_MS="5000",
+                   CLASSIFICATION_RUN_ID=report["run_id"], CLASSIFICATION_READY_FILE=str(ready),
                    CLASSIFICATION_RUBRIC=str(c01.source_path(report["sources"]["rubric"])),
                    CLASSIFICATION_PROMPT=str(c01.source_path(report["sources"]["prompt"])),
                    CLASSIFICATION_POLICY=str(c01.source_path(report["sources"]["policy"])))
@@ -66,43 +91,45 @@ def run_batch(inputs, config, report, catalog, validation, output):
                     raise ValueError("adaptador indisponível na inicialização")
                 time.sleep(.01)
             info = c01.read(ready)
-            report["environment"].update({k: info[k] for k in ("peak_memory_bytes", "infrastructure_usd", "seed") if k in info})
+            report["environment"].update({k: info[k] for k in ("infrastructure_usd", "seed") if k in info})
             report["environment"].update(runtime=info["runtime"], hardware=info["hardware"],
                                          cold_start_ms=(time.monotonic() - started) * 1000)
             c01.structure(validation, "report", report)
-            with (output / "observations.jsonl").open("x", encoding="utf-8") as observations, (
-                    output / "decisions.jsonl").open("x", encoding="utf-8") as verdicts:
-                for item in inputs:
-                    start = time.monotonic()
-                    c01.structure(validation, "input", item)
-                    missing, invalid, _ = c01.normalize_input(item, catalog)
-                    obs = None
-                    if missing and not invalid and item["catalog"] == catalog:
-                        obs = exchange(proc, item)
-                        c01.structure(validation, "observation", obs)
-                        c01.verify_observation(obs, missing, report, catalog)
-                    d = decide(item, obs, catalog, report["run_id"])
-                    c01.structure(validation, "decision", d)
-                    c01.verify_case(item, obs, d, report, catalog)
-                    if obs is not None:
-                        if config["identity"]["mode"] == "real":
-                            obs["elapsed_ms"] = (time.monotonic() - start) * 1000
-                        observations.write(encode(obs) + "\n")
-                        obs_rows.append(obs)
-                    verdicts.write(encode(d) + "\n")
-                    decisions.append(d)
+            responses = ResponseStream(proc.stdout)
+            for item in inputs:
+                start = time.monotonic()
+                c01.structure(validation, "input", item)
+                missing, invalid, _ = c01.normalize_input(item, catalog)
+                obs = None
+                if missing and not invalid and item["catalog"] == catalog:
+                    obs = exchange(proc, item, responses, journal)
+                    c01.structure(validation, "observation", obs)
+                    c01.verify_observation(obs, missing, report, catalog)
+                d = decide(item, obs, catalog, report["run_id"])
+                c01.structure(validation, "decision", d)
+                c01.verify_case(item, obs, d, report, catalog)
+                if obs is not None and config["identity"]["mode"] == "real":
+                    obs["elapsed_ms"] = (time.monotonic() - start) * 1000
+                journal.complete(d, obs)
             proc.stdin.close()
-            if not select.select([proc.stdout], [], [], 5)[0] or proc.stdout.read(1):
-                raise ValueError("saída adicional depois da última observação")
+            responses.finish()
             if proc.wait(timeout=5):
                 raise ValueError("adaptador encerrou com erro")
+            if final.exists():
+                resources = c01.read(final)
+                if not isinstance(resources, dict) or set(resources) != {"peak_memory_bytes"}:
+                    raise ValueError("metadados finais inválidos")
+                peak = resources["peak_memory_bytes"]
+                if peak is not None and (type(peak) is not int or peak < 0):
+                    raise ValueError("peak_memory_bytes final inválido")
+                report["environment"]["peak_memory_bytes"] = peak
         finally:
             if proc.poll() is None:
                 proc.kill()
                 proc.wait()
             proc.stdin.close()
             proc.stdout.close()
-    return obs_rows, decisions
+    return journal.observations, journal.decisions
 
 
 def describe(report):
@@ -158,7 +185,8 @@ def run(args):
     report.update(identity=config["identity"], sources=sources, split=args.split, completed_ids=completed,
                   planned_ids=ids, run_id="c02-" + uuid.uuid4().hex, eligibility="inconclusive",
                   git_revision=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=c01.ROOT, text=True).strip(),
-                  environment=dict(report["environment"], runtime=platform.python_version(), hardware=platform.machine()))
+                  environment=dict(report["environment"], runtime=platform.python_version(),
+                                   hardware=platform.machine(), peak_memory_bytes=None))
     c01.structure(validation, "report", report)
     c01.verify_sources(report, protocol, split)
     output = args.output.resolve()
@@ -175,33 +203,37 @@ def run(args):
     write_json(output / "invocation.json", dict(command=shlex.join(command),
                config_sha256=c01.digest(args.config), attempts=args.attempts, concurrency=args.concurrency))
     inputs_path = output / "inputs.jsonl"
-    inputs_path.write_text("".join(encode(item) + "\n" for item in inputs), encoding="utf-8")
-    if args.dry_run:
-        write_json(output / "plan.json", dict(run_id=report["run_id"], identity=report["identity"],
+    with inputs_path.open("x", encoding="utf-8") as stream:
+        stream.writelines(encode(item) + "\n" for item in inputs)
+        stream.flush()
+        os.fsync(stream.fileno())
+    write_json(output / "plan.json", dict(run_id=report["run_id"], identity=report["identity"],
                    sources=sources, planned_ids=ids, selected_ids=completed, control_ids=report["control_ids"],
                    input=inventory(inputs_path), concurrency=args.concurrency, attempts=args.attempts))
+    if args.dry_run:
         return
-    obs, decisions = run_batch(inputs, config, report, catalog, validation, output)
-    report.update(summarize(cases, inputs, obs, decisions, catalog, completed, fixture=args.mode == "fixture"))
-    if args.split == "final_test" and len(completed) < len(ids):
-        # For a partial final test the contract retains known full-test populations.
-        counts = protocol["exact_test_denominators"]
-        populations = {"automatic_completion_on_expected_review_cases": counts["expected_review_cases"],
-                       "automatic_non_urgent_applied_when_expected_urgent": counts["urgent_priority_omitted_cases"],
-                       "automatic_coverage_on_fully_classifiable_cases_min": counts["fully_classifiable_cases"],
-                       "raw_urgent_recognition_min": counts["urgent_priority_omitted_cases"],
-                       "warm_total_latency_p95_ms_max": len(ids)}
-        for name, population in populations.items():
-            partial(report["gates"][name], population)
-        for value in report["urgent_outcomes"].values():
-            partial(value, counts["urgent_priority_omitted_cases"])
-        partial(report["latency_p50_ms"], len(ids))
-    report["eligibility"] = eligibility(report, protocol, obs, decisions)
-    report["artifacts"] = {kind: inventory(output / (kind + ".jsonl")) for kind in c01.KINDS}
-    bundle = dict(inputs=inputs, observations=obs, decisions=decisions, report=report)
-    c01.verify_run(bundle, validation, protocol, split, catalog, cases)
-    (output / "report.md").write_text(describe(report), encoding="utf-8")
-    write_json(output / "report.json", report)
+    with Journal(output, report["run_id"], inputs) as journal:
+        obs, decisions = run_batch(inputs, config, report, catalog, validation, journal)
+        report.update(summarize(cases, inputs, obs, decisions, catalog, completed, fixture=args.mode == "fixture"))
+        if args.split == "final_test" and len(completed) < len(ids):
+            # For a partial final test the contract retains known full-test populations.
+            counts = protocol["exact_test_denominators"]
+            populations = {"automatic_completion_on_expected_review_cases": counts["expected_review_cases"],
+                           "automatic_non_urgent_applied_when_expected_urgent": counts["urgent_priority_omitted_cases"],
+                           "automatic_coverage_on_fully_classifiable_cases_min": counts["fully_classifiable_cases"],
+                           "raw_urgent_recognition_min": counts["urgent_priority_omitted_cases"],
+                           "warm_total_latency_p95_ms_max": len(ids)}
+            for name, population in populations.items():
+                partial(report["gates"][name], population)
+            for value in report["urgent_outcomes"].values():
+                partial(value, counts["urgent_priority_omitted_cases"])
+            partial(report["latency_p50_ms"], len(ids))
+        report["eligibility"] = eligibility(report, protocol, obs, decisions)
+        report["artifacts"] = {kind: inventory(output / (kind + ".jsonl")) for kind in c01.KINDS}
+        bundle = dict(inputs=inputs, observations=obs, decisions=decisions, report=report)
+        c01.verify_run(bundle, validation, protocol, split, catalog, cases)
+        (output / "report.md").write_text(describe(report), encoding="utf-8")
+        write_json(output / "report.json", report)
 
 
 def partial(m, population):
