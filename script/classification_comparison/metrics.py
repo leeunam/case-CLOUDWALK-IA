@@ -47,6 +47,7 @@ def slice_metrics(rows, field=None):
 
 
 def usage(observations):
+    observations = [o for o in observations if o["origin"] == "candidate"]
     n = len(observations)
     requests = [u for o in observations for u in o["request_usage"]]
     totals = dict(attempts=n, requests=len(requests), questions=sum(o["questions"] for o in observations))
@@ -127,11 +128,7 @@ def eligibility(report, protocol, observations, decisions):
             report["completed_ids"] != report["planned_ids"] or
             len(report["completed_ids"]) != protocol["execution"]["full_test_cases_per_candidate"]):
         return "inconclusive"
-    controls = [d for d in decisions if d["id"] in report["control_ids"]]
-    reasons = {d["reason"] for d in controls}
-    if not {"invalid_input", "channel_complete"} <= reasons or not any(
-            d["outcome"] == "review" and any(f["status"] == "predicted" for f in d["fields"].values())
-            for d in controls):
+    if not c01.has_required_controls(report, {d["id"]: d for d in decisions}):
         return "inconclusive"
     if not any(c["status"] != "error" for o in observations if o["id"] in report["completed_ids"]
                for c in o["choices"].values()):

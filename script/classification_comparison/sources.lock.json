@@ -1,9 +1,10 @@
 {
-  "docs/planejamento/classificacao-comparativa/protocolo-comparacao.json": "cfdfce669e8c625e65a00b7b4f09e20412f5ef71e45d595c2ec76c435f35a68d",
-  "docs/planejamento/classificacao-comparativa/contratos/fixtures/report.json": "dbb7a79b941d7b7d8157f6d2f966c867726000c44d8b9b06933484b3967f16aa",
-  "docs/planejamento/classificacao-comparativa/contratos/common.schema.json": "92f757d2f99bf91310dc305177a2f89e13b5406dfd9923bc18b6a6e0e04b1a1c",
+  "docs/planejamento/classificacao-comparativa/protocolo-comparacao.json": "eb9bdbb786037bac864f3155ff6dfbb45feb83dfdb99958f463b6896a614dced",
+  "docs/planejamento/classificacao-comparativa/contratos/fixtures/report.json": "8a1730da7eee99d4e04c898a4aa047adf70c3f6d5bb5af0b04cee2f0fc13b4a2",
+  "docs/planejamento/classificacao-comparativa/contratos/common.schema.json": "bc242132690bfef7504e0124a1758b56c9a336359ab9ffde038f8645a8cef0c3",
   "docs/planejamento/classificacao-comparativa/contratos/decision.schema.json": "2894c6763940a41657de72db5b37672493b495c3b77b0a8812505ede88a58582",
   "docs/planejamento/classificacao-comparativa/contratos/input.schema.json": "2e943f5b228181366da189b9b51b463ffb1ea8140aabf01e701ad9e4232339fa",
-  "docs/planejamento/classificacao-comparativa/contratos/observation.schema.json": "4cc66ab868671a94d1f3f43626b98f77ba5d8bf4fb8012a6ade60206489b341e",
-  "docs/planejamento/classificacao-comparativa/contratos/report.schema.json": "bdb1b9b54da5f6daca54fa2c43c10898857c4a4aa2b54fbce6f62f760deb8804"
+  "docs/planejamento/classificacao-comparativa/contratos/observation.schema.json": "0df9647efe7e57768904cdecf24c1e42a3ce2ce6e977a73a073b0b5169bc3d38",
+  "docs/planejamento/classificacao-comparativa/contratos/report.schema.json": "4820101137d6297446c9950ffce98d751db21df85f7c400059f50d91fa90aac2",
+  "docs/planejamento/classificacao-comparativa/contratos/politica-controles.json": "2611786ddde1eb2b064b02f7dda7bb7a0aae06cc8f127a9fc7e8fec14e937fb7"
 }

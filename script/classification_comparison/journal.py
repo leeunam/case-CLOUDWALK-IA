@@ -36,7 +36,9 @@ def sync_directory(path):
 
 
 class Journal:
-    def __init__(self, output, run_id, inputs):
+    def __init__(self, output, run_id, inputs, planned_injections, publish):
+        self.planned_injections = planned_injections
+        self.publish = publish
         self.output = output
         self.run_id = run_id
         self.inputs = inputs
@@ -128,7 +130,10 @@ class Journal:
                         pending_usage[key] = value["value"]
             elif delivery == "not_sent":
                 pending_usage.update(requests=0, questions=0)
-        manifest = dict(run_id=self.run_id, status="interrupted", eligibility="inconclusive",
+        injected = [o["id"] for o in prefix_obs if o["origin"] == "injected_control"]
+        inventory_fields = dict(self.planned_injections) if injected else {}
+        inventory_fields.update(ids=injected, count=len(injected))
+        manifest = dict(contract_version="1.1.0", injected_controls=inventory_fields, run_id=self.run_id, status="interrupted", eligibility="inconclusive",
                         reason=str(error), error=type(error).__name__, dispatched_ids=dispatched,
                         completed_ids=completed, interrupted_id=active, delivery=delivery,
                         interrupted_observation=pending, interrupted_usage=pending_usage,
@@ -141,6 +146,7 @@ class Journal:
             append(stream, manifest)
         temp.replace(self.output / "interruption.json")
         sync_directory(self.output)
+        self.publish(prefix_inputs, prefix_obs, prefix_decisions, prefix=True)
 
     def __exit__(self, typ, exc, tb):
         try:

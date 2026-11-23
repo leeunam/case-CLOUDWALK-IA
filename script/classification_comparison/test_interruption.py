@@ -11,6 +11,7 @@ from unittest.mock import patch
 from types import SimpleNamespace
 
 import journal
+import run as runner
 
 from run import HERE, ResponseStream, c01, decode, encode, run
 
@@ -32,7 +33,19 @@ def adapter(action):
             if action == "invalid":
                 print('{"bad":"id"}', flush=True)
                 continue
-        obs = dict(fixtures[case_id], run_id=os.environ["CLASSIFICATION_RUN_ID"])
+        obs = dict(fixtures[case_id], run_id=os.environ["CLASSIFICATION_RUN_ID"],
+                   identity=json.loads(os.environ["CLASSIFICATION_IDENTITY"]))
+        if action == "spoof":
+            obs["origin"] = "injected_control"
+        if action == "always_valid":
+            if obs["origin"] != "candidate":
+                raise AssertionError("ID reservado chegou ao subprocesso")
+            obs.update(choices={f: {"status": "predicted", "raw": {"category": "pix", "priority": "basic"}[f], "reason": None}
+                                for f in obs["choices"]},
+                       returned_model=obs["identity"]["requested_model"], requests=1,
+                       questions=len(obs["choices"]), request_usage=[dict(input_tokens=3, output_tokens=1,
+                       observed_api_usd=.01, estimated_api_usd=None, tariff=None)])
+            obs.pop("version_error_raw", None)
         if case_id == "ctl-simples":
             obs["request_usage"][0]["observed_api_usd"] = 0.01
         sys.stdout.buffer.write(encode(obs).encode("utf8") + b"\r\n")
@@ -66,6 +79,11 @@ class RoundOne(unittest.TestCase):
             self.execute(action)
         m = c01.read(self.output / "interruption.json")
         self.assertEqual(m["eligibility"], "inconclusive")
+        prefix = c01.read(self.output / "prefix-report.json")
+        self.assertEqual(m["injected_controls"], {"ids": [], "count": 0})
+        self.assertEqual(prefix["injected_controls"], m["injected_controls"])
+        self.assertEqual(prefix["control_ids"], m["completed_ids"])
+        self.assertEqual(prefix["usage"], m["verified_prefix_usage"])
         self.assertEqual(m["completed_ids"], ["ctl-completo", "ctl-simples"])
         self.assertEqual(m["dispatched_ids"], ["ctl-simples", "ctl-duplo"])
         self.assertEqual(m["interrupted_id"], "ctl-duplo")
@@ -102,7 +120,7 @@ class RoundOne(unittest.TestCase):
             self.execute("trailing")
         m = c01.read(self.output / "interruption.json")
         self.assertIsNone(m["interrupted_id"])
-        self.assertEqual(len(m["completed_ids"]), 12)
+        self.assertEqual(len(m["completed_ids"]), 13)
         self.assertFalse(m["not_started_ids"])
 
     def test_ctrl_c_at_each_completion_write(self):
@@ -207,6 +225,65 @@ class RoundOne(unittest.TestCase):
                         m = c01.read(self.output / "interruption.json")
                         self.assertEqual(m["interrupted_id"], case_id)
                         self.assertNotIn(case_id, m["completed_ids"])
+
+    def test_always_predicting_candidate_has_independent_mixed_control(self):
+        self.execute("always_valid")
+        r = c01.read(self.output / "report.json")
+        policy_ref = c01.read(c01.PLAN / "protocolo-comparacao.json")["control_policy"]
+        policy = c01.read(c01.source_path(policy_ref))
+        reserved, = policy["controls"]
+        self.assertEqual(r["injected_controls"], dict(count=1, ids=[reserved], policy=policy_ref,
+                                                    identity=policy["identity"]))
+        rows = c01.read_records(self.output / "observations.jsonl")
+        candidate = [row for row in rows if row["origin"] == "candidate"]
+        self.assertEqual(len(candidate), 8)
+        self.assertTrue(all(c["status"] == "predicted" for o in candidate for c in o["choices"].values()))
+        events = c01.read_records(self.output / "journal.jsonl")
+        self.assertEqual([e["id"] for e in events if e["event"] == "dispatched"], [o["id"] for o in candidate])
+        self.assertEqual(r["usage"]["attempts"]["value"], 8)
+        self.assertEqual(r["usage"]["requests"]["value"], 8)
+        self.assertEqual(r["usage"]["observed_api_usd"]["value"], .08)
+        self.assertEqual(r["usage"]["input_tokens"]["samples"], 8)
+        self.assertEqual(r["gates"]["partial_application_after_abstention_or_error"],
+                         dict(state="measured", value=0, numerator=0, denominator=1))
+        self.assertEqual(rows[-1]["id"], reserved)
+        self.assertEqual(rows[-1]["choices"], policy["controls"][reserved]["choices"])
+        self.assertEqual(rows[-1]["request_usage"], [])
+        self.assertIsNone(rows[-1]["elapsed_ms"])
+        self.assertEqual(r["eligibility"], "inconclusive")
+
+    def test_preflight_refuses_plan_without_reserved_control(self):
+        prepared = runner.preflight()
+        example = prepared[-1]
+        reserved, = example["report"]["injected_controls"]["ids"]
+        example["inputs"] = [i for i in example["inputs"] if i["id"] != reserved]
+        with patch("run.preflight", return_value=prepared), self.assertRaisesRegex(ValueError, "omite controle"):
+            self.execute("missing-control")
+        self.assertFalse(self.output.exists())
+
+    def test_candidate_cannot_claim_origin_of_evaluator(self):
+        with self.assertRaises(ValueError):
+            self.execute("spoof")
+        m = c01.read(self.output / "interruption.json")
+        self.assertEqual(m["interrupted_id"], "ctl-simples")
+        self.assertEqual(m["injected_controls"], {"count": 0, "ids": []})
+        self.assertEqual(m["verified_prefix_usage"]["attempts"]["value"], 0)
+        self.assertIsNone(m["interrupted_usage"]["observed_api_usd"])
+        self.assertFalse((self.output / "report.json").exists())
+
+    def test_modified_injection_rejected_before_commit(self):
+        original = runner.injected_observation
+        def tamper(*args):
+            obs = original(*args)
+            obs["choices"] = dict(obs["choices"], category={"raw": "terminal", "status": "predicted", "reason": None})
+            return obs
+
+        with patch("run.injected_observation", tamper), self.assertRaisesRegex(ValueError, "control_policy_choices"):
+            self.execute("tamper")
+        r = c01.read(self.output / "prefix-report.json")
+        self.assertEqual(len(r["control_ids"]), 12)
+        self.assertEqual(r["injected_controls"], {"ids": [], "count": 0})
+        self.assertFalse((self.output / "report.json").exists())
 
     def test_final_memory_and_unavailable(self):
         for action, expected in [("peak=777", 777), ("peak=0", 0), ("peak=null", None), ("omit", None)]:

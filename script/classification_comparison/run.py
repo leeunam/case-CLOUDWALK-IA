@@ -13,7 +13,7 @@ import time
 import uuid
 
 sys.dont_write_bytecode = True
-from common import HERE, c01, decide, decode, encode, preflight, project
+from common import HERE, c01, decide, decode, encode, injected_inventory, injected_observation, preflight, project
 from metrics import eligibility, summarize
 from journal import Journal, inventory, sync_directory
 
@@ -87,11 +87,12 @@ def exchange(proc, item, responses, journal, deadline):
     return obs
 
 
-def run_batch(inputs, config, report, catalog, validation, journal):
+def run_batch(inputs, config, report, catalog, validation, journal, policy):
     with tempfile.TemporaryDirectory() as scratch:
         ready = Path(scratch) / "ready.json"
         final = Path(scratch) / "final.json"
-        env = dict(os.environ, CLASSIFICATION_IDENTITY=encode(config["identity"]),
+        env = dict(os.environ, CLASSIFICATION_CONTRACT_VERSION=report["contract_version"],
+                   CLASSIFICATION_IDENTITY=encode(config["identity"]),
                    CLASSIFICATION_FINAL_FILE=str(final), CLASSIFICATION_TIMEOUT_MS="5000",
                    CLASSIFICATION_RUN_ID=report["run_id"], CLASSIFICATION_READY_FILE=str(ready),
                    CLASSIFICATION_RUBRIC=str(c01.source_path(report["sources"]["rubric"])),
@@ -106,10 +107,12 @@ def run_batch(inputs, config, report, catalog, validation, journal):
                     raise ValueError("adaptador indisponível na inicialização")
                 time.sleep(.01)
             info = c01.read(ready)
-            report["environment"].update({k: info[k] for k in ("infrastructure_usd", "seed") if k in info})
-            report["environment"].update(runtime=info["runtime"], hardware=info["hardware"],
+            environment = dict(report["environment"])
+            environment.update({k: info[k] for k in ("infrastructure_usd", "seed") if k in info})
+            environment.update(runtime=info["runtime"], hardware=info["hardware"],
                                          cold_start_ms=(time.monotonic() - started) * 1000)
-            c01.structure(validation, "report", report)
+            c01.structure(validation, "report", dict(report, environment=environment))
+            report["environment"] = environment
             responses = ResponseStream(proc.stdout)
             for item in inputs:
                 start = time.monotonic()
@@ -117,15 +120,24 @@ def run_batch(inputs, config, report, catalog, validation, journal):
                 c01.structure(validation, "input", item)
                 missing, invalid, _ = c01.normalize_input(item, catalog)
                 obs = None
-                if missing and not invalid and item["catalog"] == catalog:
+                if item["id"] in policy["controls"]:
+                    obs = injected_observation(item, report["run_id"], policy)
+                elif missing and not invalid and item["catalog"] == catalog:
                     obs = exchange(proc, item, responses, journal, deadline)
+                if obs is not None:
                     c01.structure(validation, "observation", obs)
                     c01.verify_observation(obs, missing, report, catalog)
+                    if obs["origin"] == "injected_control":
+                        local = dict(report, control_ids=[item["id"]], injected_controls=injected_inventory(
+                            [item["id"]], report["injected_controls"]["policy"], policy))
+                        c01.verify_injected_controls(local, {"inputs": {item["id"]: item},
+                                                            "observations": {item["id"]: obs}},
+                                                     {"control_policy": report["injected_controls"]["policy"]})
                     journal.pending_observation = obs
                 d = decide(item, obs, catalog, report["run_id"])
                 c01.structure(validation, "decision", d)
                 c01.verify_case(item, obs, d, report, catalog)
-                if obs is not None:
+                if obs is not None and obs["origin"] == "candidate":
                     end = time.monotonic()
                     check_deadline(obs, deadline, end)
                     if config["identity"]["mode"] == "real":
@@ -163,6 +175,7 @@ def describe(report):
     lines = [f"# Avaliação {report['run_id']}", "",
              f"Modo {report['identity']['mode']}. Elegibilidade {report['eligibility']}.",
              f"{len(report['completed_ids'])} relatos e {len(report['control_ids'])} controles.",
+             f"Controles injetados pelo avaliador: {report['injected_controls']['count']}.",
              "", "| Campo | Acerto bruto | Acerto aplicado | Cobertura automática |",
              "| --- | --- | --- | --- |"]
     for field, summary in report["by_field"].items():
@@ -192,7 +205,15 @@ def run(args):
     if args.limit is not None and not 1 <= args.limit <= len(ids):
         raise ValueError("limite fora da população da partição")
     completed = ids[:args.limit]
+    if config.get("contract_version") != protocol["contract_version"]:
+        raise ValueError("configuração incompatível com o contrato")
+    reference = protocol["control_policy"]
+    policy = c01.read(c01.source_path(reference))
     controls = example["inputs"]
+    reserved = [item["id"] for item in controls if item["id"] in policy["controls"]]
+    if set(reserved) != set(policy["controls"]):
+        raise ValueError("plano omite controle reservado da política")
+    report["injected_controls"] = injected_inventory(reserved, reference, policy)
     inputs = [project(cases[i], catalog) for i in completed] + controls
     for item in inputs:
         c01.structure(validation, "input", item)
@@ -221,7 +242,8 @@ def run(args):
     if args.dry_run:
         command.append("--dry-run")
     write_json(output / "invocation.json", dict(command=shlex.join(command),
-               config_sha256=c01.digest(args.config), attempts=args.attempts, concurrency=args.concurrency))
+               config_sha256=c01.digest(args.config), contract_version=report["contract_version"],
+               control_policy=reference, attempts=args.attempts, concurrency=args.concurrency))
     inputs_path = output / "inputs.jsonl"
     with inputs_path.open("x", encoding="utf-8") as stream:
         stream.writelines(encode(item) + "\n" for item in inputs)
@@ -229,31 +251,51 @@ def run(args):
         os.fsync(stream.fileno())
     write_json(output / "plan.json", dict(run_id=report["run_id"], identity=report["identity"],
                    sources=sources, planned_ids=ids, selected_ids=completed, control_ids=report["control_ids"],
+                   injected_controls=report["injected_controls"], contract_version=report["contract_version"],
                    input=inventory(inputs_path), concurrency=args.concurrency, attempts=args.attempts))
     if args.dry_run:
         return
-    with Journal(output, report["run_id"], inputs) as journal:
-        obs, decisions = run_batch(inputs, config, report, catalog, validation, journal)
-        report.update(summarize(cases, inputs, obs, decisions, catalog, completed, fixture=args.mode == "fixture"))
-        if args.split == "final_test" and len(completed) < len(ids):
-            # For a partial final test the contract retains known full-test populations.
-            counts = protocol["exact_test_denominators"]
-            populations = {"automatic_completion_on_expected_review_cases": counts["expected_review_cases"],
-                           "automatic_non_urgent_applied_when_expected_urgent": counts["urgent_priority_omitted_cases"],
-                           "automatic_coverage_on_fully_classifiable_cases_min": counts["fully_classifiable_cases"],
-                           "raw_urgent_recognition_min": counts["urgent_priority_omitted_cases"],
-                           "warm_total_latency_p95_ms_max": len(ids)}
-            for name, population in populations.items():
-                partial(report["gates"][name], population)
-            for value in report["urgent_outcomes"].values():
-                partial(value, counts["urgent_priority_omitted_cases"])
-            partial(report["latency_p50_ms"], len(ids))
-        report["eligibility"] = eligibility(report, protocol, obs, decisions)
-        report["artifacts"] = {kind: inventory(output / (kind + ".jsonl")) for kind in c01.KINDS}
-        bundle = dict(inputs=inputs, observations=obs, decisions=decisions, report=report)
-        c01.verify_run(bundle, validation, protocol, split, catalog, cases)
-        (output / "report.md").write_text(describe(report), encoding="utf-8")
-        write_json(output / "report.json", report)
+    def publish(inputs, obs, decisions, prefix=False):
+        write_report(output, report.copy(), inputs, obs, decisions, validation, protocol, split, catalog,
+                     cases, policy, prefix)
+
+    with Journal(output, report["run_id"], inputs, report["injected_controls"], publish) as journal:
+        obs, decisions = run_batch(inputs, config, report, catalog, validation, journal, policy)
+        publish(inputs, obs, decisions)
+
+
+def write_report(output, report, inputs, obs, decisions, validation, protocol, split, catalog, cases, policy, prefix):
+    completed = [d["id"] for d in decisions if d["id"] in cases]
+    controls = [d["id"] for d in decisions if d["id"] not in cases]
+    injected = [o["id"] for o in obs if o["origin"] == "injected_control"]
+    if not prefix and (completed != report["completed_ids"] or controls != report["control_ids"] or
+                       injected != report["injected_controls"]["ids"]):
+        raise ValueError("lote completo diverge do plano de relatos e controles")
+    report.update(completed_ids=completed, control_ids=controls,
+                  injected_controls=injected_inventory(injected, protocol["control_policy"], policy))
+    report.update(summarize(cases, inputs, obs, decisions, catalog, completed,
+                            fixture=report["identity"]["mode"] == "fixture"))
+    if report["split"] == "final_test" and len(completed) < len(report["planned_ids"]):
+        # For a partial final test the contract retains known full-test populations.
+        counts = protocol["exact_test_denominators"]
+        populations = {"automatic_completion_on_expected_review_cases": counts["expected_review_cases"],
+                       "automatic_non_urgent_applied_when_expected_urgent": counts["urgent_priority_omitted_cases"],
+                       "automatic_coverage_on_fully_classifiable_cases_min": counts["fully_classifiable_cases"],
+                       "raw_urgent_recognition_min": counts["urgent_priority_omitted_cases"],
+                       "warm_total_latency_p95_ms_max": len(report["planned_ids"])}
+        for name, population in populations.items():
+            partial(report["gates"][name], population)
+        for value in report["urgent_outcomes"].values():
+            partial(value, counts["urgent_priority_omitted_cases"])
+        partial(report["latency_p50_ms"], len(report["planned_ids"]))
+    report["eligibility"] = eligibility(report, protocol, obs, decisions)
+    stream_prefix = "verified_" if prefix else ""
+    report["artifacts"] = {k: inventory(output / f"{stream_prefix}{k}.jsonl") for k in c01.KINDS}
+    bundle = dict(inputs=inputs, observations=obs, decisions=decisions, report=report)
+    c01.verify_run(bundle, validation, protocol, split, catalog, cases)
+    name = "prefix-report" if prefix else "report"
+    (output / f"{name}.md").write_text(describe(report), encoding="utf-8")
+    write_json(output / f"{name}.json", report)
 
 
 def partial(m, population):

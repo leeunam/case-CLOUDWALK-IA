@@ -19,7 +19,22 @@ def encode(obj):
 
 def project(case, catalog):
     return {**{key: case[key] for key in ("id", "text", "received", "missing")},
-            "brand": "marca-sintetica", "catalog": catalog, "contract_version": "1.0.0"}
+            "brand": "marca-sintetica", "catalog": catalog, "contract_version": "1.1.0"}
+
+
+def injected_inventory(ids, reference, policy):
+    inventory = {"ids": ids, "count": len(ids)}
+    if ids:
+        inventory.update(policy=reference, identity=policy["identity"])
+    return inventory
+
+
+def injected_observation(item, run_id, policy):
+    spec = policy["controls"][item["id"]]
+    return dict(contract_version=item["contract_version"], run_id=run_id, id=item["id"], attempt=1,
+                origin="injected_control", identity=policy["identity"], choices=spec["choices"],
+                returned_model=None, weights_revision=None, temperature_state="unknown",
+                elapsed_ms=None, load_ms=None, inference_ms=None, requests=0, questions=0, request_usage=[])
 
 
 def preflight():

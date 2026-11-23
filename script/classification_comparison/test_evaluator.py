@@ -110,7 +110,7 @@ class EvaluatorTest(unittest.TestCase):
             self.assertFalse((args.output / "observations.jsonl").exists())
             with (args.output / "inputs.jsonl").open(encoding="utf-8", newline="\n") as stream:
                 rows = list(map(decode, stream))
-            self.assertEqual(len(rows), 14)
+            self.assertEqual(len(rows), 15)
             self.assertTrue(all(set(row) == {"id","text","brand","catalog","missing","received","contract_version"}
                                 for row in rows))
             args.output = path / "invalid"
@@ -156,7 +156,7 @@ STDIN.each_line do |line|
   item = JSON.parse(line)
   missing = item.fetch('missing')
   choices = missing.to_h { |f| [f, {status: 'error', raw: nil, reason: 'adapter_error'}] }
-  puts JSON.generate(contract_version: '1.0.0', id: ARGV.empty? ? item.fetch('id') : 'wrong-id',
+  puts JSON.generate(contract_version: item.fetch('contract_version'), origin: 'candidate', id: ARGV.empty? ? item.fetch('id') : 'wrong-id',
     attempt: 1, run_id: ENV.fetch('CLASSIFICATION_RUN_ID'), identity: identity,
     returned_model: nil, weights_revision: nil, choices: choices, temperature_state: 'unknown',
     elapsed_ms: nil, load_ms: nil, inference_ms: nil, requests: 0, questions: 0, request_usage: [])
