@@ -1,0 +1,12 @@
+{
+  "command": "rtk proxy python3 -B script/classification_comparison/run.py --mode fixture --split development --config script/classification_comparison/fixture.json --output NOVO_DIRETORIO",
+  "config_sha256": "01671a1b4d727a953dfbb0d63558de2110fda5436a32c932ff533cd0e9042f16",
+  "contract_version": "1.1.0",
+  "control_policy": {
+    "path": "docs/planejamento/classificacao-comparativa/contratos/politica-controles.json",
+    "version": "1.0.0",
+    "sha256": "2611786ddde1eb2b064b02f7dda7bb7a0aae06cc8f127a9fc7e8fec14e937fb7"
+  },
+  "attempts": 1,
+  "concurrency": 1
+}
