@@ -27,7 +27,7 @@ Enquanto C01-L implementa, outra frente somente leitura pode preparar vetores e 
 - Percentil adulterado, exclusão de unknown/falha, denominador incorreto, inclusão de controle, versões/chaves/protocolos/hashcaminhos cruzados são rejeitados.
 - Report antigo conserva p95 aquecido; novo aceita unknown. IPCconfig/entrada/observação/decisão continuam1.1 no relatório1.2.
 - Prefixos/interrupções mantêm observação válida tardia, cobrança pendente e fronteira durável. Nenhuma reentrega silenciosa ou artefato parcial decisório.
-- Revalidar os 18 relatórios presentes sob protocolo1.0/contrato1.1 (11GLi,4Qwen,2C02,1golden) sem mudar seus bytes. Exemplo antigo decontrato1.0 permanece reproduzível no commit de origem.
+- Revalidar os 17 relatórios presentes sob protocolo1.0/contrato1.1 (11GLi,3Qwen,2C02,1golden) sem mudar seus bytes. Exemplo antigo decontrato1.0 permanece reproduzível no commit de origem.
 
 ## Exercício
 
