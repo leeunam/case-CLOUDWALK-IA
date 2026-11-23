@@ -51,6 +51,9 @@ def adapter(action, observations_path=c01.FIXTURES / "observations.jsonl"):
             obs["request_usage"][0]["observed_api_usd"] = 0.01
         if case_id == "ctl-versao" and action.endswith("billed-version"):
             obs["request_usage"][0].update(input_tokens=1, output_tokens=10, observed_api_usd=2)
+        if case_id == "ctl-duplo" and action == "surrogate":
+            obs["choices"]["category"] = dict(status="invalid", raw=chr(0xd800), reason="invalid_output")
+            obs["request_usage"][1]["observed_api_usd"] = 1.99
         sys.stdout.buffer.write(encode(obs).encode("utf8") + b"\r\n")
         sys.stdout.buffer.flush()
     if action == "trailing":
@@ -149,22 +152,23 @@ class RoundOne(unittest.TestCase):
                 self.assertFalse((self.output / "interruption.json").exists())
 
     def test_interruption_during_final_publication(self):
-        dump = json.dump
+        open_path = Path.open
         event = journal.Journal.event
         answers = self.synthetic_final_answers()
 
-        def partial_json(value, file, **kwargs):
-            if Path(file.name).name == "report.tmp":
-                file.write("{")
+        def partial_json(path, *args, **kwargs):
+            if path.name == "report.tmp":
+                with open_path(path, *args, **kwargs) as file:
+                    file.write("{")
                 raise OSError("gravação parcial do relatório")
-            dump(value, file, **kwargs)
+            return open_path(path, *args, **kwargs)
 
         def unfinished(journal, name, **details):
             if name == "finished":
                 raise OSError("falha no fechamento do diário")
             event(journal, name, **details)
 
-        for stage, failure in (("partial-json", patch("run.json.dump", partial_json)),
+        for stage, failure in (("partial-json", patch.object(Path, "open", partial_json)),
                                ("finished", patch.object(journal.Journal, "event", unfinished))):
             with self.subTest(stage=stage):
                 with failure, self.assertRaises(OSError):
@@ -266,6 +270,52 @@ class RoundOne(unittest.TestCase):
 
     def test_invalid_answer_is_not_evidence(self):
         self.check_interruption("invalid", ValueError)
+
+    def test_surrogate_raw_crosses_pipe_and_journal(self):
+        self.execute("surrogate")
+        report = c01.read(self.output / "report.json")
+        observations_file = c01.source_path(report["artifacts"]["observations"])
+        self.assertIn(r"\ud800", observations_file.read_text(encoding="utf-8"))
+        observations = {o["id"]: o for o in c01.read_records(observations_file)}
+        obs = observations["ctl-duplo"]
+        self.assertEqual(obs["choices"]["category"], dict(status="invalid", raw=chr(0xd800), reason="invalid_output"))
+        self.assertEqual(sum(u["observed_api_usd"] for u in obs["request_usage"]), 2)
+        decisions = {d["id"]: d for d in c01.read_records(c01.source_path(report["artifacts"]["decisions"]))}
+        self.assertEqual(decisions["ctl-duplo"]["outcome"], "review")
+        self.assertTrue(all(f["applied"] is None for f in decisions["ctl-duplo"]["fields"].values()))
+        self.assertIn("ctl-sem-assunto", observations)
+        self.assertEqual(len(decisions), 13)
+        self.assertEqual(report["usage"]["observed_api_usd"]["value"], 2.01)
+
+    def test_interrupted_surrogate_observation_keeps_its_usage(self):
+        complete = journal.Journal.complete
+        def interrupt(batch, decision, obs):
+            if decision["id"] == "ctl-duplo":
+                raise KeyboardInterrupt()
+            complete(batch, decision, obs)
+
+        with patch.object(journal.Journal, "complete", interrupt), self.assertRaises(KeyboardInterrupt):
+            self.execute("surrogate")
+        manifest_file = self.output / "interruption.json"
+        self.assertIn(r"\ud800", manifest_file.read_text(encoding="utf-8"))
+        manifest = c01.read(manifest_file)
+        self.assertEqual(manifest["interrupted_observation"]["choices"]["category"]["raw"], chr(0xd800))
+        self.assertEqual(manifest["interrupted_usage"]["observed_api_usd"], 2)
+        self.assertEqual(manifest["interrupted_usage"]["requests"], 2)
+        self.assertEqual(manifest["verified_prefix_usage"]["observed_api_usd"]["value"], .01)
+        self.assertEqual(manifest["completed_ids"], ["ctl-completo", "ctl-simples"])
+        self.assertEqual(manifest["eligibility"], "inconclusive")
+
+    def test_json_writers_preserve_unicode_and_escape_only_surrogates(self):
+        valid = "ação 🙂\u2028separa\u2029linhas\u0085"
+        obj = {"valid": valid, "raw": [chr(0xd800), r"\ud800", chr(0xdc00)]}
+        path = self.path / "unicode.json"
+        runner.write_json(path, obj)
+        for encoded in (encode(obj), path.read_text(encoding="utf-8")):
+            self.assertIn(valid, encoded)
+            self.assertEqual(decode(encoded.encode("utf-8")), obj)
+        with self.assertRaises(ValueError):
+            encode(float("nan"))
 
     def test_extra_fragment_after_complete_prefix(self):
         with self.assertRaisesRegex(ValueError, "stdout adicional"):
