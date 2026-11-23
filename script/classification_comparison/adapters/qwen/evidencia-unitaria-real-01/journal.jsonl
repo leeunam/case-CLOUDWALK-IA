@@ -1,0 +1,5 @@
+{"event": "planned", "run_id": "c03-66c775e05f6b4654b1bacc8f23a8500a", "plan": {"path": "script/classification_comparison/adapters/qwen/evidencia-unitaria-real-01/plan.json", "sha256": "26e9832392a89b6e7d81b54a3d734cfe396d6964954c81f429b4fb5cd0c8c7f1"}}
+{"event": "dispatch_started", "run_id": "c03-66c775e05f6b4654b1bacc8f23a8500a", "id": "jev-003", "attempt": 1}
+{"event": "dispatched", "run_id": "c03-66c775e05f6b4654b1bacc8f23a8500a", "id": "jev-003", "attempt": 1}
+{"event": "completed", "run_id": "c03-66c775e05f6b4654b1bacc8f23a8500a", "id": "jev-003", "attempts": 1}
+{"event": "finished", "run_id": "c03-66c775e05f6b4654b1bacc8f23a8500a", "decisions": 1}
