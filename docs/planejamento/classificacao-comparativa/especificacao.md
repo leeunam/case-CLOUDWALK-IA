@@ -65,8 +65,9 @@ e a conversão de saída segundo o schema congelado.
   omitida e 20 com ambas omitidas. Versão 1.1.0, SHA-256
   `0e7e4c342c2a39cefd89855d8c0513f447d7878303eb4091488ca8af78928880`.
 - Esse conjunto é provisório. Os campos ausentes de `jev-001`, `jev-002`,
-  `jev-005`, `jev-041` e `jev-044` possuem aprovação humana registrada na
-  [revisão parcial](revisao-de-rotulos.md). Os outros 55 relatos aguardam revisão.
+  `jev-003`, `jev-005`, `jev-008`, `jev-009`, `jev-041` e `jev-044` possuem
+  aprovação humana registrada na [revisão parcial](revisao-de-rotulos.md).
+  Os outros 52 relatos aguardam revisão.
 - C01 registra a revisão humana de todos os rótulos e justificativas. Alterar
   texto, rótulo, catálogo ou máscara exige nova versão/hash e registro do motivo.
 - Separar exemplos de desenvolvimento/calibração do conjunto final de teste.
