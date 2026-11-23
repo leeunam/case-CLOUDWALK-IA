@@ -49,8 +49,9 @@ o protocolo completo da C01.
 Depois, o responsável aprovou critérios e divisão 24/36. As fontes atuais são
 `protocolo-comparacao.json`, `divisao-dados.json` e `rubrica-comum.md`.
 Os contratos v1.1.0 distinguem controles injetados e candidato, conforme
-`contratos/ajuste-1.1.md`. A revisão foi aprovada; C02 ainda precisa concluir
-e validar sua integração antes de liberar os adaptadores.
+`contratos/ajuste-1.1.md`. A C02 está aceita, incluindo manutenção de integração com 31 testes.
+A C03 está integrada e aceita offline com 24 testes; o piloto real continua
+bloqueado. A C04 executou primeiro piloto CPU e ajusta somente desenvolvimento.
 Orçamento real e vencedor seguem decisões pendentes.
 
 Use o [quadro](README.md), a [especificação](especificacao.md) e o card inteiro.

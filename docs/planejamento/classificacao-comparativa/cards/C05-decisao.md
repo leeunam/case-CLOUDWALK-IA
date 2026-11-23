@@ -57,3 +57,13 @@ Retornar comandos, artefatos, gastos, limitações e ADR assinada pela decisão 
 
 Explicar por que o modelo com maior acerto pode ser inadequado se rebaixar
 urgentes, e por que um modelo que revisa tudo não resolve o objetivo operacional.
+
+## Pré-requisitos técnicos do ensaio final
+
+O executor do piloto C03 aceita apenas desenvolvimento e controles. Sua
+autorização não libera automaticamente os 36 relatos reservados. Depois do
+piloto real aceito, preparar escopo e autorização próprios para o lote final,
+vinculados aos IDs e hashes congelados, sem reutilizar a permissão do piloto.
+A latência remota permanece com aquecimento desconhecido; comprovar o estado
+ou discutir o método remoto/local antes de C05. A meta aprovada não pode ser
+considerada satisfeita por presunção. Esses pontos não iniciam o ensaio final.

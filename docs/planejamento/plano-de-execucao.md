@@ -59,8 +59,12 @@ diretamente pelo responsável e 52 pela IA sob delegação explícita, conforme 
 divisão 24/36 foram aprovados no [protocolo](classificacao-comparativa/protocolo-comparacao.md).
 Os contratos v1.1.0 passaram na verificação local, conforme o
 [aceite C01](classificacao-comparativa/aceite-c01.md). A revisão final da C01 foi aprovada. A revisão da C02 levou à emenda técnica
-1.1.0 de proveniência dos controles. O avaliador está aceito com 27 testes
-e reprodução fixture do código aprovado; C03 e C04 estão liberadas. Vencedor e orçamento real continuam pendentes.
+1.1.0 de proveniência dos controles. O avaliador está aceito com 31 testes
+após a manutenção de integração e reprodução fixture do código aprovado.
+A C03 foi integrada e aceita offline com 24 testes, preservando o bloqueio
+do piloto pago. A C04 já executou o primeiro piloto CPU local; os ajustes
+seguem somente em desenvolvimento, com evidências preservadas. Vencedor e
+orçamento real continuam pendentes.
 Criar os cards não equivale a autorizar inferência paga nem escolher o fornecedor.
 
 Ordem: C01 → C02 → C03/C04 em paralelo → C05 → C06 → C07. R01 e R02 podem

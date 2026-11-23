@@ -2,8 +2,7 @@
 
 Issue publicada: [#4](https://github.com/leeunam/case-CLOUDWALK-IA/issues/4). Consulte a issue para progresso e comentários atuais.
 
-Estado: **liberada para implementação com transporte simulado**. Piloto pago continua bloqueado por credencial e teto autorizado.
-Base de execução e ambiente isolado são informados pelo integrador.
+Estado: **implementação offline aceita e integrada** em `276b0eba96d2d3acaf099e3c59fe5775265fef3c`. [Aceite offline](../../../evidencias/c03/aceite-offline.json): 24 testes aprovados e reprodução fixture de 24 relatos e 13 controles. O aceite real continua bloqueado por credencial, autorização financeira e confirmação do faturamento.
 
 ## Parent e especificação
 
