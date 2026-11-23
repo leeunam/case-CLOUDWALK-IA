@@ -7,6 +7,10 @@ Issue publicada: [#2](https://github.com/leeunam/case-CLOUDWALK-IA/issues/2). Co
 [Quadro CLASS-001](../README.md) · [CLASS-SPEC-001](../especificacao.md).
 Estado inicial: planejamento com participação humana; não libera ensaio pago.
 
+Progresso de revisão em 2026-11-23: cinco casos com aprovação dos campos
+ausentes e 55 pendentes, conforme o [registro parcial](../revisao-de-rotulos.md).
+C01 continua em andamento; o dataset completo permanece provisório.
+
 ## O que construir
 
 Como responsável pelo projeto, conseguir aprovar um protocolo executável antes
