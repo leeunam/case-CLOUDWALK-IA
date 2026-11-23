@@ -5,6 +5,13 @@ novos ajustes GLiClass nesta entrega. Essa decisão substitui a exigência de
 dois candidatos na execução final. Não seleciona automaticamente o Qwen.
 Base de preparação: `e06143dfc49505894e707f446fa97a93fc58ba24`.
 
+O plano estático foi gerado e conferido na branch
+`docs/resultado-classificacao`, worktree `.worktrees/c05-comparacao`, após a
+emenda integrada `99b6230`. Foram confirmados 36 relatos, 13 controles e 44
+possíveis chamadas do candidato, sem iniciar o adaptador nem acessar a chave.
+[Conferência e reprodução](../../c05.md). A execução real continua pendente
+da disponibilidade e dos limites do executor final; não há resultado C05.
+
 ## Escopo e evidências
 
 - Avaliar somente `qwen/qwen3.8-27b`, com os 36 IDs de `final_test` da divisão
