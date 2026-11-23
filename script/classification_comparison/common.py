@@ -19,9 +19,9 @@ def encode(obj, *, indent=None):
     return text.encode("utf-8", errors="backslashreplace").decode("utf-8")
 
 
-def project(case, catalog):
+def project(case, catalog, *, ipc_version=c01.get_profile().ipc_version):
     return {**{key: case[key] for key in ("id", "text", "received", "missing")},
-            "brand": "marca-sintetica", "catalog": catalog, "contract_version": "1.1.0"}
+            "brand": "marca-sintetica", "catalog": catalog, "contract_version": ipc_version}
 
 
 def injected_inventory(ids, reference, policy):
@@ -39,26 +39,20 @@ def injected_observation(item, run_id, policy):
                 elapsed_ms=None, load_ms=None, inference_ms=None, requests=0, questions=0, request_usage=[])
 
 
-def preflight():
-    # The protocol is the trust root. It pins the catalog, data, split and rubric.
-    lock = c01.read(HERE / "sources.lock.json")
-    for path, sha in lock.items():
-        c01.source_path({"path": path, "sha256": sha})
-    validators = c01.validators()
-    example = c01.load_bundle(validators)
+def preflight(profile_name=c01.LEGACY):
+    profile = c01.get_profile(profile_name)
+    validators, protocol, split, catalog, indexed = c01.profile_context(profile.name)
+    example = c01.load_bundle(validators, profile.golden_path)
     sources = example["report"]["sources"]
-    protocol, split, catalog, dataset = [c01.read(c01.source_path(sources[key]))
-                                         for key in ("protocol", "split", "catalog", "dataset")]
-    cases = dataset["cases"]
-    indexed = {case["id"]: case for case in cases}
-    if len(indexed) != len(cases) or dataset["version"] != sources["dataset"]["version"]:
+    dataset = c01.read(c01.source_path(sources["dataset"]))
+    if len(indexed) != len(dataset["cases"]) or dataset["version"] != sources["dataset"]["version"]:
         raise ValueError("dataset incompatível")
     membership = []
     for partition in ("development", "final_test"):
         for mask, ids in split[partition].items():
             for case_id in ids:
                 case = indexed[case_id]
-                envelope = project(case, catalog)
+                envelope = project(case, catalog, ipc_version=profile.ipc_version)
                 c01.structure(validators, "input", envelope)
                 missing, invalid, _ = c01.normalize_input(envelope, catalog)
                 expected = case["expected"]

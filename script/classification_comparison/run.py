@@ -88,7 +88,7 @@ def run_batch(inputs, config, report, catalog, validation, journal, policy):
     with tempfile.TemporaryDirectory() as scratch:
         ready = Path(scratch) / "ready.json"
         final = Path(scratch) / "final.json"
-        env = dict(os.environ, CLASSIFICATION_CONTRACT_VERSION=report["contract_version"],
+        env = dict(os.environ, CLASSIFICATION_CONTRACT_VERSION=config["contract_version"],
                    CLASSIFICATION_IDENTITY=encode(config["identity"]),
                    CLASSIFICATION_FINAL_FILE=str(final), CLASSIFICATION_TIMEOUT_MS="5000",
                    CLASSIFICATION_RUN_ID=report["run_id"], CLASSIFICATION_READY_FILE=str(ready),
@@ -170,16 +170,21 @@ def describe(report, prefix=False):
         if m["value"] is None:
             return f"sem medição (n={m['denominator']})"
         if m["numerator"] is None:
-            return f"{m['value']:.3f} ms (n={m['denominator']})"
+            suffix = " (parcial)" if "ipc_contract_version" in report and m["state"] == "partial" else ""
+            return f"{m['value']:.3f} ms (n={m['denominator']})" + suffix
         return f"{m['numerator']}/{m['denominator']}" + (" (parcial)" if m["state"] == "partial" else "")
 
     status = "Lote interrompido. Elegibilidade inconclusiva." if prefix else f"Elegibilidade {report['eligibility']}."
     lines = [f"# Avaliação {report['run_id']}", "",
              f"Modo {report['identity']['mode']}. {status}",
              f"{len(report['completed_ids'])} relatos e {len(report['control_ids'])} controles.",
-             f"Controles injetados pelo avaliador: {report['injected_controls']['count']}.",
-             "", "| Campo | Acerto bruto | Acerto aplicado | Cobertura automática |",
-             "| --- | --- | --- | --- |"]
+             f"Controles injetados pelo avaliador: {report['injected_controls']['count']}."]
+    if "ipc_contract_version" in report:
+        profile = c01.profile_for_report(report)
+        lines += [f"Perfil `{profile.name}` · protocolo {profile.quality_version} · "
+                  f"relatório {profile.report_version} · IPC {profile.ipc_version}."]
+    lines += ["", "| Campo | Acerto bruto | Acerto aplicado | Cobertura automática |",
+              "| --- | --- | --- | --- |"]
     for field, summary in report["by_field"].items():
         values = [format_metric(summary[k]) for k in ("raw_accuracy", "applied_accuracy", "automatic_coverage")]
         lines.append("| " + " | ".join([field, *values]) + " |")
@@ -199,7 +204,9 @@ def describe(report, prefix=False):
 
 
 def run(args):
-    validation, protocol, split, catalog, cases, example = preflight()
+    selected_profile = getattr(args, "profile", None)
+    profile = c01.get_profile(c01.LEGACY if selected_profile is None else selected_profile)
+    validation, protocol, split, catalog, cases, example = preflight(profile.name)
     config = c01.read(args.config)
     report = example["report"].copy()
     sources = dict(report["sources"], policy=config["policy"], prompt=config["prompt"])
@@ -207,7 +214,7 @@ def run(args):
     if args.limit is not None and not 1 <= args.limit <= len(ids):
         raise ValueError("limite fora da população da partição")
     completed = ids[:args.limit]
-    if config.get("contract_version") != protocol["contract_version"]:
+    if config.get("contract_version") != profile.ipc_version:
         raise ValueError("configuração incompatível com o contrato")
     reference = protocol["control_policy"]
     policy = c01.read(c01.source_path(reference))
@@ -216,7 +223,7 @@ def run(args):
     if set(reserved) != set(policy["controls"]):
         raise ValueError("plano omite controle reservado da política")
     report["injected_controls"] = injected_inventory(reserved, reference, policy)
-    inputs = [project(cases[i], catalog) for i in completed] + controls
+    inputs = [project(cases[i], catalog, ipc_version=profile.ipc_version) for i in completed] + controls
     for item in inputs:
         c01.structure(validation, "input", item)
         c01.normalize_input(item, catalog)
@@ -239,13 +246,19 @@ def run(args):
     command = ["rtk", "proxy", "python3", "-B", str((HERE / "run.py").relative_to(c01.ROOT)),
                "--mode", args.mode, "--split", args.split, "--config",
                os.path.relpath(args.config.resolve(), c01.ROOT), "--output", "NOVO_DIRETORIO"]
+    if selected_profile is not None:
+        command += ["--profile", profile.name]
     if args.limit:
         command += ["--limit", str(args.limit)]
     if args.dry_run:
         command.append("--dry-run")
+    profile_metadata = {}
+    if profile.name == c01.OBSERVED:
+        profile_metadata.update(profile=profile.name, protocol_version=profile.quality_version,
+                                ipc_contract_version=profile.ipc_version)
     write_json(output / "invocation.json", dict(command=shlex.join(command),
                config_sha256=c01.digest(args.config), contract_version=report["contract_version"],
-               control_policy=reference, attempts=args.attempts, concurrency=args.concurrency))
+               control_policy=reference, attempts=args.attempts, concurrency=args.concurrency, **profile_metadata))
     inputs_path = output / "inputs.jsonl"
     with inputs_path.open("x", encoding="utf-8") as stream:
         stream.writelines(encode(item) + "\n" for item in inputs)
@@ -254,20 +267,23 @@ def run(args):
     write_json(output / "plan.json", dict(run_id=report["run_id"], identity=report["identity"],
                    sources=sources, planned_ids=ids, selected_ids=completed, control_ids=report["control_ids"],
                    injected_controls=report["injected_controls"], contract_version=report["contract_version"],
-                   input=inventory(inputs_path), concurrency=args.concurrency, attempts=args.attempts))
+                   input=inventory(inputs_path), concurrency=args.concurrency, attempts=args.attempts, **profile_metadata))
     if args.dry_run:
         return
     def publish(inputs, obs, decisions, prefix=False):
         write_report(output, report.copy(), inputs, obs, decisions, validation, protocol, split, catalog,
                      cases, policy, prefix)
 
-    with Journal(output, report["run_id"], inputs, report["injected_controls"], publish) as journal:
+    journal_profile = dict(contract_version=report["contract_version"], **profile_metadata) if profile_metadata else None
+    with Journal(output, report["run_id"], inputs, report["injected_controls"], publish,
+                 profile_metadata=journal_profile) as journal:
         obs, decisions = run_batch(inputs, config, report, catalog, validation, journal, policy)
         publish(inputs, obs, decisions)
         journal.event("finished", decisions=len(decisions))
 
 
 def write_report(output, report, inputs, obs, decisions, validation, protocol, split, catalog, cases, policy, prefix):
+    profile = c01.profile_for_report(report)
     completed = [d["id"] for d in decisions if d["id"] in cases]
     controls = [d["id"] for d in decisions if d["id"] not in cases]
     injected = [o["id"] for o in obs if o["origin"] == "injected_control"]
@@ -277,7 +293,7 @@ def write_report(output, report, inputs, obs, decisions, validation, protocol, s
     report.update(completed_ids=completed, control_ids=controls,
                   injected_controls=injected_inventory(injected, protocol["control_policy"], policy))
     report.update(summarize(cases, inputs, obs, decisions, catalog, completed,
-                            fixture=report["identity"]["mode"] == "fixture"))
+                            fixture=report["identity"]["mode"] == "fixture", profile_name=profile.name))
     if report["split"] == "final_test" and len(completed) < len(report["planned_ids"]):
         # For a partial final test the contract retains known full-test populations.
         counts = protocol["exact_test_denominators"]
@@ -285,7 +301,7 @@ def write_report(output, report, inputs, obs, decisions, validation, protocol, s
                        "automatic_non_urgent_applied_when_expected_urgent": counts["urgent_priority_omitted_cases"],
                        "automatic_coverage_on_fully_classifiable_cases_min": counts["fully_classifiable_cases"],
                        "raw_urgent_recognition_min": counts["urgent_priority_omitted_cases"],
-                       "warm_total_latency_p95_ms_max": len(report["planned_ids"])}
+                       profile.latency_gate: len(report["planned_ids"])}
         for name, population in populations.items():
             partial(report["gates"][name], population)
         for value in report["urgent_outcomes"].values():
@@ -298,7 +314,7 @@ def write_report(output, report, inputs, obs, decisions, validation, protocol, s
     c01.verify_run(bundle, validation, protocol, split, catalog, cases)
     name = "prefix-report" if prefix else "report"
     (output / f"{name}.md").write_text(describe(report, prefix), encoding="utf-8")
-    # No contrato 1.1, a evidência completa pode exigir um veredito mesmo após interrupção.
+    # A evidência completa pode exigir um veredito mesmo após interrupção.
     if not prefix or report["eligibility"] == "inconclusive":
         write_json(output / f"{name}.json", report)
 
@@ -314,6 +330,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True, help="diretório novo dentro do checkout")
     parser.add_argument("--config", type=Path, default=HERE / "fixture.json")
+    parser.add_argument("--profile", choices=c01.PROFILES, help="perfil do relatório (padrão: warm-1.0)")
     parser.add_argument("--mode", choices=("fixture", "real"), default="fixture")
     parser.add_argument("--split", choices=("development", "control", "final_test"), default="development")
     parser.add_argument("--limit", type=int)

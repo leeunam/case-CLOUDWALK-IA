@@ -1,6 +1,6 @@
 """Unidades do protocolo C01. Controles entram em integridade e usage apenas."""
 from collections import Counter
-from math import ceil, fsum
+from math import ceil, fsum, isfinite
 
 from common import c01
 
@@ -68,7 +68,8 @@ def percentile(values, population, p):
                 value=sorted(values)[ceil(p * len(values)) - 1], numerator=None, denominator=len(values))
 
 
-def summarize(cases, inputs, observations, decisions, catalog, completed, fixture=True):
+def summarize(cases, inputs, observations, decisions, catalog, completed, fixture=True, *, profile_name=c01.LEGACY):
+    profile = c01.get_profile(profile_name)
     by_id = {o["id"]: o for o in observations}
     verdicts = {d["id"]: d for d in decisions}
     rows = [(cases[i], by_id[i], verdicts[i]) for i in completed]
@@ -105,8 +106,17 @@ def summarize(cases, inputs, observations, decisions, catalog, completed, fixtur
             integrity["partial"] += any(d["fields"][f]["applied"] is not None for f in item["missing"])
 
     expected_review = [r for r in rows if c01.ABSTENTION in r[0]["expected"].values()]
-    durations = [o["elapsed_ms"] for _, o, _ in rows if not fixture and
-                 o["temperature_state"] == "warm" and o["elapsed_ms"] is not None]
+    durations = []
+    if not fixture:
+        for _, obs, _ in rows:
+            elapsed = obs["elapsed_ms"]
+            if elapsed is None:
+                continue
+            if profile.name == c01.OBSERVED:
+                if obs["origin"] == "candidate" and isfinite(elapsed) and elapsed >= 0:
+                    durations.append(elapsed)
+            elif obs["temperature_state"] == "warm":
+                durations.append(elapsed)
     gates = dict(channel_field_preservation_ratio=metric(integrity["preserved"], integrity["provided"]),
                  complete_or_invalid_controls_model_calls=metric(integrity["calls"], integrity["blocked"], count=True),
                  partial_application_after_abstention_or_error=metric(integrity["partial"], integrity["incomplete"], count=True),
@@ -114,8 +124,8 @@ def summarize(cases, inputs, observations, decisions, catalog, completed, fixtur
                                                                      len(expected_review), count=True),
                  automatic_non_urgent_applied_when_expected_urgent=metric(counters["applied_lower"], len(urgent), count=True),
                  automatic_coverage_on_fully_classifiable_cases_min=slice_metrics(rows)["automatic_coverage"],
-                 raw_urgent_recognition_min=metric(counters["raw"], len(urgent)),
-                 warm_total_latency_p95_ms_max=percentile(durations, len(rows), .95))
+                 raw_urgent_recognition_min=metric(counters["raw"], len(urgent)))
+    gates[profile.latency_gate] = percentile(durations, len(rows), .95)
     for f in c01.FIELDS:
         gates[f"applied_{f}_accuracy"] = by_field[f]["applied_accuracy"]
     return dict(by_field=by_field, by_mask=by_mask, by_stratum=by_stratum, urgent_outcomes=outcomes,
