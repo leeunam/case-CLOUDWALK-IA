@@ -1,0 +1,15 @@
+{
+  "script": "script/classification_comparison/adapters/gliclass/evidence/targeted-development.py",
+  "script_sha256": "164342aa32123fedcaad1c39fdfb9fbfa9162a031213d72e9ac0c9b3eae1bc1f",
+  "config_sha256": "3f9186d50e13245e7122f23baa62452829fd82cdc0dcc961a36439bd4099dff3",
+  "selected_id": "jev-002",
+  "concurrency": 1,
+  "attempts": 1,
+  "timeout_ms": 5000,
+  "cpu_affinity": [
+    0,
+    2
+  ],
+  "scope": "development_only",
+  "reason": "Isolate masks after earlier prefix timeout; do not pool with previous batches"
+}
