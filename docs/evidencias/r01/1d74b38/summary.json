@@ -1,0 +1,25 @@
+{
+  "task": "R01",
+  "source_revision": "1d74b38487999dde18ace23f9a704bbac24121e7",
+  "project": "cloudwalk_r01_02b2bb62526c",
+  "runner_exit_code": 0,
+  "controlled_scenarios_status": "passed_final_review_finding_pending",
+  "recovery_seconds": {
+    "mock": 12.283714106000843,
+    "events": 12.254594162999638
+  },
+  "fixed_deadline_seconds": 120,
+  "final_stage": {
+    "stage": "resultado",
+    "status": "aprovado"
+  },
+  "canonical_recovery_verified": true,
+  "native_tests": {
+    "integration": 20,
+    "trial": 12,
+    "failures": 0
+  },
+  "cleanup": "runner concluded successfully; docker ps empty",
+  "scope": "controlled real Kafka/Rails trial; not a repetition of historical F08 load; original failures preserved",
+  "pending": "Final review found missing SQL case after known acceptance must fail instead of inconclusive; negative-path classification only. Await final fix and review."
+}
