@@ -11,8 +11,9 @@ implementada ou executada como parte deste planejamento.
 Está confirmado comparar Qwen pela Feita com GLiClass local. Os 60 rótulos
 foram revisados para referência exploratória: oito casos diretamente pelo
 responsável e 52 pela IA sob delegação, conforme o [registro](revisao-de-rotulos.md).
-A separação de dados e os limites de aceitação foram aprovados; contratos estão
-em fechamento e o orçamento real segue pendente. A integração operacional só começa depois de C05 registrar
+A separação de dados e os limites de aceitação foram aprovados; contratos
+v1.0.0 passaram na verificação local e o orçamento real segue pendente.
+A integração operacional só começa depois de C05 registrar
 um vencedor elegível aprovado pelo responsável. O resultado pode ser inconclusivo.
 
 Os cards representam Specification Driven Development. Cada tarefa deve ligar
@@ -20,8 +21,8 @@ comportamento especificado, critérios de aceite, evidências e decisão de revi
 Um commit ou teste fixture, sozinho, não equivale a aceite com um modelo real.
 
 Os [critérios e a separação dos dados](protocolo-comparacao.md) foram aprovados
-na C01. Eles preservam a revisão dos 60 rótulos; a liberação de C02 aguarda os
-contratos e a verificação final. Chamadas reais continuam sem orçamento autorizado.
+na C01. O [aceite](aceite-c01.md) registra contratos, verificações e limites
+para liberar C02 com fixtures após integração. Chamadas reais continuam sem orçamento autorizado.
 
 ## Cards e dependências
 

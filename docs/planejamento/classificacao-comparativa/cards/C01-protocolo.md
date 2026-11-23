@@ -5,12 +5,13 @@ Issue publicada: [#2](https://github.com/leeunam/case-CLOUDWALK-IA/issues/2). Co
 ## Parent e especificação
 
 [Quadro CLASS-001](../README.md) · [CLASS-SPEC-001](../especificacao.md).
-Estado inicial: planejamento com participação humana; não libera ensaio pago.
+Estado: verificação local concluída; revisão ampla final antes da liberação
+registrada pelo integrador. [Evidências e passagem](../aceite-c01.md).
 
 Progresso em 2026-11-23: revisão dos 60 casos concluída para referência
 exploratória, com oito aprovações diretas e 52 pela IA sob delegação explícita,
-conforme o [registro da revisão](../revisao-de-rotulos.md). C01 continua em
-andamento: critérios e divisão foram aprovados, e os contratos estão em fechamento.
+conforme o [registro da revisão](../revisao-de-rotulos.md). Os critérios/divisão
+foram aprovados e os contratos e exemplos passaram nas verificações locais.
 
 Os [critérios e a divisão](../protocolo-comparacao.md) foram aprovados pelo
 responsável em 2026-11-23. A aprovação não autoriza gasto de API nem escolhe modelo.
@@ -26,24 +27,24 @@ escolhe o vencedor.
 
 ## Critérios de aceite
 
-- [ ] CLASS-SPEC-001, schema JSON e fixtures registram entradas completas,
+- [x] CLASS-SPEC-001, schema JSON e fixtures registram entradas completas,
   omissões simples/duplas, inválidos, abstenção, erro e aplicação tudo-ou-revisão.
-- [ ] A origem válida do canal é preservada; entrada completa/inválida não
+- [x] A origem válida do canal é preservada; entrada completa/inválida não
   solicita inferência; scores opcionais têm natureza explícita, sem falsa calibração.
 - [x] Revisão dos 60 relatos documentada por caso, com origem, justificativas,
   ressalvas e hash preservado: oito aprovações diretas e 52 pela IA delegada.
-  Registrar a limitação de referência exploratória; o protocolo final segue pendente.
+  A limitação de referência exploratória acompanha o protocolo.
 - [x] Separar dados de desenvolvimento/calibração dos de teste final. Fixar IDs,
   tamanhos, catálogos e contagem de urgentes com prioridade omitida no holdout;
   declarar se o resultado sustenta decisão inicial ou apenas estudo exploratório.
   Não ajustar prompts/limiares com o resultado do holdout.
-- [ ] Congelar a mesma informação semântica para os dois candidatos: critérios de
+- [x] Congelar a mesma informação semântica para os dois candidatos: critérios de
   categoria/prioridade/urgência, abstenção e eventuais exemplos. Registrar o
   mapeamento para cada adaptador e qualquer diferença antes da execução final.
 - [x] Aprovar limites de erro de urgência, acerto/cobertura, abstenção, latência
   e custo antes da comparação. Distinguir urgente classificado abaixo de urgente,
   abstenção e falha. Aceitar formalmente a possibilidade de nenhum vencedor.
-- [ ] Definir schema de relatório, estados de medição, denominadores e registros
+- [x] Definir schema de relatório, estados de medição, denominadores e registros
   de modelo/política/ambiente. Evidência ausente não vira aprovação nem custo zero.
 - [x] Registrar teto e limites de execução real ou marcar autorização pendente.
   Sem autorização, o caminho de fixtures segue disponível e o real fica bloqueado.
