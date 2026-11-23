@@ -67,7 +67,8 @@ class ObservedLatencyProfile(unittest.TestCase):
             observations[case_id] = dict(origin="candidate", elapsed_ms=duration,
                                          temperature_state=("warm", "unknown", "cold")[index % 3],
                                          choices={"category": {"status": status}, "priority": {"status": status}})
-        observations["ctl-duplo"] = dict(origin="candidate", elapsed_ms=60000, temperature_state="warm")
+        observations["ctl-duplo"] = dict(origin="candidate", elapsed_ms=5200, temperature_state="warm",
+                                         choices={"priority": {"status": "error", "reason": "timeout"}})
         return report, observations
 
     def test_complete_sample_and_inclusive_gate(self):
@@ -129,6 +130,7 @@ class ObservedLatencyProfile(unittest.TestCase):
 
     def test_missing_durations_prefix_fixture_and_zero_samples(self):
         report, obs = self.synthetic_sample([0, None, 5020])
+        obs["synthetic-2"]["choices"]["priority"] = {"status": "error", "reason": "timeout"}
         decisions = {row["id"]: row for row in self.golden["decisions"]}
         report["planned_ids"] = report["completed_ids"] + ["synthetic-pending"]
         report["latency_p50_ms"] = metric("partial", 2, 0)
@@ -149,6 +151,25 @@ class ObservedLatencyProfile(unittest.TestCase):
             self.assertEqual(c.verify_observed_latency(report, obs, 36), 0)
         report["gates"][c.OBSERVED_GATE]["denominator"] = 0
         with self.assertRaisesRegex(c.ContractError, "observed_latency"):
+            c.verify_observed_latency(report, obs, 36)
+
+    def test_last_sample_and_controls_must_be_completable_even_when_p95_passes(self):
+        report, obs = self.synthetic_sample([1500] * 34 + [3000, 5130])
+        report["latency_p50_ms"] = metric("measured", 36, 1500)
+        report["gates"][c.OBSERVED_GATE] = metric("measured", 36, 3000)
+        last = obs["synthetic-35"]
+        last["choices"] = {"category": {"status": "predicted"}, "priority": {"status": "error", "reason": "timeout"}}
+        self.assertEqual(c.verify_observed_latency(report, obs, 36), 36)
+        last["elapsed_ms"] = 5251
+        with self.assertRaisesRegex(c.ContractError, "observed_deadline: synthetic-35"):
+            c.verify_observed_latency(report, obs, 36)
+        last["elapsed_ms"] = 5130
+        last["choices"]["priority"]["reason"] = "transport"
+        with self.assertRaisesRegex(c.ContractError, "observed_deadline: synthetic-35"):
+            c.verify_observed_latency(report, obs, 36)
+        last["elapsed_ms"] = 5000
+        obs["ctl-duplo"]["choices"]["priority"] = {"status": "predicted"}
+        with self.assertRaisesRegex(c.ContractError, "observed_deadline: ctl-duplo"):
             c.verify_observed_latency(report, obs, 36)
 
     def test_saved_synthetic_development_report_uses_authenticated_elapsed(self):
@@ -174,17 +195,43 @@ class ObservedLatencyProfile(unittest.TestCase):
                                          samples=int(counted), expected_samples=1)
         with TemporaryDirectory(dir=c.ROOT, prefix="synthetic-contract-") as folder:
             directory = Path(folder)
-            for stream, row in (("inputs", item), ("observations", obs), ("decisions", decision)):
-                path = directory / f"{stream}.jsonl"
-                path.write_text(json.dumps(row) + "\n", encoding="utf-8")
-                report["artifacts"][stream] = dict(path=path.relative_to(c.ROOT).as_posix(), sha256=c.digest(path))
             manifest = directory / "report.json"
-            manifest.write_text(json.dumps(report), encoding="utf-8")
+
+            def save(observation, verdict):
+                for stream, row in (("inputs", item), ("observations", observation), ("decisions", verdict)):
+                    path = directory / f"{stream}.jsonl"
+                    path.write_text(json.dumps(row) + "\n", encoding="utf-8")
+                    report["artifacts"][stream] = dict(path=path.relative_to(c.ROOT).as_posix(), sha256=c.digest(path))
+                manifest.write_text(json.dumps(report), encoding="utf-8")
+
+            save(obs, decision)
             self.assertEqual(c.verify_report(manifest).name, c.OBSERVED)
             report["gates"][c.OBSERVED_GATE]["value"] = 122
             manifest.write_text(json.dumps(report), encoding="utf-8")
             with self.assertRaisesRegex(c.ContractError, "observed_latency"):
                 c.verify_report(manifest)
+
+            vectors = [(5000, None, True), (5000.000001, None, False), (5130, "transport", False),
+                       (5130, "timeout", True), (5250, "timeout", True), (5251, "timeout", False)]
+            for elapsed, reason, accepted in vectors:
+                with self.subTest(elapsed=elapsed, reason=reason):
+                    observation = dict(obs, elapsed_ms=elapsed)
+                    verdict = deepcopy(decision)
+                    gate = metric("unmeasured", 0)
+                    if reason:
+                        observation["choices"] = {"category": {"status": "error", "reason": reason, "raw": None}}
+                        verdict.update(outcome="review", reason="incomplete_prediction")
+                        verdict["fields"]["category"] = {"status": "error", "applied": None}
+                        gate = dict(state="measured", numerator=0, denominator=1, value=0)
+                    report["gates"]["partial_application_after_abstention_or_error"] = gate
+                    report["latency_p50_ms"] = metric("measured", 1, elapsed)
+                    report["gates"][c.OBSERVED_GATE] = metric("measured", 1, elapsed)
+                    save(observation, verdict)
+                    if accepted:
+                        self.assertEqual(c.verify_report(manifest).name, c.OBSERVED)
+                    else:
+                        with self.assertRaisesRegex(c.ContractError, "observed_deadline"):
+                            c.verify_report(manifest)
 
 
 if __name__ == "__main__":

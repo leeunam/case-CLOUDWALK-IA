@@ -23,6 +23,7 @@ LEGACY = "warm-1.0"
 OBSERVED = "observed-total-1.1"
 WARM_GATE = "warm_total_latency_p95_ms_max"
 OBSERVED_GATE = "observed_total_latency_p95_ms_max"
+TIMEOUT_DELIVERY_MS = 250
 
 
 @dataclass(frozen=True)
@@ -485,11 +486,18 @@ def verify_observed_latency(report, observations, population):
     """Reconstruct the two nearest ranks from completed cases, independent of C02."""
     durations = []
     if report["identity"]["mode"] == "real":
-        for case_id in report["completed_ids"]:
-            obs = observations[case_id]
+        completed = set(report["completed_ids"])
+        timeout_ms = report["environment"]["timeout_ms"]
+        for case_id, obs in observations.items():
             elapsed = obs["elapsed_ms"]
-            if obs["origin"] == "candidate" and elapsed is not None:
-                require(isfinite(elapsed) and elapsed >= 0, "observed_duration", case_id)
+            if obs["origin"] != "candidate" or elapsed is None:
+                continue
+            require(isfinite(elapsed) and elapsed >= 0, "observed_duration", case_id)
+            if elapsed > timeout_ms:
+                has_timeout = any(choice["status"] == "error" and choice.get("reason") == "timeout"
+                                  for choice in obs["choices"].values())
+                require(has_timeout and elapsed <= timeout_ms + TIMEOUT_DELIVERY_MS, "observed_deadline", case_id)
+            if case_id in completed:
                 durations.append(elapsed)
     durations.sort()
     count = len(durations)
