@@ -84,6 +84,9 @@ class Journal:
         self.active = self.pending_observation = None
 
     def interrupted(self, error):
+        # A publicação final pode ter falhado depois de escrever parte do relatório.
+        for name in ("report.json", "report.md", "report.tmp"):
+            (self.output / name).unlink(missing_ok=True)
         # A linha completed sincronizada confirma observação e decisão anteriores.
         events = records(self.output / "journal.jsonl")
         completed = [e["id"] for e in events if e["event"] == "completed"]
@@ -152,7 +155,5 @@ class Journal:
         try:
             if exc is not None:
                 self.interrupted(exc)
-            else:
-                self.event("finished", decisions=len(self.decisions))
         finally:
             self.streams.close()

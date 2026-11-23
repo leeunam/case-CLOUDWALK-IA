@@ -164,7 +164,7 @@ def run_batch(inputs, config, report, catalog, validation, journal, policy):
     return journal.observations, journal.decisions
 
 
-def describe(report):
+def describe(report, prefix=False):
     def format_metric(m):
         if m["value"] is None:
             return f"sem medição (n={m['denominator']})"
@@ -172,8 +172,9 @@ def describe(report):
             return f"{m['value']:.3f} ms (n={m['denominator']})"
         return f"{m['numerator']}/{m['denominator']}" + (" (parcial)" if m["state"] == "partial" else "")
 
+    status = "Lote interrompido. Elegibilidade inconclusiva." if prefix else f"Elegibilidade {report['eligibility']}."
     lines = [f"# Avaliação {report['run_id']}", "",
-             f"Modo {report['identity']['mode']}. Elegibilidade {report['eligibility']}.",
+             f"Modo {report['identity']['mode']}. {status}",
              f"{len(report['completed_ids'])} relatos e {len(report['control_ids'])} controles.",
              f"Controles injetados pelo avaliador: {report['injected_controls']['count']}.",
              "", "| Campo | Acerto bruto | Acerto aplicado | Cobertura automática |",
@@ -262,6 +263,7 @@ def run(args):
     with Journal(output, report["run_id"], inputs, report["injected_controls"], publish) as journal:
         obs, decisions = run_batch(inputs, config, report, catalog, validation, journal, policy)
         publish(inputs, obs, decisions)
+        journal.event("finished", decisions=len(decisions))
 
 
 def write_report(output, report, inputs, obs, decisions, validation, protocol, split, catalog, cases, policy, prefix):
@@ -294,8 +296,10 @@ def write_report(output, report, inputs, obs, decisions, validation, protocol, s
     bundle = dict(inputs=inputs, observations=obs, decisions=decisions, report=report)
     c01.verify_run(bundle, validation, protocol, split, catalog, cases)
     name = "prefix-report" if prefix else "report"
-    (output / f"{name}.md").write_text(describe(report), encoding="utf-8")
-    write_json(output / f"{name}.json", report)
+    (output / f"{name}.md").write_text(describe(report, prefix), encoding="utf-8")
+    # No contrato 1.1, a evidência completa pode exigir um veredito mesmo após interrupção.
+    if not prefix or report["eligibility"] == "inconclusive":
+        write_json(output / f"{name}.json", report)
 
 
 def partial(m, population):
