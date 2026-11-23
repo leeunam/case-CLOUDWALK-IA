@@ -13,8 +13,10 @@ def decode(line):
                       parse_constant=c01.reject_constant, parse_float=c01.finite_float)
 
 
-def encode(obj):
-    return json.dumps(obj, ensure_ascii=False, allow_nan=False)
+def encode(obj, *, indent=None):
+    text = json.dumps(obj, ensure_ascii=False, allow_nan=False, indent=indent)
+    # Um substituto isolado só pode atravessar o fluxo UTF-8 como escape JSON.
+    return text.encode("utf-8", errors="backslashreplace").decode("utf-8")
 
 
 def project(case, catalog):

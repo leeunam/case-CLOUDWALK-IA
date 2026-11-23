@@ -1,7 +1,6 @@
 """Runner C02. O stdout do adaptador contém uma observação por entrada apta."""
 import argparse
 import select
-import json
 import os
 from pathlib import Path
 import platform
@@ -21,8 +20,7 @@ from journal import Journal, inventory, sync_directory
 def write_json(path, value):
     temp = path.with_suffix(".tmp")
     with temp.open("x", encoding="utf-8") as file:
-        json.dump(value, file, ensure_ascii=False, indent=2, allow_nan=False)
-        file.write("\n")
+        file.write(encode(value, indent=2) + "\n")
         file.flush()
         os.fsync(file.fileno())
     temp.replace(path)
