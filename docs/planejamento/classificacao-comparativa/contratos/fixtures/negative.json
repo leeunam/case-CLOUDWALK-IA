@@ -1,0 +1,208 @@
+[
+  {
+    "id": "vazamento-expected",
+    "changes": [{"path": ["inputs", 1, "expected"], "value": "oculto"}],
+    "expected_error": "schema/input//additionalProperties"
+  },
+  {
+    "id": "vazamento-rationale",
+    "changes": [{"path": ["inputs", 1, "rationale"], "value": "oculto"}],
+    "expected_error": "schema/input//additionalProperties"
+  },
+  {
+    "id": "vazamento-stratum",
+    "changes": [{"path": ["inputs", 1, "stratum"], "value": "oculto"}],
+    "expected_error": "schema/input//additionalProperties"
+  },
+  {
+    "id": "vazamento-review_source",
+    "changes": [{"path": ["inputs", 1, "review_source"], "value": "oculto"}],
+    "expected_error": "schema/input//additionalProperties"
+  },
+  {
+    "id": "versao-do-contrato",
+    "changes": [{"path": ["observations", 0, "contract_version"], "value": "2.0.0"}],
+    "expected_error": "schema/observation/contract_version/const"
+  },
+  {
+    "id": "marca-externa",
+    "changes": [{"path": ["inputs", 1, "brand"], "value": "marca-real"}],
+    "expected_error": "schema/input/brand/const"
+  },
+  {
+    "id": "score-sem-tipo",
+    "changes": [{"path": ["observations", 1, "choices", "category", "score"], "value": 2.7}],
+    "expected_error": "schema/observation/choices/category/score/anyOf"
+  },
+  {
+    "id": "mascara-divergente",
+    "changes": [{"path": ["inputs", 2, "missing"], "value": ["category"]}],
+    "expected_error": "missing_mask"
+  },
+  {
+    "id": "controle-chama-modelo",
+    "changes": [{"path": ["decisions", 0, "attempts"], "value": 1}],
+    "expected_error": "attempt_count"
+  },
+  {
+    "id": "controle-invalido-chama-modelo",
+    "changes": [{"path": ["decisions", 3, "attempts"], "value": 1}],
+    "expected_error": "attempt_count"
+  },
+  {
+    "id": "valor-do-canal-trocado",
+    "changes": [{"path": ["decisions", 1, "fields", "priority", "applied"], "value": "urgent"}],
+    "expected_error": "applied_value"
+  },
+  {
+    "id": "parcial-em-revisao",
+    "changes": [{"path": ["decisions", 4, "fields", "priority", "applied"], "value": "urgent"}],
+    "expected_error": "applied_value"
+  },
+  {
+    "id": "invalido-como-predito",
+    "changes": [{"path": ["observations", 0, "choices", "category", "raw"], "value": "cartoes"}],
+    "expected_error": "predicted_code"
+  },
+  {
+    "id": "solicita-campo-fornecido",
+    "changes": [
+      {
+        "path": ["observations", 0, "choices", "priority"],
+        "value": {"status": "predicted", "raw": "basic", "reason": null}
+      }
+    ],
+    "expected_error": "requested_fields"
+  },
+  {
+    "id": "identificador-repetido",
+    "changes": [{"path": ["decisions", 1, "id"], "value": "ctl-completo"}],
+    "expected_error": "duplicate_id"
+  },
+  {
+    "id": "identificador-desalinhado",
+    "changes": [{"path": ["observations", 0, "id"], "value": "ctl-fantasma"}],
+    "expected_error": "stream_ids"
+  },
+  {
+    "id": "outra-politica",
+    "changes": [{"path": ["observations", 0, "identity", "policy_version"], "value": "9.0.0"}],
+    "expected_error": "observation_identity"
+  },
+  {
+    "id": "custo-estimado-sem-tarifa",
+    "changes": [{"path": ["observations", 0, "request_usage", 0, "estimated_api_usd"], "value": 0.1}],
+    "expected_error": "estimate_tariff"
+  },
+  {
+    "id": "fixture-aprovada",
+    "changes": [{"path": ["report", "eligibility"], "value": "pass"}],
+    "expected_error": "eligibility"
+  },
+  {
+    "id": "real-incompleto-aprovado",
+    "changes": [
+      {"path": ["report", "identity", "mode"], "value": "real"},
+      {"path": ["observations", 0, "identity", "mode"], "value": "real"},
+      {"path": ["observations", 1, "identity", "mode"], "value": "real"},
+      {"path": ["observations", 2, "identity", "mode"], "value": "real"},
+      {"path": ["observations", 3, "identity", "mode"], "value": "real"},
+      {"path": ["observations", 4, "identity", "mode"], "value": "real"},
+      {"path": ["observations", 5, "identity", "mode"], "value": "real"},
+      {"path": ["observations", 6, "identity", "mode"], "value": "real"},
+      {"path": ["observations", 7, "identity", "mode"], "value": "real"},
+      {"path": ["report", "eligibility"], "value": "pass"}
+    ],
+    "expected_error": "eligibility"
+  },
+  {
+    "id": "zero-inventado",
+    "changes": [{"path": ["report", "gates", "raw_urgent_recognition_min", "value"], "value": 0}],
+    "expected_error": "schema/report/gates/raw_urgent_recognition_min/value/type"
+  },
+  {
+    "id": "divisao-por-zero",
+    "changes": [
+      {
+        "path": ["report", "gates", "raw_urgent_recognition_min"],
+        "value": {"state": "measured", "numerator": 0, "denominator": 0, "value": 0}
+      }
+    ],
+    "expected_error": "metric_sample"
+  },
+  {
+    "id": "taxa-incoerente",
+    "changes": [
+      {
+        "path": ["report", "gates", "raw_urgent_recognition_min"],
+        "value": {"state": "measured", "numerator": 1, "denominator": 6, "value": 1}
+      }
+    ],
+    "expected_error": "metric_ratio"
+  },
+  {
+    "id": "rubrica-divergente",
+    "changes": [{"path": ["report", "sources", "rubric", "version"], "value": "2.0.0"}],
+    "expected_error": "source_version"
+  },
+  {
+    "id": "versao-divergente-aplicada",
+    "changes": [{"path": ["observations", 0, "returned_model"], "value": "modelo-sintetico-v9"}],
+    "expected_error": "model_version"
+  },
+  {
+    "id": "custo-parcial-sem-amostra",
+    "changes": [
+      {
+        "path": ["report", "usage", "observed_api_usd"],
+        "value": {"state": "partial", "value": 0, "samples": 0, "expected_samples": 9}
+      }
+    ],
+    "expected_error": "usage_sample"
+  },
+  {
+    "id": "custo-indisponivel-com-zero",
+    "changes": [{"path": ["report", "usage", "estimated_api_usd", "value"], "value": 0}],
+    "expected_error": "usage_state"
+  },
+  {
+    "id": "versao-comprovada-como-timeout",
+    "changes": [{"path": ["observations", 6, "choices", "priority", "reason"], "value": "timeout"}],
+    "expected_error": "model_version"
+  },
+  {
+    "id": "modelo-compativel-como-divergente",
+    "changes": [{"path": ["observations", 6, "returned_model"], "value": "modelo-sintetico-v1"}],
+    "expected_error": "model_version"
+  },
+  {
+    "id": "versao-desconhecida-como-divergente",
+    "changes": [{"path": ["observations", 4, "choices", "priority", "reason"], "value": "version_mismatch"}],
+    "expected_error": "model_version"
+  },
+  {
+    "id": "uso-de-segunda-chamada-omitido",
+    "changes": [{"path": ["observations", 1, "requests"], "value": 1}],
+    "expected_error": "request_usage_count"
+  },
+  {
+    "id": "cobranca-parcial-como-total",
+    "changes": [{"path": ["report", "usage", "observed_api_usd", "state"], "value": "measured"}],
+    "expected_error": "usage_state"
+  },
+  {
+    "id": "cobranca-parcial-descartada",
+    "changes": [{"path": ["report", "usage", "observed_api_usd", "value"], "value": 0}],
+    "expected_error": "usage_total"
+  },
+  {
+    "id": "acerto-do-gate-diverge-da-fatia",
+    "changes": [
+      {
+        "path": ["report", "gates", "applied_category_accuracy"],
+        "value": {"state": "measured", "numerator": 1, "denominator": 1, "value": 1}
+      }
+    ],
+    "expected_error": "applied_accuracy_mismatch"
+  }
+]

@@ -27,8 +27,10 @@ Aplicar o ciclo em cada card:
    o motivo/versão e passar a base atualizada aos outros chats. Documentos não
    devem ser alterados silenciosamente para justificar um resultado já obtido.
 
-No projeto, começar pelo [C01 — issue #2](https://github.com/leeunam/case-CLOUDWALK-IA/issues/2).
-Construção em paralelo entra depois de C02. A documentação é viva e versionada;
+No projeto, o [aceite C01](aceite-c01.md) registra a passagem para
+[C02 — issue #3](https://github.com/leeunam/case-CLOUDWALK-IA/issues/3) com
+fixtures, após o integrador informar o SHA da base aceita. Adaptadores em
+paralelo entram depois de C02. A documentação é viva e versionada;
 uma ambiguidade descoberta durante o código volta ao chat central.
 
 ## Antes de delegar
@@ -46,8 +48,8 @@ o protocolo completo da C01.
 
 Depois, o responsável aprovou critérios e divisão 24/36. As fontes atuais são
 `protocolo-comparacao.json`, `divisao-dados.json` e `rubrica-comum.md`.
-O fechamento dos contratos e a liberação do integrador precedem C02; orçamento
-real e vencedor seguem decisões pendentes.
+Os contratos v1.0.0 foram verificados; a liberação do integrador precede C02.
+Orçamento real e vencedor seguem decisões pendentes.
 
 Use o [quadro](README.md), a [especificação](especificacao.md) e o card inteiro.
 A base fonte estudada é `cb9683179d713e7bcbfc95c54003dc30630ab7ad`. O SHA de

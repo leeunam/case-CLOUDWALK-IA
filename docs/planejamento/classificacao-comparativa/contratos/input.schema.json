@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://class-001.invalid/v1/input.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "id", "brand", "text", "catalog", "received", "missing"],
+  "properties": {
+    "contract_version": {"$ref": "common.schema.json#/$defs/version"},
+    "id": {"$ref": "common.schema.json#/$defs/id"},
+    "brand": {"const": "marca-sintetica"},
+    "text": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "catalog": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "category", "priority"],
+      "properties": {
+        "version": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "category": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1, "pattern": "\\S"}},
+        "priority": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1, "pattern": "\\S"}}
+      }
+    },
+    "received": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {"category": {}, "priority": {}}
+    },
+    "missing": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/field"}, "uniqueItems": true}
+  }
+}

@@ -1,0 +1,1 @@
+Política de demonstração 1.0.0. A fixture ctl-politica registra a recusa simulada de uma escolha de ranking. Sem limiar selecionado para modelos reais.

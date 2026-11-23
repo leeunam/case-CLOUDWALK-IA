@@ -2,8 +2,9 @@
 
 Estado: **critérios e divisão aprovados pelo responsável em 2026-11-23**, pela
 resposta “aprovo” no chat central. São escolhas para o MVP, não exigências do
-TAPI ou resultados medidos. O fechamento dos contratos ainda precede a
-liberação de C02; chamadas reais continuam sem orçamento autorizado.
+TAPI ou resultados medidos. Os contratos v1.0.0 foram verificados localmente;
+o [aceite C01](aceite-c01.md) precede a liberação de C02. Chamadas reais
+continuam sem orçamento autorizado.
 
 [Definições estruturadas](protocolo-comparacao.json) ·
 [IDs e contagens da divisão](divisao-dados.json) ·
@@ -98,8 +99,8 @@ O compromisso entre cobertura e erros nas decisões aceitas é discutido em
 Essas referências apoiam o método; os valores numéricos deste protocolo são
 decisões locais aprovadas, não limites prescritos pelas fontes.
 
-## O que falta para C01
+## Passagem da C01
 
-Completar/congelar rubrica e schemas com exemplos válidos/inválidos e registrar
-o aceite do protocolo completo. O orçamento
-pode continuar pendente para C02 com fixtures, mantendo execuções reais bloqueadas.
+A rubrica e os schemas com exemplos válidos/inválidos estão congelados;
+o [aceite](aceite-c01.md) registra as verificações e a revisão. O orçamento
+continua pendente para C02 com fixtures, mantendo execuções reais bloqueadas.

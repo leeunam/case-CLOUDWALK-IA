@@ -1,6 +1,6 @@
 # CLASS-SPEC-001 — comparação e seleção do classificador
 
-Versão: 0.3, de 2026-11-23. SDD significa **Specification Driven Development**:
+Versão: 1.0, de 2026-11-23. SDD significa **Specification Driven Development**:
 o comportamento e suas provas são definidos antes da implementação.
 
 ## Estado e objetivo
@@ -9,8 +9,9 @@ A comparação **Qwen pela Feita × GLiClass local** foi escolhida pelo respons�
 Os critérios de aceitação e a divisão 24/36 foram aprovados pelo responsável.
 Vencedor e orçamento de execução real permanecem pendentes. A revisão dos 60 rótulos está documentada:
 oito casos aprovados diretamente pelo responsável e 52 pela IA sob delegação
-explícita, para referência exploratória. C01 resolve os pontos restantes antes
-de liberar as tarefas dependentes. Esta especificação não declara um vencedor.
+explícita, para referência exploratória. Os contratos v1.0.0 passaram na
+verificação local; o [aceite C01](aceite-c01.md) registra evidências e limites
+para liberar C02 com fixtures. Esta especificação não declara um vencedor.
 
 O objetivo é escolher um classificador para completar categoria e prioridade
 ausentes, com acerto, tratamento de urgência, abstenção, latência e custo
@@ -39,10 +40,11 @@ Jev, novos canais reais ou uma plataforma genérica de roteamento entre modelos.
 8. A integração conserva idempotência, versões, descarte auditado de resultados
    tardios e prevalência de uma correção humana posterior.
 
-## Contrato do experimento a congelar em C01
+## Contrato do experimento congelado em C01
 
-A versão final deve ter JSON Schema, exemplos válidos e inválidos e uma
-semântica única para os dois adaptadores. Não é o contrato HTTP público Rails.
+O [contrato v1.0.0](contratos/README.md) contém JSON Schema, exemplos válidos
+e inválidos e semântica única para os dois adaptadores. Ele pertence ao
+experimento, separadamente do contrato HTTP público Rails.
 
 | Área | Informação obrigatória |
 | --- | --- |
@@ -73,12 +75,13 @@ e a conversão de saída segundo o schema congelado.
   [manifesto por caso](revisao-de-rotulos.json). Nenhum rótulo foi alterado.
 - O conjunto permanece uma referência exploratória, sem validação humana
   independente de todos os casos. O metadado legado `review: provisional`
-  permanece inalterado; a revisão não conclui o protocolo nem a separação dos dados.
+  permanece inalterado; a fonte atual do protocolo e da divisão é a C01.
 - C01 registra quem revisou cada caso, dúvidas e justificativas. Alterar texto,
   rótulo, catálogo ou máscara exige nova versão/hash e registro do motivo.
-- Separar exemplos de desenvolvimento/calibração do conjunto final de teste.
+- A divisão aprovada separa 24 exemplos de desenvolvimento/calibração e 36
+  de teste final. Os IDs estão em `divisao-dados.json`.
   Prompts, limiares e política de abstenção não podem ser ajustados usando os
-  resultados do teste final. C01 escolhe e registra a separação e os tamanhos.
+  resultados do teste final. O teste contém seis urgentes com prioridade omitida.
 - O teste pareado usa os mesmos relatos, catálogos e máscaras nos dois modelos.
   Ambos recebem as mesmas definições de categoria, prioridade/urgência,
   informação insuficiente e eventuais exemplos. O formato pode variar, mas
@@ -110,9 +113,9 @@ Apresentar contagens, denominadores e limitações, por campo, máscara e estrat
 - Calibração, se avaliada, exige critério e amostra próprios. Scores ou números
   de confiança dos dois modelos não são diretamente equivalentes.
 
-C01 deve fixar, antes da execução final, os limites numéricos de erro de
-urgência, cobertura/abstenção, acerto, latência e orçamento, com justificativa
-do responsável. Esses valores são decisões do experimento, não exigências
+O protocolo aprovado fixa os limites numéricos de erro de urgência,
+cobertura/abstenção, acerto e latência antes da execução. O orçamento permanece
+pendente e bloqueia chamadas pagas. Esses valores são decisões do experimento, não exigências
 quantitativas do TAPI. Um modelo que se abstém em tudo não ganha por evitar
 erros. C05 pode concluir que nenhum candidato satisfaz os critérios ou que
 a evidência é insuficiente. A escolha operacional exige decisão humana.
@@ -122,7 +125,8 @@ sem erros observados não comprova uma baixa taxa de erro em produção.
 
 Os [critérios e a divisão aprovados](protocolo-comparacao.md), com dados
 estruturados em `protocolo-comparacao.json` e `divisao-dados.json`, fixam as metas
-antes do ensaio. O fechamento dos contratos ainda precede a liberação de C02.
+antes do ensaio. O [aceite C01](aceite-c01.md) autoriza a passagem ao avaliador
+fixture após integração, preservando os limites de execução real.
 
 ## Execução e limites financeiros
 

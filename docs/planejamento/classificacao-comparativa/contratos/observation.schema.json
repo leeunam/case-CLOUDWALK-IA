@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://class-001.invalid/v1/observation.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "id",
+    "run_id",
+    "attempt",
+    "identity",
+    "returned_model",
+    "weights_revision",
+    "choices",
+    "temperature_state",
+    "elapsed_ms",
+    "load_ms",
+    "inference_ms",
+    "requests",
+    "questions",
+    "request_usage"
+  ],
+  "properties": {
+    "contract_version": {"$ref": "common.schema.json#/$defs/version"},
+    "id": {"$ref": "common.schema.json#/$defs/id"},
+    "run_id": {"$ref": "common.schema.json#/$defs/id"},
+    "attempt": {"const": 1},
+    "identity": {"$ref": "common.schema.json#/$defs/identity"},
+    "returned_model": {"anyOf": [{"type": "string", "minLength": 1, "pattern": "\\S"}, {"type": "null"}]},
+    "weights_revision": {"anyOf": [{"type": "string", "minLength": 1, "pattern": "\\S"}, {"type": "null"}]},
+    "choices": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {"category": {"$ref": "#/$defs/choice"}, "priority": {"$ref": "#/$defs/choice"}}
+    },
+    "temperature_state": {"enum": ["warm", "cold", "unknown"]},
+    "elapsed_ms": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
+    "load_ms": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
+    "inference_ms": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
+    "requests": {"type": "integer", "minimum": 0},
+    "questions": {"type": "integer", "minimum": 0},
+    "version_error_raw": {"description": "Optional diagnostic output from a rejected model revision; never applied."},
+    "request_usage": {
+      "description": "One usage record per request in dispatch order, including requests with unknown billing.",
+      "type": "array",
+      "items": {"$ref": "#/$defs/request_usage"}
+    }
+  },
+  "$defs": {
+    "choice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "raw", "reason"],
+      "properties": {
+        "status": {"enum": ["predicted", "abstained", "invalid", "error"]},
+        "raw": {},
+        "reason": {"anyOf": [{"type": "string", "minLength": 1, "pattern": "\\S"}, {"type": "null"}]},
+        "score": {"anyOf": [{"$ref": "common.schema.json#/$defs/score"}, {"type": "null"}]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "predicted"}}},
+          "then": {
+            "properties": {"raw": {"type": "string", "minLength": 1, "pattern": "\\S"}, "reason": {"type": "null"}}
+          }
+        },
+        {
+          "if": {"properties": {"status": {"const": "abstained"}}},
+          "then": {"properties": {"reason": {"enum": ["explicit", "policy"]}}}
+        },
+        {
+          "if": {"properties": {"status": {"const": "invalid"}}},
+          "then": {"properties": {"reason": {"enum": ["invalid_output", "missing_output"]}}}
+        },
+        {
+          "if": {"properties": {"status": {"const": "error"}}},
+          "then": {
+            "properties": {
+              "reason": {"enum": ["timeout", "transport", "version_mismatch", "adapter_error"]},
+              "raw": {"type": "null"},
+              "score": {"type": "null"}
+            }
+          }
+        }
+      ]
+    },
+    "request_usage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_tokens", "output_tokens", "observed_api_usd", "estimated_api_usd", "tariff"],
+      "properties": {
+        "input_tokens": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+        "output_tokens": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+        "observed_api_usd": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
+        "estimated_api_usd": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
+        "tariff": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["source", "date", "rate"],
+              "properties": {
+                "source": {"type": "string", "minLength": 1, "pattern": "\\S"},
+                "date": {"type": "string", "format": "date"},
+                "rate": {"type": "string", "minLength": 1, "pattern": "\\S"}
+              }
+            },
+            {"type": "null"}
+          ]
+        }
+      }
+    }
+  }
+}

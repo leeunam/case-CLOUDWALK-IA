@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://class-001.invalid/v1/common.schema.json",
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+    "version": {"const": "1.0.0"},
+    "field": {"enum": ["category", "priority"]},
+    "string": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "count": {"type": "integer", "minimum": 0},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "provider", "requested_model", "adapter_version", "policy_version"],
+      "properties": {
+        "mode": {"enum": ["fixture", "real"]},
+        "provider": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "requested_model": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "adapter_version": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "policy_version": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "expected_returned_model": {"anyOf": [{"$ref": "#/$defs/string"}, {"type": "null"}]},
+        "expected_weights_revision": {"anyOf": [{"$ref": "#/$defs/string"}, {"type": "null"}]}
+      }
+    },
+    "score": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "value"],
+          "properties": {
+            "kind": {"enum": ["provider_probability"]},
+            "value": {"type": "number", "minimum": 0, "maximum": 1}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "value"],
+          "properties": {"kind": {"enum": ["ranking"]}, "value": {"type": "number"}}
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "value"],
+          "properties": {"kind": {"enum": ["self_report"]}, "value": {"type": "string", "minLength": 1, "pattern": "\\S"}}
+        }
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "version", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "sha256": {"$ref": "common.schema.json#/$defs/sha256"}
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "sha256": {"$ref": "common.schema.json#/$defs/sha256"}
+      }
+    }
+  }
+}

@@ -2,6 +2,10 @@
 
 Issue publicada: [#3](https://github.com/leeunam/case-CLOUDWALK-IA/issues/3). Consulte a issue para progresso e comentários atuais.
 
+Estado: **liberada para implementação com fixtures** após o aceite C01.
+O integrador informa o SHA imutável da main integrada na passagem. Sem
+chamadas a fornecedores ou autorização de gasto nesta tarefa.
+
 ## Parent e especificação
 
 [Quadro CLASS-001](../README.md) · [CLASS-SPEC-001](../especificacao.md).

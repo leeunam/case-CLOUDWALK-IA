@@ -3,8 +3,8 @@
 Estado: **60 casos revisados para referência exploratória**: oito com aprovação
 direta do responsável (dez decisões de campo) e 52 com revisão/aprovação da IA
 sob delegação explícita (70 decisões de campo). Nenhum rótulo foi alterado.
-A revisão caso a caso está concluída; C01 continua em andamento e C02 ainda
-não foi liberada.
+A revisão caso a caso está concluída. O [aceite C01](aceite-c01.md) registra
+o protocolo e a passagem ao avaliador; chamadas pagas seguem bloqueadas.
 
 Fonte: [dataset de 60 relatos](../../../script/f08/jev/dataset.json), versão
 1.1.0, SHA-256
@@ -120,12 +120,13 @@ Urgência considera necessidade imediata, como perda em curso ou interrupção s
 alternativa. Os casos previamente aprovados ilustram essa interpretação. A rubrica
 operacional final ainda será congelada na C01.
 
-## Pendências antes do protocolo final
+## Protocolo e próximos passos
 
-- Detalhar e congelar a rubrica e a informação comum fornecida aos candidatos.
-- Separar desenvolvimento/calibração e teste final antes de usar exemplos em prompts.
-- Definir critérios de escolha, schema/fixtures e limites de execução conforme
-  a [C01](cards/C01-protocolo.md).
+- A rubrica comum, os critérios, a divisão 24/36 e os contratos v1.0.0 estão
+  registrados na [C01](cards/C01-protocolo.md).
+- O avaliador C02 usa as fontes congeladas e os exemplos de desenvolvimento;
+  o teste final não serve para ajustar prompts ou limiares.
+- O orçamento para execução real continua pendente.
 - Manter os rótulos fixos durante o teste final e declarar a origem da revisão.
 
 Nenhum caso deste conjunto foi enviado a Qwen ou GLiClass nesta revisão.

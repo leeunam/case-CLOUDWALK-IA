@@ -26,10 +26,12 @@ concluído. A F08 executou a referência de carga: cinco rodadas aprovadas e
 uma reprovada por encerramento dos consumidores após a retomada do Kafka.
 O [relatório F08](../f08.md) conserva os resultados e o diagnóstico. A correção
 da recuperação, a avaliação real do Jev e a publicação seguem pendentes.
-Antes de novas medições, corrigir também os dois casos limite registrados
-em F08: carimbo ausente junto de publicação tardia e atribuição SQL de uma
-escrita de chat persistida após timeout HTTP. Os resultados atuais foram
-conferidos com os dados completos e permanecem publicados.
+A R02 resolveu os dois casos limite do analisador: carimbo ausente junto de
+publicação tardia e atribuição SQL de escrita de chat após timeout HTTP. Seu
+aceite local registrou 49 testes e preservação dos sete históricos e das
+12.600 linhas, conforme a [issue #9](https://github.com/leeunam/case-CLOUDWALK-IA/issues/9).
+A correção R01 dos consumidores continua em revisão/ensaio. Os resultados
+históricos permanecem publicados sem alteração.
 
 A [passagem da F08](passagem-f08.md) separa o gerador/observador de carga
 do dataset/avaliador Jev, com arquivos próprios e a mesma base Git. A execução
@@ -53,7 +55,9 @@ Os 60 rótulos foram revisados para referência exploratória: oito casos
 diretamente pelo responsável e 52 pela IA sob delegação explícita, conforme o
 [registro da C01](classificacao-comparativa/revisao-de-rotulos.md). Critérios e
 divisão 24/36 foram aprovados no [protocolo](classificacao-comparativa/protocolo-comparacao.md).
-Contratos estão em fechamento; vencedor e orçamento real continuam pendentes.
+Os contratos v1.0.0 passaram na verificação local, conforme o
+[aceite C01](classificacao-comparativa/aceite-c01.md). A revisão final da C01 foi aprovada; C02 está liberada para implementação
+com fixtures após a integração. Vencedor e orçamento real continuam pendentes.
 Criar os cards não equivale a autorizar inferência paga nem escolher o fornecedor.
 
 Ordem: C01 → C02 → C03/C04 em paralelo → C05 → C06 → C07. R01 e R02 podem
