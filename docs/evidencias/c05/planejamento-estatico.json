@@ -1,0 +1,83 @@
+{
+  "task": "C05",
+  "status": "static_plan_verified_not_live_ready",
+  "scope_base_revision": "99b62309d3d5c33cba3d547748df4d7bf3457c0d",
+  "branch": "docs/resultado-classificacao",
+  "worktree": ".worktrees/c05-comparacao",
+  "profile": "observed-total-1.1",
+  "quality_protocol_version": "1.1.0",
+  "report_contract_version": "1.2.0",
+  "ipc_contract_version": "1.1.0",
+  "plan_path": "script/classification_comparison/c05/plano-qwen-final",
+  "final_cases": 36,
+  "controls": 13,
+  "max_candidate_requests": 44,
+  "candidate_natural_controls": 8,
+  "zero_model_call_controls": 4,
+  "injected_controls": 1,
+  "attempts_per_case": 1,
+  "concurrency": 1,
+  "credentials_loaded": false,
+  "adapter_started": false,
+  "provider_posts": 0,
+  "holdout_inferences": 0,
+  "artifacts": {
+    "inputs.jsonl": {
+      "sha256": "1786f8cdc239f9a661ba413f7f8ee964a33c5d87be48450a62ea29fd5a4fed09",
+      "bytes": 40065
+    },
+    "invocation.json": {
+      "sha256": "f68dae46f2745b189fcc920df5c4090834414d19463cc01b53edc27fd78252ef",
+      "bytes": 721
+    },
+    "plan.json": {
+      "sha256": "ed78d19d4d3266f52e0cdbf9bac594d27afa5fcbf53cabb2647c46e5d6861013",
+      "bytes": 3952
+    }
+  },
+  "sources_verified": {
+    "dataset": {
+      "path": "script/f08/jev/dataset.json",
+      "version": "1.1.0",
+      "sha256": "0e7e4c342c2a39cefd89855d8c0513f447d7878303eb4091488ca8af78928880"
+    },
+    "catalog": {
+      "path": "script/f08/jev/catalog.json",
+      "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271",
+      "version": "1.0.0"
+    },
+    "rubric": {
+      "path": "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
+      "version": "1.0.0",
+      "sha256": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac"
+    },
+    "protocol": {
+      "path": "docs/planejamento/classificacao-comparativa/protocolo-comparacao-1.1.json",
+      "version": "1.1.0",
+      "sha256": "061a91a0c9b1b054ca2c9579077453d77ac765f24d725667fb97b5749db1aed7"
+    },
+    "split": {
+      "path": "docs/planejamento/classificacao-comparativa/divisao-dados.json",
+      "sha256": "8f7d0eab0d9431c2906e07bc022dc31a80684464f4b99f75dfc6ed1277fed1a9",
+      "version": "1.0.0"
+    },
+    "policy": {
+      "path": "script/classification_comparison/adapters/qwen/politica.txt",
+      "version": "1.0.0",
+      "sha256": "c1b459d24a874b3e5e44a67297314d322dded0ee6c7413c7d3a0cdd28f70f56b"
+    },
+    "prompt": {
+      "path": "script/classification_comparison/adapters/qwen/prompt.txt",
+      "version": "1.0.0",
+      "sha256": "b38edc9e1db036405b1e3eadb63f11219a01dec4aefe6996e40c6c6c19ec8527"
+    }
+  },
+  "limits": [
+    "Only a static plan: no report, observations or decisions were generated.",
+    "The config command still targets the historical development pilot; it is not a runnable final-test recipe.",
+    "Paid adapter requires a final-scope manifest and final-ID/profile validation before use.",
+    "The final budget cannot use the historical full-run worst-case reservation under USD10.",
+    "Public model page displayed Down; no availability POST was attempted.",
+    "No classifier eligibility or operational adoption was established."
+  ]
+}
