@@ -18,11 +18,7 @@
     "inference_ms",
     "requests",
     "questions",
-    "input_tokens",
-    "output_tokens",
-    "observed_api_usd",
-    "estimated_api_usd",
-    "tariff"
+    "request_usage"
   ],
   "properties": {
     "contract_version": {"$ref": "common.schema.json#/$defs/version"},
@@ -44,26 +40,12 @@
     "inference_ms": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
     "requests": {"type": "integer", "minimum": 0},
     "questions": {"type": "integer", "minimum": 0},
-    "input_tokens": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
-    "output_tokens": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
-    "observed_api_usd": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
-    "estimated_api_usd": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
-    "tariff": {
-      "anyOf": [
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["source", "date", "rate"],
-          "properties": {
-            "source": {"type": "string", "minLength": 1, "pattern": "\\S"},
-            "date": {"type": "string", "format": "date"},
-            "rate": {"type": "string", "minLength": 1, "pattern": "\\S"}
-          }
-        },
-        {"type": "null"}
-      ]
-    },
-    "version_error_raw": {"description": "Optional diagnostic output from a rejected model revision; never applied."}
+    "version_error_raw": {"description": "Optional diagnostic output from a rejected model revision; never applied."},
+    "request_usage": {
+      "description": "One usage record per request in dispatch order, including requests with unknown billing.",
+      "type": "array",
+      "items": {"$ref": "#/$defs/request_usage"}
+    }
   },
   "$defs": {
     "choice": {
@@ -102,6 +84,32 @@
           }
         }
       ]
+    },
+    "request_usage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_tokens", "output_tokens", "observed_api_usd", "estimated_api_usd", "tariff"],
+      "properties": {
+        "input_tokens": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+        "output_tokens": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+        "observed_api_usd": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
+        "estimated_api_usd": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
+        "tariff": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["source", "date", "rate"],
+              "properties": {
+                "source": {"type": "string", "minLength": 1, "pattern": "\\S"},
+                "date": {"type": "string", "format": "date"},
+                "rate": {"type": "string", "minLength": 1, "pattern": "\\S"}
+              }
+            },
+            {"type": "null"}
+          ]
+        }
+      }
     }
   }
 }

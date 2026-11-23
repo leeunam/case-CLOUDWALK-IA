@@ -91,7 +91,7 @@
   },
   {
     "id": "custo-estimado-sem-tarifa",
-    "changes": [{"path": ["observations", 0, "estimated_api_usd"], "value": 0.1}],
+    "changes": [{"path": ["observations", 0, "request_usage", 0, "estimated_api_usd"], "value": 0.1}],
     "expected_error": "estimate_tariff"
   },
   {
@@ -155,14 +155,44 @@
     "changes": [
       {
         "path": ["report", "usage", "observed_api_usd"],
-        "value": {"state": "partial", "value": 0, "samples": 0, "expected_samples": 8}
+        "value": {"state": "partial", "value": 0, "samples": 0, "expected_samples": 9}
       }
     ],
-    "expected_error": "usage_state"
+    "expected_error": "usage_sample"
   },
   {
     "id": "custo-indisponivel-com-zero",
     "changes": [{"path": ["report", "usage", "estimated_api_usd", "value"], "value": 0}],
     "expected_error": "usage_state"
+  },
+  {
+    "id": "versao-comprovada-como-timeout",
+    "changes": [{"path": ["observations", 6, "choices", "priority", "reason"], "value": "timeout"}],
+    "expected_error": "model_version"
+  },
+  {
+    "id": "modelo-compativel-como-divergente",
+    "changes": [{"path": ["observations", 6, "returned_model"], "value": "modelo-sintetico-v1"}],
+    "expected_error": "model_version"
+  },
+  {
+    "id": "versao-desconhecida-como-divergente",
+    "changes": [{"path": ["observations", 4, "choices", "priority", "reason"], "value": "version_mismatch"}],
+    "expected_error": "model_version"
+  },
+  {
+    "id": "uso-de-segunda-chamada-omitido",
+    "changes": [{"path": ["observations", 1, "requests"], "value": 1}],
+    "expected_error": "request_usage_count"
+  },
+  {
+    "id": "cobranca-parcial-como-total",
+    "changes": [{"path": ["report", "usage", "observed_api_usd", "state"], "value": "measured"}],
+    "expected_error": "usage_state"
+  },
+  {
+    "id": "cobranca-parcial-descartada",
+    "changes": [{"path": ["report", "usage", "observed_api_usd", "value"], "value": 0}],
+    "expected_error": "usage_total"
   }
 ]

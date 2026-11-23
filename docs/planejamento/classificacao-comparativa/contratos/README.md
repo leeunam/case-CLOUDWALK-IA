@@ -23,7 +23,9 @@ adaptador.
 ## Entrada e lote Ruby/Python
 
 JSONL usa UTF-8, um objeto JSON completo por linha, sem cabeçalho, linhas
-vazias, chaves repetidas ou valores não finitos. Mensagens de diagnóstico
+vazias, chaves repetidas ou valores não finitos. LF encerra o registro, inclusive
+quando precedido de CR. U+2028, U+2029 e U+0085 podem fazer parte de uma
+string JSON. Mensagens de diagnóstico
 ficam fora desse fluxo. Ruby e Python podem trocar arquivos ou usar streams.
 C02 define a linha de comando e como ligar os processos. Um único processo
 local carrega os pesos uma vez por lote e responde na ordem de entrada. Cada
@@ -59,7 +61,11 @@ dos pesos, versões do adaptador e da política. Um identificador de modelo
 pode ser um alias. Quando houver versão esperada, fixar
 `identity.expected_returned_model` e/ou `identity.expected_weights_revision`
 antes do lote. Uma divergência verificada na resposta gera `version_mismatch`
-e revisão. Um timeout pode deixar modelo retornado e revisão `null`.
+e revisão em todos os campos solicitados. Essa causa requer pelo menos um
+identificador retornado diferente do fixado. Um timeout pode deixar modelo
+retornado e revisão `null`. Se a resposta omitir um identificador exigido e
+a versão não puder ser verificada, registrar a causa operacional (por
+exemplo, `adapter_error`) e manter o caso em revisão.
 `version_error_raw` aceita diagnóstico sintético de uma resposta de versão
 recusada. Não incluir credenciais ou cabeçalhos. Registrar no material de
 política como cada adaptador constrói a entrada comum, a versão dos pesos,
@@ -109,7 +115,9 @@ de 2,7 que não pode ser interpretado como probabilidade.
   no ambiente registra a inicialização do lote. Identificar se a tentativa
   ocorreu com processo aquecido, frio ou desconhecido. No teste, aquecer antes
   do primeiro relato medido e incluir tempos de falhas e timeouts.
-- Tokens e custo desconhecidos usam `null`. `observed_api_usd` guarda
+- Cada item de `request_usage` registra uma requisição, na ordem de envio.
+  A lista tem comprimento igual a `requests`, mesmo quando o fornecedor
+  omite a cobrança. Tokens e custo desconhecidos usam `null`. `observed_api_usd` guarda
   cobrança informada. `estimated_api_usd` exige tarifa com fonte, data e taxa
   (unidade e valor). Uma chamada local pode ter custo de API conhecido de zero.
   O custo de infraestrutura tem registro próprio. CPU/GPU ficam em `hardware`,
@@ -136,8 +144,10 @@ Cada métrica inclui `state`, `numerator`, `denominator` e `value`.
 as unidades efetivamente observadas e seu denominador. `unmeasured` indica
 ausência de medição e `unavailable`, medição impedida. Nos dois últimos,
 numerador e valor são nulos. O denominador pode ser conhecido (inclusive zero)
-ou nulo. Quando uma fatia descritiva está vazia usar `unmeasured` com
-denominador zero. Uma taxa medida requer denominador positivo.
+ou nulo. A exceção para uma fatia descritiva vazia exige `unmeasured` com
+denominador zero e população efetivamente vazia nas linhas de origem. O
+checker confere a população do teste usando máscaras, gabaritos congelados e
+campos efetivamente aplicados. Uma taxa medida requer denominador positivo.
 
 | Grupo | Unidade e leitura |
 | --- | --- |
@@ -145,7 +155,15 @@ denominador zero. Uma taxa medida requer denominador positivo.
 | `by_field`, `by_mask`, `by_stratum` | Fatias por campo-alvo, máscara de omissão e estrato do gabarito. Cada taxa conserva seus próprios numerador e denominador. |
 | `urgent_outcomes` | Denominador dos seis urgentes com prioridade omitida no teste. `applied_urgent`, `applied_lower` e `review` descrevem o caso. `abstained`, `invalid` e `operational_error` descrevem o campo prioridade e podem coincidir com revisão. |
 | `latency_p50_ms` e gate p95 | Valor em ms, numerador nulo e denominador igual ao número de relatos aquecidos com tempo observado, inclusive falhas. Usar posto mais próximo do protocolo. |
-| `usage` | Totais de tentativas, requisições, perguntas, tokens e custo observado/estimado com estado, valor, número de tentativas com medição e total de tentativas observadas no lote. Cobrança ausente conserva valor nulo. |
+| `usage` | Totais com estado, valor, `samples` e `expected_samples`. A unidade de amostragem para contadores de execução é a tentativa. Para tokens e custos é a requisição. |
+
+Para `requests`, `attempts` e `questions`, os contadores da observação são
+obrigatórios. Um lote com zero tentativas tem os três totais medidos em zero,
+com zero amostras. Para tokens e custos, somar os valores conhecidos. Se
+apenas uma de duas requisições informar USD 0,01, o resultado será
+`partial`, valor 0,01, uma amostra conhecida e duas esperadas. Quando
+nenhuma requisição informa cobrança, manter valor nulo. Os números de
+`ctl-duplo` exercitam essa situação com valores simulados.
 
 Nas fatias, `raw_accuracy` conta escolhas brutas que coincidem com o gabarito
 sobre todos os campos-alvo da fatia, incluindo abstenção explícita ou por
@@ -189,6 +207,7 @@ pertencem a C02.
 
 ```sh
 rtk proxy python3 script/check_classification_contracts.py
+rtk proxy python3 docs/planejamento/classificacao-comparativa/contratos/test_regressions.py -v
 ```
 
 Cada exemplo em [negative.json](fixtures/negative.json) é uma mutação declarativa

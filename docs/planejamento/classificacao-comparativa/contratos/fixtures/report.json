@@ -62,11 +62,11 @@
   "artifacts": {
     "inputs": {
       "path": "docs/planejamento/classificacao-comparativa/contratos/fixtures/inputs.jsonl",
-      "sha256": "93cdd6bc158f5e7915c62a53b9702e9ba2b809e64fd9bd3c14eddd53921f7c2e"
+      "sha256": "40e696fc144a4657c1bb795259050d0102abdd14969424091f05e71c093cb779"
     },
     "observations": {
       "path": "docs/planejamento/classificacao-comparativa/contratos/fixtures/observations.jsonl",
-      "sha256": "d25efee66b90fc34b0f199b77dc830170ca30288eac5e4de7e2070b204992789"
+      "sha256": "3e86f181725c5aa8769edd9e86f6fd1f6855d3f74d497dd77da9841541ff0985"
     },
     "decisions": {
       "path": "docs/planejamento/classificacao-comparativa/contratos/fixtures/decisions.jsonl",
@@ -214,12 +214,12 @@
   "latency_p50_ms": {"state": "unmeasured", "numerator": null, "denominator": null, "value": null},
   "eligibility": "inconclusive",
   "usage": {
-    "requests": {"state": "measured", "value": 8, "samples": 8, "expected_samples": 8},
+    "requests": {"state": "measured", "value": 9, "samples": 8, "expected_samples": 8},
     "attempts": {"state": "measured", "value": 8, "samples": 8, "expected_samples": 8},
     "questions": {"state": "measured", "value": 11, "samples": 8, "expected_samples": 8},
-    "input_tokens": {"state": "unmeasured", "value": null, "samples": 0, "expected_samples": 8},
-    "output_tokens": {"state": "unmeasured", "value": null, "samples": 0, "expected_samples": 8},
-    "observed_api_usd": {"state": "unavailable", "value": null, "samples": 0, "expected_samples": 8},
-    "estimated_api_usd": {"state": "unmeasured", "value": null, "samples": 0, "expected_samples": 8}
+    "input_tokens": {"state": "partial", "value": 10, "samples": 1, "expected_samples": 9},
+    "output_tokens": {"state": "unmeasured", "value": null, "samples": 0, "expected_samples": 9},
+    "observed_api_usd": {"state": "partial", "value": 0.01, "samples": 1, "expected_samples": 9},
+    "estimated_api_usd": {"state": "unmeasured", "value": null, "samples": 0, "expected_samples": 9}
   }
 }

@@ -2,7 +2,7 @@
 from copy import deepcopy
 from hashlib import sha256
 import json
-from math import isclose, isfinite
+from math import fsum, isclose, isfinite
 from pathlib import Path
 import sys
 from urllib.parse import urldefrag, urljoin
@@ -135,9 +135,12 @@ def verify_observation(obs, missing, report, catalog):
         verify_choice(choice, catalog[field], case_id)
     identity = obs["identity"]
     pins = (("expected_returned_model", "returned_model"), ("expected_weights_revision", "weights_revision"))
-    mismatch = any(identity.get(pin) is not None and obs[actual] != identity[pin] for pin, actual in pins)
-    if mismatch:
-        require(all(c["status"] == "error" for c in choices.values()), "model_version", case_id)
+    expected = [(identity[pin], obs[actual]) for pin, actual in pins if identity.get(pin) is not None]
+    mismatch = any(actual is not None and actual != pin for pin, actual in expected)
+    unknown = any(actual is None for _, actual in expected)
+    for choice in choices.values():
+        require((choice["reason"] == "version_mismatch") == mismatch, "model_version", case_id)
+        require(not unknown or choice["status"] == "error", "model_version", case_id)
     if "version_error_raw" in obs:
         require(any(c["reason"] == "version_mismatch" for c in choices.values()), "model_version", case_id)
     has_response = any(choice["status"] != "error" for choice in choices.values())
@@ -145,7 +148,9 @@ def verify_observation(obs, missing, report, catalog):
     require(obs["requests"] > 0 or obs["questions"] == 0, "question_count", case_id)
     answered = sum(choice["status"] != "error" for choice in choices.values())
     require(answered <= obs["questions"] <= len(missing), "question_count", case_id)
-    require(obs["estimated_api_usd"] is None or obs["tariff"] is not None, "estimate_tariff", case_id)
+    require(obs["requests"] == len(obs["request_usage"]), "request_usage_count", case_id)
+    for usage in obs["request_usage"]:
+        require(usage["estimated_api_usd"] is None or usage["tariff"] is not None, "estimate_tariff", case_id)
     if obs["inference_ms"] is not None and obs["elapsed_ms"] is not None:
         require(obs["inference_ms"] <= obs["elapsed_ms"], "inference_duration", case_id)
 
@@ -204,20 +209,51 @@ def verify_metric(metric, operation, name):
         require(num is not None and num <= den and isclose(value, num / den), "metric_ratio", name)
 
 
-def verify_usage(report, attempts):
+def verify_usage(report, observations):
+    requests = [row for obs in observations for row in obs["request_usage"]]
+    counts = {"attempts": len(observations), "requests": len(requests),
+              "questions": sum(obs["questions"] for obs in observations)}
     for name, total in report["usage"].items():
         state, value, n, expected = (total[k] for k in ("state", "value", "samples", "expected_samples"))
-        require(expected == attempts and n <= expected, "usage_sample", name)
-        if state in ("unmeasured", "unavailable"):
-            consistent = n == 0 and value is None
+        if name in counts:
+            require(n == expected == len(observations), "usage_sample", name)
+            require(state == "measured" and value == counts[name], "usage_state", name)
+            continue
+        known = [row[name] for row in requests if row[name] is not None]
+        require(expected == len(requests) and n == len(known), "usage_sample", name)
+        if not known:
+            require(state in ("unavailable", "unmeasured") and value is None, "usage_state", name)
         else:
-            consistent = value is not None and n > 0 and (n == expected) == (state == "measured")
-            if name not in ("observed_api_usd", "estimated_api_usd"):
-                consistent = consistent and isinstance(value, int)
-        require(consistent, "usage_state", name)
+            expected_state = "measured" if n == expected else "partial"
+            require(state == expected_state and value is not None, "usage_state", name)
+            if name.endswith("_tokens"):
+                require(isinstance(value, int) and value == sum(known), "usage_total", name)
+            else:
+                require(isclose(value, fsum(known)), "usage_total", name)
 
 
-def verify_metrics(report, protocol, fully_observed):
+def slice_population(dimension, group, completed, dataset, decisions):
+    """Count units at risk; never compute a quality numerator or candidate score."""
+    cases = targets = classifiable = applied = 0
+    for case_id in completed:
+        case = dataset[case_id]
+        fields = case["missing"]
+        if dimension == "by_field":
+            if group not in fields:
+                continue
+            fields = [group]
+        elif dimension == "by_mask" and group != "+".join(fields):
+            continue
+        elif dimension == "by_stratum" and group != case["stratum"]:
+            continue
+        cases += 1
+        targets += len(fields)
+        classifiable += ABSTENTION not in case["expected"].values()
+        applied += sum(decisions[case_id]["fields"][f]["applied"] is not None for f in fields)
+    return cases, targets, classifiable, applied
+
+
+def verify_metrics(report, protocol, fully_observed, dataset, decisions):
     states = []
     passed = []
     for name, metric in report["gates"].items():
@@ -240,9 +276,21 @@ def verify_metrics(report, protocol, fully_observed):
                 passed.append(metric["value"] <= limit)
     for dimension in ("by_field", "by_mask", "by_stratum"):
         for group, summary in report[dimension].items():
+            cases, targets, classifiable, applied = slice_population(
+                dimension, group, report["completed_ids"], dataset, decisions)
+            populations = {"applied_accuracy": applied, "review": cases,
+                           "automatic_coverage": classifiable, "correct_completion_coverage": classifiable}
             for name, metric in summary.items():
-                verify_metric(metric, "ratio", f"{dimension}.{group}.{name}")
-                if metric["state"] != "unmeasured" or metric["denominator"] != 0:
+                label = f"{dimension}.{group}.{name}"
+                verify_metric(metric, "ratio", label)
+                population = populations.get(name, targets)
+                denominator = metric["denominator"]
+                if fully_observed and denominator is not None:
+                    if metric["state"] == "partial":
+                        require(denominator <= population, "slice_denominator", label)
+                    else:
+                        require(denominator == population, "slice_denominator", label)
+                if not (population == 0 and metric["state"] == "unmeasured" and denominator == 0):
                     states.append(metric["state"])
     for name, metric in report["urgent_outcomes"].items():
         verify_metric(metric, "ratio", name)
@@ -338,8 +386,8 @@ def verify_run(bundle, validation, protocol, split, catalog, dataset):
         for name, expected in denominators.items():
             metric = report["gates"][name]
             require(metric["state"] != "measured" or metric["denominator"] == expected, "gate_denominator", name)
-    verify_usage(report, len(observations))
-    verify_metrics(report, protocol, full)
+    verify_usage(report, list(observations.values()))
+    verify_metrics(report, protocol, full, dataset, indexed["decisions"])
 
 
 def load_bundle(validation):
@@ -348,8 +396,9 @@ def load_bundle(validation):
     bundle = {"report": report}
     for kind, entry in report["artifacts"].items():
         path = source_path(entry)
-        bundle[kind] = [json.loads(line, object_pairs_hook=unique_properties, parse_constant=reject_constant, parse_float=finite_float)
-                        for line in path.read_text(encoding="utf-8").splitlines()]
+        with path.open(encoding="utf-8", newline="\n") as lines:
+            bundle[kind] = [json.loads(line, object_pairs_hook=unique_properties, parse_constant=reject_constant,
+                                       parse_float=finite_float) for line in lines]
     return bundle
 
 

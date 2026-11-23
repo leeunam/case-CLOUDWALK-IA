@@ -153,6 +153,7 @@
     "latency_p50_ms": {"$ref": "#/$defs/metric"},
     "eligibility": {"enum": ["pass", "fail", "inconclusive"]},
     "usage": {
+      "description": "Execution counters sample attempts; token and charge totals sample individual requests.",
       "type": "object",
       "additionalProperties": false,
       "required": [
