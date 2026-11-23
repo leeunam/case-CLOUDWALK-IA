@@ -1,4 +1,5 @@
 {
   "category": "Determine a categoria do atendimento a partir do relato.",
-  "priority": "Determine a prioridade do atendimento a partir do relato."
+  "priority": "Determine a prioridade do atendimento a partir do relato.",
+  "context": "Use a marca, a máscara, os valores recebidos, o catálogo e a rubrica comum do contexto. Escolha um único rótulo para o campo solicitado com base no relato integral."
 }

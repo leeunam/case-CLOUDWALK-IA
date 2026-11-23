@@ -1,6 +1,7 @@
 """Runtime CPU para a revisão pública fixada no C04."""
 import hashlib
 from importlib import metadata
+import json
 import os
 from pathlib import Path
 import sys
@@ -10,6 +11,7 @@ MODEL = "knowledgator/gliclass-multilang-mini"
 REVISION = "0bd888b6c3ef9fca5f0a9d407bddfbbc7623486b"
 WEIGHTS_SHA256 = "440d8f17603d3e6f7d13a4fe7ffa7e9ef2c5a2581cceccb2f643334b92c8aea8"
 SNAPSHOT = HERE / ".cache" / "weights" / REVISION
+MANIFEST = HERE / "snapshot-manifest.json"
 FILES = ("model.safetensors", "config.json", "tokenizer.json", "tokenizer_config.json",
          "special_tokens_map.json", "spm.model", "added_tokens.json")
 PINS = {"gliclass": "0.1.22", "torch": "2.12.0+cpu", "transformers": "5.8.1"}
@@ -40,15 +42,37 @@ class FullTokenizer:
         return inputs
 
 
+def snapshot_manifest():
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    files = manifest["files"]
+    if (manifest["manifest_version"] != "1.0.0" or manifest["model"] != MODEL or
+            manifest["revision"] != REVISION or set(files) != set(FILES) or
+            files["model.safetensors"]["lfs_sha256"] != WEIGHTS_SHA256):
+        raise ValueError("manifesto versionado diverge da revisão fixada")
+    return files
+
+
 def verify_snapshot(path=SNAPSHOT):
-    for name in FILES:
-        if not (path / name).is_file():
-            raise FileNotFoundError(f"snapshot local incompleto: {name}")
-    with (path / "model.safetensors").open("rb") as weights:
-        digest = hashlib.file_digest(weights, "sha256").hexdigest()
-    if digest != WEIGHTS_SHA256:
-        raise ValueError("SHA-256 dos pesos diverge da revisão oficial")
-    return digest
+    files = snapshot_manifest()
+    for name, expected in files.items():
+        with (path / name).open("rb") as file:
+            size = os.fstat(file.fileno()).st_size
+            if size != expected["size"]:
+                raise ValueError(f"tamanho local divergente: {name}")
+            if "lfs_sha256" in expected:
+                digest = hashlib.file_digest(file, "sha256").hexdigest()
+                pinned = expected["lfs_sha256"]
+            else:
+                digest = hashlib.sha1(f"blob {size}\0".encode("ascii"))
+                digest = hashlib.file_digest(file, lambda: digest).hexdigest()
+                pinned = expected["git_blob_sha1"]
+            if digest != pinned:
+                raise ValueError(f"hash local divergente: {name}")
+    return files["model.safetensors"]["lfs_sha256"]
+
+
+def manifest_sha256():
+    return hashlib.sha256(MANIFEST.read_bytes()).hexdigest()
 
 
 def load_pipeline(policy):
@@ -77,9 +101,21 @@ def load_pipeline(policy):
     if model.config.architecture_type != "uni-encoder":
         raise ValueError("arquitetura do snapshot diverge")
     tokenizer = AutoTokenizer.from_pretrained(str(SNAPSHOT), local_files_only=True, trust_remote_code=False)
-    limit = min(policy["max_tokens"], model.config.encoder_config.max_position_embeddings, tokenizer.model_max_length)
+    limit = policy["max_tokens"]
+    if type(limit) is not int or not 1 <= limit <= 2048:
+        raise ValueError("limite de contexto fora das políticas da C04")
     pipeline = ZeroShotClassificationPipeline(
         model, FullTokenizer(tokenizer, limit), classification_type="multi-label",
         device="cpu", progress_bar=False, max_length=limit,
     )
-    return pipeline, {"runtime": installed, "weights_sha256": digest, "tokens": limit, "dtype": "float32"}
+    return pipeline, {
+        "runtime": installed, "weights_sha256": digest, "snapshot_manifest_sha256": manifest_sha256(),
+        "context_profile": policy["context_profile"], "configured_context_tokens": limit,
+        "encoder_max_position_embeddings": model.config.encoder_config.max_position_embeddings,
+        "tokenizer_declared_model_max_length": tokenizer.model_max_length, "dtype": "float32",
+    }
+
+
+if __name__ == "__main__":
+    print(json.dumps({"model": MODEL, "revision": REVISION, "weights_sha256": verify_snapshot(),
+                      "snapshot_manifest_sha256": manifest_sha256()}))

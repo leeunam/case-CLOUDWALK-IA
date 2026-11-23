@@ -6,8 +6,8 @@
     "requested_model": "knowledgator/gliclass-multilang-mini",
     "expected_returned_model": "knowledgator/gliclass-multilang-mini",
     "expected_weights_revision": "0bd888b6c3ef9fca5f0a9d407bddfbbc7623486b",
-    "adapter_version": "1.0.0",
-    "policy_version": "1.0.0"
+    "adapter_version": "1.1.0",
+    "policy_version": "1.1.0"
   },
   "command": [
     "script/classification_comparison/adapters/gliclass/.venv/bin/python",
@@ -16,12 +16,12 @@
   ],
   "prompt": {
     "path": "script/classification_comparison/adapters/gliclass/prompt.json",
-    "version": "1.0.0",
-    "sha256": "747fc3446d564538c5fa83a03b47be989dc6fe6fb2b7641c9f33651170c723c3"
+    "version": "1.1.0",
+    "sha256": "4d391db33a41240d0acd24a518afa569c1176b48875c474334edf056bd786ad9"
   },
   "policy": {
     "path": "script/classification_comparison/adapters/gliclass/policy.json",
-    "version": "1.0.0",
-    "sha256": "e2a277ba2fc9103fda13547ad9184359c276bb97fb18d1fee02a966b4c404474"
+    "version": "1.1.0",
+    "sha256": "e8209fa628518c2650030fa78b2cfa30700a47bd0c78ba897acac990afaebf02"
   }
 }

@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -12,7 +13,7 @@ from unittest.mock import Mock, patch
 
 from adapter import ABSTENTION, FIELDS, ROOT, Context, Worker, choice_from_output, infer, observe
 from fake_runtime import load_fake
-from model import ContextOverflow, FullTokenizer, HERE, PINS, load_pipeline, verify_snapshot
+from model import FILES, ContextOverflow, FullTokenizer, HERE, PINS, load_pipeline, snapshot_manifest, verify_snapshot
 
 
 ENV = {
@@ -31,7 +32,7 @@ def load_with_failure(policy):
     fallback, info = load_fake(policy)
 
     def pipeline(text, labels, **options):
-        if text == "Teste parcial" and "prioridade" in options["prompt"]:
+        if text == "Teste parcial" and options["prompt"].startswith("Determine a prioridade"):
             raise ValueError("erro injetado")
         if text == "Teste de prazo":
             time.sleep(1)
@@ -46,7 +47,7 @@ def fail_load(policy):
 class AdapterTest(unittest.TestCase):
     def setUp(self):
         self.context = Context.load(ENV)
-        self.item = dict(contract_version="1.1.0", id="sem-gabarito", text="Texto íntegro\nCom U+2028: \u2028",
+        self.item = dict(contract_version="1.1.0", id="sem-gabarito", brand="marca-sintetica", text="Texto íntegro\nCom U+2028: \u2028",
                          catalog=self.context.catalog, received={}, missing=list(FIELDS))
 
     def worker(self, loader=load_fake, context=None):
@@ -54,26 +55,37 @@ class AdapterTest(unittest.TestCase):
         self.addCleanup(worker.close)
         return worker
 
-    def test_mapping_retains_exact_text_and_all_urgent_and_abstention_criteria(self):
-        item = dict(self.item, received={"category": "pix"}, missing=["priority"])
-        text, labels, prompt = self.context.request(item, "priority")
+    def test_each_single_question_retains_full_context_and_integral_text(self):
+        for target, provided, code in (("category", "priority", "basic"), ("priority", "category", "pix")):
+            item = dict(self.item, received={provided: code}, missing=[target], expected="gabarito-secreto")
+            with self.subTest(target=target):
+                text, labels, prompt = self.context.request(item, target)
+                context_str = prompt.split("Contexto do atendimento (JSON):\n", 1)[1].split("\n", 1)[0]
+                context = json.loads(context_str)
+                self.assertEqual(text, item["text"])
+                self.assertEqual(context["marca"], item["brand"])
+                self.assertEqual(context["mascara_de_omissao"], [target])
+                self.assertEqual(context["campos_recebidos"], {
+                    provided: {"valor": code, "significado": self.context.catalog[provided][code]}})
+                self.assertEqual(context["catalogo"], self.context.catalog)
+                self.assertEqual(prompt.count(self.context.rubric), 1)
+                self.assertEqual(labels, {key: key for key in (*self.context.catalog[target], ABSTENTION)})
+                self.assertNotIn(item["id"], prompt)
+                self.assertNotIn(item["expected"], prompt)
 
-        self.assertEqual(text, item["text"])
-        self.assertEqual(set(labels.values()), set(self.context.catalog["priority"]) | {ABSTENTION})
-        for label, code in labels.items():
-            self.assertIn(self.context.definitions["priority"][code], label)
-            self.assertIn(self.context.catalog["priority"].get(code, ""), label)
-        self.assertIn("perda em andamento", next(label for label, code in labels.items() if code == "urgent"))
-        self.assertIn("fatos sobre impacto/prazo/funcionamento", next(label for label, code in labels.items() if code == ABSTENTION))
-        self.assertIn("sem depender de uma palavra-chave isolada", prompt)
-        self.assertIn("category: pix", prompt)
-        self.assertNotIn(item["id"], prompt)
-
-    def test_category_mapping_retains_catalog_and_full_abstention(self):
-        _, labels, prompt = self.context.request(self.item, "category")
-        self.assertEqual(set(labels.values()), {"pix", "payouts", "terminal", ABSTENTION})
-        self.assertIn("uma operação mencionados isoladamente", next(label for label, code in labels.items() if code == ABSTENTION))
-        self.assertNotIn("urgência/impacto", prompt)
+    def test_each_double_question_retains_both_omissions_and_the_same_rubric(self):
+        item = dict(self.item, received={"category": None, "priority": " "})
+        for field in FIELDS:
+            _, labels, prompt = self.context.request(item, field)
+            context_str = prompt.split("Contexto do atendimento (JSON):\n", 1)[1].split("\n", 1)[0]
+            context = json.loads(context_str)
+            self.assertEqual(context["mascara_de_omissao"], list(FIELDS))
+            self.assertEqual(context["campos_recebidos"], {
+                "category": {"valor": None, "significado": "campo ausente"},
+                "priority": {"valor": " ", "significado": "campo ausente"},
+            })
+            self.assertIn(self.context.rubric, prompt)
+            self.assertEqual(set(labels), {*self.context.catalog[field], ABSTENTION})
 
     def test_pipeline_gets_original_text_and_zero_examples(self):
         text, labels, prompt = self.context.request(self.item, "category")
@@ -89,17 +101,35 @@ class AdapterTest(unittest.TestCase):
         self.assertEqual((explicit["reason"], explicit["raw"]), ("explicit", ABSTENTION))
         self.assertEqual((tied["reason"], tied["raw"]), ("policy", {"tied_codes": ["pix", ABSTENTION]}))
 
-    def test_empty_missing_and_invalid_outputs(self):
-        labels = {"pix": "pix", "abstenção": ABSTENTION}
-        invalid = [
-            None, [[{}]], [[{"label": "fora", "score": .5}]], scores(labels, [float("nan"), .1]),
-            scores(labels, [False, .1]), [[{"label": "pix", "score": .5}] * 2],
-        ]
-        for value in invalid:
+    def test_absent_output_has_null_raw(self):
+        labels = {"pix": "pix", ABSTENTION: ABSTENTION}
+        for value in (None, [], [[]]):
+            self.assertEqual(choice_from_output(value, labels, "ranking"),
+                             dict(status="invalid", raw=None, reason="missing_output", score=None))
+
+    def test_invalid_output_preserves_raw_unknown_labels_and_partial_scores(self):
+        labels = {"pix": "pix", ABSTENTION: ABSTENTION}
+        for value, raw in [
+            ([[{}]], [[{}]]),
+            ([[{"label": "fora", "score": .99}]], [[{"label": "fora", "score": .99}]]),
+            (scores(labels, [False, .1]), scores(labels, [False, .1])),
+            ([[{"label": "pix", "score": .5}]], [[{"label": "pix", "score": .5}]]),
+            ("pix", {"valor": "pix"}),
+            (ABSTENTION, {"valor": ABSTENTION}),
+        ]:
             with self.subTest(value=value):
-                self.assertEqual(choice_from_output(value, labels, "ranking")["reason"], "invalid_output")
-        for value in ([[]], [[{"label": "pix", "score": .5}]]):
-            self.assertEqual(choice_from_output(value, labels, "ranking")["reason"], "missing_output")
+                self.assertEqual(choice_from_output(value, labels, "ranking"),
+                                 dict(status="invalid", raw=raw, reason="invalid_output", score=None))
+
+    def test_invalid_output_is_serializable_without_nonfinite_json(self):
+        labels = {"pix": "pix", ABSTENTION: ABSTENTION}
+        for nonfinite in (float("nan"), float("inf"), float("-inf")):
+            invalid = scores(labels, [nonfinite, .1])
+            result = choice_from_output(invalid, labels, "ranking")
+            self.assertEqual(result["reason"], "invalid_output")
+            self.assertEqual(result["raw"], scores(labels, [None, .1]))
+            json.dumps(result, allow_nan=False)
+        self.assertEqual(choice_from_output(float("nan"), labels, "ranking")["raw"], {"valor": None})
 
     def test_truncation_is_disabled_before_tokenizing(self):
         input_ids = SimpleNamespace(shape=(1, 513))
@@ -111,7 +141,7 @@ class AdapterTest(unittest.TestCase):
         input_ids.shape = (1, 512)
         self.assertIs(guarded("No limite", truncation=True)["input_ids"], input_ids)
 
-    def test_public_tokenizer_sentinel_keeps_encoder_limit_in_pipeline(self):
+    def test_public_sentinel_is_metadata_and_policy_selects_context_limit(self):
         encoder = SimpleNamespace(max_position_embeddings=512)
         config = SimpleNamespace(architecture_type="uni-encoder", encoder_config=encoder)
         model = SimpleNamespace(config=config)
@@ -123,13 +153,48 @@ class AdapterTest(unittest.TestCase):
                                         ZeroShotClassificationPipeline=pipeline),
             "transformers": SimpleNamespace(AutoTokenizer=Mock(**{"from_pretrained.return_value": tokenizer})),
         }
-        with patch.dict(os.environ), patch.dict(sys.modules, modules), patch("model.verify_snapshot"), \
-                patch("model.metadata.version", side_effect=PINS.__getitem__):
-            _, info = load_pipeline(dict(self.context.policy, max_tokens=1024))
-        guarded_tokenizer = pipeline.call_args.args[1]
-        self.assertEqual(info["tokens"], 512)
-        self.assertEqual(pipeline.call_args.kwargs["max_length"], 512)
-        self.assertEqual(guarded_tokenizer.limit, 512)
+        experimental = json.loads((HERE / "policy-dev-2048.json").read_text())
+        for policy, expected in ((self.context.policy, 512), (experimental, 2048)):
+            with self.subTest(limit=expected), patch.dict(os.environ), patch.dict(sys.modules, modules), \
+                    patch("model.verify_snapshot"), patch("model.metadata.version", side_effect=PINS.__getitem__):
+                _, info = load_pipeline(policy)
+                guarded_tokenizer = pipeline.call_args.args[1]
+                self.assertEqual(info["configured_context_tokens"], expected)
+                self.assertEqual(info["encoder_max_position_embeddings"], 512)
+                self.assertEqual(info["tokenizer_declared_model_max_length"], tokenizer.model_max_length)
+                self.assertEqual(pipeline.call_args.kwargs["max_length"], expected)
+                self.assertEqual(guarded_tokenizer.limit, expected)
+
+    def test_snapshot_rejects_substitution_with_unchanged_size(self):
+        public = snapshot_manifest()
+        self.assertEqual(len(public), 7)
+        self.assertEqual(sum(item["size"] for item in public.values()), 588168305)
+        self.assertIn("lfs_sha256", public["tokenizer.json"])
+        self.assertNotIn("lfs_sha256", public["config.json"])
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)
+            files = {}
+            for name in FILES:
+                original = name.encode("ascii")
+                (path / name).write_bytes(original)
+                size = len(original)
+                files[name] = {"size": size, "git_blob_sha1": hashlib.sha1(
+                    f"blob {size}\0".encode("ascii") + original).hexdigest()}
+                if "lfs_sha256" in public[name]:
+                    files[name]["lfs_sha256"] = hashlib.sha256(original).hexdigest()
+                    # Para LFS, o blob Git descreve o ponteiro e difere do conteúdo local.
+                    files[name]["git_blob_sha1"] = "0" * 40
+
+            with patch("model.snapshot_manifest", return_value=files):
+                self.assertEqual(verify_snapshot(path), files["model.safetensors"]["lfs_sha256"])
+                for name in ("tokenizer.json", "config.json"):
+                    with self.subTest(name=name):
+                        file = path / name
+                        original = file.read_bytes()
+                        file.write_bytes(b"x" * len(original))
+                        with self.assertRaisesRegex(ValueError, name):
+                            verify_snapshot(path)
+                        file.write_bytes(original)
 
     def test_invalid_catalog_complete_and_invalid_values_block_dispatch(self):
         self.assertFalse(self.context.eligible(dict(self.item, catalog={})))
@@ -155,12 +220,18 @@ class AdapterTest(unittest.TestCase):
         worker = self.worker(load_with_failure, context)
         worker.receive(time.monotonic() + 2)
         result = observe(dict(self.item, text="Teste de prazo"), worker, context,
-                         IDENTITY, "run", "fake", None)
+                         {"mode": "real"}, "run", "fake", None)
+        self.assertEqual(result["temperature_state"], "warm")
+        self.assertGreater(result["elapsed_ms"], 0)
         self.assertEqual([choice["reason"] for choice in result["choices"].values()], ["timeout", "timeout"])
         self.assertEqual((result["requests"], result["questions"]), (1, 1))
         self.assertIsNone(result["inference_ms"])
         worker.process.join(timeout=1)
-        after = observe(self.item, worker, context, IDENTITY, "run", "fake", None)
+        after = observe(self.item, worker, context, {"mode": "real"}, "run", "fake", None)
+        self.assertEqual(after["temperature_state"], "unknown")
+        self.assertGreaterEqual(after["elapsed_ms"], 0)
+        self.assertIsNone(after["inference_ms"])
+        self.assertEqual(after["attempt"], 1)
         self.assertEqual(after["requests"], 0)
         self.assertEqual(after["choices"]["priority"]["reason"], "adapter_error")
 

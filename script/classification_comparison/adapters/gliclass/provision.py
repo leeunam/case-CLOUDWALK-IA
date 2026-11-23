@@ -5,7 +5,7 @@ from pathlib import Path
 import shutil
 import time
 
-from model import FILES, HERE, MODEL, REVISION, SNAPSHOT, verify_snapshot
+from model import FILES, HERE, MODEL, REVISION, SNAPSHOT, manifest_sha256, snapshot_manifest, verify_snapshot
 
 
 def main():
@@ -17,9 +17,19 @@ def main():
 
     started = time.monotonic()
     info = HfApi(token=False).model_info(MODEL, revision=REVISION, files_metadata=True, token=False)
-    sizes = {file.rfilename: file.size for file in info.siblings if file.rfilename in FILES}
-    if (info.sha != REVISION or info.gated or info.private or set(sizes) != set(FILES) or
-            any(size is None for size in sizes.values()) or sum(sizes.values()) > 700_000_000):
+    expected = snapshot_manifest()
+    published = {}
+    for file in info.siblings:
+        if file.rfilename not in expected:
+            continue
+        entry = {"size": file.size, "git_blob_sha1": file.blob_id}
+        if file.lfs:
+            if file.size != file.lfs.size:
+                raise ValueError(f"tamanhos públicos divergentes: {file.rfilename}")
+            entry["lfs_sha256"] = file.lfs.sha256
+        published[file.rfilename] = entry
+    if (info.sha != REVISION or info.gated or info.private or published != expected or
+            sum(file["size"] for file in expected.values()) > 700_000_000):
         raise ValueError("metadados do snapshot público divergentes ou fora do orçamento")
     if shutil.disk_usage(HERE).free < 2_000_000_000:
         raise OSError("disco insuficiente para provisionar o snapshot")
@@ -29,10 +39,9 @@ def main():
                                   allow_patterns=list(FILES), max_workers=1))
     download_ms = (time.monotonic() - download_started) * 1000
     actual = {name: (path / name).stat().st_size for name in FILES}
-    if actual != sizes:
-        raise ValueError("tamanhos locais divergem dos arquivos públicos fixados")
     result = dict(model=MODEL, revision=REVISION, license="Apache-2.0", files=actual,
                   snapshot_bytes=sum(actual.values()), weights_sha256=verify_snapshot(path),
+                  snapshot_manifest_sha256=manifest_sha256(),
                   first_population=not before, snapshot_download_or_reuse_ms=download_ms,
                   public_metadata_ms=(download_started - started) * 1000,
                   network_transfer_bytes=None, api_usd=0)

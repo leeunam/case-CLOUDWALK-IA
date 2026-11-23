@@ -36,8 +36,7 @@ def atomic_json(path, value):
 class Context:
     catalog: dict
     prompts: dict
-    definitions: dict
-    priority_notes: str
+    rubric: str
     policy: dict
 
     @classmethod
@@ -46,37 +45,28 @@ class Context:
         catalog = read_json(ROOT / "script/f08/jev/catalog.json")
         prompts = read_json(env["CLASSIFICATION_PROMPT"])
         policy = read_json(env["CLASSIFICATION_POLICY"])
-        definitions = {}
-        for field, heading in zip(FIELDS, ("Categoria", "Prioridade"), strict=True):
-            section = re.search(rf"(?m)^## {heading}\n([\s\S]*?)(?=^## |\Z)", rubric).group(1)
-            definitions[field] = {
-                code: " ".join(description.split())
-                for code, description in re.findall(r"(?m)^- `([^\n`]+)`: (.*(?:\n  [^\n]+)*)", section)
-            }
-            if set(definitions[field]) != set(catalog[field]) | {ABSTENTION}:
-                raise ValueError(f"rubrica e catálogo divergem: {field}")
-            if field == "priority":
-                priority_notes = section.strip().split("\n\n")[-1]
-                priority_notes = " ".join(priority_notes.split())
-        if not priority_notes.startswith("Prioridade mede urgência/impacto") or policy["examples"]:
-            raise ValueError("rubrica de urgência ou baseline de zero exemplos incompatível")
-        return cls(catalog, prompts, definitions, priority_notes, policy)
+        if policy["examples"]:
+            raise ValueError("baseline exige zero exemplos")
+        return cls(catalog, prompts, rubric, policy)
 
     def request(self, item, field):
-        descriptions = self.catalog[field]
-        definitions = self.definitions[field]
-        labels = {}
-        for code in (*descriptions, ABSTENTION):
-            catalog_text = descriptions.get(code, "")
-            label = " ".join(value for value in (code, catalog_text, definitions[code]) if value)
-            labels[label] = code
-        prompt = self.prompts[field]
-        if field == "priority":
-            prompt = f"{prompt} {self.priority_notes}"
-        received = [f"{key}: {value}" for key, value in item["received"].items() if key not in item["missing"]]
-        if received:
-            prompt = f"{prompt} Campos válidos do canal: {', '.join(received)}."
-        return item["text"], labels, prompt + "\nRelato:\n"
+        labels = {code: code for code in (*self.catalog[field], ABSTENTION)}
+        received = {
+            key: {"valor": value, "significado": self.catalog[key][value]}
+            if key not in item["missing"] else {"valor": value, "significado": "campo ausente"}
+            for key, value in item["received"].items()
+        }
+        context = {
+            "marca": item["brand"], "mascara_de_omissao": item["missing"],
+            "campos_recebidos": received, "catalogo": self.catalog,
+        }
+        context_json = json.dumps(context, ensure_ascii=False, separators=(",", ":"))
+        prompt = (
+            f"{self.prompts[field]}\n{self.prompts['context']}\n"
+            f"Contexto do atendimento (JSON):\n{context_json}\n"
+            f"Rubrica comum (integral):\n{self.rubric}\nRelato:\n"
+        )
+        return item["text"], labels, prompt
 
     def eligible(self, item):
         if item.get("contract_version") != VERSION or item.get("catalog") != self.catalog:
@@ -94,27 +84,35 @@ def error(reason):
     return dict(status="error", raw=None, reason=reason, score=None)
 
 
-def invalid(reason):
-    return dict(status="invalid", raw=None, reason=reason, score=None)
+def invalid_output(output, labels):
+    # A saída esperada usa JSON. Valores não finitos em qualquer nível viram nulos.
+    try:
+        raw = json.loads(json.dumps(output), parse_constant=lambda _constant: None)
+    except (TypeError, ValueError, RecursionError):
+        raw = {"tipo_python": type(output).__name__}
+    if raw is None or (isinstance(raw, str) and raw in (*labels.values(), ABSTENTION)):
+        # Um valor presente mas inválido não pode parecer um código válido ou uma omissão no IPC.
+        raw = {"valor": raw}
+    return dict(status="invalid", raw=raw, reason="invalid_output", score=None)
 
 
 def choice_from_output(output, labels, score_kind):
-    if output == [[]]:
-        return invalid("missing_output")
+    if output is None or (isinstance(output, list) and output in ([], [[]])):
+        return dict(status="invalid", raw=None, reason="missing_output", score=None)
     if not isinstance(output, list) or len(output) != 1 or not isinstance(output[0], list):
-        return invalid("invalid_output")
+        return invalid_output(output, labels)
 
     scores = {}
     for row in output[0]:
         if not isinstance(row, dict):
-            return invalid("invalid_output")
+            return invalid_output(output, labels)
         label, score = row.get("label"), row.get("score")
         if (not isinstance(label, str) or label not in labels or label in scores or
                 type(score) not in (int, float) or not 0 <= score <= 1):
-            return invalid("invalid_output")
+            return invalid_output(output, labels)
         scores[label] = score
     if scores.keys() != labels.keys():
-        return invalid("missing_output")
+        return invalid_output(output, labels)
 
     high = max(scores.values())
     winners = [labels[label] for label, value in scores.items() if value == high]
@@ -145,7 +143,8 @@ def worker_main(parent, request_pipe, result_pipe, unused_request, unused_result
         started = time.monotonic()
         pipeline, metadata = loader(context.policy)
         loaded = time.monotonic()
-        sample = dict(text="Mensagem sintética usada para aquecer o runtime.", received={}, missing=list(FIELDS))
+        sample = dict(brand="marca-sintetica", text="Mensagem sintética usada para aquecer o runtime.",
+                      received={}, missing=list(FIELDS))
         for field in FIELDS:
             observed = infer(pipeline, context.request(sample, field), context.policy)
             if observed["status"] == "invalid":
@@ -251,7 +250,7 @@ def observe(item, worker, context, identity, run_id, model, revision):
     inference_ms = sum(durations) if real and requests and len(durations) == requests else None
     return dict(contract_version=VERSION, id=item["id"], run_id=run_id, attempt=1, origin="candidate",
                 identity=identity, returned_model=model, weights_revision=revision, choices=choices,
-                temperature_state="warm" if real else "unknown",
+                temperature_state="warm" if real and requests else "unknown",
                 elapsed_ms=(time.monotonic() - started) * 1000 if real else None,
                 load_ms=None, inference_ms=inference_ms, requests=requests, questions=requests,
                 request_usage=[dict(LOCAL_USAGE, observed_api_usd=0 if real else None)
@@ -290,7 +289,7 @@ def run(loader, *, mode, model, revision):
             if not context.eligible(item):
                 raise ValueError("C02 despachou entrada completa, inválida ou fora do catálogo")
             obs = observe(item, worker, context, identity, env["CLASSIFICATION_RUN_ID"], model, revision)
-            print(json.dumps(obs, ensure_ascii=False, allow_nan=False), flush=True)
+            print(json.dumps(obs, ensure_ascii=True, allow_nan=False), flush=True)
     finally:
         worker.close()
     usage = resource.getrusage(resource.RUSAGE_CHILDREN)
