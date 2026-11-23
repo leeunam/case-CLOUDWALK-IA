@@ -243,7 +243,8 @@ class ReconciliationTests(unittest.TestCase):
         self.assertTrue(different["identity_inconsistent"])
 
     def aggregate(self, *, sql=None, lag=None, records=None, resources=None, cleanup="concluída", mode="smoke",
-                  fault=None, earlier_lag=(), earlier_sql=(), capture=None, snapshot=True, fault_seconds=None):
+                  fault=None, earlier_lag=(), earlier_sql=(), capture=None, snapshot=True, fault_seconds=None,
+                  chat_events=None, cases=None):
         entries = plan("test", 1, [(1, 1)])
         entry = entries[0]
         config = next(configurations(arguments(["smoke", "--rate", "1", "--seconds", "1"])))
@@ -251,6 +252,9 @@ class ReconciliationTests(unittest.TestCase):
         manifest = {"cleanup": cleanup, "run_id": "f08-test", "revision": "a" * 40, "scenario": mode, "parameters": config,
                     "window": {"start_ms": 10, "arrivals_end_ms": 1010, "end_ms": 6010}, "k6_exit": 0,
                     "observation": {"kafka_records": {"complete": True}}}
+        if chat_events is not None:
+            config.update(chat={"target": 1, "ramp_seconds": 1, "hold_seconds": 5, "period_seconds": 100}, stages=[])
+            entries = []
         records = self.records() if records is None else records
         manifest["observation"]["kafka_records"] = ({"complete": True, "expected_offsets": len(records),
                                                      "records_read": len(records)} if capture is None else capture)
@@ -262,7 +266,7 @@ class ReconciliationTests(unittest.TestCase):
             output = Path(temporary)
             write_json(output / "ready.json", {"channels": {entry["brand"]: {entry["kind"]: "channel"}}})
             if snapshot:
-                write_json(output / "persistence.json", {"sample_ms": 6011, "cases": [self.case]})
+                write_json(output / "persistence.json", {"sample_ms": 6011, "cases": [self.case] if cases is None else cases})
             write_json(output / "k6-summary.json", {"iterations": {"count": 1}})
             for sample in earlier_sql:
                 append(output / "sql-samples.jsonl", sample)
@@ -277,8 +281,8 @@ class ReconciliationTests(unittest.TestCase):
                 append(output / "kafka-records.jsonl", record)
             for sample in self.resources() if resources is None else resources:
                 append(output / "resources.jsonl", sample)
-            publish(output, manifest, entries, [event])
-            return json.loads((output / "report.json").read_text()), json.loads((output / "reconciliation.jsonl").read_text())
+            publish(output, manifest, entries, [event] if chat_events is None else chat_events)
+            return json.loads((output / "report.json").read_text()), next(iter(map(json.loads, (output / "reconciliation.jsonl").read_text().splitlines())), None)
 
     def records(self):
         common = {"case_id": "case", "correlation_id": "corr", "turn_id": "turn", "partition": 0, "offset": 0}
@@ -368,6 +372,60 @@ class ReconciliationTests(unittest.TestCase):
         self.assertIsNone(report["goals"]["escoamento_na_janela"])
         self.assertIn("carimbos de efeitos", str(report["measurement_gaps"]))
         self.assertEqual(report["observed_failures"], [])
+
+    def test_missing_completion_does_not_erase_late_publication(self):
+        self.case["turns"][0].update(completed_ms=None, published_ms=6011)
+        report, row = self.aggregate()
+        self.assertIsNone(row["last_effect_ms"])
+        self.assertEqual(report["state"], "bloqueado")
+        self.assertIn("carimbos de efeitos", str(report["measurement_gaps"]))
+        self.assertIs(report["goals"]["escoamento_na_janela"], False)
+        self.assertIn("escoamento_na_janela", str(report["observed_failures"]))
+
+    def test_reprocessing_one_offset_is_not_a_second_copy(self):
+        records = self.records()[:2]
+        report, _ = self.aggregate(records=records + [records[-1]])
+        self.assertEqual(report["kafka"]["repeated_records_observed"], 0)
+        self.assertIn("leitura de eventos Kafka incompleta", report["measurement_gaps"])
+
+    def chat_report(self, cases, **changes):
+        write = {"type": "chat_write", "client": 1, "key": "key", "source_event_id": self.body["source_event_id"],
+                 "channel_id": "channel", "status": 0, "case_id": None, "correlation_id": None,
+                 "preparation": False, "at_ms": 300, "sent_ms": 100, **changes}
+        report, _ = self.aggregate(mode="chat", chat_events=[write], cases=cases)
+        return report, report["chat"]["traffic_reconciliation"][0]
+
+    def test_chat_timeout_reconciles_customer_and_ai_by_channel_and_source(self):
+        other = dict(self.case, channel_id="another", case_id="unrelated")
+        report, write = self.chat_report([self.case, other])
+        self.assertEqual(write["stored_case_id"], "case")
+        self.assertEqual(write["receipt_mismatches"], [])
+        self.assertEqual(report["chat"]["http_statuses"], {"0": 1})
+        self.assertEqual(report["chat"]["accepted"], 0)
+        self.assertIn("falhas em sessão, conexão ou escrita", report["observed_failures"])
+        integrity = report["integrity"]
+        self.assertEqual(integrity["persisted_without_http_202"], 1)
+        self.assertEqual(integrity["unplanned_entries"], [{"case_id": "unrelated", "source_event_id": self.body["source_event_id"]}])
+        self.assertEqual([m["case_id"] for m in integrity["unattributed_messages"]], ["unrelated"] * 2)
+
+    def test_chat_checks_each_supplied_receipt_field_independently(self):
+        for field in ("case_id", "correlation_id"):
+            with self.subTest(field=field):
+                report, write = self.chat_report([self.case], **{field: "wrong"})
+                self.assertEqual(write["receipt_mismatches"], [field])
+                self.assertIn("vínculo do recibo de chat diverge da entrada SQL", report["observed_failures"])
+                self.assertEqual(report["integrity"]["unattributed_message_count"], 0)
+
+    def test_chat_missing_and_multiple_matches_have_no_selected_case(self):
+        for cases, expected in (([], 0), ([self.case, dict(self.case, case_id="second")], 2)):
+            with self.subTest(entries=expected):
+                report, write = self.chat_report(cases)
+                self.assertEqual(write["entry_count"], expected)
+                self.assertIsNone(write["stored_case_id"])
+                self.assertEqual(report["integrity"]["persisted_without_http_202"], 0)
+                self.assertEqual(report["integrity"]["unattributed_message_count"], 2 * expected)
+                self.assertEqual("múltiplas entradas SQL para a identidade de uma escrita de chat"
+                                 in report["observed_failures"], expected > 1)
 
     def test_unproven_or_short_intervention_blocks_and_transient_reads_can_recover(self):
         fault = {"stopped_state": {"Status": "exited", "FinishedAt": "1970-01-01T00:00:00.100+00:00"},
