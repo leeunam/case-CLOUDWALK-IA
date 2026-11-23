@@ -73,6 +73,11 @@ encerrar novos ajustes do GLiClass nesta entrega. C04 deixa de bloquear C05;
 a qualificação usa os mesmos critérios e os 36 casos finais, sem comparação
 pareada final. A configuração de execução e a escolha operacional continuam
 pendentes. [Plano vigente](classificacao-comparativa/qualificacao-qwen.md).
+O reteste C03-P2 autorizado usou uma chamada adicional no mesmo caso e foi
+confirmado em recibo separado; não avalia o conjunto final. C05-E adiciona
+o executor final e a contabilidade cumulativa com 28 testes offline,
+preservando as regressões anteriores e o teto total de US$ 10. O lote real
+permanece condicionado ao manifesto e à decisão próprios.
 Criar os cards não equivale a autorizar inferência paga nem escolher o fornecedor.
 
 A atualização C01-L/C02-L foi aceita e integrada em `933836e`. As próximas

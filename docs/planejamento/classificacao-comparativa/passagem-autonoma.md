@@ -8,8 +8,13 @@ evidências, sem aceite do modelo, e deixa de bloquear C05. C05 passa a qualific
 Qwen contra as metas aprovadas, sem alegar comparação pareada final.
 [Plano e pré-voo](qualificacao-qwen.md). Na consulta pública de 23/11/2026,
 a Feita exibiu `qwen/qwen3.8-27b` como `Down`; nenhuma inferência foi tentada.
-Os 36 relatos continuam reservados, sem inferência. A execução aguarda
-disponibilidade e adaptação/verificação do executor final e seu orçamento.
+Os 36 relatos continuam reservados, sem inferência. Posteriormente, o reteste
+autorizado C03-P2 respondeu em 1,894 s, com US$ 0,000518 exibidos no log,
+apesar do indicador anterior. O resumo confirmou duas chamadas experimentais
+e aproximadamente US$ 0,00104. [Recibo](../../evidencias/c03/reteste-unitario-real-02.json).
+C05-E implementa o executor e a conta persistente, com 28 testes offline;
+o lote pago ainda exige manifesto próprio, gastos anteriores consolidados
+e referências financeiras verificadas. [Guia C05](../../c05.md).
 Nenhum modelo foi escolhido nem integrado ao Rails. C06/C07 continuam
 dependentes de decisão elegível; F09/F10 e E01 mantêm suas dependências.
 
