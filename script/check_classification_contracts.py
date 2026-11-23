@@ -253,11 +253,33 @@ def slice_population(dimension, group, completed, dataset, decisions):
     return cases, targets, classifiable, applied
 
 
+def verify_population(metric, population, code, label):
+    denominator = metric["denominator"]
+    if denominator is None:
+        return
+    if metric["state"] == "partial":
+        require(denominator <= population, code, label)
+    else:
+        require(denominator == population, code, label)
+
+
 def verify_metrics(report, protocol, fully_observed, dataset, decisions):
     states = []
     passed = []
+    counts = protocol["exact_test_denominators"]
+    final_test = report.get("split") == "final_test"
+    fixed_populations = fully_observed or final_test
+    warm_cases = protocol["execution"]["full_test_cases_per_candidate"] if final_test else len(report["completed_ids"])
+    urgent_cases = counts["urgent_priority_omitted_cases"]
+    gate_populations = {"warm_total_latency_p95_ms_max": warm_cases,
+                        "automatic_coverage_on_fully_classifiable_cases_min": counts["fully_classifiable_cases"],
+                        "raw_urgent_recognition_min": urgent_cases,
+                        "automatic_completion_on_expected_review_cases": counts["expected_review_cases"],
+                        "automatic_non_urgent_applied_when_expected_urgent": urgent_cases}
     for name, metric in report["gates"].items():
         if name.startswith("applied_") and name.endswith("_accuracy"):
+            field = name.removeprefix("applied_").removesuffix("_accuracy")
+            require(metric == report["by_field"][field]["applied_accuracy"], "applied_accuracy_mismatch", field)
             limit = protocol["gates"]["applied_accuracy_per_field_min"]
         else:
             limit = protocol["gates"][name]
@@ -268,6 +290,8 @@ def verify_metrics(report, protocol, fully_observed, dataset, decisions):
         else:
             operation = "count"
         verify_metric(metric, operation, name)
+        if fixed_populations and name in gate_populations:
+            verify_population(metric, gate_populations[name], "gate_denominator", name)
         states.append(metric["state"])
         if metric["state"] == "measured":
             if operation == "ratio":
@@ -285,17 +309,18 @@ def verify_metrics(report, protocol, fully_observed, dataset, decisions):
                 verify_metric(metric, "ratio", label)
                 population = populations.get(name, targets)
                 denominator = metric["denominator"]
-                if fully_observed and denominator is not None:
-                    if metric["state"] == "partial":
-                        require(denominator <= population, "slice_denominator", label)
-                    else:
-                        require(denominator == population, "slice_denominator", label)
+                if fully_observed:
+                    verify_population(metric, population, "slice_denominator", label)
                 if not (population == 0 and metric["state"] == "unmeasured" and denominator == 0):
                     states.append(metric["state"])
     for name, metric in report["urgent_outcomes"].items():
         verify_metric(metric, "ratio", name)
+        if fixed_populations:
+            verify_population(metric, urgent_cases, "urgent_denominator", name)
         states.append(metric["state"])
     verify_metric(report["latency_p50_ms"], "percentile", "latency_p50_ms")
+    if fixed_populations:
+        verify_population(report["latency_p50_ms"], warm_cases, "latency_denominator", "latency_p50_ms")
     states.append(report["latency_p50_ms"]["state"])
     # Gates require denominators. Descriptive slices can legitimately be empty
     # (e.g. applied accuracy in a stratum with no accepted predictions).
@@ -371,21 +396,21 @@ def verify_run(bundle, validation, protocol, split, catalog, dataset):
     partial_control = any(indexed["decisions"][i]["outcome"] == "review" and
                           any(f["status"] == "predicted" for f in indexed["decisions"][i]["fields"].values())
                           for i in controls)
+    warm_samples = sum(observations[i]["temperature_state"] == "warm" and observations[i]["elapsed_ms"] is not None
+                       for i in completed)
+    if split_name == "final_test":
+        urgent_ids = split["summary"]["final_test"]["urgent_priority_omitted_ids"]
+        urgent_seen = len(set(completed).intersection(urgent_ids))
+        for name, metric in report["urgent_outcomes"].items():
+            if metric["state"] in ("measured", "partial"):
+                require(metric["denominator"] <= urgent_seen, "urgent_denominator", name)
+        latencies = (report["latency_p50_ms"], report["gates"]["warm_total_latency_p95_ms_max"])
+        for metric in latencies:
+            if metric["state"] in ("measured", "partial"):
+                require(metric["denominator"] <= warm_samples, "latency_denominator", report["run_id"])
     full = (report["identity"]["mode"] == "real" and split_name == "final_test" and completed == planned
-            and {"channel_complete", "invalid_input"} <= reasons and partial_control
-            and all(observations[i]["temperature_state"] == "warm" and observations[i]["elapsed_ms"] is not None
-                    for i in completed)
+            and {"channel_complete", "invalid_input"} <= reasons and partial_control and warm_samples == len(completed)
             and any(c["status"] != "error" for i in completed for c in observations[i]["choices"].values()))
-    if full:
-        den = protocol["exact_test_denominators"]
-        denominators = {"warm_total_latency_p95_ms_max": len(completed),
-                        "automatic_coverage_on_fully_classifiable_cases_min": den["fully_classifiable_cases"],
-                        "raw_urgent_recognition_min": den["urgent_priority_omitted_cases"],
-                        "automatic_completion_on_expected_review_cases": den["expected_review_cases"],
-                        "automatic_non_urgent_applied_when_expected_urgent": den["urgent_priority_omitted_cases"]}
-        for name, expected in denominators.items():
-            metric = report["gates"][name]
-            require(metric["state"] != "measured" or metric["denominator"] == expected, "gate_denominator", name)
     verify_usage(report, list(observations.values()))
     verify_metrics(report, protocol, full, dataset, indexed["decisions"])
 

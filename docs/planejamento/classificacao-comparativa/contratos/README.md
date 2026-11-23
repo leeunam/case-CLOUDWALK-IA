@@ -184,6 +184,12 @@ completos/inválidos. Aplicação parcial usa como população os relatos examin
 para detectar aplicação indevida depois de falha ou abstenção. Os controles
 devem provocar esses caminhos inclusive se o candidato sempre responder com
 códigos válidos. Separar controles das métricas calculadas sobre o teste.
+O gate de acerto aplicado de cada campo reproduz o estado, o numerador, o
+denominador e o valor da métrica `applied_accuracy` em `by_field`. Com zero
+aplicações em um campo, o gate fica sem medição e a elegibilidade fica
+inconclusiva. No teste completo, cada taxa medida de `urgent_outcomes` usa os
+seis urgentes. Os percentis p50 e p95 medidos usam as mesmas 36 tentativas
+aquecidas. Evidência parcial informa a quantidade observada e impede aprovação.
 A escolha bruta urgente conta mesmo quando o relato segue para revisão.
 O relatório preserva a separação entre taxa de reconhecimento e contagem de
 rebaixamentos aplicados.

@@ -41,8 +41,8 @@ escolhe o vencedor.
 - [x] Congelar a mesma informação semântica para os dois candidatos: critérios de
   categoria/prioridade/urgência, abstenção e eventuais exemplos. Registrar o
   mapeamento para cada adaptador e qualquer diferença antes da execução final.
-- [x] Aprovar limites de erro de urgência, acerto/cobertura, abstenção, latência
-  e custo antes da comparação. Distinguir urgente classificado abaixo de urgente,
+- [x] Aprovar metas de erro de urgência, acerto, cobertura, abstenção e latência
+  antes da comparação. Distinguir urgente classificado abaixo de urgente,
   abstenção e falha. Aceitar formalmente a possibilidade de nenhum vencedor.
 - [x] Definir schema de relatório, estados de medição, denominadores e registros
   de modelo/política/ambiente. Evidência ausente não vira aprovação nem custo zero.

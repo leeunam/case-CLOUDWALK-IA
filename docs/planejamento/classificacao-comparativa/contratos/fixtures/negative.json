@@ -194,5 +194,15 @@
     "id": "cobranca-parcial-descartada",
     "changes": [{"path": ["report", "usage", "observed_api_usd", "value"], "value": 0}],
     "expected_error": "usage_total"
+  },
+  {
+    "id": "acerto-do-gate-diverge-da-fatia",
+    "changes": [
+      {
+        "path": ["report", "gates", "applied_category_accuracy"],
+        "value": {"state": "measured", "numerator": 1, "denominator": 1, "value": 1}
+      }
+    ],
+    "expected_error": "applied_accuracy_mismatch"
   }
 ]
