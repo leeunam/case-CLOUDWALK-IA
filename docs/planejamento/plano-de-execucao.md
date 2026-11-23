@@ -61,8 +61,9 @@ Os contratos v1.1.0 passaram na verificação local, conforme o
 [aceite C01](classificacao-comparativa/aceite-c01.md). A revisão final da C01 foi aprovada. A revisão da C02 levou à emenda técnica
 1.1.0 de proveniência dos controles. O avaliador está aceito com 31 testes
 após a manutenção de integração e reprodução fixture do código aprovado.
-A C03 foi integrada e aceita offline com 24 testes, preservando o bloqueio
-do piloto pago. A C04 tem código revisado e dez lotes reais adicionais de
+A C03 foi integrada com 30 testes e piloto real mínimo aceito: uma requisição
+completou `pix` e `urgent` em 1,826 s, com cobrança exibida de aproximadamente
+US$ 0,000518. O comparativo final permanece pendente. A C04 tem código revisado e dez lotes reais adicionais de
 desenvolvimento, incluindo falhas por prazo e um rebaixamento de urgência.
 Sua configuração não está aprovada para C05. A [passagem atual](classificacao-comparativa/passagem-autonoma.md)
 registra as evidências e o bloqueio do piloto Qwen. Vencedor e orçamento real

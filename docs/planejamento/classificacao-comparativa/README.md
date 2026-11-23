@@ -22,8 +22,8 @@ Um commit ou teste fixture, sozinho, não equivale a aceite com um modelo real.
 
 Os [critérios e a separação dos dados](protocolo-comparacao.md) foram aprovados
 na C01. O [aceite](aceite-c01.md) registra contratos, verificações e limites
-com C02 aceita após revisão e reprodução. A C03 está aceita offline; o piloto
-pago aguarda credencial, teto e confirmação do faturamento. A C04 tem código
+com C02 aceita após revisão e reprodução. A C03 tem implementação e piloto
+real mínimo aceitos, com uma chamada e cobrança de aproximadamente US$ 0,000518. A C04 tem código
 revisado e investigação local preservada, com falhas de latência e um
 rebaixamento de urgência. Sua configuração não está aprovada para C05.
 A [passagem atual](passagem-autonoma.md) identifica a próxima decisão humana.

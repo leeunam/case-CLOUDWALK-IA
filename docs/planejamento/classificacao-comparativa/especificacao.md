@@ -7,7 +7,9 @@ o comportamento e suas provas são definidos antes da implementação.
 
 A comparação **Qwen pela Feita × GLiClass local** foi escolhida pelo responsável.
 Os critérios de aceitação e a divisão 24/36 foram aprovados pelo responsável.
-Vencedor e orçamento de execução real permanecem pendentes. A revisão dos 60 rótulos está documentada:
+Vencedor permanece pendente. Posteriormente, o responsável autorizou até
+US$ 10 para o piloto e pediu mínimo de requisições; uma chamada real C03
+foi executada e aceita. [Autorização e limites](autorizacao-piloto-economico.md). A revisão dos 60 rótulos está documentada:
 oito casos aprovados diretamente pelo responsável e 52 pela IA sob delegação
 explícita, para referência exploratória. Os contratos v1.0.0 passaram na
 verificação local; o [aceite C01](aceite-c01.md) registra evidências e limites
@@ -114,8 +116,8 @@ Apresentar contagens, denominadores e limitações, por campo, máscara e estrat
   de confiança dos dois modelos não são diretamente equivalentes.
 
 O protocolo aprovado fixa os limites numéricos de erro de urgência,
-cobertura/abstenção, acerto e latência antes da execução. O orçamento permanece
-pendente e bloqueia chamadas pagas. Esses valores são decisões do experimento, não exigências
+cobertura/abstenção, acerto e latência antes da execução. O orçamento do piloto foi autorizado em até US$ 10, com mínimo de requisições.
+O escopo financeiro do teste final tem confirmação própria antes de sua execução. Esses valores são decisões do experimento, não exigências
 quantitativas do TAPI. Um modelo que se abstém em tudo não ganha por evitar
 erros. C05 pode concluir que nenhum candidato satisfaz os critérios ou que
 a evidência é insuficiente. A escolha operacional exige decisão humana.

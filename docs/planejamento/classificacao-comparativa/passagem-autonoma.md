@@ -1,5 +1,7 @@
 # Passagem da execução autônoma · 23/11/2026
 
+**Atualização posterior:** o responsável configurou a chave, autorizou até US$ 10 com mínimo de requisições, e o piloto real C03 usou uma chamada. Retornou `pix` + `urgent` corretamente em 1,826 s; o painel exibiu cobrança aproximada de US$ 0,000518. [Recibo](../../evidencias/c03/piloto-unitario-real.json). Foi aprovado depois usar o tempo total da classificação na meta de 3 s; protocolo e avaliador serão atualizados offline antes do teste final. O checkpoint abaixo descreve o estado anterior ao piloto e é preservado como histórico.
+
 Base técnica integrada localmente: `93cdbd79cf318ffa4be8888a366a1368c06b250c`.
 Este registro é um checkpoint; retomar pelo HEAD atual e conferir alterações e worktrees antes de editar. O código não foi enviado ao remoto. Os cards públicos foram atualizados separadamente.
 

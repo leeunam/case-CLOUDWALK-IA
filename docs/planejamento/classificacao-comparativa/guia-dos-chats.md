@@ -50,11 +50,12 @@ Depois, o responsável aprovou critérios e divisão 24/36. As fontes atuais sã
 `protocolo-comparacao.json`, `divisao-dados.json` e `rubrica-comum.md`.
 Os contratos v1.1.0 distinguem controles injetados e candidato, conforme
 `contratos/ajuste-1.1.md`. A C02 está aceita, incluindo manutenção de integração com 31 testes.
-A C03 está integrada e aceita offline com 24 testes; o piloto real continua
-bloqueado. A C04 tem código e investigação local revisados, com timeouts e
+A C03 está integrada com 30 testes e piloto real mínimo aceito: uma chamada
+completou os dois campos de desenvolvimento. A C04 tem código e investigação local revisados, com timeouts e
 rebaixamento de urgência observados; sua configuração não está liberada para
 C05. A [passagem atual](passagem-autonoma.md) reúne os resultados e a retomada.
-Orçamento real e vencedor seguem decisões pendentes.
+Há autorização de até US$ 10 para o piloto, com mínimo de requisições; o
+primeiro caso custou aproximadamente US$ 0,000518. Vencedor segue pendente.
 
 Use o [quadro](README.md), a [especificação](especificacao.md) e o card inteiro.
 A base fonte estudada é `cb9683179d713e7bcbfc95c54003dc30630ab7ad`. O SHA de

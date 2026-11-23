@@ -639,7 +639,14 @@ ressalvas constam no [registro](classificacao-comparativa/revisao-de-rotulos.md)
 Na mesma data, o responsável aprovou os critérios numéricos e a divisão de
 24 casos para desenvolvimento e 36 para teste, registrados no
 [protocolo](classificacao-comparativa/protocolo-comparacao.md). O orçamento
-de chamadas reais e a escolha do classificador permanecem pendentes.
+de chamadas reais e a escolha do classificador permaneciam pendentes naquele marco.
+Posteriormente, o responsável autorizou até US$ 10 para o piloto e pediu
+mínimo de requisições. O piloto econômico usou uma chamada e foi aceito,
+conforme o [registro](classificacao-comparativa/autorizacao-piloto-economico.md).
+O responsável também aprovou usar o tempo total de espera pela classificação
+na meta de 3 s, em substituição à exigência de aquecimento comprovado.
+Essa alteração será versionada antes do teste final; resultados históricos
+conservam sua régua. A escolha do classificador continua pendente.
 
 ## Relações de domínio já confirmadas
 

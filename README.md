@@ -64,9 +64,9 @@ ainda não foram ensaiadas. A R02 corrigiu os dois casos limite do analisador, c
 e reanálise dos sete históricos preservada. A recuperação R01 passou no ensaio real controlado, conforme
 [seu relatório](docs/r01.md). A C01 fechou critérios, divisão de dados e contratos da
 comparação. A [C02](docs/c02.md) está aceita, com 31 testes após a manutenção
-e reprodução fixture. A [C03](docs/c03.md) está integrada e aceita offline,
-com 24 testes; o piloto Qwen real aguarda credencial, teto autorizado e
-confirmação do faturamento. A [C04](docs/c04.md) tem implementação revisada
+e reprodução fixture. A [C03](docs/c03.md) tem 30 testes e primeiro piloto real
+mínimo aceito: uma chamada completou dois campos em 1,826 s, com cobrança
+exibida de aproximadamente US$ 0,000518. Essa amostra não é a comparação final. A [C04](docs/c04.md) tem implementação revisada
 e dez lotes reais adicionais de desenvolvimento: houve timeouts e um
 rebaixamento de urgente para básico. Sua configuração não está aprovada
 para integração. A [passagem atual](docs/planejamento/classificacao-comparativa/passagem-autonoma.md)

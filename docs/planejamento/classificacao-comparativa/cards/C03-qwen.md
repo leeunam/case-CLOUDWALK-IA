@@ -2,7 +2,7 @@
 
 Issue publicada: [#4](https://github.com/leeunam/case-CLOUDWALK-IA/issues/4). Consulte a issue para progresso e comentários atuais.
 
-Estado: **implementação offline aceita e integrada** em `276b0eba96d2d3acaf099e3c59fe5775265fef3c`. [Aceite offline](../../../evidencias/c03/aceite-offline.json): 24 testes aprovados e reprodução fixture de 24 relatos e 13 controles. O aceite real continua bloqueado por credencial, autorização financeira e confirmação do faturamento.
+Estado: **implementação e piloto real mínimo aceitos**. [Relatório](../../../c03.md): 30 testes Qwen, 31 do avaliador e uma única chamada real em `jev-003`, com dois campos corretos em 1,826 s e cobrança exibida de aproximadamente US$ 0,000518. A referência tem um caso de desenvolvimento; não é a comparação final nem escolha do modelo. [Recibo](../../../evidencias/c03/piloto-unitario-real.json).
 
 ## Parent e especificação
 
@@ -17,22 +17,22 @@ O teste final é C05. O candidato inicial é `qwen/qwen3.8-27b`.
 
 ## Critérios de aceite
 
-- [ ] Confirmar modelo, endpoint, capacidades, tarifa e formato de usage na Feita.
+- [x] Confirmar modelo, endpoint, capacidades, tarifa e formato de usage na Feita.
   Registrar data, solicitado/retornado e limitações; indisponibilidade é explícita.
-- [ ] Enviar somente campos faltantes, com texto, critérios e catálogo da marca,
+- [x] Enviar somente campos faltantes, com texto, critérios e catálogo da marca,
   exigindo valores permitidos e opção de informação insuficiente. Preservar as
   mesmas definições e exemplos semânticos oferecidos ao candidato local em C01.
-- [ ] Validar a saída antes de agregá-la; preservar campos do canal e cumprir
+- [x] Validar a saída antes de agregá-la; preservar campos do canal e cumprir
   tudo-ou-revisão. JSON válido com código inventado continua inválido.
-- [ ] Timeout, rate limit, resposta inválida, recusa e falha de transporte geram
+- [x] Timeout, rate limit, resposta inválida, recusa e falha de transporte geram
   resultados rastreáveis. Limites/retentativas obedecem ao protocolo; nenhuma oculta.
-- [ ] Registrar tokens cobrados, custo observado quando disponível e estimativa
+- [x] Registrar tokens cobrados, custo observado quando disponível e estimativa
   separada quando necessária. Sem usage/tarifa suficiente, não afirmar custo zero.
-- [ ] Chave apenas no ambiente local, nunca em arquivos versionados, logs ou issues.
+- [x] Chave apenas no ambiente local, nunca em arquivos versionados, logs ou issues.
   Sem chave ou autorização/teto, o ensaio real para antes da chamada externa.
-- [ ] Testes cobrem máscara simples/dupla, preservação, inválidos, abstenção e
+- [x] Testes cobrem máscara simples/dupla, preservação, inválidos, abstenção e
   erros usando o avaliador comum. Saída de fixture é identificada como fixture.
-- [ ] Com autorização, piloto limitado em exemplos de desenvolvimento gera
+- [x] Com autorização, piloto limitado em exemplos de desenvolvimento gera
   artefatos reais. Se bloqueado, entregar implementação/testes e bloqueio preciso;
   não declarar aceite real concluído. Congelar prompt/versão para C05.
 
