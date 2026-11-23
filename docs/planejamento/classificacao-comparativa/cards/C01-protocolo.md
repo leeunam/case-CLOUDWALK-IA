@@ -10,10 +10,10 @@ Estado inicial: planejamento com participação humana; não libera ensaio pago.
 Progresso em 2026-11-23: revisão dos 60 casos concluída para referência
 exploratória, com oito aprovações diretas e 52 pela IA sob delegação explícita,
 conforme o [registro da revisão](../revisao-de-rotulos.md). C01 continua em
-andamento; protocolo, separação dos dados e limites ainda estão pendentes.
+andamento: critérios e divisão foram aprovados, e os contratos estão em fechamento.
 
-A [proposta de critérios e divisão](../proposta-de-comparacao.md) está preparada
-para decisão do responsável. Seus números e IDs ainda não são um protocolo aprovado.
+Os [critérios e a divisão](../protocolo-comparacao.md) foram aprovados pelo
+responsável em 2026-11-23. A aprovação não autoriza gasto de API nem escolhe modelo.
 
 ## O que construir
 
@@ -33,19 +33,19 @@ escolhe o vencedor.
 - [x] Revisão dos 60 relatos documentada por caso, com origem, justificativas,
   ressalvas e hash preservado: oito aprovações diretas e 52 pela IA delegada.
   Registrar a limitação de referência exploratória; o protocolo final segue pendente.
-- [ ] Separar dados de desenvolvimento/calibração dos de teste final. Fixar IDs,
+- [x] Separar dados de desenvolvimento/calibração dos de teste final. Fixar IDs,
   tamanhos, catálogos e contagem de urgentes com prioridade omitida no holdout;
   declarar se o resultado sustenta decisão inicial ou apenas estudo exploratório.
   Não ajustar prompts/limiares com o resultado do holdout.
 - [ ] Congelar a mesma informação semântica para os dois candidatos: critérios de
   categoria/prioridade/urgência, abstenção e eventuais exemplos. Registrar o
   mapeamento para cada adaptador e qualquer diferença antes da execução final.
-- [ ] Aprovar limites de erro de urgência, acerto/cobertura, abstenção, latência
+- [x] Aprovar limites de erro de urgência, acerto/cobertura, abstenção, latência
   e custo antes da comparação. Distinguir urgente classificado abaixo de urgente,
   abstenção e falha. Aceitar formalmente a possibilidade de nenhum vencedor.
 - [ ] Definir schema de relatório, estados de medição, denominadores e registros
   de modelo/política/ambiente. Evidência ausente não vira aprovação nem custo zero.
-- [ ] Registrar teto e limites de execução real ou marcar autorização pendente.
+- [x] Registrar teto e limites de execução real ou marcar autorização pendente.
   Sem autorização, o caminho de fixtures segue disponível e o real fica bloqueado.
 - [ ] Integrador registra aprovação e commit do protocolo comum antes de liberar C02.
 

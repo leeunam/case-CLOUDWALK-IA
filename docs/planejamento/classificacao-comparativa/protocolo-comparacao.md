@@ -1,16 +1,17 @@
-# C01 — proposta de critérios e separação dos dados
+# C01 — critérios e separação dos dados aprovados
 
-Estado: **proposta para decisão do responsável**. Os números abaixo ainda não
-foram aprovados e não são exigências do TAPI ou resultados já medidos.
-Esta proposta não libera C02 nem autoriza chamadas reais.
+Estado: **critérios e divisão aprovados pelo responsável em 2026-11-23**, pela
+resposta “aprovo” no chat central. São escolhas para o MVP, não exigências do
+TAPI ou resultados medidos. O fechamento dos contratos ainda precede a
+liberação de C02; chamadas reais continuam sem orçamento autorizado.
 
-[Definições estruturadas](proposta-de-comparacao.json) ·
-[IDs e contagens da divisão](divisao-proposta.json) ·
+[Definições estruturadas](protocolo-comparacao.json) ·
+[IDs e contagens da divisão](divisao-dados.json) ·
 [Origem da revisão dos rótulos](revisao-de-rotulos.md).
 
-## Régua proposta
+## Régua aprovada
 
-| Critério | Proposta | Motivo |
+| Critério | Meta aprovada | Motivo |
 | --- | --- | --- |
 | Preservar dados válidos do canal | 100%; controles com entrada completa ou inválida fazem zero chamadas ao modelo. | O modelo só complementa campos ausentes. |
 | Aplicação íntegra | Zero aplicação parcial após abstenção, erro ou campo inválido. | Um resultado incompleto deve seguir para revisão. |
@@ -21,7 +22,7 @@ Esta proposta não libera C02 nem autoriza chamadas reais.
 | Ambiguidade esperada | Os 7 casos com pelo menos um campo esperado como informação insuficiente devem ir para revisão. | Nesses casos não se deve aplicar um complemento completo por suposição. |
 | Tempo de resposta | p95 da tentativa completa com modelo/processo aquecido até 3 segundos; timeout de 5 segundos por relato. | Meta inicial para classificar sem alongar excessivamente o atendimento. |
 
-As metas de 90%, 70%, 80% e 3 segundos são escolhas propostas para este MVP.
+As metas de 90%, 70%, 80% e 3 segundos são escolhas aprovadas para este MVP.
 Acerto considera confiabilidade das decisões aplicadas; cobertura considera
 quanto trabalho o modelo consegue assumir. Exigir os dois evita premiar apenas
 uma média obtida em poucas respostas. Essas metas devem ser congeladas antes
@@ -49,7 +50,7 @@ de observar os resultados finais, com possibilidade de nenhum candidato passar.
 - Rodar as 36 tentativas do teste por candidato com concorrência 1 e uma tentativa
   por relato. Ensaio incompleto, métrica ausente ou denominador zero é inconclusivo.
 
-## Separação proposta: 24 para desenvolver e 36 para testar
+## Separação aprovada: 24 para desenvolver e 36 para testar
 
 | Grupo | Casos | Categoria ausente | Prioridade ausente | Ambos ausentes | Campos-alvo | Urgentes com prioridade omitida |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -72,7 +73,7 @@ reserva para o ensaio, não um teste externo cego.
 ## Uso de API e recursos locais
 
 O teto monetário permanece **pendente**, sem chamadas reais autorizadas por
-esta proposta. Antes do piloto, confirmar tarifa e estimar o lote; decidir com
+este protocolo. Antes do piloto, confirmar tarifa e estimar o lote; decidir com
 o responsável o limite e registrar como interromper antes de ultrapassá-lo.
 Fixtures e validação de contratos podem ser preparadas enquanto isso.
 
@@ -94,11 +95,11 @@ A separação de dados de ajuste e teste segue a prevenção de vazamento descri
 na [documentação do scikit-learn](https://scikit-learn.org/stable/common_pitfalls.html).
 O compromisso entre cobertura e erros nas decisões aceitas é discutido em
 [Selective Classification for Deep Neural Networks](https://arxiv.org/abs/1705.08500).
-Essas referências apoiam o método; os valores numéricos desta proposta são decisões
-locais a aprovar, não limites prescritos pelas fontes.
+Essas referências apoiam o método; os valores numéricos deste protocolo são
+decisões locais aprovadas, não limites prescritos pelas fontes.
 
 ## O que falta para C01
 
-Aprovar ou ajustar esta régua e a divisão; completar/congelar rubrica e schemas
-com exemplos válidos/inválidos; registrar o aceite do protocolo. O orçamento
+Completar/congelar rubrica e schemas com exemplos válidos/inválidos e registrar
+o aceite do protocolo completo. O orçamento
 pode continuar pendente para C02 com fixtures, mantendo execuções reais bloqueadas.

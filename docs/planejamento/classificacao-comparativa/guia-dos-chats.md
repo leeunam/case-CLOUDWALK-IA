@@ -44,6 +44,11 @@ diretas e 52 por IA delegada, documentadas na [revisão](revisao-de-rotulos.md).
 Manter essa origem explícita. A delegação não aprova orçamento, vencedor ou
 o protocolo completo da C01.
 
+Depois, o responsável aprovou critérios e divisão 24/36. As fontes atuais são
+`protocolo-comparacao.json`, `divisao-dados.json` e `rubrica-comum.md`.
+O fechamento dos contratos e a liberação do integrador precedem C02; orçamento
+real e vencedor seguem decisões pendentes.
+
 Use o [quadro](README.md), a [especificação](especificacao.md) e o card inteiro.
 A base fonte estudada é `cb9683179d713e7bcbfc95c54003dc30630ab7ad`. O SHA de
 execução deve conter o planejamento aprovado e as dependências integradas.

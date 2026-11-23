@@ -1,13 +1,13 @@
 # CLASS-SPEC-001 — comparação e seleção do classificador
 
-Versão: 0.2, de 2026-11-23. SDD significa **Specification Driven Development**:
+Versão: 0.3, de 2026-11-23. SDD significa **Specification Driven Development**:
 o comportamento e suas provas são definidos antes da implementação.
 
 ## Estado e objetivo
 
 A comparação **Qwen pela Feita × GLiClass local** foi escolhida pelo responsável.
-O vencedor, os limites de aceitação, a separação dos dados e o orçamento de
-execução ainda não foram aprovados. A revisão dos 60 rótulos está documentada:
+Os critérios de aceitação e a divisão 24/36 foram aprovados pelo responsável.
+Vencedor e orçamento de execução real permanecem pendentes. A revisão dos 60 rótulos está documentada:
 oito casos aprovados diretamente pelo responsável e 52 pela IA sob delegação
 explícita, para referência exploratória. C01 resolve os pontos restantes antes
 de liberar as tarefas dependentes. Esta especificação não declara um vencedor.
@@ -120,9 +120,9 @@ Registrar quantos urgentes com prioridade omitida permanecem no teste final
 e o alcance da conclusão permitido pelo tamanho da amostra. Um piloto pequeno
 sem erros observados não comprova uma baixa taxa de erro em produção.
 
-A [proposta de critérios e divisão](proposta-de-comparacao.md) apresenta metas
-e IDs concretos para revisão. Seu estado é pendente; não substituir os critérios
-aprovados nem liberar um card dependente enquanto o protocolo estiver em aberto.
+Os [critérios e a divisão aprovados](protocolo-comparacao.md), com dados
+estruturados em `protocolo-comparacao.json` e `divisao-dados.json`, fixam as metas
+antes do ensaio. O fechamento dos contratos ainda precede a liberação de C02.
 
 ## Execução e limites financeiros
 

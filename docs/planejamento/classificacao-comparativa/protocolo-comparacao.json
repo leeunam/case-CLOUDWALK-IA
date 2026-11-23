@@ -1,7 +1,7 @@
 {
-  "version": "0.1.0",
+  "version": "1.0.0",
   "task": "C01",
-  "status": "proposed_awaiting_responsible_approval",
+  "status": "approved",
   "created_on": "2026-11-23",
   "source_dataset": {
     "path": "script/f08/jev/dataset.json",
@@ -10,9 +10,10 @@
   },
   "source_catalog": {
     "path": "script/f08/jev/catalog.json",
-    "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271"
+    "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271",
+    "version": "1.0.0"
   },
-  "data_split_file": "divisao-proposta.json",
+  "data_split_file": "divisao-dados.json",
   "provenance": {
     "human_direct_cases": 8,
     "agent_delegated_cases": 52,
@@ -58,5 +59,22 @@
   "decision": {
     "policy": "Safety gates first. Among eligible candidates, compare correct case completions, per-field accuracy, urgent outcomes, latency and API cost/local resources. Responsible records justified choice; inconclusive or no eligible candidate are allowed.",
     "score_calibration": "Model scores are not assumed calibrated or comparable; abstention thresholds/prompt chosen only on development before final freeze."
+  },
+  "approval": {
+    "approved_on": "2026-11-23",
+    "approved_by": "responsável pelo projeto",
+    "evidence": "Resposta \"aprovo\" à régua e à divisão 24/36 apresentadas no chat central.",
+    "scope": [
+      "critérios numéricos de qualidade, cobertura, urgência, preservação e latência",
+      "divisão 24 desenvolvimento e 36 teste final"
+    ],
+    "paid_execution_authorized": false
+  },
+  "contract_version": "1.0.0",
+  "data_split_sha256": "8f7d0eab0d9431c2906e07bc022dc31a80684464f4b99f75dfc6ed1277fed1a9",
+  "rubric": {
+    "path": "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
+    "version": "1.0.0",
+    "sha256": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac"
   }
 }

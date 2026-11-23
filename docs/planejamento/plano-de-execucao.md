@@ -51,8 +51,9 @@ com Jev. A nova frente preserva as regras de negócio, prepara o comparativo e,
 após decisão humana, atualiza o aceite real para o classificador selecionado.
 Os 60 rótulos foram revisados para referência exploratória: oito casos
 diretamente pelo responsável e 52 pela IA sob delegação explícita, conforme o
-[registro da C01](classificacao-comparativa/revisao-de-rotulos.md). Protocolo,
-separação dos dados, vencedor e orçamento real continuam pendentes.
+[registro da C01](classificacao-comparativa/revisao-de-rotulos.md). Critérios e
+divisão 24/36 foram aprovados no [protocolo](classificacao-comparativa/protocolo-comparacao.md).
+Contratos estão em fechamento; vencedor e orçamento real continuam pendentes.
 Criar os cards não equivale a autorizar inferência paga nem escolher o fornecedor.
 
 Ordem: C01 → C02 → C03/C04 em paralelo → C05 → C06 → C07. R01 e R02 podem

@@ -636,6 +636,11 @@ IA delegada. Essa autorização substitui a exigência de revisão humana caso a
 caso, sem aprovar orçamento, vencedor ou protocolo completo. A origem e as
 ressalvas constam no [registro](classificacao-comparativa/revisao-de-rotulos.md).
 
+Na mesma data, o responsável aprovou os critérios numéricos e a divisão de
+24 casos para desenvolvimento e 36 para teste, registrados no
+[protocolo](classificacao-comparativa/protocolo-comparacao.md). O orçamento
+de chamadas reais e a escolha do classificador permanecem pendentes.
+
 ## Relações de domínio já confirmadas
 
 O diagrama representa relações de negócio, sem fixar tabelas ou tecnologias.
