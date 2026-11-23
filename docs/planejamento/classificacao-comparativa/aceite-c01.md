@@ -1,7 +1,8 @@
 # C01 — aceite local e passagem para C02
 
-Estado: verificação local concluída em 2026-11-23, com orçamento de execução
-real pendente. A revisão ampla final precede a liberação registrada pelo integrador.
+Estado: **aceita localmente em 2026-11-23**, com revisão ampla e re-revisão
+aprovadas. C02 liberada somente para fixtures, após integração e indicação do
+SHA pelo integrador. Orçamento de execução real permanece pendente.
 
 ## O que está fechado
 
@@ -18,7 +19,10 @@ real pendente. A revisão ampla final precede a liberação registrada pelo inte
 
 ## Evidência local
 
-A entrega dos contratos está em `d39d659`, com correções em `590a8b9`.
+A entrega dos contratos está em `d39d659`, com correções em `590a8b9` e
+`98b2bc2`. A revisão ampla final aprovou a coerência das métricas e a
+distinção entre metas aprovadas e orçamento pendente, com 43 contraprovas
+dirigidas e um controle de manifesto interrompido.
 A revisão independente encontrou cinco problemas e a re-revisão confirmou
 a correção de todos: completude das fatias, custo parcial, zero comprovado
 de chamadas, origem da divergência de versão e texto Unicode em JSONL.
@@ -31,7 +35,7 @@ rtk proxy python3 docs/planejamento/classificacao-comparativa/contratos/test_reg
 ```
 
 Resultado: **5 schemas, 12 entradas, 8 observações, 12 decisões, 1 relatório
-fixture e 33 rejeições esperadas** conferidos. As quatro regressões passaram,
+fixture e 34 rejeições esperadas** conferidos. As oito regressões passaram,
 sem erros ou falhas. O relatório fixture é inconclusivo quanto à qualidade
 dos candidatos; os valores sintéticos exercitam a representação.
 

@@ -22,7 +22,7 @@ Um commit ou teste fixture, sozinho, não equivale a aceite com um modelo real.
 
 Os [critérios e a separação dos dados](protocolo-comparacao.md) foram aprovados
 na C01. O [aceite](aceite-c01.md) registra contratos, verificações e limites
-para liberar C02 com fixtures após integração. Chamadas reais continuam sem orçamento autorizado.
+com C02 liberada para fixtures após integração. Chamadas reais continuam sem orçamento autorizado.
 
 ## Cards e dependências
 

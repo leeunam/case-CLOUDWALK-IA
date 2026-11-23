@@ -5,8 +5,8 @@ Issue publicada: [#2](https://github.com/leeunam/case-CLOUDWALK-IA/issues/2). Co
 ## Parent e especificação
 
 [Quadro CLASS-001](../README.md) · [CLASS-SPEC-001](../especificacao.md).
-Estado: verificação local concluída; revisão ampla final antes da liberação
-registrada pelo integrador. [Evidências e passagem](../aceite-c01.md).
+Estado: **aceita localmente em 2026-11-23**, com revisão e re-revisão
+aprovadas. C02 liberada somente para fixtures. [Evidências](../aceite-c01.md).
 
 Progresso em 2026-11-23: revisão dos 60 casos concluída para referência
 exploratória, com oito aprovações diretas e 52 pela IA sob delegação explícita,
@@ -48,7 +48,7 @@ escolhe o vencedor.
   de modelo/política/ambiente. Evidência ausente não vira aprovação nem custo zero.
 - [x] Registrar teto e limites de execução real ou marcar autorização pendente.
   Sem autorização, o caminho de fixtures segue disponível e o real fica bloqueado.
-- [ ] Integrador registra aprovação e commit do protocolo comum antes de liberar C02.
+- [x] Integrador registra aprovação e commit do protocolo comum antes de liberar C02.
 
 ## Fora do escopo
 
