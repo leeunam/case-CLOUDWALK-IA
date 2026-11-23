@@ -1,0 +1,24 @@
+{
+  "task": "C02",
+  "status": "maintenance_accepted_local",
+  "code_revision": "4f967439d192b9eec63d8bcf404067d304e05bf8",
+  "integration_revision": "6c27eb65a1c38dd3efde44c01330c6421a97b08a",
+  "tests": {
+    "command": "rtk proxy python3 -B -m unittest discover -s script/classification_comparison -p 'test_*.py' -v",
+    "count": 31,
+    "seconds": 27.938,
+    "failures": 0,
+    "errors": 0
+  },
+  "review": "Both directed maintenance reviews approved; no open findings in corrected diffs",
+  "covered": [
+    "late valid observation and known usage retained without accepting classification",
+    "lone surrogate preserved as JSON escape in IPC, journal and reports",
+    "interrupted usage remains separate from verified prefix",
+    "valid Unicode preserved and NaN rejected"
+  ],
+  "paid_requests": 0,
+  "contract_changes": false,
+  "gate_changes": false,
+  "historical_acceptance": "docs/evidencias/c02/aceite-local.json"
+}

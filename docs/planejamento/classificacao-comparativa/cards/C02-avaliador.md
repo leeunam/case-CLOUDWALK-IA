@@ -59,3 +59,7 @@ antes de ser consumida. Retornar commits, comandos, testes e um relatório fixtu
 
 Escolher um caso com uma escolha bruta correta e aplicação recusada; localizar
 por que a resposta não conta como classificação automática aplicada.
+
+## Manutenção aceita — 2026-11-23
+
+Correções `0a910fa` e `4f96743`, integradas em `6c27eb6`, preservam observações/cobranças tardias e valores Unicode inválidos sem aplicar a classificação nem perder evidências. Suíte completa: 31 testes em 27,938 s, zero falhas ou erros; revisões dirigidas aprovadas. [Registro](../../../evidencias/c02/manutencao-integracao.json). Nenhuma mudança nos critérios, contratos ou autorização de gasto.
