@@ -1,0 +1,19 @@
+{
+  "task": "C02",
+  "status": "accepted_local",
+  "code_revision": "0201bf136823f85d5ac3ae8512383e273cca9b8a",
+  "native_tests": 27,
+  "test_seconds": 22.762,
+  "failures": 0,
+  "contract_regressions": 11,
+  "expected_rejections": 64,
+  "fixture_cases": 24,
+  "controls": 13,
+  "injected_controls": 1,
+  "candidate_attempts": 32,
+  "observations": 33,
+  "eligibility": "inconclusive",
+  "model_calls": 0,
+  "scope": "fixture only; no evidence of provider quality, latency or API cost",
+  "review": "task reviews and whole-branch final review approved after corrections"
+}
