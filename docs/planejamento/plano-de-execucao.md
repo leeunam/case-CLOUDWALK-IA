@@ -35,6 +35,25 @@ A [passagem da F08](passagem-f08.md) separa o gerador/observador de carga
 do dataset/avaliador Jev, com arquivos próprios e a mesma base Git. A execução
 comparável e a revisão humana dos rótulos ficam no chat central.
 
+### Frente ativa de classificação — CLASS-001
+
+Em 2026-11-23, o responsável escolheu comparar Qwen pela Feita com GLiClass
+local antes de selecionar o classificador. O [quadro SDD](classificacao-comparativa/README.md)
+contém sete cards de protocolo/avaliador/adaptadores/comparação/integração/demo
+e duas correções independentes de robustez. A especificação é CLASS-SPEC-001;
+a decisão está em D017. SDD aqui significa Specification Driven Development.
+
+Os itens F04/F08 abaixo registram a implementação e o experimento anteriores
+com Jev. A nova frente preserva as regras de negócio, prepara o comparativo e,
+após decisão humana, atualiza o aceite real para o classificador selecionado.
+Ainda não há vencedor, rótulos completamente aprovados ou orçamento liberado.
+Criar os cards não equivale a autorizar inferência paga nem escolher o fornecedor.
+
+Ordem: C01 → C02 → C03/C04 em paralelo → C05 → C06 → C07. R01 e R02 podem
+andar independentemente e bloqueiam o fechamento da demonstração C07.
+O [guia dos chats](classificacao-comparativa/guia-dos-chats.md) explica base Git,
+isolamento, propriedade, modelos sugeridos, revisão e exercícios de aprendizagem.
+
 ## 1. Ordem de trabalho
 
 | Etapa | Entregas internas | Evidência para avançar |

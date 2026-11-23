@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "project": "CLASS-001",
+  "spec": "CLASS-SPEC-001",
+  "spec_version": "0.1",
+  "repository": "leeunam/case-CLOUDWALK-IA",
+  "application_baseline": "cb9683179d713e7bcbfc95c54003dc30630ab7ad",
+  "state": "draft_for_breakdown_review",
+  "epic": {
+    "title": "[CLASS-001] Comparar Qwen/Feita e GLiClass e integrar o classificador escolhido",
+    "labels": [
+      "enhancement",
+      "documentation"
+    ],
+    "url": null
+  },
+  "cards": [
+    {
+      "id": "C01",
+      "title": "[C01] Congelar protocolo, rótulos e critérios de escolha",
+      "file": "cards/C01-protocolo.md",
+      "depends_on": [],
+      "labels": [
+        "documentation"
+      ],
+      "role": "central/humano",
+      "url": null,
+      "state": "planned",
+      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites"
+    },
+    {
+      "id": "C02",
+      "title": "[C02] Executar lote fixture e produzir relatório comparativo comum",
+      "file": "cards/C02-avaliador.md",
+      "depends_on": [
+        "C01"
+      ],
+      "labels": [
+        "enhancement"
+      ],
+      "role": "avaliador",
+      "url": null,
+      "state": "planned",
+      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites"
+    },
+    {
+      "id": "C03",
+      "title": "[C03] Classificar relato de desenvolvimento com Qwen pela Feita",
+      "file": "cards/C03-qwen.md",
+      "depends_on": [
+        "C02"
+      ],
+      "labels": [
+        "enhancement"
+      ],
+      "role": "qwen",
+      "url": null,
+      "state": "planned",
+      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites"
+    },
+    {
+      "id": "C04",
+      "title": "[C04] Classificar relato de desenvolvimento com GLiClass local",
+      "file": "cards/C04-gliclass.md",
+      "depends_on": [
+        "C02"
+      ],
+      "labels": [
+        "enhancement"
+      ],
+      "role": "gliclass",
+      "url": null,
+      "state": "planned",
+      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites"
+    },
+    {
+      "id": "C05",
+      "title": "[C05] Publicar comparação pareada e decidir o classificador",
+      "file": "cards/C05-decisao.md",
+      "depends_on": [
+        "C03",
+        "C04"
+      ],
+      "labels": [
+        "documentation"
+      ],
+      "role": "central/humano",
+      "url": null,
+      "state": "planned",
+      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites"
+    },
+    {
+      "id": "C06",
+      "title": "[C06] Encaminhar atendimento pelo classificador escolhido",
+      "file": "cards/C06-integracao.md",
+      "depends_on": [
+        "C05"
+      ],
+      "labels": [
+        "enhancement"
+      ],
+      "role": "integracao",
+      "url": null,
+      "state": "planned",
+      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites"
+    },
+    {
+      "id": "C07",
+      "title": "[C07] Reproduzir demonstração com o modelo selecionado",
+      "file": "cards/C07-reproducao.md",
+      "depends_on": [
+        "C06",
+        "R01",
+        "R02"
+      ],
+      "labels": [
+        "documentation",
+        "enhancement"
+      ],
+      "role": "reproducao",
+      "url": null,
+      "state": "planned",
+      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites"
+    },
+    {
+      "id": "R01",
+      "title": "[R01] Recuperar consumo após perda de associação ao grupo Kafka",
+      "file": "cards/R01-recuperacao.md",
+      "depends_on": [],
+      "labels": [
+        "bug"
+      ],
+      "role": "robustez",
+      "url": null,
+      "state": "planned",
+      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites"
+    },
+    {
+      "id": "R02",
+      "title": "[R02] Preservar atraso e atribuir escritas de chat após timeout",
+      "file": "cards/R02-analisador.md",
+      "depends_on": [],
+      "labels": [
+        "bug"
+      ],
+      "role": "analisador",
+      "url": null,
+      "state": "planned",
+      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites"
+    }
+  ]
+}

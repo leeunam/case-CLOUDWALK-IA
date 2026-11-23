@@ -525,6 +525,10 @@ de campos ausentes e as alternativas de contingência estão em
 
 **Estado:** confirmado para a primeira entrega.
 
+A direção de comparar alternativas ao Jev foi aprovada depois, em D017.
+As regras de campos ausentes, preservação e revisão abaixo permanecem; o
+fornecedor operacional só muda após decisão e integração verificadas.
+
 - Os canais simulados enviam categoria e prioridade junto da solicitação.
 - A plataforma valida e registra os valores recebidos e os utiliza nas regras
   de encaminhamento e distribuição.
@@ -601,6 +605,29 @@ de campos ausentes e as alternativas de contingência estão em
 Medir acerto por campo, erros de prioridade urgente, cobertura automática,
 latência, falhas e custo com relatos sintéticos em português. A versão do
 modelo, limiares, prazos e política de falhas ainda precisam ser definidos.
+
+## D017 — Comparar Qwen/Feita e GLiClass antes de selecionar o classificador
+
+**Estado:** comparação confirmada pelo responsável em 2026-11-23; vencedor
+e integração operacional ainda pendentes.
+
+- Comparar `qwen/qwen3.8-27b` pela Feita com
+  `knowledgator/gliclass-multilang-mini` local, usando modelos já treinados.
+- Medir acerto bruto/aplicado por campo, erros em urgentes, cobertura/abstenção,
+  latência e custo/recursos. Não equiparar scores a probabilidades calibradas.
+- Preservar D015 quanto a validar antes da inferência, completar só ausentes,
+  manter campos válidos, aplicar o complemento íntegro ou encaminhar à revisão.
+- Revisar rótulos e congelar protocolo, separação de dados, critérios e limites
+  financeiros antes da comparação final. Os dados existentes continuam provisórios.
+- Escolher com evidência e aprovação humana; resultado inconclusivo ou nenhum
+  candidato elegível são saídas válidas. Não ativar os dois por atendimento.
+- Integrar o escolhido posteriormente, com origem/proveniência corretas e
+  contratos consumidores atualizados, preservando o histórico Jev.
+- Não incluir treinamento, engenharia reversa, UI de modelos ou fallback entre
+  fornecedores. Recuperação Kafka e analisador seguem correções independentes.
+
+Especificação, cards SDD, dependências e passagem entre chats estão em
+[CLASS-001](classificacao-comparativa/README.md).
 
 ## Relações de domínio já confirmadas
 
