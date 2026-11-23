@@ -1,0 +1,113 @@
+[
+  {
+    "id": "versao-relatorio-antiga",
+    "changes": [
+      {
+        "path": [
+          "report",
+          "contract_version"
+        ],
+        "value": "1.1.0"
+      }
+    ],
+    "expected_error": "schema/report/contract_version/const"
+  },
+  {
+    "id": "versao-ipc-trocada",
+    "changes": [
+      {
+        "path": [
+          "report",
+          "ipc_contract_version"
+        ],
+        "value": "1.2.0"
+      }
+    ],
+    "expected_error": "schema/report/ipc_contract_version/const"
+  },
+  {
+    "id": "gate-antigo-adicional",
+    "changes": [
+      {
+        "path": [
+          "report",
+          "gates",
+          "warm_total_latency_p95_ms_max"
+        ],
+        "value": {
+          "state": "unmeasured",
+          "numerator": null,
+          "denominator": 0,
+          "value": null
+        }
+      }
+    ],
+    "expected_error": "schema/report/gates/additionalProperties"
+  },
+  {
+    "id": "protocolo-antigo",
+    "changes": [
+      {
+        "path": [
+          "report",
+          "sources",
+          "protocol"
+        ],
+        "value": {
+          "path": "docs/planejamento/classificacao-comparativa/protocolo-comparacao.json",
+          "sha256": "eb9bdbb786037bac864f3155ff6dfbb45feb83dfdb99958f463b6896a614dced",
+          "version": "1.0.0"
+        }
+      }
+    ],
+    "expected_error": "profile_protocol"
+  },
+  {
+    "id": "protocolo-autodeclarado",
+    "changes": [
+      {
+        "path": [
+          "report",
+          "sources",
+          "protocol",
+          "sha256"
+        ],
+        "value": "0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    ],
+    "expected_error": "profile_protocol"
+  },
+  {
+    "id": "fixture-com-medicao",
+    "changes": [
+      {
+        "path": [
+          "report",
+          "latency_p50_ms"
+        ],
+        "value": {
+          "state": "measured",
+          "value": 100,
+          "numerator": null,
+          "denominator": 1
+        }
+      }
+    ],
+    "expected_error": "observed_latency"
+  },
+  {
+    "id": "populacao-incorreta",
+    "changes": [
+      {
+        "path": [
+          "report",
+          "gates",
+          "observed_total_latency_p95_ms_max",
+          "denominator"
+        ],
+        "value": 1
+      }
+    ],
+    "expected_error": "observed_latency"
+  }
+]
