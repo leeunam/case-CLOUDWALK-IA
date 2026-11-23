@@ -83,7 +83,6 @@ def exchange(proc, item, responses, journal, deadline):
     obs = responses.record(deadline + TIMEOUT_DELIVERY_SECONDS)
     if not isinstance(obs, dict) or obs.get("id") != item["id"]:
         raise ValueError(f"ID de resposta divergente para {item['id']}")
-    check_deadline(obs, deadline, time.monotonic())
     return obs
 
 
@@ -138,6 +137,7 @@ def run_batch(inputs, config, report, catalog, validation, journal, policy):
                 c01.structure(validation, "decision", d)
                 c01.verify_case(item, obs, d, report, catalog)
                 if obs is not None and obs["origin"] == "candidate":
+                    # Conferir o prazo após guardar a resposta validada e seu uso na tentativa pendente.
                     end = time.monotonic()
                     check_deadline(obs, deadline, end)
                     if config["identity"]["mode"] == "real":
