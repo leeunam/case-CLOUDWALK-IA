@@ -1,10 +1,12 @@
 """Directed contract checks with static data, without invoking an evaluator or model."""
 from copy import deepcopy
 import json
+from shutil import copyfile
 from pathlib import Path
 import sys
 from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "script"))
@@ -41,6 +43,8 @@ class ContractRegressions(unittest.TestCase):
         injected_id, = report["injected_controls"]["ids"]
         ids = ["ctl-completo", "ctl-duplo", "ctl-invalido", injected_id]
         report["control_ids"] = ids
+        gate = "partial_application_after_abstention_or_error"
+        report["gates"][gate] = metric("measured", 0, 1, 0)
         for stream in contract.KINDS:
             bundle[stream] = [row for row in bundle[stream] if row["id"] in ids]
         # The sole candidate attempt (ctl-duplo) makes two requests, one with known cost.
@@ -58,11 +62,39 @@ class ContractRegressions(unittest.TestCase):
         self.assertTrue(all(field["applied"] is None for field in decisions[injected_id]["fields"].values()))
         self.assertEqual([decisions[i]["attempts"] for i in ("ctl-completo", "ctl-invalido")], [0, 0])
 
+        # Omitting only the injection from this gate claims no incomplete attempt.
+        report["gates"][gate] = metric("unmeasured", None, 0, None)
+        with self.assertRaisesRegex(contract.ContractError, "partial_application_gate"):
+            self.verify_saved_bundle(bundle)
+
+    def test_saved_report_cannot_repin_modified_policy_bytes(self):
+        report = deepcopy(self.bundle["report"])
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            plan = root / contract.PLAN.relative_to(contract.ROOT)
+            source = report["injected_controls"]["policy"]
+            for entry in [*report["sources"].values(), *report["artifacts"].values(), source]:
+                dest = root / entry["path"]
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                copyfile(contract.ROOT / entry["path"], dest)
+            policy = root / source["path"]
+            policy.write_bytes(policy.read_bytes() + b"\n")
+            source["sha256"] = contract.digest(policy)
+            manifest = root / "report.json"
+            manifest.write_text(json.dumps(report), encoding="utf-8")
+            with patch.object(contract, "ROOT", root), patch.object(contract, "PLAN", plan):
+                bundle = contract.load_bundle(self.validation, manifest)
+                protocol = contract.read(plan / "protocolo-comparacao.json")
+                self.assertNotEqual(source["sha256"], protocol["control_policy"]["sha256"])
+                with self.assertRaisesRegex(contract.ContractError, "artifact_hash: .*politica-controles"):
+                    contract.verify_run(bundle, self.validation, protocol, self.split, self.catalog, self.dataset)
+
     def test_natural_mixed_responses_do_not_substitute_for_injection(self):
         bundle = deepcopy(self.bundle)
         report = bundle["report"]
         injected_id, = report["injected_controls"]["ids"]
         report["control_ids"].remove(injected_id)
+        report["gates"]["partial_application_after_abstention_or_error"] = metric("measured", 0, 6, 0)
         report["injected_controls"] = {"count": 0, "ids": []}
         for stream in contract.KINDS:
             bundle[stream] = [row for row in bundle[stream] if row["id"] != injected_id]
@@ -213,6 +245,7 @@ class ContractRegressions(unittest.TestCase):
         bundle = deepcopy(self.bundle)
         ids = ["ctl-completo", "ctl-invalido"]
         bundle["report"]["control_ids"] = ids
+        bundle["report"]["gates"]["partial_application_after_abstention_or_error"] = metric("unmeasured", None, 0, None)
         bundle["report"]["injected_controls"] = {"count": 0, "ids": []}
         for stream in contract.KINDS:
             bundle[stream] = [r for r in bundle[stream] if r["id"] in ids]

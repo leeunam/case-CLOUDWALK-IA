@@ -40,7 +40,7 @@
     },
     "protocol": {
       "path": "docs/planejamento/classificacao-comparativa/protocolo-comparacao.json",
-      "sha256": "e1085c328f9f3aee49fff17ee881734a56f3f428b215761c706cff0405f17f1b",
+      "sha256": "eb9bdbb786037bac864f3155ff6dfbb45feb83dfdb99958f463b6896a614dced",
       "version": "1.0.0"
     },
     "split": {
@@ -109,7 +109,7 @@
   "gates": {
     "channel_field_preservation_ratio": {"state": "unmeasured", "numerator": null, "denominator": null, "value": null},
     "complete_or_invalid_controls_model_calls": {"state": "unmeasured", "numerator": null, "denominator": null, "value": null},
-    "partial_application_after_abstention_or_error": {"state": "unmeasured", "numerator": null, "denominator": null, "value": null},
+    "partial_application_after_abstention_or_error": {"state": "measured", "numerator": 0, "denominator": 7, "value": 0},
     "automatic_completion_on_expected_review_cases": {"state": "unmeasured", "numerator": null, "denominator": null, "value": null},
     "automatic_non_urgent_applied_when_expected_urgent": {"state": "unmeasured", "numerator": null, "denominator": null, "value": null},
     "automatic_coverage_on_fully_classifiable_cases_min": {"state": "unmeasured", "numerator": null, "denominator": null, "value": null},

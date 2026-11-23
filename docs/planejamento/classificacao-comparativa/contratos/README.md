@@ -147,7 +147,10 @@ Acrescentar o ID reservado a `report.control_ids` e declarar em
 
 Um lote sem injeções registra `{"count":0,"ids":[]}`. A ordem de `ids`
 reproduz o subconjunto reservado de `control_ids` e a ordem das observações
-injetadas. O hash identifica os bytes da política no caminho indicado.
+injetadas. O protocolo congelado fixa o caminho, a versão e o SHA-256 dos
+bytes da política em `control_policy`. Antes de usar a política, conferir seus
+bytes com essa referência. Para uma injeção, o relatório repete os três
+valores. A mesma conferência se aplica a um lote salvo.
 `sources.policy` continua identificando a política do candidato. Os IDs dos
 60 relatos permanecem exclusivos do dataset.
 
@@ -234,8 +237,23 @@ omitidos pode pertencer a ambas as fatias por campo.
 
 Os gates têm populações explícitas no [protocolo](../protocolo-comparacao.md).
 Preservação usa os campos válidos recebidos. Chamadas proibidas usam os controles
-completos/inválidos. Aplicação parcial usa como população os relatos examinados
-para detectar aplicação indevida depois de falha ou abstenção. O controle misto injetado precisa provar a retenção de uma escolha bruta,
+completos/inválidos.
+
+Para `partial_application_after_abstention_or_error`, contar uma vez cada
+relato com observação concluída que contenha ao menos uma escolha `abstained`,
+`invalid` ou `error`. Esse conjunto inclui as duas origens e coincide com
+as decisões `incomplete_prediction` após validação. Um campo inválido na
+**entrada** bloqueia a tentativa e fica fora da população. O numerador conta
+os relatos dessa população em que algum campo originalmente ausente teve
+valor aplicado. A preservação de um valor fornecido pelo canal fica fora do
+numerador. Se houver população, o gate tem `state: "measured"`, denominador
+igual ao número de relatos e `value` igual ao numerador. Com população vazia,
+registrar `unmeasured`, denominador zero, numerador e valor nulos. O cálculo
+usa todas as decisões concluídas inclusive em um relatório de prefixo.
+
+Na fixture integral há zero violações em sete relatos. Quando somente a
+injeção provoca uma escolha incompleta, há zero violações em um relato.
+O controle misto injetado precisa provar a retenção de uma escolha bruta,
 inclusive se o candidato sempre responder com códigos válidos. Sua ausência
 impede uma decisão de elegibilidade, mesmo que haja abstenções naturais. Separar controles das métricas calculadas sobre o teste.
 O gate de acerto aplicado de cada campo reproduz o estado, o numerador, o

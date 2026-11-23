@@ -391,5 +391,30 @@
       {"path": ["observations", 0, "elapsed_ms"], "value": 4}
     ],
     "expected_error": "artifact_records"
+  },
+  {
+    "id": "aplicacao-parcial-populacao-e-violacao-inventadas",
+    "changes": [{"path": ["report", "gates", "partial_application_after_abstention_or_error"], "value": {"state": "measured", "numerator": 1, "denominator": 1000, "value": 1}}],
+    "expected_error": "partial_application_gate"
+  },
+  {
+    "id": "aplicacao-parcial-violacao-inventada",
+    "changes": [{"path": ["report", "gates", "partial_application_after_abstention_or_error"], "value": {"state": "measured", "numerator": 1, "denominator": 7, "value": 1}}],
+    "expected_error": "partial_application_gate"
+  },
+  {
+    "id": "aplicacao-parcial-populacao-omite-controle",
+    "changes": [{"path": ["report", "gates", "partial_application_after_abstention_or_error"], "value": {"state": "measured", "numerator": 0, "denominator": 6, "value": 0}}],
+    "expected_error": "partial_application_gate"
+  },
+  {
+    "id": "aplicacao-parcial-evidencia-completa-como-parcial",
+    "changes": [{"path": ["report", "gates", "partial_application_after_abstention_or_error"], "value": {"state": "partial", "numerator": 0, "denominator": 7, "value": 0}}],
+    "expected_error": "partial_application_gate"
+  },
+  {
+    "id": "aplicacao-parcial-evidencia-completa-como-indisponivel",
+    "changes": [{"path": ["report", "gates", "partial_application_after_abstention_or_error"], "value": {"state": "unavailable", "numerator": null, "denominator": 7, "value": null}}],
+    "expected_error": "partial_application_gate"
   }
 ]

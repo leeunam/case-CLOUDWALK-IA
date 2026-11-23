@@ -14,7 +14,6 @@ ROOT = Path(__file__).resolve().parents[1]
 PLAN = ROOT / "docs/planejamento/classificacao-comparativa"
 CONTRACTS = PLAN / "contratos"
 FIXTURES = CONTRACTS / "fixtures"
-CONTROL_POLICY = CONTRACTS / "politica-controles.json"
 FIELDS = ("category", "priority")
 KINDS = {"inputs": "input", "observations": "observation", "decisions": "decision"}
 ABSTENTION = "informacao_insuficiente"
@@ -361,9 +360,11 @@ def verify_sources(report, protocol, split):
             "policy_version", report["run_id"])
 
 
-def verify_injected_controls(report, indexed):
+def verify_injected_controls(report, indexed, protocol):
     inventory = report["injected_controls"]
-    policy = read(CONTROL_POLICY)
+    approved = protocol["control_policy"]
+    policy = read(source_path(approved))
+    require(policy["identity"]["policy_version"] == approved["version"], "control_policy_identity", approved["path"])
     ids = [i for i in report["control_ids"] if i in policy["controls"]]
     require(inventory["ids"] == ids and inventory["count"] == len(ids), "injected_inventory", report["run_id"])
     observed_ids = [i for i, obs in indexed["observations"].items() if obs["origin"] == "injected_control"]
@@ -371,9 +372,9 @@ def verify_injected_controls(report, indexed):
     if not ids:
         return
     source = inventory["policy"]
-    require(source["path"] == str(CONTROL_POLICY.relative_to(ROOT)), "control_policy_path", source["path"])
-    source_path(source)
-    require(inventory["identity"] == policy["identity"] and source["version"] == policy["identity"]["policy_version"],
+    require(source["path"] == approved["path"], "control_policy_path", source["path"])
+    require(source["sha256"] == approved["sha256"], "artifact_hash", source["path"])
+    require(inventory["identity"] == policy["identity"] and source["version"] == approved["version"],
             "control_policy_identity", report["run_id"])
     for i in ids:
         spec = policy["controls"][i]
@@ -383,6 +384,20 @@ def verify_injected_controls(report, indexed):
         # A null or absent score both describe absence of a score in the wire format.
         choices = {f: {k: v for k, v in ch.items() if k != "score"} for f, ch in obs["choices"].items()}
         require(choices == spec["choices"], "control_policy_choices", i)
+
+
+def verify_partial_application(report, observations, decisions):
+    # One case per incomplete attempt, including controls of either origin.
+    incomplete = [obs for obs in observations.values()
+                  if any(choice["status"] != "predicted" for choice in obs["choices"].values())]
+    violations = sum(any(decisions[obs["id"]]["fields"][field]["applied"] is not None
+                         for field in obs["choices"]) for obs in incomplete)
+    if incomplete:
+        expected = dict(state="measured", numerator=violations, denominator=len(incomplete), value=violations)
+    else:
+        expected = dict(state="unmeasured", numerator=None, denominator=0, value=None)
+    require(report["gates"]["partial_application_after_abstention_or_error"] == expected,
+            "partial_application_gate", report["run_id"])
 
 
 def has_required_controls(report, decisions):
@@ -425,7 +440,7 @@ def verify_run(bundle, validation, protocol, split, catalog, dataset):
         require(list(indexed[kind]) == order, "stream_ids", kind)
     observations = indexed["observations"]
     require(list(observations) == [i for i in order if i in observations], "stream_ids", "observations")
-    verify_injected_controls(report, indexed)
+    verify_injected_controls(report, indexed, protocol)
     for i in order:
         item = indexed["inputs"][i]
         if i in completed:
@@ -447,6 +462,7 @@ def verify_run(bundle, validation, protocol, split, catalog, dataset):
     full = (report["identity"]["mode"] == "real" and split_name == "final_test" and completed == planned
             and has_required_controls(report, indexed["decisions"]) and warm_samples == len(completed)
             and any(c["status"] != "error" for i in completed for c in observations[i]["choices"].values()))
+    verify_partial_application(report, observations, indexed["decisions"])
     verify_usage(report, list(observations.values()))
     verify_metrics(report, protocol, full, dataset, indexed["decisions"])
     for kind, path in paths.items():

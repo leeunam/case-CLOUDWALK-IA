@@ -11,8 +11,10 @@ O contrato reserva uma entrada sintética adicional para essa verificação.
 
 1. No preflight, verificar a versão 1.1.0 dos quatro envelopes, o protocolo
    e a política de controles pelos hashes congelados na base integrada.
-   O SHA-256 do protocolo é `e1085c328f9f3aee49fff17ee881734a56f3f428b215761c706cff0405f17f1b`.
-   A identidade e o SHA-256 da política de controles constam no [formato do lote](README.md#origem-e-controle-de-aplicação-parcial).
+   O SHA-256 do protocolo é `eb9bdbb786037bac864f3155ff6dfbb45feb83dfdb99958f463b6896a614dced`.
+   `protocol.control_policy` fixa caminho, versão e SHA-256. O checker confere
+   os bytes da política antes de interpretar seu conteúdo e exige que o
+   inventário da injeção repita a referência aprovada. [Formato do lote](README.md#origem-e-controle-de-aplicação-parcial)
 2. Reservar os IDs de `policy.controls` ao avaliador. Usar o catálogo e a
    máscara comuns. Entregar os demais controles aptos ao adaptador e esperar
    `origin: "candidate"` e a identidade do candidato. O controle reservado
@@ -42,7 +44,9 @@ v = c.validators()
 bundle = c.load_bundle(v)
 report = bundle["report"]
 inventory = report["injected_controls"]
-policy = c.read(c.source_path(inventory["policy"]))
+approved = c.read(c.PLAN / "protocolo-comparacao.json")["control_policy"]
+assert inventory["policy"] == approved
+policy = c.read(c.source_path(approved))
 case_id, = inventory["ids"]
 spec = policy["controls"][case_id]
 entry = next(item for item in bundle["inputs"] if item["id"] == case_id)
@@ -66,12 +70,30 @@ escolhas, ao conteúdo dos três arquivos e aos hashes de origem. Para validar
 outro lote salvo, usar `load_bundle(validators, Path(".../report.json"))`
 e `verify_run` com o protocolo, a divisão, o catálogo e o dataset congelados.
 
+## Correções da revisão de `509c0fa`
+
+A população do gate de aplicação parcial contém todos os relatos observados
+com alguma escolha abstida, inválida ou com erro. Cada ID conta uma vez.
+Na fixture são `ctl-sem-assunto`, `ctl-saida-invalida`, `ctl-timeout`,
+`ctl-saida-ausente`, `ctl-versao`, `ctl-politica` e a injeção reservada.
+Os sete retêm todos os campos originalmente ausentes. O gate guarda
+`{"state":"measured","numerator":0,"denominator":7,"value":0}`.
+A execução mínima do teste com todas as previsões naturais válidas guarda
+zero violações em um relato. Omitir a injeção somente dessa contagem quebra
+a verificação. Entradas bloqueadas antes da tentativa ficam fora do gate.
+
+Reproduzimos os dois aceites indevidos na base anterior. A métrica com uma
+violação e denominador mil era aceita. Uma política com um LF acrescentado
+e um novo SHA no manifesto também era aceita em uma cópia temporária. Os
+testes agora exigem a rejeição das contagens, estados e bytes divergentes
+e exercitam a leitura do relatório salvo com o protocolo aprovado.
+
 ## Verificação realizada
 
 | Verificação offline | Resultado |
 | --- | --- |
-| `rtk proxy python3 -B script/check_classification_contracts.py` | 5 schemas, 13 entradas/13 decisões, 9 observações, 59 rejeições esperadas |
-| `rtk proxy python3 -B docs/planejamento/classificacao-comparativa/contratos/test_regressions.py -v` | 10 testes aprovados |
+| `rtk proxy python3 -B script/check_classification_contracts.py` | 5 schemas, 13 entradas/13 decisões, 9 observações, 64 rejeições esperadas |
+| `rtk proxy python3 -B docs/planejamento/classificacao-comparativa/contratos/test_regressions.py -v` | 11 testes aprovados |
 | Exemplo mínimo acima | Escolha bruta `pix`, abstenção na prioridade, ambos os valores aplicados nulos |
 | `rtk git diff --check` | Sem erros de formatação |
 
