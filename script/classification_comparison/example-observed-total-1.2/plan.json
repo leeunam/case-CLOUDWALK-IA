@@ -1,5 +1,5 @@
 {
-  "run_id": "c02-cf0f47feb8424b148be8595faeb4a7ba",
+  "run_id": "c02-b05fd5cba3014a0399367b7b393e8ac1",
   "identity": {
     "mode": "fixture",
     "provider": "fixture",
@@ -74,7 +74,28 @@
   "selected_ids": [
     "jev-004",
     "jev-007",
-    "jev-010"
+    "jev-010",
+    "jev-013",
+    "jev-019",
+    "jev-028",
+    "jev-037",
+    "jev-040",
+    "jev-002",
+    "jev-005",
+    "jev-008",
+    "jev-014",
+    "jev-023",
+    "jev-032",
+    "jev-035",
+    "jev-041",
+    "jev-003",
+    "jev-006",
+    "jev-009",
+    "jev-015",
+    "jev-018",
+    "jev-024",
+    "jev-033",
+    "jev-039"
   ],
   "control_ids": [
     "ctl-completo",
@@ -110,7 +131,7 @@
   "contract_version": "1.2.0",
   "input": {
     "path": "script/classification_comparison/example-observed-total-1.2/inputs.jsonl",
-    "sha256": "2cdc4ea58c7147cf0c3864c2453429869d5533c531819f26a0a330ed1680792e"
+    "sha256": "1b6b6a83be36be7bf011d8c5476f9f0431b0d3d145c0bb71cfe798fa32b07ecc"
   },
   "concurrency": 1,
   "attempts": 1,

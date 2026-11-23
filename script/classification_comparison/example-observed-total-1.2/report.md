@@ -1,82 +1,82 @@
-# Avaliação c02-cf0f47feb8424b148be8595faeb4a7ba
+# Avaliação c02-b05fd5cba3014a0399367b7b393e8ac1
 
 Modo fixture. Elegibilidade inconclusive.
-3 relatos e 13 controles.
+24 relatos e 13 controles.
 Controles injetados pelo avaliador: 1.
 Perfil `observed-total-1.1` · protocolo 1.1.0 · relatório 1.2.0 · IPC 1.1.0.
 
 | Campo | Acerto bruto | Acerto aplicado | Cobertura automática |
 | --- | --- | --- | --- |
-| category | 1/3 | 1/1 | 1/3 |
-| priority | sem medição (n=0) | sem medição (n=0) | sem medição (n=0) |
+| category | 8/16 | 3/3 | 3/11 |
+| priority | 6/16 | 1/1 | 1/11 |
 
 ## by_mask
 
 | Fatia | Métrica | Contagem |
 | --- | --- | --- |
-| category | raw_accuracy | 1/3 |
-| category | applied_accuracy | 1/1 |
-| category | correct_abstention | 0/3 |
-| category | undue_abstention | 2/3 |
-| category | invalid_output | 0/3 |
-| category | operational_error | 0/3 |
-| category | unapplied_choices | 0/3 |
-| category | review | 2/3 |
-| category | automatic_coverage | 1/3 |
-| category | correct_completion_coverage | 1/3 |
-| priority | raw_accuracy | sem medição (n=0) |
+| category | raw_accuracy | 4/8 |
+| category | applied_accuracy | 2/2 |
+| category | correct_abstention | 2/8 |
+| category | undue_abstention | 4/8 |
+| category | invalid_output | 0/8 |
+| category | operational_error | 0/8 |
+| category | unapplied_choices | 0/8 |
+| category | review | 6/8 |
+| category | automatic_coverage | 2/6 |
+| category | correct_completion_coverage | 2/6 |
+| priority | raw_accuracy | 2/8 |
 | priority | applied_accuracy | sem medição (n=0) |
-| priority | correct_abstention | sem medição (n=0) |
-| priority | undue_abstention | sem medição (n=0) |
-| priority | invalid_output | sem medição (n=0) |
-| priority | operational_error | sem medição (n=0) |
-| priority | unapplied_choices | sem medição (n=0) |
-| priority | review | sem medição (n=0) |
-| priority | automatic_coverage | sem medição (n=0) |
-| priority | correct_completion_coverage | sem medição (n=0) |
-| category+priority | raw_accuracy | sem medição (n=0) |
-| category+priority | applied_accuracy | sem medição (n=0) |
-| category+priority | correct_abstention | sem medição (n=0) |
-| category+priority | undue_abstention | sem medição (n=0) |
-| category+priority | invalid_output | sem medição (n=0) |
-| category+priority | operational_error | sem medição (n=0) |
-| category+priority | unapplied_choices | sem medição (n=0) |
-| category+priority | review | sem medição (n=0) |
-| category+priority | automatic_coverage | sem medição (n=0) |
-| category+priority | correct_completion_coverage | sem medição (n=0) |
+| priority | correct_abstention | 2/8 |
+| priority | undue_abstention | 6/8 |
+| priority | invalid_output | 0/8 |
+| priority | operational_error | 0/8 |
+| priority | unapplied_choices | 0/8 |
+| priority | review | 8/8 |
+| priority | automatic_coverage | 0/6 |
+| priority | correct_completion_coverage | 0/6 |
+| category+priority | raw_accuracy | 8/16 |
+| category+priority | applied_accuracy | 2/2 |
+| category+priority | correct_abstention | 4/16 |
+| category+priority | undue_abstention | 8/16 |
+| category+priority | invalid_output | 0/16 |
+| category+priority | operational_error | 0/16 |
+| category+priority | unapplied_choices | 2/16 |
+| category+priority | review | 7/8 |
+| category+priority | automatic_coverage | 1/5 |
+| category+priority | correct_completion_coverage | 1/5 |
 
 ## by_stratum
 
 | Fatia | Métrica | Contagem |
 | --- | --- | --- |
-| rotina | raw_accuracy | 0/2 |
-| rotina | applied_accuracy | sem medição (n=0) |
-| rotina | correct_abstention | 0/2 |
-| rotina | undue_abstention | 2/2 |
-| rotina | invalid_output | 0/2 |
-| rotina | operational_error | 0/2 |
-| rotina | unapplied_choices | 0/2 |
-| rotina | review | 2/2 |
-| rotina | automatic_coverage | 0/2 |
-| rotina | correct_completion_coverage | 0/2 |
-| urgente | raw_accuracy | 1/1 |
-| urgente | applied_accuracy | 1/1 |
-| urgente | correct_abstention | 0/1 |
-| urgente | undue_abstention | 0/1 |
-| urgente | invalid_output | 0/1 |
-| urgente | operational_error | 0/1 |
-| urgente | unapplied_choices | 0/1 |
-| urgente | review | 0/1 |
-| urgente | automatic_coverage | 1/1 |
-| urgente | correct_completion_coverage | 1/1 |
-| ambiguo | raw_accuracy | sem medição (n=0) |
+| rotina | raw_accuracy | 2/14 |
+| rotina | applied_accuracy | 1/1 |
+| rotina | correct_abstention | 0/14 |
+| rotina | undue_abstention | 12/14 |
+| rotina | invalid_output | 0/14 |
+| rotina | operational_error | 0/14 |
+| rotina | unapplied_choices | 1/14 |
+| rotina | review | 10/11 |
+| rotina | automatic_coverage | 1/11 |
+| rotina | correct_completion_coverage | 1/11 |
+| urgente | raw_accuracy | 4/8 |
+| urgente | applied_accuracy | 3/3 |
+| urgente | correct_abstention | 0/8 |
+| urgente | undue_abstention | 4/8 |
+| urgente | invalid_output | 0/8 |
+| urgente | operational_error | 0/8 |
+| urgente | unapplied_choices | 1/8 |
+| urgente | review | 4/6 |
+| urgente | automatic_coverage | 2/6 |
+| urgente | correct_completion_coverage | 2/6 |
+| ambiguo | raw_accuracy | 8/10 |
 | ambiguo | applied_accuracy | sem medição (n=0) |
-| ambiguo | correct_abstention | sem medição (n=0) |
-| ambiguo | undue_abstention | sem medição (n=0) |
-| ambiguo | invalid_output | sem medição (n=0) |
-| ambiguo | operational_error | sem medição (n=0) |
-| ambiguo | unapplied_choices | sem medição (n=0) |
-| ambiguo | review | sem medição (n=0) |
+| ambiguo | correct_abstention | 8/10 |
+| ambiguo | undue_abstention | 2/10 |
+| ambiguo | invalid_output | 0/10 |
+| ambiguo | operational_error | 0/10 |
+| ambiguo | unapplied_choices | 0/10 |
+| ambiguo | review | 7/7 |
 | ambiguo | automatic_coverage | sem medição (n=0) |
 | ambiguo | correct_completion_coverage | sem medição (n=0) |
 
@@ -84,56 +84,56 @@ Perfil `observed-total-1.1` · protocolo 1.1.0 · relatório 1.2.0 · IPC 1.1.0.
 
 | Fatia | Métrica | Contagem |
 | --- | --- | --- |
-| category | raw_accuracy | 1/3 |
-| category | applied_accuracy | 1/1 |
-| category | correct_abstention | 0/3 |
-| category | undue_abstention | 2/3 |
-| category | invalid_output | 0/3 |
-| category | operational_error | 0/3 |
-| category | unapplied_choices | 0/3 |
-| category | review | 2/3 |
-| category | automatic_coverage | 1/3 |
-| category | correct_completion_coverage | 1/3 |
-| priority | raw_accuracy | sem medição (n=0) |
-| priority | applied_accuracy | sem medição (n=0) |
-| priority | correct_abstention | sem medição (n=0) |
-| priority | undue_abstention | sem medição (n=0) |
-| priority | invalid_output | sem medição (n=0) |
-| priority | operational_error | sem medição (n=0) |
-| priority | unapplied_choices | sem medição (n=0) |
-| priority | review | sem medição (n=0) |
-| priority | automatic_coverage | sem medição (n=0) |
-| priority | correct_completion_coverage | sem medição (n=0) |
+| category | raw_accuracy | 8/16 |
+| category | applied_accuracy | 3/3 |
+| category | correct_abstention | 4/16 |
+| category | undue_abstention | 8/16 |
+| category | invalid_output | 0/16 |
+| category | operational_error | 0/16 |
+| category | unapplied_choices | 1/16 |
+| category | review | 13/16 |
+| category | automatic_coverage | 3/11 |
+| category | correct_completion_coverage | 3/11 |
+| priority | raw_accuracy | 6/16 |
+| priority | applied_accuracy | 1/1 |
+| priority | correct_abstention | 4/16 |
+| priority | undue_abstention | 10/16 |
+| priority | invalid_output | 0/16 |
+| priority | operational_error | 0/16 |
+| priority | unapplied_choices | 1/16 |
+| priority | review | 15/16 |
+| priority | automatic_coverage | 1/11 |
+| priority | correct_completion_coverage | 1/11 |
 
 ## Urgentes com prioridade omitida
 
-- applied_urgent · sem medição (n=0)
-- applied_lower · sem medição (n=0)
-- review · sem medição (n=0)
-- abstained · sem medição (n=0)
-- invalid · sem medição (n=0)
-- operational_error · sem medição (n=0)
+- applied_urgent · 1/4
+- applied_lower · 0/4
+- review · 3/4
+- abstained · 2/4
+- invalid · 0/4
+- operational_error · 0/4
 
 ## Indicadores
 
-- p50 · sem medição (n=3)
-- channel_field_preservation_ratio · 12/12
+- p50 · sem medição (n=24)
+- channel_field_preservation_ratio · 25/25
 - complete_or_invalid_controls_model_calls · 0/4
-- partial_application_after_abstention_or_error · 0/9
-- automatic_completion_on_expected_review_cases · sem medição (n=0)
-- automatic_non_urgent_applied_when_expected_urgent · sem medição (n=0)
-- automatic_coverage_on_fully_classifiable_cases_min · 1/3
-- raw_urgent_recognition_min · sem medição (n=0)
-- observed_total_latency_p95_ms_max · sem medição (n=3)
-- applied_category_accuracy · 1/1
-- applied_priority_accuracy · sem medição (n=0)
+- partial_application_after_abstention_or_error · 0/28
+- automatic_completion_on_expected_review_cases · 0/7
+- automatic_non_urgent_applied_when_expected_urgent · 0/4
+- automatic_coverage_on_fully_classifiable_cases_min · 3/17
+- raw_urgent_recognition_min · 2/4
+- observed_total_latency_p95_ms_max · sem medição (n=24)
+- applied_category_accuracy · 3/3
+- applied_priority_accuracy · 1/1
 
 ## Uso por tentativa e requisição
 
-- attempts · 11 (11/11 amostras)
-- requests · 12 (11/11 amostras)
-- questions · 14 (11/11 amostras)
-- input_tokens · sem medição (0/12 amostras)
-- output_tokens · sem medição (0/12 amostras)
-- observed_api_usd · sem medição (0/12 amostras)
-- estimated_api_usd · sem medição (0/12 amostras)
+- attempts · 32 (32/32 amostras)
+- requests · 33 (32/32 amostras)
+- questions · 43 (32/32 amostras)
+- input_tokens · sem medição (0/33 amostras)
+- output_tokens · sem medição (0/33 amostras)
+- observed_api_usd · sem medição (0/33 amostras)
+- estimated_api_usd · sem medição (0/33 amostras)
