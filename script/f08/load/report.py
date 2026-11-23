@@ -139,12 +139,16 @@ def kafka_offsets(row, records_by_id):
         ("agent.requests", row["request_event_id"], "agent.turn.requested"),
         ("agent.events", row["expected_result_event_id"], row["expected_result_type"]),
     ):
-        offsets[topic] = [{"partition": entry["partition"], "offset": entry["offset"]}
-                          for entry in records_by_id.get((topic, event_id), [])
-                          if event_id and entry.get("event_type") == event_type
-                          and all(row[k] and entry.get(k) == row[k] for k in ("turn_id", "case_id", "correlation_id"))
-                          and (topic == "agent.requests" or entry.get("request_event_id") == row["request_event_id"])
-                          and isinstance(entry.get("partition"), int) and isinstance(entry.get("offset"), int)]
+        matching_positions = (
+            (entry["partition"], entry["offset"])
+            for entry in records_by_id.get((topic, event_id), [])
+            if event_id and entry.get("event_type") == event_type
+            and all(row[k] and entry.get(k) == row[k] for k in ("turn_id", "case_id", "correlation_id"))
+            and (topic == "agent.requests" or entry.get("request_event_id") == row["request_event_id"])
+            and isinstance(entry.get("partition"), int) and isinstance(entry.get("offset"), int)
+        )
+        offsets[topic] = [{"partition": partition, "offset": offset}
+                          for partition, offset in dict.fromkeys(matching_positions)]
     return offsets
 
 
@@ -187,7 +191,12 @@ def evidence(output, manifest, plan, events):
     extra_sources = defaultdict(set)
     for event in events:
         if event["type"] == "chat_write":
-            extra_sources[event.get("case_id")].add(event["source_event_id"])
+            source = event["source_event_id"]
+            identity = (event["channel_id"], source)
+            known_entries.add(identity)
+            matching = existing.get(identity, [])
+            if len(matching) == 1:
+                extra_sources[matching[0][0]["case_id"]].add(source)
     for event in rows(output / "human.jsonl"):
         if event.get("operation") == "retorno_cliente":
             case_id = event["case_id"]
@@ -266,7 +275,7 @@ def chat_recovery(events, probe, indexed):
             and closed["at_ms"] <= probe["sent_ms"]):
         return False, False
     matching = indexed.get((probe["channel_id"], probe["source_event_id"]), [])
-    ids = {message["id"] for case, _ in matching if case["case_id"] == case_id
+    ids = {message["id"] for case, _ in matching if len(matching) == 1 and case["case_id"] == case_id
            and case["correlation_id"] == probe["correlation_id"] for message in case["messages"] or []
            if message["source_event_id"] == probe["source_event_id"] and message["author"] == "customer"
            and message["sequence"] > cursor}
@@ -318,12 +327,15 @@ def chat_summary(events, config, window, cases):
     for row in traffic + preparation:
         source = row["source_event_id"]
         matching = indexed.get((row["channel_id"], source), [])
-        case = matching[0][0] if matching else {}
+        case = matching[0][0] if len(matching) == 1 else {}
         customer = [message["id"] for message in case.get("messages") or []
                     if message["source_event_id"] == source and message["author"] == "customer"]
         traffic_reconciliation.append({"client": row["client"], "key": row["key"], "source_event_id": source,
-                                       "http_status": row["status"], "case_id": row["case_id"],
-                                       "correlation_id": row["correlation_id"],
+                                       "http_status": row["status"], "case_id": row.get("case_id"),
+                                       "correlation_id": row.get("correlation_id"), "channel_id": row["channel_id"],
+                                       "receipt_mismatches": [key for key in ("case_id", "correlation_id")
+                                                              if case and row.get(key) is not None
+                                                              and row[key] != case[key]],
                                        "stored_case_id": case.get("case_id"), "customer_message_ids": customer,
                                        "stored_correlation_id": case.get("correlation_id"), "entry_count": len(matching)})
     reads = [row for row in events if row["type"] == "chat_read" and row["reason"] == "reconnect"]
@@ -435,14 +447,19 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
                             for point in lag_good)), None)
     failure_offsets = {(row["topic"], row["event_id"]) for row in kafka
                        if row["event_id"] and row["topic"] == "agent.failures"}
-    duplicates = Counter((row["topic"], row["event_id"]) for row in kafka if row["event_id"]
-                         and row["topic"] != "agent.failures")
+    positions = defaultdict(set)
+    for record in kafka:
+        if record["event_id"] and record["topic"] != "agent.failures":
+            if isinstance(record.get("partition"), int) and isinstance(record.get("offset"), int):
+                positions[(record["topic"], record["event_id"])].add((record["partition"], record["offset"]))
+    duplicates = {key: len(locations) for key, locations in positions.items()}
     measured_turns = [row for row in reconciled if row["http_status"] == 202 or row["case_id"]]
     missing_effect_times = [row for row in measured_turns if row["state"] == "concluído" and row["last_effect_ms"] is None]
-    known_turns_on_time = all(row["state"] == "concluído" and (row["last_effect_ms"] is None or
-                              in_window(row["last_effect_ms"])) for row in measured_turns)
-    latest_work = max([window.get("arrivals_end_ms", 0)] +
-                      [row["last_effect_ms"] for row in measured_turns if row["last_effect_ms"] is not None])
+    available_effect_times = [stamp for row in measured_turns if row["state"] == "concluído"
+                              for stamp in row["effect_timestamps_ms"].values() if stamp is not None]
+    known_turns_on_time = all(row["state"] == "concluído" for row in measured_turns) and all(
+        in_window(stamp) for stamp in available_effect_times)
+    latest_work = max([window.get("arrivals_end_ms", 0), *available_effect_times])
     initial_metrics, second_metrics = times(initial), times(second)
     dropped = (k6.get("dropped_iterations") or {}).get("count", 0) if k6 else None
     outbox_final = [turn for case in cases for turn in case["turns"] or []
@@ -492,6 +509,10 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
             failures.append("falhas em sessão, conexão ou escrita")
         if not chat["recovery_probe_read_new_messages"]:
             failures.append("recuperação pelo cursor não observada")
+        if any(item["entry_count"] > 1 for item in chat["traffic_reconciliation"]):
+            failures.append("múltiplas entradas SQL para a identidade de uma escrita de chat")
+        if any(item["receipt_mismatches"] for item in chat["traffic_reconciliation"]):
+            failures.append("vínculo do recibo de chat diverge da entrada SQL")
         if snapshot and any(item["http_status"] == 202 and (
                 item["entry_count"] != 1 or len(item["customer_message_ids"]) != 1 or
                 item["case_id"] != item["stored_case_id"] or item["correlation_id"] != item["stored_correlation_id"])
@@ -537,9 +558,12 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
     if (output / "observer-errors.jsonl").exists():
         gaps.append("observador de elegibilidade de continuações registrou erros")
     capture = manifest.get("observation", {}).get("kafka_records", {})
+    captured_positions = {(r["topic"], r["partition"], r["offset"]) for r in kafka
+                          if isinstance(r.get("partition"), int) and isinstance(r.get("offset"), int)}
     if (capture.get("complete") is not True or type(capture.get("expected_offsets")) is not int
             or type(capture.get("records_read")) is not int
-            or capture["expected_offsets"] != capture["records_read"] or capture["records_read"] != len(kafka)):
+            or capture["expected_offsets"] != capture["records_read"] or capture["records_read"] != len(kafka)
+            or len(captured_positions) != len(kafka)):
         gaps.append("leitura de eventos Kafka incompleta")
     if config["fault_seconds"] and (not ready or not in_window(stopped) or not in_window(started)
                                     or fault.get("stopped_state", {}).get("Status") != "exited"
@@ -625,7 +649,7 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
                   "repeated_ids": [{"topic": topic, "event_id": event, "copies": count}
                                    for (topic, event), count in duplicates.items() if count > 1],
                   "distinct_dead_letter_event_ids": len(failure_offsets),
-                  "dead_letter_records_observed": sum(row["topic"] == "agent.failures" for row in kafka),
+                  "dead_letter_records_observed": sum(topic == "agent.failures" for topic, _, _ in captured_positions),
                   "evidence": manifest.get("observation", {}).get("kafka_records")} if window else None,
         "http": {"initial_and_followup_reqs": len(emissions) + second_metrics["offered"],
                  "initial_and_followup_non_202": initial_metrics["non_202"] + second_metrics["non_202"]}
@@ -635,7 +659,9 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
                       "unplanned_entries": unplanned, "confirmed_losses": sum(row["confirmed_loss"] for row in accepted),
                       "duplicated_effect_identities": sum(row["duplicate_effect"] for row in accepted),
                       "persisted_without_http_202": sum(bool(row["case_id"]) and row["http_status"] != 202
-                                                      for row in reconciled),
+                                                      for row in reconciled) + (sum(
+                          item["entry_count"] == 1 and item["http_status"] != 202
+                          for item in chat["traffic_reconciliation"]) if chat else 0),
                       "not_reconciled_http_202": sum(row["state"] != "concluído" for row in accepted)}
         if snapshot else None,
         "backlog": {**{f"max_{key}": max((row[key] for row in good), default=None) for key in

@@ -1,0 +1,157 @@
+{
+  "sha256_report_py": "59cc49db33ee4a5c6cc23c51ede3468cf24f2c650e469c8860e4407aaf856823",
+  "lotes": {
+    "referencia-inicial": {
+      "sha256": "856b23a4e6817b47baef1f2fe3ca0b9914210f335c1f499405769f4c5ac8f95c",
+      "arquivos_verificados": 64,
+      "rodadas": [
+        {
+          "run_id": "f08-reference-1795207088594-f6c560-01",
+          "original": "aprovado",
+          "reanalisado": "aprovado",
+          "iniciais_202": 1500,
+          "continuacoes_202": 300,
+          "turnos_concluidos": 1800,
+          "p95_aceite_inicial_ms": 123,
+          "p95_resposta_inicial_ms": 398.1201171875,
+          "linhas_de_reconciliacao": 1800,
+          "linhas_divergentes": 0,
+          "campos_divergentes": [],
+          "campos_adicionados": [
+            "integrity.unattributed_message_count",
+            "integrity.unattributed_messages",
+            "integrity.unplanned_entries"
+          ],
+          "entradas_sem_plano": 0,
+          "mensagens_sem_atribuicao": 0
+        },
+        {
+          "run_id": "f08-reference-1795207088594-f6c560-02",
+          "original": "aprovado",
+          "reanalisado": "aprovado",
+          "iniciais_202": 1500,
+          "continuacoes_202": 300,
+          "turnos_concluidos": 1800,
+          "p95_aceite_inicial_ms": 112,
+          "p95_resposta_inicial_ms": 28090.736083984375,
+          "linhas_de_reconciliacao": 1800,
+          "linhas_divergentes": 0,
+          "campos_divergentes": [],
+          "campos_adicionados": [
+            "integrity.unattributed_message_count",
+            "integrity.unattributed_messages",
+            "integrity.unplanned_entries"
+          ],
+          "entradas_sem_plano": 0,
+          "mensagens_sem_atribuicao": 0
+        },
+        {
+          "run_id": "f08-reference-1795207088594-f6c560-03",
+          "original": "bloqueado",
+          "reanalisado": "bloqueado",
+          "iniciais_202": 1500,
+          "continuacoes_202": 300,
+          "turnos_concluidos": 1800,
+          "p95_aceite_inicial_ms": 113,
+          "p95_resposta_inicial_ms": 391.35009765625,
+          "linhas_de_reconciliacao": 1800,
+          "linhas_divergentes": 0,
+          "campos_divergentes": [],
+          "campos_adicionados": [
+            "integrity.unattributed_message_count",
+            "integrity.unattributed_messages",
+            "integrity.unplanned_entries"
+          ],
+          "entradas_sem_plano": 0,
+          "mensagens_sem_atribuicao": 0
+        }
+      ]
+    },
+    "referencia-complemento": {
+      "sha256": "54dbdd975cb7aa585c3f92d5e6d20b101f617b851b765c674134a171cb065515",
+      "arquivos_verificados": 95,
+      "rodadas": [
+        {
+          "run_id": "f08-reference-1795208792430-8b61b6-01",
+          "original": "aprovado",
+          "reanalisado": "aprovado",
+          "iniciais_202": 1500,
+          "continuacoes_202": 300,
+          "turnos_concluidos": 1800,
+          "p95_aceite_inicial_ms": 142,
+          "p95_resposta_inicial_ms": 433.05908203125,
+          "linhas_de_reconciliacao": 1800,
+          "linhas_divergentes": 0,
+          "campos_divergentes": [],
+          "campos_adicionados": [
+            "integrity.unattributed_message_count",
+            "integrity.unattributed_messages",
+            "integrity.unplanned_entries"
+          ],
+          "entradas_sem_plano": 0,
+          "mensagens_sem_atribuicao": 0
+        },
+        {
+          "run_id": "f08-reference-1795208792430-8b61b6-02",
+          "original": "aprovado",
+          "reanalisado": "aprovado",
+          "iniciais_202": 1500,
+          "continuacoes_202": 300,
+          "turnos_concluidos": 1800,
+          "p95_aceite_inicial_ms": 121,
+          "p95_resposta_inicial_ms": 31753.946044921875,
+          "linhas_de_reconciliacao": 1800,
+          "linhas_divergentes": 0,
+          "campos_divergentes": [],
+          "campos_adicionados": [
+            "integrity.unattributed_message_count",
+            "integrity.unattributed_messages",
+            "integrity.unplanned_entries"
+          ],
+          "entradas_sem_plano": 0,
+          "mensagens_sem_atribuicao": 0
+        },
+        {
+          "run_id": "f08-reference-1795208792430-8b61b6-03",
+          "original": "aprovado",
+          "reanalisado": "aprovado",
+          "iniciais_202": 1500,
+          "continuacoes_202": 300,
+          "turnos_concluidos": 1800,
+          "p95_aceite_inicial_ms": 145,
+          "p95_resposta_inicial_ms": 487.615966796875,
+          "linhas_de_reconciliacao": 1800,
+          "linhas_divergentes": 0,
+          "campos_divergentes": [],
+          "campos_adicionados": [
+            "integrity.unattributed_message_count",
+            "integrity.unattributed_messages",
+            "integrity.unplanned_entries"
+          ],
+          "entradas_sem_plano": 0,
+          "mensagens_sem_atribuicao": 0
+        },
+        {
+          "run_id": "f08-reference-1795208792430-8b61b6-04",
+          "original": "reprovado",
+          "reanalisado": "reprovado",
+          "iniciais_202": 1500,
+          "continuacoes_202": 60,
+          "turnos_concluidos": 356,
+          "p95_aceite_inicial_ms": 126,
+          "p95_resposta_inicial_ms": 492.76904296875,
+          "linhas_de_reconciliacao": 1800,
+          "linhas_divergentes": 0,
+          "campos_divergentes": [],
+          "campos_adicionados": [
+            "integrity.unattributed_message_count",
+            "integrity.unattributed_messages",
+            "integrity.unplanned_entries"
+          ],
+          "entradas_sem_plano": 0,
+          "mensagens_sem_atribuicao": 0
+        }
+      ]
+    }
+  }
+}
