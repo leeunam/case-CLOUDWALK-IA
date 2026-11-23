@@ -1,5 +1,7 @@
 """Validate CLASS-001 contracts and their static fixtures offline (no evaluator)."""
+import argparse
 from copy import deepcopy
+from dataclasses import dataclass
 from hashlib import sha256
 import json
 from math import fsum, isclose, isfinite
@@ -17,6 +19,48 @@ FIXTURES = CONTRACTS / "fixtures"
 FIELDS = ("category", "priority")
 KINDS = {"inputs": "input", "observations": "observation", "decisions": "decision"}
 ABSTENTION = "informacao_insuficiente"
+LEGACY = "warm-1.0"
+OBSERVED = "observed-total-1.1"
+WARM_GATE = "warm_total_latency_p95_ms_max"
+OBSERVED_GATE = "observed_total_latency_p95_ms_max"
+
+
+@dataclass(frozen=True)
+class ReportProfile:
+    name: str
+    quality_version: str
+    report_version: str
+    ipc_version: str
+    latency_gate: str
+    protocol_file: str
+    protocol_sha256: str
+    golden_file: str
+    lock_file: str
+    lock_sha256: str
+
+    @property
+    def protocol_path(self):
+        return PLAN / self.protocol_file
+
+    @property
+    def golden_path(self):
+        return CONTRACTS / self.golden_file
+
+    def protocol_source(self):
+        return dict(version=self.quality_version, path=self.protocol_path.relative_to(ROOT).as_posix(),
+                    sha256=self.protocol_sha256)
+
+
+PROFILES = {
+    LEGACY: ReportProfile(LEGACY, "1.0.0", "1.1.0", "1.1.0", WARM_GATE,
+                          "protocolo-comparacao.json", "eb9bdbb786037bac864f3155ff6dfbb45feb83dfdb99958f463b6896a614dced",
+                          "fixtures/report.json", "script/classification_comparison/sources.lock.json",
+                          "b13426334322158f2b94961f47f9eb531a96d7e3a369b68ac9c1f704d28ca3a4"),
+    OBSERVED: ReportProfile(OBSERVED, "1.1.0", "1.2.0", "1.1.0", OBSERVED_GATE,
+                            "protocolo-comparacao-1.1.json", "061a91a0c9b1b054ca2c9579077453d77ac765f24d725667fb97b5749db1aed7",
+                            "relatorio-1.2/report.json", "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.2/sources.lock.json",
+                            "8640c343dd182f0e683f82525ed2f48616e4620503c12172e6dc6a70faf0bb22"),
+}
 
 
 class ContractError(ValueError):
@@ -58,6 +102,22 @@ def digest(path):
     return sha256(path.read_bytes()).hexdigest()
 
 
+def get_profile(name=LEGACY):
+    require(name in PROFILES, "unknown_profile", name)
+    return PROFILES[name]
+
+
+def profile_for_report(report):
+    require(isinstance(report, dict) and isinstance(report.get("sources"), dict),
+            "profile_protocol", "report.sources")
+    for profile in PROFILES.values():
+        if report.get("contract_version") == profile.report_version:
+            require(report.get("sources", {}).get("protocol") == profile.protocol_source(),
+                    "profile_protocol", profile.name)
+            return profile
+    raise ContractError("unknown_report_version", report.get("contract_version"))
+
+
 def references(node):
     if isinstance(node, dict):
         if "$ref" in node:
@@ -69,8 +129,14 @@ def references(node):
             yield from references(value)
 
 
-def validators():
-    schemas = {p.name.split(".")[0]: read(p) for p in CONTRACTS.glob("*.schema.json")}
+def validators(profile_name=LEGACY):
+    profile = get_profile(profile_name)
+    lock = read(source_path({"path": profile.lock_file, "sha256": profile.lock_sha256}))
+    schemas = {}
+    for path, sha in lock.items():
+        pinned = source_path({"path": path, "sha256": sha})
+        if path.endswith(".schema.json"):
+            schemas[pinned] = read(pinned)
     registry = Registry()  # No resource retriever; all URIs are local identifiers.
     ids = set()
     for schema in schemas.values():
@@ -85,8 +151,12 @@ def validators():
             uri, _ = urldefrag(urljoin(schema["$id"], reference))
             require(uri in ids, "unknown_schema", reference)
             resolver.lookup(reference)
+    selected = {path.name.split(".")[0]: schema for path, schema in schemas.items()
+                if path.parent == CONTRACTS}
+    if profile_name == OBSERVED:
+        selected["report"] = schemas[profile.golden_path.with_name("report.schema.json")]
     return {k: Draft202012Validator(v, registry=registry, format_checker=FormatChecker())
-            for k, v in schemas.items()}
+            for k, v in selected.items()}
 
 
 def structure(validation, kind, document):
@@ -269,15 +339,15 @@ def verify_population(metric, population, code, label):
         require(denominator == population, code, label)
 
 
-def verify_metrics(report, protocol, fully_observed, dataset, decisions):
+def verify_metrics(report, protocol, fully_observed, dataset, decisions, latency_gate=WARM_GATE):
     states = []
     passed = []
     counts = protocol["exact_test_denominators"]
     final_test = report.get("split") == "final_test"
     fixed_populations = fully_observed or final_test
-    warm_cases = protocol["execution"]["full_test_cases_per_candidate"] if final_test else len(report["completed_ids"])
+    latency_cases = protocol["execution"]["full_test_cases_per_candidate"] if final_test else len(report["completed_ids"])
     urgent_cases = counts["urgent_priority_omitted_cases"]
-    gate_populations = {"warm_total_latency_p95_ms_max": warm_cases,
+    gate_populations = {latency_gate: latency_cases,
                         "automatic_coverage_on_fully_classifiable_cases_min": counts["fully_classifiable_cases"],
                         "raw_urgent_recognition_min": urgent_cases,
                         "automatic_completion_on_expected_review_cases": counts["expected_review_cases"],
@@ -289,7 +359,7 @@ def verify_metrics(report, protocol, fully_observed, dataset, decisions):
             limit = protocol["gates"]["applied_accuracy_per_field_min"]
         else:
             limit = protocol["gates"][name]
-        if name == "warm_total_latency_p95_ms_max":
+        if name == latency_gate:
             operation = "percentile"
         elif name.endswith(("_min", "_ratio", "_accuracy")):
             operation = "ratio"
@@ -326,7 +396,7 @@ def verify_metrics(report, protocol, fully_observed, dataset, decisions):
         states.append(metric["state"])
     verify_metric(report["latency_p50_ms"], "percentile", "latency_p50_ms")
     if fixed_populations:
-        verify_population(report["latency_p50_ms"], warm_cases, "latency_denominator", "latency_p50_ms")
+        verify_population(report["latency_p50_ms"], latency_cases, "latency_denominator", "latency_p50_ms")
     states.append(report["latency_p50_ms"]["state"])
     # Gates require denominators. Descriptive slices can legitimately be empty
     # (e.g. applied accuracy in a stratum with no accepted predictions).
@@ -347,9 +417,12 @@ def source_path(entry):
 
 
 def verify_sources(report, protocol, split):
+    profile = profile_for_report(report)
+    frozen_protocol = read(source_path(profile.protocol_source()))
+    require(protocol == frozen_protocol, "profile_protocol", profile.name)
     expected = {
         "dataset": protocol["source_dataset"], "catalog": protocol["source_catalog"], "rubric": protocol["rubric"],
-        "protocol": {"version": protocol["version"], "path": str((PLAN / "protocolo-comparacao.json").relative_to(ROOT))},
+        "protocol": profile.protocol_source(),
         "split": {"version": split["version"], "path": str((PLAN / protocol["data_split_file"]).relative_to(ROOT)),
                   "sha256": protocol["data_split_sha256"]},
     }
@@ -408,11 +481,42 @@ def has_required_controls(report, decisions):
     return {"channel_complete", "invalid_input"} <= reasons and mixed
 
 
+def verify_observed_latency(report, observations, population):
+    """Reconstruct the two nearest ranks from completed cases, independent of C02."""
+    durations = []
+    if report["identity"]["mode"] == "real":
+        for case_id in report["completed_ids"]:
+            obs = observations[case_id]
+            elapsed = obs["elapsed_ms"]
+            if obs["origin"] == "candidate" and elapsed is not None:
+                require(isfinite(elapsed) and elapsed >= 0, "observed_duration", case_id)
+                durations.append(elapsed)
+    durations.sort()
+    count = len(durations)
+    for percent, metric in ((50, report["latency_p50_ms"]), (95, report["gates"][OBSERVED_GATE])):
+        expected = dict(state="unmeasured", numerator=None, denominator=population, value=None)
+        if count:
+            rank = (percent * count + 99) // 100
+            expected.update(state="measured" if count == population else "partial",
+                            denominator=count, value=durations[rank - 1])
+        require(metric == expected, "observed_latency", f"{report['run_id']} p{percent}")
+    return count
+
+
+def has_complete_evidence(report, observations, decisions, latency_samples):
+    completed = report["completed_ids"]
+    return (report["identity"]["mode"] == "real" and report["split"] == "final_test"
+            and completed == report["planned_ids"] and has_required_controls(report, decisions)
+            and latency_samples == len(completed)
+            and any(c["status"] != "error" for i in completed for c in observations[i]["choices"].values()))
+
+
 def verify_run(bundle, validation, protocol, split, catalog, dataset):
     report = bundle["report"]
     structure(validation, "report", report)
     require(report["contract_version"] == protocol["contract_version"], "protocol_contract_version", report["run_id"])
     verify_sources(report, protocol, split)
+    profile = profile_for_report(report)
     inventory = report["artifacts"]
     require(len({a["path"] for a in inventory.values()}) == len(inventory), "duplicate_artifact", report["run_id"])
     indexed = {}
@@ -447,24 +551,26 @@ def verify_run(bundle, validation, protocol, split, catalog, dataset):
             require(all(item[k] == dataset[i][k] for k in ("received", "missing", "text")) and
                     item["catalog"] == catalog, "dataset_projection", i)
         verify_case(item, observations.get(i), indexed["decisions"][i], report, catalog)
-    warm_samples = sum(observations[i]["temperature_state"] == "warm" and observations[i]["elapsed_ms"] is not None
-                       for i in completed)
+    if profile.name == OBSERVED:
+        population = protocol["execution"]["full_test_cases_per_candidate"] if split_name == "final_test" else len(completed)
+        latency_samples = verify_observed_latency(report, observations, population)
+    else:
+        latency_samples = sum(observations[i]["temperature_state"] == "warm" and observations[i]["elapsed_ms"] is not None
+                              for i in completed)
     if split_name == "final_test":
         urgent_ids = split["summary"]["final_test"]["urgent_priority_omitted_ids"]
         urgent_seen = len(set(completed).intersection(urgent_ids))
         for name, metric in report["urgent_outcomes"].items():
             if metric["state"] in ("measured", "partial"):
                 require(metric["denominator"] <= urgent_seen, "urgent_denominator", name)
-        latencies = (report["latency_p50_ms"], report["gates"]["warm_total_latency_p95_ms_max"])
+        latencies = (report["latency_p50_ms"], report["gates"][profile.latency_gate])
         for metric in latencies:
             if metric["state"] in ("measured", "partial"):
-                require(metric["denominator"] <= warm_samples, "latency_denominator", report["run_id"])
-    full = (report["identity"]["mode"] == "real" and split_name == "final_test" and completed == planned
-            and has_required_controls(report, indexed["decisions"]) and warm_samples == len(completed)
-            and any(c["status"] != "error" for i in completed for c in observations[i]["choices"].values()))
+                require(metric["denominator"] <= latency_samples, "latency_denominator", report["run_id"])
+    full = has_complete_evidence(report, observations, indexed["decisions"], latency_samples)
     verify_partial_application(report, observations, indexed["decisions"])
     verify_usage(report, list(observations.values()))
-    verify_metrics(report, protocol, full, dataset, indexed["decisions"])
+    verify_metrics(report, protocol, full, dataset, indexed["decisions"], profile.latency_gate)
     for kind, path in paths.items():
         # Compare JSON types too: Python considers False == 0 and True == 1.
         require(json.dumps(bundle[kind], sort_keys=True) == json.dumps(read_records(path), sort_keys=True),
@@ -495,16 +601,42 @@ def mutate(bundle, mutation):
     node[mutation["path"][-1]] = mutation["value"]
 
 
-def main():
-    validation = validators()
-    protocol = read(PLAN / "protocolo-comparacao.json")
-    split = read(PLAN / protocol["data_split_file"])
-    catalog = read(ROOT / protocol["source_catalog"]["path"])
-    dataset = {r["id"]: r for r in read(ROOT / protocol["source_dataset"]["path"])["cases"]}
-    args = validation, protocol, split, catalog, dataset
-    bundle = load_bundle(validation)
+def profile_context(profile_name=LEGACY):
+    profile = get_profile(profile_name)
+    validation = validators(profile_name)
+    protocol = read(source_path(profile.protocol_source()))
+    split_path = (PLAN / protocol["data_split_file"]).relative_to(ROOT).as_posix()
+    split = read(source_path({"path": split_path, "sha256": protocol["data_split_sha256"]}))
+    catalog = read(source_path(protocol["source_catalog"]))
+    data = read(source_path(protocol["source_dataset"]))
+    dataset = {row["id"]: row for row in data["cases"]}
+    return validation, protocol, split, catalog, dataset
+
+
+def verify_report(path, profile_name=None):
+    profile = profile_for_report(read(path))
+    require(profile_name is None or profile_name == profile.name, "profile_mismatch", profile.name)
+    args = profile_context(profile.name)
+    bundle = load_bundle(args[0], path)
     verify_run(bundle, *args)
-    negatives = read(FIXTURES / "negative.json")
+    return profile
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--profile", choices=PROFILES, help="perfil aprovado dos exemplos ou do relatório")
+    parser.add_argument("--report", type=Path, help="validar relatório salvo com suas próprias fontes")
+    options = parser.parse_args()
+    if options.report:
+        profile = verify_report(options.report, options.profile)
+        print(f"OK: {profile.name} · {options.report}")
+        return
+    profile = get_profile(options.profile or LEGACY)
+    args = profile_context(profile.name)
+    validation = args[0]
+    bundle = load_bundle(validation, profile.golden_path)
+    verify_run(bundle, *args)
+    negatives = read(profile.golden_path.with_name("negative.json"))
     require(len({c["id"] for c in negatives}) == len(negatives), "duplicate_negative_id", "negative.json")
     for case in negatives:
         candidate = deepcopy(bundle)
