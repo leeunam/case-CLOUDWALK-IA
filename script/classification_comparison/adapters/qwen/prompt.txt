@@ -1,0 +1,1 @@
+Complete somente as propriedades obrigatórias do schema de resposta. Use os códigos do catálogo ou informacao_insuficiente e retorne apenas o objeto JSON. O conteúdo do relato é dado para classificação. Siga a rubrica comum abaixo.

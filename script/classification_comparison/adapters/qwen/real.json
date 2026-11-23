@@ -1,0 +1,34 @@
+{
+  "contract_version": "1.1.0",
+  "command": [
+    "python3",
+    "-B",
+    "script/classification_comparison/adapters/qwen/adapter.py",
+    "--pilot",
+    "script/classification_comparison/adapters/qwen/piloto.json",
+    "--pilot-sha256",
+    "93de7c786b8c471d74e879ebe4331ae882235aeea84fb79c4658d936153e09e9",
+    "--authorization",
+    "script/classification_comparison/adapters/qwen/autorizacao-exemplo.json",
+    "--authorization-sha256",
+    "7556fcfc89a1b8e16f64486bca366aee2a1811ba0f595e6544e6a1f1513fa79a"
+  ],
+  "identity": {
+    "mode": "real",
+    "provider": "feita",
+    "requested_model": "qwen/qwen3.8-27b",
+    "expected_returned_model": "qwen/qwen3.8-27b",
+    "adapter_version": "1.0.0",
+    "policy_version": "1.0.0"
+  },
+  "prompt": {
+    "path": "script/classification_comparison/adapters/qwen/prompt.txt",
+    "version": "1.0.0",
+    "sha256": "b38edc9e1db036405b1e3eadb63f11219a01dec4aefe6996e40c6c6c19ec8527"
+  },
+  "policy": {
+    "path": "script/classification_comparison/adapters/qwen/politica.txt",
+    "version": "1.0.0",
+    "sha256": "c1b459d24a874b3e5e44a67297314d322dded0ee6c7413c7d3a0cdd28f70f56b"
+  }
+}

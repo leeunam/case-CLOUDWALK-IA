@@ -1,0 +1,9 @@
+{
+  "date": "2026-11-23",
+  "source": "https://feita.ai/models/qwen/qwen3.8-27b",
+  "unit": "USD/Mtoken",
+  "input": "0.425",
+  "output": "2.55",
+  "cache_read": "0.085",
+  "cache_write": "0.531"
+}
