@@ -1,11 +1,11 @@
 # CLASS-SPEC-001 — comparação e seleção do classificador
 
-Versão: 1.0, de 2026-11-23. SDD significa **Specification Driven Development**:
+Versão: 1.1, de 2026-11-23. SDD significa **Specification Driven Development**:
 o comportamento e suas provas são definidos antes da implementação.
 
 ## Estado e objetivo
 
-A comparação **Qwen pela Feita × GLiClass local** foi escolhida pelo responsável.
+A comparação **Qwen pela Feita × GLiClass local** foi a escolha inicial do responsável.
 Os critérios de aceitação e a divisão 24/36 foram aprovados pelo responsável.
 Vencedor permanece pendente. Posteriormente, o responsável autorizou até
 US$ 10 para o piloto e pediu mínimo de requisições; uma chamada real C03
@@ -14,6 +14,14 @@ oito casos aprovados diretamente pelo responsável e 52 pela IA sob delegação
 explícita, para referência exploratória. Os contratos v1.0.0 passaram na
 verificação local; o [aceite C01](aceite-c01.md) registra evidências e limites
 para liberar C02 com fixtures. Esta especificação não declara um vencedor.
+
+**Emenda de escopo aprovada:** depois dos pilotos, o responsável escolheu
+focar na avaliação do Qwen e encerrar novos ajustes do GLiClass nesta entrega.
+C05 passa a ser uma qualificação do Qwen contra as metas congeladas, sem
+comparação pareada final. C04 conserva implementação e resultados como
+investigação encerrada, sem aceite do modelo para integração. A descrição
+original do ensaio pareado abaixo é histórica; esta emenda prevalece na
+continuidade. [Plano vigente](qualificacao-qwen.md).
 
 O objetivo é escolher um classificador para completar categoria e prioridade
 ausentes, com acerto, tratamento de urgência, abstenção, latência e custo

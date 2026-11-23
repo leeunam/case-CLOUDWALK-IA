@@ -2,6 +2,11 @@
 
 Issue publicada: [#7](https://github.com/leeunam/case-CLOUDWALK-IA/issues/7). Consulte a issue para progresso e comentários atuais.
 
+Escopo vigente: integrar Qwen somente se C05 comprovar elegibilidade e o
+responsável aprovar a adoção. Novos ajustes GLiClass foram encerrados nesta
+entrega. O resultado histórico de C04 continua preservado; não é pré-requisito
+de elegibilidade para C05.
+
 ## Parent e especificação
 
 [Quadro CLASS-001](../README.md) · [CLASS-SPEC-001](../especificacao.md).
@@ -30,8 +35,8 @@ preservando histórico, correção humana e autorização por marca.
   probabilidades inventadas. Timeout, lease e retentativas têm limites coerentes.
 - [ ] Testes e passagem real cobrem ao menos os caminhos completo, complemento,
   revisão/correção e resultado tardio, incluindo isolamento entre duas marcas.
-- [ ] Se GLiClass vencer, empacotar execução local e prontidão/recursos. Se Qwen
-  vencer, configurar somente credencial/rede permitidas. Contratos de webhooks
+- [ ] Se o Qwen for elegível e sua adoção for aprovada, configurar somente
+  credencial/rede permitidas. Contratos de webhooks
   e eventos Kafka não mudam incidentalmente.
 
 ## Fora do escopo

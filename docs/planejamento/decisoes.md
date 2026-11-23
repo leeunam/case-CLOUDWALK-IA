@@ -608,8 +608,11 @@ modelo, limiares, prazos e política de falhas ainda precisam ser definidos.
 
 ## D017 — Comparar Qwen/Feita e GLiClass antes de selecionar o classificador
 
-**Estado:** comparação confirmada pelo responsável em 2026-11-23; vencedor
-e integração operacional ainda pendentes.
+**Estado atual:** em 2026-11-23, após a investigação dos dois candidatos, o
+responsável aprovou focar a avaliação no Qwen e encerrar novos ajustes do
+GLiClass nesta entrega. A C05 passa a qualificar o Qwen contra as metas
+aprovadas. Escolha operacional e integração continuam pendentes. As regras
+abaixo conservam o desenho inicial; a emenda seguinte define o escopo vigente.
 
 - Comparar `qwen/qwen3.8-27b` pela Feita com
   `knowledgator/gliclass-multilang-mini` local, usando modelos já treinados.
@@ -647,6 +650,22 @@ O responsável também aprovou usar o tempo total de espera pela classificação
 na meta de 3 s, em substituição à exigência de aquecimento comprovado.
 Essa alteração será versionada antes do teste final; resultados históricos
 conservam sua régua. A escolha do classificador continua pendente.
+
+### Emenda — qualificação do Qwen
+
+O responsável escolheu explicitamente «Focar na avaliação do Qwen» após
+examinar os limites do GLiClass. Encerrar a investigação local nesta entrega
+não equivale a aprovar o GLiClass nem a declarar uma derrota em comparação
+pareada final, que não ocorreu. Código, configurações e resultados negativos
+permanecem preservados. C04 deixa de bloquear C05.
+
+A C05 avalia `qwen/qwen3.8-27b` sozinho nos 36 casos finais congelados e nos
+controles previstos, com o perfil `observed-total-1.1`. Preservar todos os
+critérios, dados, prompt, política e versões já aprovados. Não usar o teste
+final para ajustar o candidato. A conclusão pode ser elegível, não elegível
+ou inconclusiva; somente elegibilidade comprovada e aprovação humana liberam
+C06. O teto total continua US$ 10, com mínimo de requisições; não é um novo
+orçamento por lote. [Plano e pré-voo C05](classificacao-comparativa/qualificacao-qwen.md).
 
 ## Relações de domínio já confirmadas
 

@@ -68,7 +68,11 @@ desenvolvimento, incluindo falhas por prazo e um rebaixamento de urgência.
 Sua configuração não está aprovada para C05. A [passagem atual](classificacao-comparativa/passagem-autonoma.md)
 registra as evidências e as decisões pendentes. O teto de US$ 10 foi aprovado
 para o piloto Qwen, com mínimo de requisições; uma chamada foi suficiente.
-O escopo do teste final e a escolha do vencedor continuam pendentes.
+Depois da investigação, o responsável aprovou focar na avaliação do Qwen e
+encerrar novos ajustes do GLiClass nesta entrega. C04 deixa de bloquear C05;
+a qualificação usa os mesmos critérios e os 36 casos finais, sem comparação
+pareada final. A configuração de execução e a escolha operacional continuam
+pendentes. [Plano vigente](classificacao-comparativa/qualificacao-qwen.md).
 Criar os cards não equivale a autorizar inferência paga nem escolher o fornecedor.
 
 A atualização C01-L/C02-L foi aceita e integrada em `933836e`. As próximas
@@ -78,7 +82,8 @@ de aquecimento comprovado. Protocolo de qualidade 1.1, relatório 1.2 e IPC 1.1;
 39 testes do avaliador passaram, sem novas chamadas externas. Os 17 relatórios
 históricos conservaram seus hashes. [Plano e aceite](classificacao-comparativa/plano-latencia-total.md).
 
-Ordem: C01 → C02 → C03/C04 em paralelo → C05 → C06 → C07. R01 e R02 podem
+Ordem vigente: C01 → C02 → C03 → C05 → C06 → C07; C04 foi investigada em
+paralelo com C03 e seus ajustes foram encerrados nesta entrega. R01 e R02 podem
 andar independentemente e bloqueiam o fechamento da demonstração C07.
 O [guia dos chats](classificacao-comparativa/guia-dos-chats.md) explica base Git,
 isolamento, propriedade, modelos sugeridos, revisão e exercícios de aprendizagem.

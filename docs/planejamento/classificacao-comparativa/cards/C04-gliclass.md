@@ -2,7 +2,15 @@
 
 Issue publicada: [#5](https://github.com/leeunam/case-CLOUDWALK-IA/issues/5). Consulte a issue para progresso e comentários atuais.
 
-Estado: **implementação revisada e integrada para experimento; configuração não aprovada para C05**. [Relatório C04](../../../c04.md): 29 testes sintéticos, dez lotes reais adicionais validados, timeouts e um rebaixamento de urgência. Pilotos não usaram holdout nem API paga. A issue permanece aberta para decidir a viabilidade do candidato e concluir o aceite aplicável.
+Estado: **investigação encerrada nesta entrega por decisão do responsável;
+configuração não aprovada para integração**. O responsável escolheu focar
+na avaliação do Qwen. Encerrar os ajustes não significa cumprir todos os
+critérios de aceite abaixo nem reprovar o GLiClass numa comparação pareada
+final, que não ocorreu e ficou fora do escopo desta entrega.
+C04 deixa de bloquear C05. [Relatório C04](../../../c04.md): 29 testes
+sintéticos, dez lotes reais adicionais validados, timeouts e um rebaixamento
+de urgência. Código, configurações, resultados e pendência de reprodução limpa
+permanecem preservados. Os pilotos não usaram holdout nem API paga.
 
 ## Parent e especificação
 

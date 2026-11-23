@@ -1,0 +1,39 @@
+{
+  "task": "C05",
+  "status": "blocked_before_inference",
+  "checked_on": "2026-11-23",
+  "recorded_at_utc": "2026-11-23T20:00:06Z",
+  "model": "qwen/qwen3.8-27b",
+  "source": "https://feita.ai/models/qwen/qwen3.8-27b",
+  "method": "read-only public model page, Overview and Parameters",
+  "public_page": {
+    "status_display": "Down",
+    "uptime_24h_display": "21.05%",
+    "latency_24h_display": "4.7 s",
+    "context_display": "1.02M",
+    "max_output_display": "131K",
+    "input_usd_per_million_display": "0.425",
+    "output_usd_per_million_display": "2.55",
+    "cache_read_usd_per_million_display": "0.085",
+    "cache_write_usd_per_million_display": "0.531",
+    "supported_parameters_observed": ["max_tokens", "reasoning", "reasoning_effort", "response_format", "structured_outputs"]
+  },
+  "provider_calls_during_preparation": 0,
+  "holdout_inferences": 0,
+  "financial_preflight": {
+    "total_human_cap_usd": "10.00",
+    "previous_pilot_conservative_accounted_usd": "0.000519",
+    "historical_worst_case_reservation_per_request_usd": "1.4004736",
+    "planned_max_candidate_requests": 44,
+    "historical_worst_case_reservation_for_full_run_usd": "61.6208384",
+    "state": "historical reservation exceeds cap; final execution limits not yet verified"
+  },
+  "limits": [
+    "Public status is transient and must be checked again before live execution.",
+    "Public uptime and latency are provider statistics, not C05 measurements.",
+    "No POST was attempted to test availability.",
+    "Displayed pricing is public and rounded, not an account billing guarantee.",
+    "The current paid pilot adapter does not authorize final_test IDs or the new protocol.",
+    "No model eligibility or operational adoption was established."
+  ]
+}

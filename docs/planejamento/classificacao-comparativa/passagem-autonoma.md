@@ -2,7 +2,16 @@
 
 **Estado atual:** o responsável configurou a chave, autorizou até US$ 10 com mínimo de requisições, e o piloto real C03 usou uma chamada. Retornou `pix` + `urgent` corretamente em 1,826 s; o painel exibiu cobrança aproximada de US$ 0,000518. [Recibo](../../evidencias/c03/piloto-unitario-real.json). A decisão posterior de usar o tempo total da classificação foi implementada e integrada em `933836e`: selecionar explicitamente `--profile observed-total-1.1`, com p95 até 3.000 ms. Passaram 39 testes do avaliador; os 17 históricos conservaram seus hashes e nenhuma nova inferência foi feita. [Aceite](../../evidencias/latencia-total/avaliador-aceite.json).
 
-**Próxima decisão:** definir a continuidade do comparativo diante das limitações reais do GLiClass, congelar os candidatos e preparar o escopo próprio do teste final. Os 36 relatos de teste continuam reservados, sem inferência. Nenhum vencedor foi escolhido nem integrado ao Rails. C06/C07 continuam dependentes de decisão elegível; F09/F10 e E01 mantêm suas dependências.
+**Atualização de escopo aprovada:** o responsável escolheu focar na avaliação
+do Qwen e encerrar novos ajustes GLiClass nesta entrega. C04 conserva suas
+evidências, sem aceite do modelo, e deixa de bloquear C05. C05 passa a qualificar
+Qwen contra as metas aprovadas, sem alegar comparação pareada final.
+[Plano e pré-voo](qualificacao-qwen.md). Na consulta pública de 23/11/2026,
+a Feita exibiu `qwen/qwen3.8-27b` como `Down`; nenhuma inferência foi tentada.
+Os 36 relatos continuam reservados, sem inferência. A execução aguarda
+disponibilidade e adaptação/verificação do executor final e seu orçamento.
+Nenhum modelo foi escolhido nem integrado ao Rails. C06/C07 continuam
+dependentes de decisão elegível; F09/F10 e E01 mantêm suas dependências.
 
 **Decisão técnica:** o relatório passou a 1.2 sob protocolo de qualidade 1.1, preservando o IPC 1.1 e os adaptadores. Isso permite verificar os resultados históricos pela regra original. Se essa divisão se mostrar inadequada, o custo será revisar o despacho dos perfis e seus metadados, sem reescrever as medições antigas.
 

@@ -71,7 +71,11 @@ e dez lotes reais adicionais de desenvolvimento: houve timeouts e um
 rebaixamento de urgente para básico. Sua configuração não está aprovada
 para integração. A [passagem atual](docs/planejamento/classificacao-comparativa/passagem-autonoma.md)
 registra os próximos passos e as decisões pendentes.
-A comparação real e a escolha do classificador ainda estão pendentes.
+Após essa investigação, o responsável escolheu focar na avaliação do Qwen e
+encerrar novos ajustes do GLiClass nesta entrega, preservando os resultados.
+A [C05](docs/planejamento/classificacao-comparativa/qualificacao-qwen.md)
+vai qualificá-lo contra os critérios aprovados; não houve comparação pareada
+final. A execução real e a decisão de adoção continuam pendentes.
 
 A regra aprovada de latência foi integrada em `933836e`: as próximas avaliações
 selecionam `--profile observed-total-1.1`, com meta de p95 até 3 s para o tempo

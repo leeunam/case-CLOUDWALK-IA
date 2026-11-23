@@ -1,4 +1,4 @@
-# C05 — Publicar a comparação pareada e decidir o classificador
+# C05 — Qualificar o Qwen e decidir sua adoção
 
 Issue publicada: [#6](https://github.com/leeunam/case-CLOUDWALK-IA/issues/6). Consulte a issue para progresso e comentários atuais.
 
@@ -8,17 +8,23 @@ Issue publicada: [#6](https://github.com/leeunam/case-CLOUDWALK-IA/issues/6). Co
 
 ## O que construir
 
-Como responsável, comparar resultados reais dos dois candidatos e registrar uma
-decisão explicável. A execução final usa os mesmos relatos/catálogos/máscaras e
-os limites já aprovados, com adaptadores/políticas congelados. O agente prepara
-o relatório; a decisão operacional é do responsável neste chat.
+Como responsável, verificar se o Qwen atende aos critérios aprovados e registrar
+uma decisão explicável. O responsável aprovou encerrar novos ajustes do GLiClass
+nesta entrega e focar no Qwen. A execução final usa os 36 relatos reservados,
+catálogos, máscaras e limites já aprovados, com adaptador/prompt/política
+congelados. O agente prepara o relatório; a decisão operacional é do responsável
+neste chat. Não apresentar o resultado como comparação pareada final.
+
+[Plano e pré-voo vigente](../qualificacao-qwen.md). A execução real aguarda
+disponibilidade e controles de execução verificados; a consulta pública de
+23/11/2026 exibiu o modelo como `Down`. Nenhuma chamada paga foi tentada nessa consulta.
 
 ## Critérios de aceite
 
 - [ ] Antes do lote, conferir aprovações de rótulos e orçamento, hashes, versões,
   políticas, limites e ambiente. Bloquear preflight divergente sem consumir API.
-- [ ] Executar o teste final pareado, preservando cada tentativa, erro, abstenção,
-  denominador e modelo efetivo. Não ajustar os candidatos ao ver o holdout.
+- [ ] Executar a qualificação final do Qwen, preservando cada tentativa, erro,
+  abstenção, denominador e modelo efetivo. Não ajustar o candidato ao ver o holdout.
 - [ ] Publicar acerto bruto/aplicado por campo, urgentes rebaixados/abstenções/
   falhas, cobertura, inválidos, p50/p95 com amostras e custo real/estimado/local.
 - [ ] Usar `observed-total-1.1`: p95 do tempo total da classificação até
@@ -29,8 +35,8 @@ o relatório; a decisão operacional é do responsável neste chat.
   com checagem independente das contagens. Credenciais e saldo ficam ausentes.
 - [ ] Relacionar os resultados aos limites definidos antes do ensaio. Não premiar
   um modelo que se abstém em todos os casos; expor trade-offs e tamanho da amostra.
-- [ ] ADR registra resultado: vencedor elegível aprovado pelo responsável,
-  nenhum elegível ou evidência insuficiente. Falha do piloto/fornecedor permanece
+- [ ] ADR registra resultado: Qwen elegível e adoção aprovada pelo responsável,
+  não elegível ou evidência insuficiente. Falha do piloto/fornecedor permanece
   visível. Não forçar uma escolha e não apresentar evidência sintética como produção.
 - [ ] C06 só é liberada se houver vencedor elegível e aprovação humana explícita.
   Se não houver, registrar os próximos passos como nova decisão de escopo.
@@ -43,7 +49,8 @@ expandir a outros modelos, treinar pesos ou afirmar capacidade de dez mil chats.
 ## Bloqueado por
 
 - [C03 — Qwen com piloto aceito e versão congelada](C03-qwen.md).
-- [C04 — GLiClass com piloto aceito e versão congelada](C04-gliclass.md).
+- C04 não bloqueia esta qualificação: sua investigação foi encerrada nesta entrega,
+  preservando as limitações e evidências, por decisão do responsável.
 - Gates de dados e execução real aprovados em C01.
 
 ## Execução e retorno

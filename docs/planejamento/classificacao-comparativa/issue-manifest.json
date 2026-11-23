@@ -165,5 +165,33 @@
     "approved": true,
     "scope": "9 cards and 1 epic; does not approve inference budget, labels or a winning model"
   },
-  "progress_source": "GitHub issues; card states below are the publication snapshot"
+  "progress_source": "GitHub issues; card states below are the publication snapshot",
+  "scope_amendments": [
+    {
+      "date": "2026-11-23",
+      "spec_version": "1.1",
+      "approved_by": "responsável pelo projeto",
+      "decision": "Focar na avaliação do Qwen; encerrar novos ajustes GLiClass nesta entrega",
+      "source": "qualificacao-qwen.md",
+      "c04": {
+        "new_iterations": false,
+        "preserve_artifacts": true,
+        "model_eligibility_approved": false,
+        "closure_reason": "not_planned"
+      },
+      "c05": {
+        "title": "[C05] Qualificar o Qwen e decidir sua adoção",
+        "depends_on": [
+          "C03"
+        ],
+        "profile": "observed-total-1.1",
+        "final_test_cases": 36,
+        "paired_final_comparison": false,
+        "status": "preflight_blocked"
+      },
+      "total_budget_cap_usd": "10.00",
+      "operational_adoption_approved": false,
+      "frozen_protocol_changed": false
+    }
+  ]
 }
