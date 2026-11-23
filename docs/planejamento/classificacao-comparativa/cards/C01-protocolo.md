@@ -12,6 +12,9 @@ exploratória, com oito aprovações diretas e 52 pela IA sob delegação explí
 conforme o [registro da revisão](../revisao-de-rotulos.md). C01 continua em
 andamento; protocolo, separação dos dados e limites ainda estão pendentes.
 
+A [proposta de critérios e divisão](../proposta-de-comparacao.md) está preparada
+para decisão do responsável. Seus números e IDs ainda não são um protocolo aprovado.
+
 ## O que construir
 
 Como responsável pelo projeto, conseguir aprovar um protocolo executável antes

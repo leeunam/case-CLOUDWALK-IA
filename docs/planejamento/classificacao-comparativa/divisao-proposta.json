@@ -1,0 +1,141 @@
+{
+  "proposal_status": "awaiting_responsible_approval",
+  "source_dataset_version": "1.1.0",
+  "source_dataset_sha256": "0e7e4c342c2a39cefd89855d8c0513f447d7878303eb4091488ca8af78928880",
+  "development": {
+    "category": [
+      "jev-004",
+      "jev-007",
+      "jev-010",
+      "jev-013",
+      "jev-019",
+      "jev-028",
+      "jev-037",
+      "jev-040"
+    ],
+    "priority": [
+      "jev-002",
+      "jev-005",
+      "jev-008",
+      "jev-014",
+      "jev-023",
+      "jev-032",
+      "jev-035",
+      "jev-041"
+    ],
+    "category+priority": [
+      "jev-003",
+      "jev-006",
+      "jev-009",
+      "jev-015",
+      "jev-018",
+      "jev-024",
+      "jev-033",
+      "jev-039"
+    ]
+  },
+  "final_test": {
+    "category": [
+      "jev-001",
+      "jev-016",
+      "jev-022",
+      "jev-025",
+      "jev-031",
+      "jev-034",
+      "jev-043",
+      "jev-046",
+      "jev-049",
+      "jev-052",
+      "jev-055",
+      "jev-058"
+    ],
+    "priority": [
+      "jev-011",
+      "jev-017",
+      "jev-020",
+      "jev-026",
+      "jev-029",
+      "jev-038",
+      "jev-044",
+      "jev-047",
+      "jev-050",
+      "jev-053",
+      "jev-056",
+      "jev-059"
+    ],
+    "category+priority": [
+      "jev-012",
+      "jev-021",
+      "jev-027",
+      "jev-030",
+      "jev-036",
+      "jev-042",
+      "jev-045",
+      "jev-048",
+      "jev-051",
+      "jev-054",
+      "jev-057",
+      "jev-060"
+    ]
+  },
+  "version": "0.1.0",
+  "created_on": "2026-11-23",
+  "method": "Divisão proposta antes de executar candidatos, com 8/12 casos por máscara e representação de rotina, urgência e ambiguidade; sem usar resultados dos modelos.",
+  "summary": {
+    "development": {
+      "cases": 24,
+      "target_fields": 32,
+      "strata": {
+        "rotina": 11,
+        "urgente": 6,
+        "ambiguo": 7
+      },
+      "expected_full_classification": 17,
+      "expected_review": 7,
+      "urgent_priority_omitted_ids": [
+        "jev-002",
+        "jev-032",
+        "jev-003",
+        "jev-018"
+      ],
+      "human_direct_cases": 6,
+      "agent_delegated_cases": 18
+    },
+    "final_test": {
+      "cases": 36,
+      "target_fields": 48,
+      "strata": {
+        "ambiguo": 7,
+        "rotina": 22,
+        "urgente": 7
+      },
+      "expected_full_classification": 29,
+      "expected_review": 7,
+      "urgent_priority_omitted_ids": [
+        "jev-017",
+        "jev-047",
+        "jev-059",
+        "jev-027",
+        "jev-036",
+        "jev-051"
+      ],
+      "human_direct_cases": 2,
+      "agent_delegated_cases": 34
+    }
+  },
+  "model_visible_fields": [
+    "id",
+    "text",
+    "received",
+    "missing",
+    "brand_catalog_and_definitions"
+  ],
+  "model_hidden_fields": [
+    "expected",
+    "rationale",
+    "stratum",
+    "review_source",
+    "caveats",
+    "review_decisions"
+  ]
+}

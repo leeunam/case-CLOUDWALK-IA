@@ -1,0 +1,62 @@
+{
+  "version": "0.1.0",
+  "task": "C01",
+  "status": "proposed_awaiting_responsible_approval",
+  "created_on": "2026-11-23",
+  "source_dataset": {
+    "path": "script/f08/jev/dataset.json",
+    "version": "1.1.0",
+    "sha256": "0e7e4c342c2a39cefd89855d8c0513f447d7878303eb4091488ca8af78928880"
+  },
+  "source_catalog": {
+    "path": "script/f08/jev/catalog.json",
+    "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271"
+  },
+  "data_split_file": "divisao-proposta.json",
+  "provenance": {
+    "human_direct_cases": 8,
+    "agent_delegated_cases": 52,
+    "scope": "synthetic_exploratory_reference"
+  },
+  "gates": {
+    "channel_field_preservation_ratio": 1.0,
+    "complete_or_invalid_controls_model_calls": 0,
+    "partial_application_after_abstention_or_error": 0,
+    "automatic_completion_on_expected_review_cases": 0,
+    "automatic_non_urgent_applied_when_expected_urgent": 0,
+    "applied_accuracy_per_field_min": 0.9,
+    "automatic_coverage_on_fully_classifiable_cases_min": 0.7,
+    "raw_urgent_recognition_min": 0.8,
+    "warm_total_latency_p95_ms_max": 3000
+  },
+  "execution": {
+    "concurrency": 1,
+    "attempts_per_case": 1,
+    "timeout_ms_per_case": 5000,
+    "full_test_cases_per_candidate": 36,
+    "paid_execution_authorized": false,
+    "budget_cap_usd": null,
+    "budget_status": "pending",
+    "model_calls_performed": 0
+  },
+  "exact_test_denominators": {
+    "fully_classifiable_cases": 29,
+    "min_automatic_completions": 21,
+    "expected_review_cases": 7,
+    "urgent_priority_omitted_cases": 6,
+    "min_raw_urgent_choices": 5,
+    "target_fields": 48
+  },
+  "metric_semantics": {
+    "applied_accuracy_per_field": "Correct target fields / all applied target fields for that field; valid channel fields excluded; abstention, error and non-applied choices excluded and reported separately; zero applied fields makes gate inconclusive.",
+    "automatic_coverage": "Cases completely auto-applied / 29 cases for which all missing targets have deterministic labels; wrong but applied cases remain in numerator and are penalized in accuracy; report correct-completion coverage separately.",
+    "urgent_recognition": "Raw choice urgent / all six test cases with priority omitted and expected urgent; any transport error, abstention or other choice is not a correct recognition, even when the overall case goes to review.",
+    "expected_review": "All seven cases containing at least one expected informacao_insuficiente must go to review; choosing the other field correctly does not permit partial application.",
+    "latency": "Monotonic wall time for each full classification attempt with warm model/process, including validation/parse and all field questions; all observed outcomes included, even failures/timeouts; cold load/startup measured separately; p95 uses nearest-rank ceil(0.95*n).",
+    "eligibility": "All gates and a complete observed test are required; a partial run, missing metric, or zero denominator gives inconclusive, never a pass."
+  },
+  "decision": {
+    "policy": "Safety gates first. Among eligible candidates, compare correct case completions, per-field accuracy, urgent outcomes, latency and API cost/local resources. Responsible records justified choice; inconclusive or no eligible candidate are allowed.",
+    "score_calibration": "Model scores are not assumed calibrated or comparable; abstention thresholds/prompt chosen only on development before final freeze."
+  }
+}

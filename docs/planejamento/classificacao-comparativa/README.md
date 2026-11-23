@@ -19,6 +19,10 @@ Os cards representam Specification Driven Development. Cada tarefa deve ligar
 comportamento especificado, critérios de aceite, evidências e decisão de revisão.
 Um commit ou teste fixture, sozinho, não equivale a aceite com um modelo real.
 
+A [proposta de critérios e separação dos dados](proposta-de-comparacao.md)
+aguarda decisão na C01. Ela preserva a revisão concluída dos 60 rótulos e não
+autoriza chamadas reais ou a execução dos cards dependentes.
+
 ## Cards e dependências
 
 | ID | Entrega verificável / história | Bloqueado por | Onde trabalhar | Modelo sugerido |

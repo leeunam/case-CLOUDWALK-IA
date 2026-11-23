@@ -120,6 +120,10 @@ Registrar quantos urgentes com prioridade omitida permanecem no teste final
 e o alcance da conclusão permitido pelo tamanho da amostra. Um piloto pequeno
 sem erros observados não comprova uma baixa taxa de erro em produção.
 
+A [proposta de critérios e divisão](proposta-de-comparacao.md) apresenta metas
+e IDs concretos para revisão. Seu estado é pendente; não substituir os critérios
+aprovados nem liberar um card dependente enquanto o protocolo estiver em aberto.
+
 ## Execução e limites financeiros
 
 - Qwen inicial: `qwen/qwen3.8-27b`, no gateway Feita. Confirmar disponibilidade,
