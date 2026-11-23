@@ -9,8 +9,11 @@ O plano estático foi gerado e conferido na branch
 `docs/resultado-classificacao`, worktree `.worktrees/c05-comparacao`, após a
 emenda integrada `99b6230`. Foram confirmados 36 relatos, 13 controles e 44
 possíveis chamadas do candidato, sem iniciar o adaptador nem acessar a chave.
-[Conferência e reprodução](../../c05.md). A execução real continua pendente
-da disponibilidade e dos limites do executor final; não há resultado C05.
+[Conferência e reprodução](../../c05.md). A adaptação C05-E foi implementada
+offline em `24da473`, com correção `aee264c`, 28 testes C05 e regressões C02/Qwen.
+Usa conta SQLite persistente, reserva por despacho e conciliação verificada.
+O lote final pago ainda exige autorização própria, consolidação dos gastos
+anteriores e confirmação das fontes financeiras. Não há resultado C05.
 
 ## Escopo e evidências
 
@@ -60,18 +63,27 @@ Esses indicadores são do fornecedor: não substituem uma medição C05 nem
 demonstram o resultado que os nossos 36 casos teriam. Não foi feito POST.
 Verificar novamente o estado antes de uma execução real.
 
+O reteste posterior **C03-P2**, explicitamente autorizado para uma chamada de
+desenvolvimento, respondeu `pix` e `urgent` em 1,894 s e teve US$ 0,000518
+exibidos no log individual. A API respondeu apesar do indicador anterior.
+Os dois registros experimentais do gateway somaram aproximadamente
+US$ 0,00104 no resumo. Esse reteste do mesmo caso não entra no teste final
+nem comprova disponibilidade estável ou p95. [Recibo](../../evidencias/c03/reteste-unitario-real-02.json).
+
 O executor C02 suporta plano estático `final_test` sem iniciar adaptadores.
-O adaptador pago atual continua limitado a desenvolvimento/controles e ao
-protocolo do piloto antigo. Um plano estático válido não torna esse adaptador
-apto ao lote final. A adaptação deve fixar o conjunto final autorizado e o
-protocolo novo antes da credencial, preservar a medição C02 e impedir reenvio
-ou gasto fora do lote registrado.
+Na preparação estática original, o adaptador pago aceitava apenas
+desenvolvimento/controles e o protocolo antigo. C05-E adiciona o executor final
+com manifesto próprio, conjunto e conta vinculados, bloqueios pré-credencial
+e proteção contra repetição, preservando a medição C02. O piloto antigo
+permanece reproduzível. Exemplos reais continuam desabilitados; código e
+simulação não autorizam o lote pago. [Executor e reprodução](../../c05.md).
 
 ## Orçamento total e limites de execução
 
-O teto humano total permanece **US$ 10**, com mínimo de requisições. Já foram
-contabilizados conservadoramente US$ 0,000519 pelo único piloto; o restante
-conhecido é no máximo o orçamento autorizado menos esse valor. Não há nova
+O teto humano total permanece **US$ 10**, com mínimo de requisições. Os dois
+pilotos já consumidos têm contabilização conservadora de US$ 0,001038,
+separada do valor arredondado pelo painel. A abertura da conta deve consolidar
+todos os gastos anteriores e eventuais reservas pendentes. Não há nova
 verba de US$ 10 por lote, nem autorização para consumir todo o crédito da conta.
 
 A reserva histórica do piloto foi US$ 1,4004736 por requisição, pelo pior
@@ -84,8 +96,14 @@ faturáveis ou um controle cumulativo com reconciliação comprovada. Não troca
 uma reserva garantida pela extrapolação de um caso, presumir que raciocínio
 foi desativado, devolver reserva de timeout sem recibo ou aumentar o teto.
 A autorização/configuração do piloto não será reutilizada. O manifesto da
-execução final precisa fixar IDs, hashes, modelo, limites e teto cumulativo.
-Sem disponibilidade ou limite verificável, continuar somente offline.
+execução final fixa IDs, hashes, modelo, limites e teto cumulativo. C05-E
+concilia USD comprovado ou, quando explicitamente confirmada, a conversão
+documentada de `usage.credits`, mantendo o maior custo verificado. Sem custo
+conciliável, conserva a reserva e interrompe com prefixo inconclusivo, mesmo
+que exista saldo para outra reserva. Não precisa reservar as 44 chamadas de
+uma só vez. Recibos posteriores preservam a liquidação original; aumentos
+atualizam o total do caso e congelam a conta se violarem reserva ou teto.
+Sem autorização e referências verificáveis, continuar somente offline.
 
 ## Entrega de preparação
 

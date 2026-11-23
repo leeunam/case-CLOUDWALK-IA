@@ -77,6 +77,13 @@ A [C05](docs/planejamento/classificacao-comparativa/qualificacao-qwen.md)
 vai qualificá-lo contra os critérios aprovados; não houve comparação pareada
 final. A execução real e a decisão de adoção continuam pendentes.
 
+O reteste autorizado C03-P2 voltou a completar os dois campos do mesmo caso
+em 1,894 s; o log individual exibiu US$ 0,000518, e o resumo das duas chamadas
+experimentais passou a aproximadamente US$ 0,00104. A C05-E implementa o
+executor final com conta persistente, reservas e conciliação, verificado com
+28 testes C05 offline. Os exemplos reais permanecem desabilitados. [Recibo do
+reteste](docs/evidencias/c03/reteste-unitario-real-02.json) e [roteiro C05](docs/c05.md).
+
 A regra aprovada de latência foi integrada em `933836e`: as próximas avaliações
 selecionam `--profile observed-total-1.1`, com meta de p95 até 3 s para o tempo
 total da classificação, incluindo erros e timeouts com duração observada.
