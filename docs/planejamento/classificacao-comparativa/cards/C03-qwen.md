@@ -1,5 +1,7 @@
 # C03 — Classificar um relato de desenvolvimento com Qwen pela Feita
 
+Issue publicada: [#4](https://github.com/leeunam/case-CLOUDWALK-IA/issues/4). Consulte a issue para progresso e comentários atuais.
+
 ## Parent e especificação
 
 [Quadro CLASS-001](../README.md) · [CLASS-SPEC-001](../especificacao.md).

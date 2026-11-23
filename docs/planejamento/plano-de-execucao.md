@@ -42,6 +42,9 @@ local antes de selecionar o classificador. O [quadro SDD](classificacao-comparat
 contém sete cards de protocolo/avaliador/adaptadores/comparação/integração/demo
 e duas correções independentes de robustez. A especificação é CLASS-SPEC-001;
 a decisão está em D017. SDD aqui significa Specification Driven Development.
+A divisão foi aprovada e publicada no [épico CLASS-001](https://github.com/leeunam/case-CLOUDWALK-IA/issues/1),
+com nove issues vinculadas. A aprovação dos cards não aprova ainda dados,
+orçamento de inferência ou vencedor.
 
 Os itens F04/F08 abaixo registram a implementação e o experimento anteriores
 com Jev. A nova frente preserva as regras de negócio, prepara o comparativo e,

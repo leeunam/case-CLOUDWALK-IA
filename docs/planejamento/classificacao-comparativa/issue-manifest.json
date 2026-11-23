@@ -5,14 +5,15 @@
   "spec_version": "0.1",
   "repository": "leeunam/case-CLOUDWALK-IA",
   "application_baseline": "cb9683179d713e7bcbfc95c54003dc30630ab7ad",
-  "state": "draft_for_breakdown_review",
+  "state": "published",
   "epic": {
     "title": "[CLASS-001] Comparar Qwen/Feita e GLiClass e integrar o classificador escolhido",
     "labels": [
       "enhancement",
       "documentation"
     ],
-    "url": null
+    "url": "https://github.com/leeunam/case-CLOUDWALK-IA/issues/1",
+    "number": 1
   },
   "cards": [
     {
@@ -24,9 +25,10 @@
         "documentation"
       ],
       "role": "central/humano",
-      "url": null,
+      "url": "https://github.com/leeunam/case-CLOUDWALK-IA/issues/2",
       "state": "planned",
-      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites"
+      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites",
+      "number": 2
     },
     {
       "id": "C02",
@@ -39,9 +41,10 @@
         "enhancement"
       ],
       "role": "avaliador",
-      "url": null,
-      "state": "planned",
-      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites"
+      "url": "https://github.com/leeunam/case-CLOUDWALK-IA/issues/3",
+      "state": "blocked",
+      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites",
+      "number": 3
     },
     {
       "id": "C03",
@@ -54,9 +57,10 @@
         "enhancement"
       ],
       "role": "qwen",
-      "url": null,
-      "state": "planned",
-      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites"
+      "url": "https://github.com/leeunam/case-CLOUDWALK-IA/issues/4",
+      "state": "blocked",
+      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites",
+      "number": 4
     },
     {
       "id": "C04",
@@ -69,9 +73,10 @@
         "enhancement"
       ],
       "role": "gliclass",
-      "url": null,
-      "state": "planned",
-      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites"
+      "url": "https://github.com/leeunam/case-CLOUDWALK-IA/issues/5",
+      "state": "blocked",
+      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites",
+      "number": 5
     },
     {
       "id": "C05",
@@ -85,9 +90,10 @@
         "documentation"
       ],
       "role": "central/humano",
-      "url": null,
-      "state": "planned",
-      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites"
+      "url": "https://github.com/leeunam/case-CLOUDWALK-IA/issues/6",
+      "state": "blocked",
+      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites",
+      "number": 6
     },
     {
       "id": "C06",
@@ -100,9 +106,10 @@
         "enhancement"
       ],
       "role": "integracao",
-      "url": null,
-      "state": "planned",
-      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites"
+      "url": "https://github.com/leeunam/case-CLOUDWALK-IA/issues/7",
+      "state": "blocked",
+      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites",
+      "number": 7
     },
     {
       "id": "C07",
@@ -118,9 +125,10 @@
         "enhancement"
       ],
       "role": "reproducao",
-      "url": null,
-      "state": "planned",
-      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites"
+      "url": "https://github.com/leeunam/case-CLOUDWALK-IA/issues/10",
+      "state": "blocked",
+      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites",
+      "number": 10
     },
     {
       "id": "R01",
@@ -131,9 +139,10 @@
         "bug"
       ],
       "role": "robustez",
-      "url": null,
+      "url": "https://github.com/leeunam/case-CLOUDWALK-IA/issues/8",
       "state": "planned",
-      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites"
+      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites",
+      "number": 8
     },
     {
       "id": "R02",
@@ -144,9 +153,17 @@
         "bug"
       ],
       "role": "analisador",
-      "url": null,
+      "url": "https://github.com/leeunam/case-CLOUDWALK-IA/issues/9",
       "state": "planned",
-      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites"
+      "dispatch_base_policy": "Integrator supplies immutable SHA containing approved spec and integrated prerequisites",
+      "number": 9
     }
-  ]
+  ],
+  "planning_commit": "606a9a784f27b8ee25daa42121ae6cfde4fd0e35",
+  "breakdown_approval": {
+    "date": "2026-11-23",
+    "approved": true,
+    "scope": "9 cards and 1 epic; does not approve inference budget, labels or a winning model"
+  },
+  "progress_source": "GitHub issues; card states below are the publication snapshot"
 }

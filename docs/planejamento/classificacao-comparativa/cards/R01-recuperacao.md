@@ -1,5 +1,7 @@
 # R01 — Recuperar o consumo após perda da associação ao grupo Kafka
 
+Issue publicada: [#8](https://github.com/leeunam/case-CLOUDWALK-IA/issues/8). Consulte a issue para progresso e comentários atuais.
+
 ## Parent e especificação
 
 [Quadro CLASS-001](../README.md). Regressão F07 exposta pela F08; independe da

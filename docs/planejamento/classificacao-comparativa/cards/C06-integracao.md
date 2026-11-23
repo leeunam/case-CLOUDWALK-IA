@@ -1,5 +1,7 @@
 # C06 — Encaminhar um atendimento pelo classificador escolhido
 
+Issue publicada: [#7](https://github.com/leeunam/case-CLOUDWALK-IA/issues/7). Consulte a issue para progresso e comentários atuais.
+
 ## Parent e especificação
 
 [Quadro CLASS-001](../README.md) · [CLASS-SPEC-001](../especificacao.md).

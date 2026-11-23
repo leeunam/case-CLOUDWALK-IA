@@ -1,5 +1,7 @@
 # C07 — Reproduzir a demonstração com o modelo selecionado
 
+Issue publicada: [#10](https://github.com/leeunam/case-CLOUDWALK-IA/issues/10). Consulte a issue para progresso e comentários atuais.
+
 ## Parent e especificação
 
 [Quadro CLASS-001](../README.md) · [CLASS-SPEC-001](../especificacao.md).

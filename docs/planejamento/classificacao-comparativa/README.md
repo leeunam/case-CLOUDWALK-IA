@@ -1,7 +1,8 @@
 # CLASS-001 — construir, comparar e selecionar o classificador
 
-Estado: cards completos para revisão da divisão e publicação. Nenhuma tarefa
-de modelo foi implementada ou executada como parte deste planejamento.
+Estado: nove cards e o [épico #1](https://github.com/leeunam/case-CLOUDWALK-IA/issues/1) publicados em 2026-11-23,
+com divisão aprovada pelo responsável. Nenhuma tarefa de modelo foi
+implementada ou executada como parte deste planejamento.
 
 [Especificação CLASS-SPEC-001](especificacao.md) · [Guia para os chats](guia-dos-chats.md).
 
@@ -20,15 +21,15 @@ Um commit ou teste fixture, sozinho, não equivale a aceite com um modelo real.
 
 | ID | Entrega verificável / história | Bloqueado por | Onde trabalhar | Modelo sugerido |
 | --- | --- | --- | --- | --- |
-| [C01](cards/C01-protocolo.md) | Responsável aprova protocolo, dados e limites antes de gastar ou medir. | Decisões humanas do chat central. | Aqui, junto do responsável. | Chat central; Astra para revisar o desenho. |
-| [C02](cards/C02-avaliador.md) | Avaliador recebe lote fixture e produz relatório comum validado. | C01 aprovado/integrado. | Chat de avaliador. | GPT-6.2 Astra, alto. |
-| [C03](cards/C03-qwen.md) | Relato de desenvolvimento percorre Feita/Qwen e o relatório comum. | C02; piloto real também exige gates de C01. | Chat Qwen, em paralelo com C04. | GPT-6.2 Sol, alto. |
-| [C04](cards/C04-gliclass.md) | Relato percorre inferência local e relatório com tempos/recursos. | C02 e dados de desenvolvimento aprovados. | Chat GLiClass, em paralelo com C03. | GPT-6.2 Sol, alto. |
-| [C05](cards/C05-decisao.md) | Responsável compara evidências reais e registra vencedor ou inconclusão. | C03/C04 aceitos; dados/orçamento liberados. | Aqui, com execução coordenada. | Chat central; Astra para análise. |
-| [C06](cards/C06-integracao.md) | Atendimento usa o escolhido e chega à resposta ou à revisão corretamente. | C05 com vencedor aprovado e contrato congelado. | Chat de integração, revisão aqui. | GPT-6.2 Astra, alto. |
-| [C07](cards/C07-reproducao.md) | Avaliador reproduz a demo e entende escolha/limites seguindo o guia. | C06, R01 e R02 integrados e aceitos. | Chat de reprodução, aceite aqui. | GPT-6.2 Sol, alto. |
-| [R01](cards/R01-recuperacao.md) | Consumo se recupera da perda de associação Kafka com efeitos idempotentes. | Independente dos cards de classificação. | Chat de robustez. | GPT-6.2 Astra, alto. |
-| [R02](cards/R02-analisador.md) | Analisador preserva provas de atraso e atribui escrita ambígua de chat. | Independente dos cards de classificação. | Chat de análise de carga. | GPT-6.2 Astra, alto. |
+| [C01 — #2](https://github.com/leeunam/case-CLOUDWALK-IA/issues/2) | Responsável aprova protocolo, dados e limites antes de gastar ou medir. | Decisões humanas do chat central. | Aqui, junto do responsável. | Chat central; Astra para revisar o desenho. |
+| [C02 — #3](https://github.com/leeunam/case-CLOUDWALK-IA/issues/3) | Avaliador recebe lote fixture e produz relatório comum validado. | C01 aprovado/integrado. | Chat de avaliador. | GPT-6.2 Astra, alto. |
+| [C03 — #4](https://github.com/leeunam/case-CLOUDWALK-IA/issues/4) | Relato de desenvolvimento percorre Feita/Qwen e o relatório comum. | C02; piloto real também exige gates de C01. | Chat Qwen, em paralelo com C04. | GPT-6.2 Sol, alto. |
+| [C04 — #5](https://github.com/leeunam/case-CLOUDWALK-IA/issues/5) | Relato percorre inferência local e relatório com tempos/recursos. | C02 e dados de desenvolvimento aprovados. | Chat GLiClass, em paralelo com C03. | GPT-6.2 Sol, alto. |
+| [C05 — #6](https://github.com/leeunam/case-CLOUDWALK-IA/issues/6) | Responsável compara evidências reais e registra vencedor ou inconclusão. | C03/C04 aceitos; dados/orçamento liberados. | Aqui, com execução coordenada. | Chat central; Astra para análise. |
+| [C06 — #7](https://github.com/leeunam/case-CLOUDWALK-IA/issues/7) | Atendimento usa o escolhido e chega à resposta ou à revisão corretamente. | C05 com vencedor aprovado e contrato congelado. | Chat de integração, revisão aqui. | GPT-6.2 Astra, alto. |
+| [C07 — #10](https://github.com/leeunam/case-CLOUDWALK-IA/issues/10) | Avaliador reproduz a demo e entende escolha/limites seguindo o guia. | C06, R01 e R02 integrados e aceitos. | Chat de reprodução, aceite aqui. | GPT-6.2 Sol, alto. |
+| [R01 — #8](https://github.com/leeunam/case-CLOUDWALK-IA/issues/8) | Consumo se recupera da perda de associação Kafka com efeitos idempotentes. | Independente dos cards de classificação. | Chat de robustez. | GPT-6.2 Astra, alto. |
+| [R02 — #9](https://github.com/leeunam/case-CLOUDWALK-IA/issues/9) | Analisador preserva provas de atraso e atribui escrita ambígua de chat. | Independente dos cards de classificação. | Chat de análise de carga. | GPT-6.2 Astra, alto. |
 
 ```mermaid
 flowchart LR
@@ -58,8 +59,9 @@ flowchart LR
 
 ## GitHub e base de execução
 
-Tracker identificado: `leeunam/case-CLOUDWALK-IA`. Na consulta de 2026-11-23,
-o repositório remoto estava sem código e sem issues. A base de aplicação local
+Tracker identificado: `leeunam/case-CLOUDWALK-IA`. Na consulta anterior à publicação de 2026-11-23,
+o repositório remoto estava sem código e sem issues. Os cards foram publicados;
+a publicação do código não foi executada nesta ação. A base de aplicação local
 estudada é `cb9683179d713e7bcbfc95c54003dc30630ab7ad`, na `main`.
 
 Essa referência não substitui o SHA de início de uma tarefa: o integrador deve
@@ -69,10 +71,11 @@ Um agente remoto precisa do código acessível no seu ambiente antes de começar
 criar issues não publica automaticamente o código. Publicação do código é uma
 ação própria e não foi incluída neste planejamento.
 
-As issues podem ser publicadas após revisão da divisão e das dependências.
-O épico conterá a especificação para que sua leitura não dependa de links para
-arquivos ainda ausentes no GitHub. `issue-manifest.json` enumera títulos,
-dependências e labels existentes; o mapa de URLs será preenchido na publicação.
+A divisão e as dependências foram aprovadas antes da publicação. O épico
+incorpora a especificação e o guia de passagem, para que sua leitura não dependa
+de arquivos ainda ausentes no GitHub. `issue-manifest.json` registra números,
+URLs, dependências, labels e o estado inicial dos nove cards. O progresso atual
+deve ser consultado nas issues, sem tratar essa fotografia como estado vivo.
 
 ## Saída da frente
 

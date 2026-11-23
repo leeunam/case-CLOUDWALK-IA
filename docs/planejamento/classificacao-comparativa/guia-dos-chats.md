@@ -1,5 +1,36 @@
 # Passagem dos cards para este chat ou outros chats
 
+## SDD no dia a dia
+
+SDD aqui é Specification Driven Development. A especificação descreve o
+comportamento e seus limites; a issue escolhe uma fatia a executar; os critérios
+de aceite dizem quais provas são necessárias para considerar essa fatia pronta.
+O agente e o responsável usam a mesma referência antes e depois do código.
+
+Exemplo de comportamento:
+
+> Dado um relato com categoria Pix válida e prioridade ausente, quando o
+> classificador for executado, então ele solicita apenas a prioridade e
+> preserva Pix. Se houver abstenção, o atendimento vai para revisão com motivo.
+
+Aplicar o ciclo em cada card:
+
+1. Ler especificação/card e explicar a regra com um exemplo. Resolver dúvidas
+   antes de implementar; fixar quais critérios e evidências serão verificados.
+2. Confirmar dependências aceitas, SHA e ambiente isolado. O agente trabalha
+   somente nessa fatia, com testes apropriados ao comportamento combinado.
+3. Comparar o resultado com os critérios: apresentar comandos, saídas, exemplo
+   reproduzível e bloqueios. Teste fixture não comprova qualidade de modelo real.
+4. O responsável executa o exercício, entende a decisão e revisa as evidências
+   com o integrador. Só depois aceitar a tarefa e liberar a dependente.
+5. Se uma regra mudar, revisar a especificação, exemplos e critérios, registrar
+   o motivo/versão e passar a base atualizada aos outros chats. Documentos não
+   devem ser alterados silenciosamente para justificar um resultado já obtido.
+
+No projeto, começar pelo [C01 — issue #2](https://github.com/leeunam/case-CLOUDWALK-IA/issues/2).
+Construção em paralelo entra depois de C02. A documentação é viva e versionada;
+uma ambiguidade descoberta durante o código volta ao chat central.
+
 ## Antes de delegar
 
 O chat central é o integrador. Aqui ficam revisão dos rótulos, critérios de

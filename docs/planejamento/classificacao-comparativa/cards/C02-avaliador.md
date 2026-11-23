@@ -1,5 +1,7 @@
 # C02 — Executar um lote fixture e produzir o relatório comparativo comum
 
+Issue publicada: [#3](https://github.com/leeunam/case-CLOUDWALK-IA/issues/3). Consulte a issue para progresso e comentários atuais.
+
 ## Parent e especificação
 
 [Quadro CLASS-001](../README.md) · [CLASS-SPEC-001](../especificacao.md).

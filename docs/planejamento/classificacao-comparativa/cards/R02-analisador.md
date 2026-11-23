@@ -1,5 +1,7 @@
 # R02 — Preservar provas de atraso e atribuir escritas de chat após timeout
 
+Issue publicada: [#9](https://github.com/leeunam/case-CLOUDWALK-IA/issues/9). Consulte a issue para progresso e comentários atuais.
+
 ## Parent e especificação
 
 [Quadro CLASS-001](../README.md). Pendências do instrumento F08 de carga,

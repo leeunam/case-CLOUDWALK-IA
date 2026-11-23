@@ -1,5 +1,7 @@
 # C05 — Publicar a comparação pareada e decidir o classificador
 
+Issue publicada: [#6](https://github.com/leeunam/case-CLOUDWALK-IA/issues/6). Consulte a issue para progresso e comentários atuais.
+
 ## Parent e especificação
 
 [Quadro CLASS-001](../README.md) · [CLASS-SPEC-001](../especificacao.md).

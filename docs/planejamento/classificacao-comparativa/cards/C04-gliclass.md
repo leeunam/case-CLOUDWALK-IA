@@ -1,5 +1,7 @@
 # C04 — Classificar um relato de desenvolvimento com GLiClass local
 
+Issue publicada: [#5](https://github.com/leeunam/case-CLOUDWALK-IA/issues/5). Consulte a issue para progresso e comentários atuais.
+
 ## Parent e especificação
 
 [Quadro CLASS-001](../README.md) · [CLASS-SPEC-001](../especificacao.md).

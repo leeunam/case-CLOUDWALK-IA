@@ -1,5 +1,7 @@
 # C01 — Congelar protocolo, rótulos e critérios de escolha
 
+Issue publicada: [#2](https://github.com/leeunam/case-CLOUDWALK-IA/issues/2). Consulte a issue para progresso e comentários atuais.
+
 ## Parent e especificação
 
 [Quadro CLASS-001](../README.md) · [CLASS-SPEC-001](../especificacao.md).
