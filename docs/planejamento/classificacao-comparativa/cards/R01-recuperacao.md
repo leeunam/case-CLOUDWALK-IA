@@ -2,6 +2,9 @@
 
 Issue publicada: [#8](https://github.com/leeunam/case-CLOUDWALK-IA/issues/8). Consulte a issue para progresso e comentários atuais.
 
+Estado: **aceita localmente**. Código integrado em `2eee42ef6f7d81ed161ea8154fa810b5da3e2272`.
+O [relatório R01](../../../r01.md) registra revisão e ensaio final.
+
 ## Parent e especificação
 
 [Quadro CLASS-001](../README.md). Regressão F07 exposta pela F08; independe da
@@ -16,25 +19,25 @@ com confirmação contígua e idempotência dos efeitos, sem intervenção silen
 
 ## Critérios de aceite
 
-- [ ] Regressão reproduz perda de associação após efeito aceito e antes de confirmar
+- [x] Regressão reproduz perda de associação após efeito aceito e antes de confirmar
   offset, incluindo exceção e erro retornado por partição. Não tratar todo erro
   do broker como recuperável; registrar classificação e causa.
-- [ ] Os dois consumidores envolvidos retomam atribuição válida ou são reiniciados
+- [x] Os dois consumidores envolvidos retomam atribuição válida ou são reiniciados
   automaticamente por uma política operacional explícita, preservando o contrato
   de consumo. Não confirmar como proprietário de uma partição perdida.
-- [ ] Um offset só avança depois do efeito aceito ou de uma publicação terminal
+- [x] Um offset só avança depois do efeito aceito ou de uma publicação terminal
   confirmada, sem saltar lacunas. Confirmação ambígua permite reentrega com
   identidade/bytes estáveis e um único efeito persistido.
-- [ ] Confirmar a transferência de partição entre membros e o primeiro progresso
+- [x] Confirmar a transferência de partição entre membros e o primeiro progresso
   confirmado após recuperação, com grupo/tópico/partição/offset nos diagnósticos.
-- [ ] Um ensaio real controlado com Kafka comprova recuperação e escoamento no
+- [x] Um ensaio real controlado com Kafka comprova recuperação e escoamento no
   prazo definido antes do ensaio, sem reinício manual para aprovar a rodada.
   A perda de associação/rebalanceamento exercitada precisa ter evidência, não
   apenas uma parada que eventualmente não percorreu o erro. Modelos/simuladores,
   parâmetros, intervenção e recursos ficam registrados.
-- [ ] Casos que já atingiram falha/timeout têm procedimento canônico de recuperação
+- [x] Casos que já atingiram falha/timeout têm procedimento canônico de recuperação
   testado, sem aceitar resultado obsoleto nem sobrescrever atuação humana.
-- [ ] Publicar as novas evidências separadamente. Preservar a rodada histórica
+- [x] Publicar as novas evidências separadamente. Preservar a rodada histórica
   reprovada e não reinterpretar seus 1.204 casos falhos como atendidos.
 
 ## Fora do escopo

@@ -24,14 +24,16 @@ registra os resultados e a complementação administrativa da F07, incluindo
 revogação com uma sessão WebSocket já aberta. F06 e F07 têm aceite local
 concluído. A F08 executou a referência de carga: cinco rodadas aprovadas e
 uma reprovada por encerramento dos consumidores após a retomada do Kafka.
-O [relatório F08](../f08.md) conserva os resultados e o diagnóstico. A correção
-da recuperação, a avaliação real do Jev e a publicação seguem pendentes.
+O [relatório F08](../f08.md) conserva os resultados e o diagnóstico. A avaliação real do classificador e a publicação seguem pendentes. A correção
+de recuperação tem seu aceite controlado separado, sem reinterpretar a carga antiga.
 A R02 resolveu os dois casos limite do analisador: carimbo ausente junto de
 publicação tardia e atribuição SQL de escrita de chat após timeout HTTP. Seu
 aceite local registrou 49 testes e preservação dos sete históricos e das
 12.600 linhas, conforme a [issue #9](https://github.com/leeunam/case-CLOUDWALK-IA/issues/9).
-A correção R01 dos consumidores continua em revisão/ensaio. Os resultados
-históricos permanecem publicados sem alteração.
+A R01 foi aceita e integrada localmente após revisão e ensaio real controlado:
+os dois consumidores retomaram em cerca de 12 segundos, com lag zero e
+recuperação canônica aprovada. O [relatório R01](../r01.md) conserva as evidências.
+Os resultados históricos permanecem publicados sem alteração.
 
 A [passagem da F08](passagem-f08.md) separa o gerador/observador de carga
 do dataset/avaliador Jev, com arquivos próprios e a mesma base Git. A execução
@@ -56,8 +58,7 @@ diretamente pelo responsável e 52 pela IA sob delegação explícita, conforme 
 [registro da C01](classificacao-comparativa/revisao-de-rotulos.md). Critérios e
 divisão 24/36 foram aprovados no [protocolo](classificacao-comparativa/protocolo-comparacao.md).
 Os contratos v1.0.0 passaram na verificação local, conforme o
-[aceite C01](classificacao-comparativa/aceite-c01.md). A revisão final da C01 foi aprovada; C02 está liberada para implementação
-com fixtures após a integração. Vencedor e orçamento real continuam pendentes.
+[aceite C01](classificacao-comparativa/aceite-c01.md). A revisão final da C01 foi aprovada; C02 está implementada com fixtures e em revisão. Vencedor e orçamento real continuam pendentes.
 Criar os cards não equivale a autorizar inferência paga nem escolher o fornecedor.
 
 Ordem: C01 → C02 → C03/C04 em paralelo → C05 → C06 → C07. R01 e R02 podem

@@ -1,0 +1,25 @@
+{
+  "identity": {
+    "mode": "fixture",
+    "name": "controle-aplicacao-parcial",
+    "policy_version": "1.0.0"
+  },
+  "controls": {
+    "ctl-injetado-aplicacao-parcial": {
+      "text": "Quero consultar uma operação Pix.",
+      "received": {},
+      "choices": {
+        "category": {
+          "status": "predicted",
+          "raw": "pix",
+          "reason": null
+        },
+        "priority": {
+          "status": "abstained",
+          "raw": "informacao_insuficiente",
+          "reason": "explicit"
+        }
+      }
+    }
+  }
+}
