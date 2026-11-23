@@ -1,0 +1,5 @@
+{"event": "planned", "run_id": "c03-51c0c0773c224abf88522955084d5bb6", "plan": {"path": "script/classification_comparison/adapters/qwen/evidencia-reteste-real-02/plan.json", "sha256": "ac3f4476d5110a049ea0699b5767aa92e8e8cd63af9b166e017d475572b5d408"}}
+{"event": "dispatch_started", "run_id": "c03-51c0c0773c224abf88522955084d5bb6", "id": "jev-003", "attempt": 1}
+{"event": "dispatched", "run_id": "c03-51c0c0773c224abf88522955084d5bb6", "id": "jev-003", "attempt": 1}
+{"event": "completed", "run_id": "c03-51c0c0773c224abf88522955084d5bb6", "id": "jev-003", "attempts": 1}
+{"event": "finished", "run_id": "c03-51c0c0773c224abf88522955084d5bb6", "decisions": 1}
