@@ -62,3 +62,9 @@ em ambiente isolado e preferir dependências CPU quando não houver GPU
 confirmada. Nenhum peso foi baixado e nenhuma inferência foi executada neste
 pré-voo. A instalação e o piloto dependem do aceite C02 e devem ser seriais
 com os outros ensaios de desempenho.
+
+## Reconsulta dos limites públicos durante a C04
+
+Em 23/11/2026, a página pública do [Qwen na Feita](https://feita.ai/models/qwen/qwen3.8-27b) voltou a listar `max_tokens`, `reasoning`, `reasoning_effort`, `include_reasoning` e saída estruturada como parâmetros suportados. A tabela informa conversão de um crédito para US$ 0,01; o exemplo da resposta inclui `cost` e `credits`. O exemplo é compatível com essa conversão, mas não estabelece sozinho as condições efetivas da conta ou como o limite de saída trata tokens de raciocínio.
+
+Não foi encontrada nessa tela uma garantia de teto para todos os tokens faturáveis nem uma declaração explícita da unidade de `usage.cost`. Esses pontos continuam pendentes de confirmação antes de habilitar a reserva financeira. A consulta foi de leitura; nenhuma chave foi acessada e nenhuma chamada de inferência foi feita.
