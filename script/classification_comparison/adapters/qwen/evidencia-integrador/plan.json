@@ -1,0 +1,138 @@
+{
+  "run_id": "c02-6ee4179fa01f4c32a2406758c9195904",
+  "identity": {
+    "mode": "fixture",
+    "provider": "feita",
+    "requested_model": "qwen/qwen3.8-27b",
+    "expected_returned_model": "qwen/qwen3.8-27b",
+    "adapter_version": "1.0.0",
+    "policy_version": "1.0.0"
+  },
+  "sources": {
+    "dataset": {
+      "path": "script/f08/jev/dataset.json",
+      "version": "1.1.0",
+      "sha256": "0e7e4c342c2a39cefd89855d8c0513f447d7878303eb4091488ca8af78928880"
+    },
+    "catalog": {
+      "path": "script/f08/jev/catalog.json",
+      "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271",
+      "version": "1.0.0"
+    },
+    "rubric": {
+      "path": "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
+      "version": "1.0.0",
+      "sha256": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac"
+    },
+    "protocol": {
+      "path": "docs/planejamento/classificacao-comparativa/protocolo-comparacao.json",
+      "sha256": "eb9bdbb786037bac864f3155ff6dfbb45feb83dfdb99958f463b6896a614dced",
+      "version": "1.0.0"
+    },
+    "split": {
+      "path": "docs/planejamento/classificacao-comparativa/divisao-dados.json",
+      "sha256": "8f7d0eab0d9431c2906e07bc022dc31a80684464f4b99f75dfc6ed1277fed1a9",
+      "version": "1.0.0"
+    },
+    "policy": {
+      "path": "script/classification_comparison/adapters/qwen/politica.txt",
+      "version": "1.0.0",
+      "sha256": "c1b459d24a874b3e5e44a67297314d322dded0ee6c7413c7d3a0cdd28f70f56b"
+    },
+    "prompt": {
+      "path": "script/classification_comparison/adapters/qwen/prompt.txt",
+      "version": "1.0.0",
+      "sha256": "b38edc9e1db036405b1e3eadb63f11219a01dec4aefe6996e40c6c6c19ec8527"
+    }
+  },
+  "planned_ids": [
+    "jev-004",
+    "jev-007",
+    "jev-010",
+    "jev-013",
+    "jev-019",
+    "jev-028",
+    "jev-037",
+    "jev-040",
+    "jev-002",
+    "jev-005",
+    "jev-008",
+    "jev-014",
+    "jev-023",
+    "jev-032",
+    "jev-035",
+    "jev-041",
+    "jev-003",
+    "jev-006",
+    "jev-009",
+    "jev-015",
+    "jev-018",
+    "jev-024",
+    "jev-033",
+    "jev-039"
+  ],
+  "selected_ids": [
+    "jev-004",
+    "jev-007",
+    "jev-010",
+    "jev-013",
+    "jev-019",
+    "jev-028",
+    "jev-037",
+    "jev-040",
+    "jev-002",
+    "jev-005",
+    "jev-008",
+    "jev-014",
+    "jev-023",
+    "jev-032",
+    "jev-035",
+    "jev-041",
+    "jev-003",
+    "jev-006",
+    "jev-009",
+    "jev-015",
+    "jev-018",
+    "jev-024",
+    "jev-033",
+    "jev-039"
+  ],
+  "control_ids": [
+    "ctl-completo",
+    "ctl-simples",
+    "ctl-duplo",
+    "ctl-invalido",
+    "ctl-sem-assunto",
+    "ctl-saida-invalida",
+    "ctl-timeout",
+    "ctl-saida-ausente",
+    "ctl-versao",
+    "ctl-catalogo",
+    "ctl-tipo",
+    "ctl-politica",
+    "ctl-injetado-aplicacao-parcial"
+  ],
+  "injected_controls": {
+    "ids": [
+      "ctl-injetado-aplicacao-parcial"
+    ],
+    "count": 1,
+    "policy": {
+      "path": "docs/planejamento/classificacao-comparativa/contratos/politica-controles.json",
+      "version": "1.0.0",
+      "sha256": "2611786ddde1eb2b064b02f7dda7bb7a0aae06cc8f127a9fc7e8fec14e937fb7"
+    },
+    "identity": {
+      "mode": "fixture",
+      "name": "controle-aplicacao-parcial",
+      "policy_version": "1.0.0"
+    }
+  },
+  "contract_version": "1.1.0",
+  "input": {
+    "path": "script/classification_comparison/adapters/qwen/evidencia-integrador/inputs.jsonl",
+    "sha256": "1b6b6a83be36be7bf011d8c5476f9f0431b0d3d145c0bb71cfe798fa32b07ecc"
+  },
+  "concurrency": 1,
+  "attempts": 1
+}
