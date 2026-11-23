@@ -51,7 +51,9 @@ Depois, o responsável aprovou critérios e divisão 24/36. As fontes atuais sã
 Os contratos v1.1.0 distinguem controles injetados e candidato, conforme
 `contratos/ajuste-1.1.md`. A C02 está aceita, incluindo manutenção de integração com 31 testes.
 A C03 está integrada e aceita offline com 24 testes; o piloto real continua
-bloqueado. A C04 executou primeiro piloto CPU e ajusta somente desenvolvimento.
+bloqueado. A C04 tem código e investigação local revisados, com timeouts e
+rebaixamento de urgência observados; sua configuração não está liberada para
+C05. A [passagem atual](passagem-autonoma.md) reúne os resultados e a retomada.
 Orçamento real e vencedor seguem decisões pendentes.
 
 Use o [quadro](README.md), a [especificação](especificacao.md) e o card inteiro.

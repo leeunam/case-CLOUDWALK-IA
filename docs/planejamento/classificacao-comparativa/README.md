@@ -12,7 +12,7 @@ Está confirmado comparar Qwen pela Feita com GLiClass local. Os 60 rótulos
 foram revisados para referência exploratória: oito casos diretamente pelo
 responsável e 52 pela IA sob delegação, conforme o [registro](revisao-de-rotulos.md).
 A separação de dados e os limites de aceitação foram aprovados; contratos
-v1.0.0 passaram na verificação local e o orçamento real segue pendente.
+v1.1.0 passaram na verificação local e o orçamento real segue pendente.
 A integração operacional só começa depois de C05 registrar
 um vencedor elegível aprovado pelo responsável. O resultado pode ser inconclusivo.
 
@@ -22,9 +22,11 @@ Um commit ou teste fixture, sozinho, não equivale a aceite com um modelo real.
 
 Os [critérios e a separação dos dados](protocolo-comparacao.md) foram aprovados
 na C01. O [aceite](aceite-c01.md) registra contratos, verificações e limites
-com C02 aceita após revisão e reprodução. C03 e C04 estão liberadas para
-implementação. O piloto Qwen pago aguarda credencial e teto; o piloto GLiClass
-local usa recursos do host e não implica autorização de gasto.
+com C02 aceita após revisão e reprodução. A C03 está aceita offline; o piloto
+pago aguarda credencial, teto e confirmação do faturamento. A C04 tem código
+revisado e investigação local preservada, com falhas de latência e um
+rebaixamento de urgência. Sua configuração não está aprovada para C05.
+A [passagem atual](passagem-autonoma.md) identifica a próxima decisão humana.
 
 ## Cards e dependências
 
@@ -100,7 +102,8 @@ reprovação de recuperação e uma tentativa extra bloqueada.
 ## Passagem aceita do avaliador
 
 C02 integrada localmente em `d8e09b62e42122e08e3c8edc7f3566dcdb82a173`.
-[Relatório e interface](../../c02.md): 27 testes e revisão final aprovados,
+[Relatório e interface](../../c02.md): 27 testes no aceite inicial e 31 após
+a manutenção de integração, com revisões aprovadas,
 exemplo do código aceito revalidado pelos schemas e hashes. C03 e C04 recebem
 a mesma base imutável com essa integração e trabalham em áreas próprias.
 R01 e R02 têm aceite local concluído. Vencedor e orçamento de API seguem pendentes.

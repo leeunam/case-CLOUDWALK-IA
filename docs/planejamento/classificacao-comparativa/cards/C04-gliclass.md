@@ -2,8 +2,7 @@
 
 Issue publicada: [#5](https://github.com/leeunam/case-CLOUDWALK-IA/issues/5). Consulte a issue para progresso e comentários atuais.
 
-Estado: **liberada para implementação e piloto local de desenvolvimento**. Sem chamadas pagas; recursos e instalação precisam ser registrados.
-Base de execução e ambiente isolado são informados pelo integrador.
+Estado: **implementação revisada e integrada para experimento; configuração não aprovada para C05**. [Relatório C04](../../../c04.md): 29 testes sintéticos, dez lotes reais adicionais validados, timeouts e um rebaixamento de urgência. Pilotos não usaram holdout nem API paga. A issue permanece aberta para decidir a viabilidade do candidato e concluir o aceite aplicável.
 
 ## Parent e especificação
 

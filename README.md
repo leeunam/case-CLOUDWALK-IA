@@ -66,8 +66,11 @@ e reanálise dos sete históricos preservada. A recuperação R01 passou no ensa
 comparação. A [C02](docs/c02.md) está aceita, com 31 testes após a manutenção
 e reprodução fixture. A [C03](docs/c03.md) está integrada e aceita offline,
 com 24 testes; o piloto Qwen real aguarda credencial, teto autorizado e
-confirmação do faturamento. A C04 executou o primeiro piloto CPU local e
-trabalha nos ajustes de desenvolvimento, preservando a evidência inicial.
+confirmação do faturamento. A [C04](docs/c04.md) tem implementação revisada
+e dez lotes reais adicionais de desenvolvimento: houve timeouts e um
+rebaixamento de urgente para básico. Sua configuração não está aprovada
+para integração. A [passagem atual](docs/planejamento/classificacao-comparativa/passagem-autonoma.md)
+registra os próximos passos e as decisões pendentes.
 A comparação real e a escolha do classificador ainda estão pendentes.
 
 - [Escopo e arquitetura](docs/planejamento/especificacao-mvp.md)

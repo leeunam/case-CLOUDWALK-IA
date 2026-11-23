@@ -62,9 +62,11 @@ Os contratos v1.1.0 passaram na verificação local, conforme o
 1.1.0 de proveniência dos controles. O avaliador está aceito com 31 testes
 após a manutenção de integração e reprodução fixture do código aprovado.
 A C03 foi integrada e aceita offline com 24 testes, preservando o bloqueio
-do piloto pago. A C04 já executou o primeiro piloto CPU local; os ajustes
-seguem somente em desenvolvimento, com evidências preservadas. Vencedor e
-orçamento real continuam pendentes.
+do piloto pago. A C04 tem código revisado e dez lotes reais adicionais de
+desenvolvimento, incluindo falhas por prazo e um rebaixamento de urgência.
+Sua configuração não está aprovada para C05. A [passagem atual](classificacao-comparativa/passagem-autonoma.md)
+registra as evidências e o bloqueio do piloto Qwen. Vencedor e orçamento real
+continuam pendentes.
 Criar os cards não equivale a autorizar inferência paga nem escolher o fornecedor.
 
 Ordem: C01 → C02 → C03/C04 em paralelo → C05 → C06 → C07. R01 e R02 podem
