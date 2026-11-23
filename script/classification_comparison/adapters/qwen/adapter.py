@@ -5,10 +5,11 @@ import os
 import platform
 import sys
 import time
+from hashlib import sha256
 from pathlib import Path
 
 from fixture import fake_gateway
-from pilot import Blocked, Budget, PUBLIC_TARIFF, authorized_cap, money, rates
+from pilot import Blocked, Budget, PUBLIC_TARIFF, authorized_cap, money, rates, single_case_id
 from transport import FeitaTransport
 
 HERE = Path(__file__).resolve().parent
@@ -73,20 +74,23 @@ def usage_from(response, tariff, cost_unit):
             "estimated_api_usd": estimate, "tariff": reference}
 
 
-def request_body(item, received, instructions, max_tokens):
+def request_body(item, received, instructions, max_tokens, reasoning=None):
     fields = item["missing"]
     shape = {"type": "object", "required": fields, "additionalProperties": False, "properties": {
         field: {"type": "string", "enum": [*item["catalog"][field], c01.ABSTENTION]} for field in fields
     }}
     context = {key: item[key] for key in ("text", "brand", "catalog", "missing")}
     context["received"] = received
-    return encode({
+    payload = {
         "model": MODEL, "stream": False, "temperature": 0, "max_tokens": max_tokens,
         "messages": [{"role": "system", "content": instructions}, {"role": "user", "content": encode(context)}],
         "response_format": {"type": "json_schema", "json_schema": {
             "name": "classificacao", "strict": True, "schema": shape,
         }},
-    }).encode("utf-8")
+    }
+    if reasoning is not None:
+        payload["reasoning"] = reasoning
+    return encode(payload).encode("utf-8")
 
 
 def interpretation(response, fields, catalog):
@@ -152,7 +156,8 @@ class Adapter:
                "elapsed_ms": None, "load_ms": None, "inference_ms": None}
 
         try:
-            body = request_body(item, received, self.instructions, self.budget.max_tokens if self.budget else 128)
+            body = request_body(item, received, self.instructions, self.budget.max_tokens if self.budget else 128,
+                                self.budget.reasoning if self.budget else None)
             if time.monotonic() >= deadline:
                 raise TimeoutError
             if self.budget:
@@ -187,6 +192,10 @@ class Adapter:
                                 self.budget.cost_unit if self.budget else None)]
             if self.budget:
                 self.budget.observe(usage[0])
+                output_tokens = usage[0]["output_tokens"]
+                if output_tokens is not None and output_tokens > self.budget.max_tokens:
+                    print(f"Feita {item['id']}: completion_tokens {output_tokens} acima de max_tokens solicitado "
+                          f"({self.budget.max_tokens})", file=sys.stderr)
         obs.update(choices=evidence, requests=int(sent), questions=len(fields) if sent else 0, request_usage=usage,
                    returned_model=metadata(response.get("model")), weights_revision=metadata(response.get("weights_revision")))
         pins = (("expected_returned_model", "returned_model"), ("expected_weights_revision", "weights_revision"))
@@ -205,22 +214,31 @@ class Adapter:
 
 
 def pilot_budget(args, scope, identity, has_credential):
-    path = args.pilot
-    if path is None or not args.pilot_sha256 or c01.digest(path) != args.pilot_sha256:
-        raise Blocked("configuração de piloto sem hash correspondente")
-    authorization = args.authorization
-    if authorization is None or not args.authorization_sha256 or c01.digest(authorization) != args.authorization_sha256:
-        raise Blocked("manifesto de autorização sem hash correspondente")
+    def pinned_json(path, expected, label):
+        if path is None or not expected:
+            raise Blocked(f"{label} sem hash correspondente")
+        content = path.read_bytes()
+        if sha256(content).hexdigest() != expected:
+            raise Blocked(f"{label} sem hash correspondente")
+        return decode(content)
+
+    settings = pinned_json(args.pilot, args.pilot_sha256, "configuração de piloto")
+    authorization = pinned_json(args.authorization, args.authorization_sha256, "manifesto de autorização")
     protocol_path = c01.PLAN / "protocolo-comparacao.json"
-    cap = authorized_cap(c01.read(authorization), scope=scope, identity=identity,
+    cap = authorized_cap(authorization, scope=scope, identity=identity,
                          protocol_sha256=c01.digest(protocol_path), pilot_sha256=args.pilot_sha256)
     lock = c01.read(HERE.parents[1] / "sources.lock.json")
     protocol_ref = protocol_path.relative_to(c01.ROOT).as_posix()
     protocol = c01.read(c01.source_path({"path": protocol_ref, "sha256": lock[protocol_ref]}))
-    settings = c01.read(path)
     split_ref = (c01.PLAN / protocol["data_split_file"]).relative_to(c01.ROOT).as_posix()
     split = c01.read(c01.source_path({"path": split_ref, "sha256": protocol["data_split_sha256"]}))
     development = [case for cases in split["development"].values() for case in cases]
+    if not isinstance(settings, dict):
+        raise Blocked("configuração de piloto inválida")
+    if "case_id" in settings:
+        case_id = single_case_id(settings, development)
+        return Budget(settings, cap, [case_id], [], has_credential)
+
     policy = c01.read(c01.source_path(protocol["control_policy"]))
     report_ref = (c01.FIXTURES / "report.json").relative_to(c01.ROOT).as_posix()
     report = c01.read(c01.source_path({"path": report_ref, "sha256": lock[report_ref]}))

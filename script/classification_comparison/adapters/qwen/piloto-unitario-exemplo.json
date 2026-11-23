@@ -1,0 +1,15 @@
+{
+  "case_id": "jev-003",
+  "development_cases": 1,
+  "max_cases": 1,
+  "max_requests": 1,
+  "concurrency": 1,
+  "max_tokens": 128,
+  "reasoning": {"enabled": false},
+  "input_token_ceiling": 8000,
+  "token_limits_confirmed": false,
+  "tariff_verified": false,
+  "tariff": null,
+  "budget_usd": null,
+  "usage_cost_unit": null
+}
