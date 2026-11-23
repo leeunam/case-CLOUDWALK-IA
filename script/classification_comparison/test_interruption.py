@@ -25,7 +25,9 @@ def adapter(action, observations_path=c01.FIXTURES / "observations.jsonl"):
     with Path(observations_path).open(encoding="utf8", newline="\n") as stream:
         fixtures = {o["id"]: o for o in map(decode, stream)}
     for line in sys.stdin.buffer:
-        case_id = json.loads(line)["id"]
+        item = json.loads(line)
+        assert item["contract_version"] == os.environ["CLASSIFICATION_CONTRACT_VERSION"] == "1.1.0"
+        case_id = item["id"]
         if case_id == "ctl-duplo":
             if action == "die":
                 os._exit(7)
@@ -73,7 +75,7 @@ class RoundOne(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.path = Path(self.temp.name)
 
-    def execute(self, action, answers=None):
+    def execute(self, action, answers=None, *, profile=None, limit=None):
         config = c01.read(HERE / "fixture.json")
         config["command"] = [sys.executable, "-B", str(Path(__file__).resolve()), "--adapter", action]
         split = "control"
@@ -84,10 +86,10 @@ class RoundOne(unittest.TestCase):
         config_path = self.path / "config.json"
         config_path.write_text(encode(config))
         self.output = self.path / action
-        run(Namespace(config=config_path, split=split, limit=None, mode=config["identity"]["mode"], output=self.output,
-                      concurrency=1, attempts=1, dry_run=False))
+        run(Namespace(config=config_path, split=split, limit=limit, mode=config["identity"]["mode"], output=self.output,
+                      concurrency=1, attempts=1, dry_run=False, **({"profile": profile} if profile else {})))
 
-    def synthetic_final_answers(self, downgrade_urgent=False):
+    def synthetic_final_answers(self, downgrade_urgent=False, *, temperature="warm"):
         _, _, split, _, cases, example = runner.preflight()
         observations = [o for o in example["observations"] if o["origin"] == "candidate"]
         template = next(o for o in observations if o["id"] == "ctl-simples")
@@ -101,7 +103,7 @@ class RoundOne(unittest.TestCase):
                     choices[field] = dict(raw=raw, status="abstained" if abstained else "predicted",
                                           reason="explicit" if abstained else None)
                 observations.append(dict(template, id=case_id, choices=choices, questions=len(choices),
-                                         temperature_state="warm"))
+                                         temperature_state=temperature))
         path = self.path / "synthetic-answers.jsonl"
         path.write_text("".join(encode(o) + "\n" for o in observations), encoding="utf-8")
         return path
@@ -469,6 +471,96 @@ class RoundOne(unittest.TestCase):
         self.assertEqual(prefix["usage"], manifest["verified_prefix_usage"])
         self.assertEqual(prefix["usage"]["observed_api_usd"]["value"], .02)
         self.assertFalse((self.output / "report.json").exists())
+
+    def check_observed_prefix(self, manifest):
+        for key, value in dict(profile=c01.OBSERVED, contract_version="1.2.0",
+                               ipc_contract_version="1.1.0", protocol_version="1.1.0").items():
+            self.assertEqual(manifest[key], value)
+        self.assertEqual(manifest["eligibility"], "inconclusive")
+        self.assertFalse((self.output / "report.json").exists())
+        md = (self.output / "prefix-report.md").read_text(encoding="utf-8")
+        self.assertIn(c01.OBSERVED, md)
+        self.assertIn("Elegibilidade inconclusiva", md)
+
+    def test_observed_prefix_excludes_late_relato_and_keeps_usage(self):
+        answers = self.synthetic_final_answers(temperature="unknown")
+        rows = c01.read_records(answers)
+        first, second = [o for o in rows if not o["id"].startswith("ctl-")][:2]
+        second["request_usage"] = [dict(input_tokens=1, output_tokens=10, observed_api_usd=2,
+                                        estimated_api_usd=None, tariff=None)]
+        answers.write_text("".join(encode(o) + "\n" for o in rows), encoding="utf-8")
+        first_id, late_id = first["id"], second["id"]
+        now = 0.0
+        record = ResponseStream.record
+
+        def delayed(reader, deadline):
+            nonlocal now
+            row = record(reader, deadline)
+            now += .9 if row["id"] == first_id else 5.02
+            return row
+
+        clock = SimpleNamespace(monotonic=lambda: now, sleep=time.sleep)
+        with patch("run.time", clock), patch.object(ResponseStream, "record", delayed):
+            with self.assertRaisesRegex(TimeoutError, "fora do prazo"):
+                self.execute("late-relato", answers, profile=c01.OBSERVED, limit=3)
+        manifest = c01.read(self.output / "interruption.json")
+        self.check_observed_prefix(manifest)
+        self.assertEqual(manifest["completed_ids"], [first_id])
+        self.assertEqual(manifest["dispatched_ids"], [first_id, late_id])
+        self.assertEqual(manifest["interrupted_id"], late_id)
+        self.assertEqual(manifest["delivery"], "stdin_flushed")
+        pending = manifest["interrupted_observation"]
+        self.assertEqual(pending["contract_version"], "1.1.0")
+        self.assertIsNone(pending["elapsed_ms"])
+        self.assertEqual(manifest["interrupted_usage"]["observed_api_usd"], 2)
+        self.assertIsNone(manifest["verified_prefix_usage"]["observed_api_usd"]["value"])
+        path = self.output / "prefix-report.json"
+        self.assertEqual(c01.verify_report(path).name, c01.OBSERVED)
+        report = c01.read(path)
+        self.assertEqual(len(report["planned_ids"]), 36)
+        self.assertEqual(report["completed_ids"], [first_id])
+        expected = dict(state="partial", denominator=1, numerator=None, value=900)
+        self.assertEqual(report["latency_p50_ms"], expected)
+        self.assertEqual(report["gates"][c01.OBSERVED_GATE], expected)
+
+    def test_observed_prefix_counts_only_the_durable_completion(self):
+        answers = self.synthetic_final_answers(temperature="cold")
+        case_id = next(o["id"] for o in c01.read_records(answers) if o["id"].startswith("jev-"))
+        append = journal.append
+        for committed in (False, True):
+            with self.subTest(committed=committed):
+                def interrupt(stream, row):
+                    if row.get("event") == "completed" and row.get("id") == case_id:
+                        if committed:
+                            append(stream, row)
+                        raise KeyboardInterrupt()
+                    append(stream, row)
+
+                with patch("journal.append", interrupt), self.assertRaises(KeyboardInterrupt):
+                    self.execute(f"durable-{committed}", answers, profile=c01.OBSERVED, limit=2)
+                manifest = c01.read(self.output / "interruption.json")
+                self.check_observed_prefix(manifest)
+                self.assertEqual(manifest["completed_ids"], [case_id] if committed else [])
+                self.assertEqual(manifest["interrupted_id"], None if committed else case_id)
+                self.assertEqual(manifest["dispatched_ids"], [case_id])
+                self.assertEqual(manifest["interrupted_usage"], None if committed else
+                                 dict(requests=1, questions=1, input_tokens=None, output_tokens=None,
+                                      observed_api_usd=None, estimated_api_usd=None))
+                path = self.output / "prefix-report.json"
+                c01.verify_report(path, c01.OBSERVED)
+                report = c01.read(path)
+                observations = c01.read_records(c01.source_path(report["artifacts"]["observations"]))
+                expected = dict(state="partial", denominator=1, numerator=None, value=observations[0]["elapsed_ms"]) \
+                    if committed else dict(state="unmeasured", denominator=36, numerator=None, value=None)
+                self.assertEqual(report["latency_p50_ms"], expected)
+                self.assertEqual(report["gates"][c01.OBSERVED_GATE], expected)
+
+    def test_observed_full_prefix_remains_inconclusive_after_bad_eof(self):
+        answers = self.synthetic_final_answers(temperature="unknown")
+        with self.assertRaisesRegex(ValueError, "stdout adicional"):
+            self.execute("trailing", answers, profile=c01.OBSERVED)
+        self.check_interrupted_final()
+        self.check_observed_prefix(c01.read(self.output / "interruption.json"))
 
     def test_always_predicting_candidate_has_independent_mixed_control(self):
         self.execute("always_valid")

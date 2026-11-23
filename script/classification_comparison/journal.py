@@ -36,12 +36,13 @@ def sync_directory(path):
 
 
 class Journal:
-    def __init__(self, output, run_id, inputs, planned_injections, publish):
+    def __init__(self, output, run_id, inputs, planned_injections, publish, *, profile_metadata=None):
         self.planned_injections = planned_injections
         self.publish = publish
         self.output = output
         self.run_id = run_id
         self.inputs = inputs
+        self.profile_metadata = profile_metadata or {}
         self.active = None
         self.pending_observation = None
         self.observations = []
@@ -53,7 +54,7 @@ class Journal:
             for name in ("observations", "decisions", "journal"):
                 stream = self.streams.enter_context((self.output / f"{name}.jsonl").open("x", encoding="utf-8"))
                 setattr(self, name + "_file", stream)
-            self.event("planned", plan=inventory(self.output / "plan.json"))
+            self.event("planned", plan=inventory(self.output / "plan.json"), **self.profile_metadata)
             sync_directory(self.output)
             sync_directory(self.output.parent)
             return self
@@ -136,7 +137,8 @@ class Journal:
         injected = [o["id"] for o in prefix_obs if o["origin"] == "injected_control"]
         inventory_fields = dict(self.planned_injections) if injected else {}
         inventory_fields.update(ids=injected, count=len(injected))
-        manifest = dict(contract_version="1.1.0", injected_controls=inventory_fields, run_id=self.run_id, status="interrupted", eligibility="inconclusive",
+        versions = {"contract_version": c01.get_profile().report_version, **self.profile_metadata}
+        manifest = dict(versions, injected_controls=inventory_fields, run_id=self.run_id, status="interrupted", eligibility="inconclusive",
                         reason=str(error), error=type(error).__name__, dispatched_ids=dispatched,
                         completed_ids=completed, interrupted_id=active, delivery=delivery,
                         interrupted_observation=pending, interrupted_usage=pending_usage,
