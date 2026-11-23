@@ -8,6 +8,9 @@ import time
 import unittest
 from argparse import Namespace
 from unittest.mock import patch
+from types import SimpleNamespace
+
+import journal
 
 from run import HERE, ResponseStream, c01, decode, encode, run
 
@@ -101,6 +104,109 @@ class RoundOne(unittest.TestCase):
         self.assertIsNone(m["interrupted_id"])
         self.assertEqual(len(m["completed_ids"]), 12)
         self.assertFalse(m["not_started_ids"])
+
+    def test_ctrl_c_at_each_completion_write(self):
+        original = journal.append
+        for target in ("observation", "decision", "completed"):
+            for side in ("before", "after"):
+                with self.subTest(target=target, side=side):
+                    def interrupt(stream, row):
+                        selected = row.get("id") == "ctl-simples" and (
+                            (target == "completed" and row.get("event") == "completed") or
+                            (target == "observation" and "choices" in row) or
+                            (target == "decision" and "fields" in row))
+                        if selected and side == "before":
+                            raise KeyboardInterrupt()
+                        original(stream, row)
+                        if selected and side == "after":
+                            raise KeyboardInterrupt()
+
+                    with patch("journal.append", interrupt), self.assertRaises(KeyboardInterrupt):
+                        self.execute(target + "-" + side)
+                    m = c01.read(self.output / "interruption.json")
+                    committed = target == "completed" and side == "after"
+                    ids = ["ctl-completo", "ctl-simples"] if committed else ["ctl-completo"]
+                    self.assertEqual(m["completed_ids"], ids)
+                    self.assertEqual(m["dispatched_ids"], ["ctl-simples"])
+                    self.assertEqual(m["interrupted_id"], None if committed else "ctl-simples")
+                    self.assertEqual(m["not_started_ids"], c01.read(self.output / "plan.json")["control_ids"][2:])
+                    for name in ("inputs", "observations", "decisions"):
+                        entry = m["artifacts"][f"verified_{name}.jsonl"]
+                        with c01.source_path(entry).open(newline="\n") as stream:
+                            actual = [r["id"] for r in map(decode, stream)]
+                        self.assertEqual(actual, (ids[1:] if name == "observations" else ids))
+                    self.assertEqual(m["verified_prefix_usage"]["observed_api_usd"]["value"], .01 if committed else None)
+                    self.assertEqual(m["verified_prefix_usage"]["requests"]["value"], int(committed))
+                    if committed:
+                        self.assertIsNone(m["interrupted_usage"])
+                        self.assertIsNone(m["interrupted_observation"])
+                    else:
+                        self.assertEqual(m["interrupted_observation"]["id"], "ctl-simples")
+                        self.assertEqual(m["interrupted_usage"]["observed_api_usd"], .01)
+                        self.assertEqual(m["interrupted_usage"]["requests"], 1)
+
+    def test_uncommitted_observation_with_partial_billing(self):
+        original = journal.append
+        def interrupt(stream, row):
+            if row.get("id") == "ctl-duplo" and "fields" in row:
+                raise KeyboardInterrupt()
+            original(stream, row)
+
+        with patch("journal.append", interrupt), self.assertRaises(KeyboardInterrupt):
+            self.execute("partial-billing")
+        m = c01.read(self.output / "interruption.json")
+        self.assertEqual(m["completed_ids"], ["ctl-completo", "ctl-simples"])
+        self.assertEqual(m["verified_prefix_usage"]["requests"]["value"], 1)
+        self.assertEqual(m["verified_prefix_usage"]["observed_api_usd"]["value"], .01)
+        self.assertEqual(m["interrupted_id"], "ctl-duplo")
+        self.assertEqual(m["interrupted_usage"]["requests"], 2)
+        self.assertIsNone(m["interrupted_usage"]["observed_api_usd"])
+        self.assertEqual(m["interrupted_usage_samples"]["observed_api_usd"],
+                         dict(value=.01, samples=1, expected_samples=2, state="partial"))
+
+    def test_deadline_includes_validation_and_dispatch_sync(self):
+        original_append = journal.append
+        original_structure = c01.structure
+        original_record = ResponseStream.record
+        # Real pipe and schema validation; advance a deterministic monotonic clock at
+        # the same boundaries as input validation, fsync and observation delivery.
+        for case_id, arrival, accepted in (("ctl-simples", 5.13, False), ("ctl-timeout", 5.13, True),
+                                            ("ctl-timeout", 5.26, False), ("ctl-simples", 4.99, True)):
+            with self.subTest(case_id=case_id, arrival=arrival):
+                now = 0.0
+                def validate(checks, kind, row):
+                    nonlocal now
+                    original_structure(checks, kind, row)
+                    if kind == "input" and row["id"] == case_id:
+                        now += .10
+
+                def slow_sync(stream, row):
+                    nonlocal now
+                    original_append(stream, row)
+                    if row.get("event") == "dispatched" and row["id"] == case_id:
+                        now += .45
+
+                def deliver(reader, deadline):
+                    nonlocal now
+                    row = original_record(reader, deadline)
+                    if row["id"] == case_id:
+                        self.assertAlmostEqual(deadline - now, 5.25 - .55)
+                        now += arrival - .55
+                    return row
+
+                clock = SimpleNamespace(monotonic=lambda: now, sleep=time.sleep)
+                with patch("run.time", clock), patch("journal.append", slow_sync), patch.object(
+                        c01, "structure", validate), patch.object(ResponseStream, "record", deliver):
+                    action = f"{case_id}-{arrival}"
+                    if accepted:
+                        self.execute(action)
+                        self.assertTrue((self.output / "report.json").exists())
+                    else:
+                        with self.assertRaisesRegex(TimeoutError, "fora do prazo"):
+                            self.execute(action)
+                        m = c01.read(self.output / "interruption.json")
+                        self.assertEqual(m["interrupted_id"], case_id)
+                        self.assertNotIn(case_id, m["completed_ids"])
 
     def test_final_memory_and_unavailable(self):
         for action, expected in [("peak=777", 777), ("peak=0", 0), ("peak=null", None), ("omit", None)]:

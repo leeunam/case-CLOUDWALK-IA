@@ -54,21 +54,36 @@ class ResponseStream:
             raise ValueError("stdout adicional ou sem EOF após a última observação")
 
 
-def exchange(proc, item, responses, journal):
+CASE_SECONDS = 5
+TIMEOUT_DELIVERY_SECONDS = .25
+
+
+def check_deadline(obs, deadline, now):
+    if now <= deadline:
+        return
+    choices = obs.get("choices")
+    if now <= deadline + TIMEOUT_DELIVERY_SECONDS and isinstance(choices, dict) and any(
+            isinstance(c, dict) and c.get("status") == "error" and c.get("reason") == "timeout"
+            for c in choices.values()):
+        return
+    raise TimeoutError(f"resposta fora do prazo para {obs['id']}")
+
+
+def exchange(proc, item, responses, journal, deadline):
     if responses.pending or select.select([proc.stdout], [], [], 0)[0]:
         raise ValueError("stdout inesperado ou fechado antes do próximo despacho")
     payload = (encode(item) + "\n").encode("utf-8")
     journal.begin_dispatch(item["id"])
+    if time.monotonic() >= deadline:
+        journal.event("not_sent", id=item["id"])
+        raise TimeoutError(f"prazo esgotado antes do envio de {item['id']}")
     proc.stdin.write(payload)
     proc.stdin.flush()
     journal.sent()
-    deadline = time.monotonic() + 5.25
-    obs = responses.record(deadline)
+    obs = responses.record(deadline + TIMEOUT_DELIVERY_SECONDS)
     if not isinstance(obs, dict) or obs.get("id") != item["id"]:
         raise ValueError(f"ID de resposta divergente para {item['id']}")
-    if time.monotonic() > deadline - .25 and not any(
-            isinstance(choice, dict) and choice.get("reason") == "timeout" for choice in obs.get("choices", {}).values()):
-        raise TimeoutError(f"resposta fora do prazo para {item['id']}")
+    check_deadline(obs, deadline, time.monotonic())
     return obs
 
 
@@ -98,18 +113,23 @@ def run_batch(inputs, config, report, catalog, validation, journal):
             responses = ResponseStream(proc.stdout)
             for item in inputs:
                 start = time.monotonic()
+                deadline = start + CASE_SECONDS
                 c01.structure(validation, "input", item)
                 missing, invalid, _ = c01.normalize_input(item, catalog)
                 obs = None
                 if missing and not invalid and item["catalog"] == catalog:
-                    obs = exchange(proc, item, responses, journal)
+                    obs = exchange(proc, item, responses, journal, deadline)
                     c01.structure(validation, "observation", obs)
                     c01.verify_observation(obs, missing, report, catalog)
+                    journal.pending_observation = obs
                 d = decide(item, obs, catalog, report["run_id"])
                 c01.structure(validation, "decision", d)
                 c01.verify_case(item, obs, d, report, catalog)
-                if obs is not None and config["identity"]["mode"] == "real":
-                    obs["elapsed_ms"] = (time.monotonic() - start) * 1000
+                if obs is not None:
+                    end = time.monotonic()
+                    check_deadline(obs, deadline, end)
+                    if config["identity"]["mode"] == "real":
+                        obs["elapsed_ms"] = (end - start) * 1000
                 journal.complete(d, obs)
             proc.stdin.close()
             responses.finish()
