@@ -57,6 +57,20 @@ andar independentemente e bloqueiam o fechamento da demonstração C07.
 O [guia dos chats](classificacao-comparativa/guia-dos-chats.md) explica base Git,
 isolamento, propriedade, modelos sugeridos, revisão e exercícios de aprendizagem.
 
+### Evolução futura depois da publicação — E01
+
+Em 2026-11-23, o responsável pediu registrar o [E01 — atendente experimental
+com IA real](https://github.com/leeunam/case-CLOUDWALK-IA/issues/11). Retomar
+**somente depois de concluir a F09 e publicar e verificar a F10, caso sobre
+tempo**. A ordem é concluir o projeto, publicar a demonstração e então explorar
+essa evolução. Manter o card no backlog futuro durante o fluxo atual.
+
+O objetivo é conversar com um modelo real usando histórico e dados fictícios,
+integrado pelos contratos Kafka existentes, com respostas e encaminhamento
+humano demonstráveis. Essa função é distinta do classificador do CLASS-001.
+Modelo, provedor, desenho, critérios de aceite e limites de uso/custo serão
+definidos na retomada; o mock determinístico permanece disponível para testes.
+
 ## 1. Ordem de trabalho
 
 | Etapa | Entregas internas | Evidência para avançar |
