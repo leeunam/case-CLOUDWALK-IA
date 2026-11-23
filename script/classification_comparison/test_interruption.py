@@ -49,6 +49,8 @@ def adapter(action, observations_path=c01.FIXTURES / "observations.jsonl"):
             obs.pop("version_error_raw", None)
         if case_id == "ctl-simples":
             obs["request_usage"][0]["observed_api_usd"] = 0.01
+        if case_id == "ctl-versao" and action.endswith("billed-version"):
+            obs["request_usage"][0].update(input_tokens=1, output_tokens=10, observed_api_usd=2)
         sys.stdout.buffer.write(encode(obs).encode("utf8") + b"\r\n")
         sys.stdout.buffer.flush()
     if action == "trailing":
@@ -375,6 +377,48 @@ class RoundOne(unittest.TestCase):
                         m = c01.read(self.output / "interruption.json")
                         self.assertEqual(m["interrupted_id"], case_id)
                         self.assertNotIn(case_id, m["completed_ids"])
+
+    def test_late_version_mismatch_preserves_billing_without_completing(self):
+        self.execute("on-time-billed-version")
+        observations = c01.read_records(self.output / "observations.jsonl")
+        timely = next(o for o in observations if o["id"] == "ctl-versao")
+        decisions = c01.read_records(self.output / "decisions.jsonl")
+        self.assertEqual(next(d for d in decisions if d["id"] == "ctl-versao")["outcome"], "review")
+        self.assertEqual(timely["choices"]["priority"]["reason"], "version_mismatch")
+        self.assertNotEqual(timely["returned_model"], timely["identity"]["expected_returned_model"])
+        self.assertEqual(timely["request_usage"][0]["observed_api_usd"], 2)
+
+        now = 100.0
+        record = ResponseStream.record
+        def delayed(reader, deadline):
+            nonlocal now
+            row = record(reader, deadline)
+            if row["id"] == "ctl-versao":
+                now += 5.020
+            return row
+
+        with patch("run.time", SimpleNamespace(monotonic=lambda: now, sleep=time.sleep)), \
+             patch.object(ResponseStream, "record", delayed), self.assertRaisesRegex(TimeoutError, "fora do prazo"):
+            self.execute("late-billed-version")
+        manifest = c01.read(self.output / "interruption.json")
+        self.assertEqual(manifest["eligibility"], "inconclusive")
+        self.assertEqual(manifest["interrupted_id"], "ctl-versao")
+        self.assertEqual(manifest["delivery"], "stdin_flushed")
+        self.assertEqual(manifest["interrupted_observation"], dict(timely, run_id=manifest["run_id"]))
+        usage = manifest["interrupted_usage"]
+        self.assertEqual((usage["requests"], usage["input_tokens"], usage["output_tokens"], usage["observed_api_usd"]),
+                         (1, 1, 10, 2))
+        plan = c01.read(self.output / "plan.json")["control_ids"]
+        index = plan.index("ctl-versao")
+        self.assertEqual(manifest["completed_ids"], plan[:index])
+        self.assertEqual(manifest["not_started_ids"], plan[index + 1:])
+        self.assertEqual(manifest["dispatched_ids"], [o["id"] for o in observations if o["id"] in plan[:index + 1]])
+        prefix = c01.read(self.output / "prefix-report.json")
+        self.assertEqual(prefix["eligibility"], "inconclusive")
+        self.assertEqual(prefix["control_ids"], plan[:index])
+        self.assertEqual(prefix["usage"], manifest["verified_prefix_usage"])
+        self.assertEqual(prefix["usage"]["observed_api_usd"]["value"], .02)
+        self.assertFalse((self.output / "report.json").exists())
 
     def test_always_predicting_candidate_has_independent_mixed_control(self):
         self.execute("always_valid")
