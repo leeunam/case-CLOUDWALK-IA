@@ -63,7 +63,9 @@ O modo offline não mede a qualidade do Jev real; dez mil conexões de chat
 ainda não foram ensaiadas. A R02 corrigiu os dois casos limite do analisador, com 49 testes aprovados
 e reanálise dos sete históricos preservada. A recuperação R01 passou no ensaio real controlado, conforme
 [seu relatório](docs/r01.md). A C01 fechou critérios, divisão de dados e contratos da
-comparação; C02 está implementada com fixtures e em revisão.
+comparação; A [C02](docs/c02.md) está aceita com 27 testes e reprodução fixture.
+C03 e C04 iniciam a implementação dos adaptadores; o ensaio pago aguarda
+credencial e teto autorizado.
 
 - [Escopo e arquitetura](docs/planejamento/especificacao-mvp.md)
 - [Backlog e critérios de aceite](docs/planejamento/plano-de-execucao.md)

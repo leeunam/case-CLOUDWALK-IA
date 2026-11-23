@@ -2,9 +2,9 @@
 
 Issue publicada: [#3](https://github.com/leeunam/case-CLOUDWALK-IA/issues/3). Consulte a issue para progresso e comentários atuais.
 
-Estado: **liberada para implementação com fixtures** após o aceite C01.
-O integrador informa o SHA imutável da main integrada na passagem. Sem
-chamadas a fornecedores ou autorização de gasto nesta tarefa.
+Estado: **aceita e integrada localmente** em `d8e09b62e42122e08e3c8edc7f3566dcdb82a173`.
+O [relatório C02](../../../c02.md) registra 27 testes, revisão final e exemplo
+reproduzido do código aceito. Esta entrega usa somente fixtures.
 
 ## Parent e especificação
 
@@ -20,23 +20,23 @@ de Rails, Kafka e da interface do help desk.
 
 ## Critérios de aceite
 
-- [ ] Validar schema, versão, catálogo, máscaras e hashes antes do lote; recusar
+- [x] Validar schema, versão, catálogo, máscaras e hashes antes do lote; recusar
   entrada divergente sem gastar créditos. CLI documenta configuração e dry run.
-- [ ] Um lote fixture percorre entrada → adaptador → validação → decisão/aplicação
+- [x] Um lote fixture percorre entrada → adaptador → validação → decisão/aplicação
   → relatório JSON e legível, com inventário dos artefatos e comando de reprodução.
-- [ ] Campos recebidos são preservados e excluídos dos acertos produzidos pelo
+- [x] Campos recebidos são preservados e excluídos dos acertos produzidos pelo
   modelo. Escolha bruta, aplicação e estado de revisão têm contagens distintas.
-- [ ] Relatar urgentes corretamente separados, cobertura, abstenções corretas e
+- [x] Relatar urgentes corretamente separados, cobertura, abstenções corretas e
   indevidas, inválidos e erros, com denominadores por campo/máscara/estrato.
-- [ ] Sem latência/custo real, escrever não medido. Com medição parcial, manter
+- [x] Sem latência/custo real, escrever não medido. Com medição parcial, manter
   erros e denominadores; indisponibilidade total não aparece como sucesso.
-- [ ] Registrar cada tentativa e origem da tarifa/usage. Oferecer limites de
+- [x] Registrar cada tentativa e origem da tarifa/usage. Oferecer limites de
   casos, concorrência e tentativas; modo fixture é o padrão seguro de teste.
-- [ ] Testes com dados controlados comprovam denominadores, tudo-ou-revisão,
+- [x] Testes com dados controlados comprovam denominadores, tudo-ou-revisão,
   abstenção total, urgente rebaixado, falha total/parcial e evidência ausente.
-- [ ] Registrar resultado de cada adaptador por uma interface comum, incluindo
+- [x] Registrar resultado de cada adaptador por uma interface comum, incluindo
   o formato de invocação entre Ruby/Python, sem exigir parser Choice do Jev.
-- [ ] Integrar e publicar o commit-base do avaliador e exemplos antes de C03/C04.
+- [x] Integrar e publicar o commit-base do avaliador e exemplos antes de C03/C04.
 
 ## Fora do escopo
 

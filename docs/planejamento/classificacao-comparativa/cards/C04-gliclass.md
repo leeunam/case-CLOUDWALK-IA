@@ -2,6 +2,9 @@
 
 Issue publicada: [#5](https://github.com/leeunam/case-CLOUDWALK-IA/issues/5). Consulte a issue para progresso e comentários atuais.
 
+Estado: **liberada para implementação e piloto local de desenvolvimento**. Sem chamadas pagas; recursos e instalação precisam ser registrados.
+Base de execução e ambiente isolado são informados pelo integrador.
+
 ## Parent e especificação
 
 [Quadro CLASS-001](../README.md) · [CLASS-SPEC-001](../especificacao.md).

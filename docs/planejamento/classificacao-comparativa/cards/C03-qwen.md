@@ -2,6 +2,9 @@
 
 Issue publicada: [#4](https://github.com/leeunam/case-CLOUDWALK-IA/issues/4). Consulte a issue para progresso e comentários atuais.
 
+Estado: **liberada para implementação com transporte simulado**. Piloto pago continua bloqueado por credencial e teto autorizado.
+Base de execução e ambiente isolado são informados pelo integrador.
+
 ## Parent e especificação
 
 [Quadro CLASS-001](../README.md) · [CLASS-SPEC-001](../especificacao.md).

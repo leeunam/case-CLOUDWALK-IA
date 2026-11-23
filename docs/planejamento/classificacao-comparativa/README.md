@@ -22,7 +22,9 @@ Um commit ou teste fixture, sozinho, não equivale a aceite com um modelo real.
 
 Os [critérios e a separação dos dados](protocolo-comparacao.md) foram aprovados
 na C01. O [aceite](aceite-c01.md) registra contratos, verificações e limites
-com C02 liberada para fixtures após integração. Chamadas reais continuam sem orçamento autorizado.
+com C02 aceita após revisão e reprodução. C03 e C04 estão liberadas para
+implementação. O piloto Qwen pago aguarda credencial e teto; o piloto GLiClass
+local usa recursos do host e não implica autorização de gasto.
 
 ## Cards e dependências
 
@@ -94,3 +96,11 @@ novos canais reais ou alegação de capacidade de produção.
 F10/publicação por URL e cenários de escala continuam tarefas próprias. Os
 resultados históricos F08 permanecem publicados com cinco aprovações, uma
 reprovação de recuperação e uma tentativa extra bloqueada.
+
+## Passagem aceita do avaliador
+
+C02 integrada localmente em `d8e09b62e42122e08e3c8edc7f3566dcdb82a173`.
+[Relatório e interface](../../c02.md): 27 testes e revisão final aprovados,
+exemplo do código aceito revalidado pelos schemas e hashes. C03 e C04 recebem
+a mesma base imutável com essa integração e trabalham em áreas próprias.
+R01 e R02 têm aceite local concluído. Vencedor e orçamento de API seguem pendentes.
