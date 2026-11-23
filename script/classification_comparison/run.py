@@ -84,7 +84,8 @@ def exchange(proc, item, responses, journal, deadline):
     return obs
 
 
-def run_batch(inputs, config, report, catalog, validation, journal, policy):
+def run_batch(inputs, config, report, catalog, validation, journal, policy, *,
+              before_exchange=None, after_candidate=None):
     with tempfile.TemporaryDirectory() as scratch:
         ready = Path(scratch) / "ready.json"
         final = Path(scratch) / "final.json"
@@ -120,6 +121,9 @@ def run_batch(inputs, config, report, catalog, validation, journal, policy):
                 if item["id"] in policy["controls"]:
                     obs = injected_observation(item, report["run_id"], policy)
                 elif missing and not invalid and item["catalog"] == catalog:
+                    if before_exchange is not None:
+                        journal.active = item["id"]
+                        before_exchange(item)
                     obs = exchange(proc, item, responses, journal, deadline)
                 if obs is not None:
                     c01.structure(validation, "observation", obs)
@@ -144,6 +148,8 @@ def run_batch(inputs, config, report, catalog, validation, journal, policy):
                         c01.structure(validation, "observation", obs)
                         c01.verify_observation(obs, missing, report, catalog)
                 journal.complete(d, obs)
+                if after_candidate is not None and obs is not None and obs["origin"] == "candidate":
+                    after_candidate(item)
             proc.stdin.close()
             responses.finish()
             if proc.wait(timeout=5):
