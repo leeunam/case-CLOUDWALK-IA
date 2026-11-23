@@ -1,0 +1,5 @@
+C03 Qwen/Feita, política 1.0.0
+Uma chamada JSON estruturada por relato, somente para campos ausentes. A decisão de aplicar pertence ao avaliador comum.
+Abstenção explícita usa informacao_insuficiente. Recusa documentada do provedor aciona abstenção por política. Saídas ausentes, chaves inesperadas, códigos fora do catálogo ou JSON inválido geram evidência de revisão.
+Prazo de 5 s por relato, com margem local para entrega pelo IPC. O modo fixture simula o gateway. Modelo e pesos efetivos são medidos quando retornados. Pontuações e latência do modelo ficam indisponíveis quando não informadas.
+Piloto real limitado a desenvolvimento e aos oito controles naturais, com uma tentativa, concorrência 1, autorização do protocolo, tarifas verificadas, limites de tokens e reserva financeira por despacho.
