@@ -74,7 +74,8 @@ class CanonicalTest(unittest.TestCase):
         self.t.db.receipt.side_effect = lambda event_id: self.receipts[event_id]
         self.t.kafka.records.side_effect = lambda topic, key: self.records[key]
 
-    def snapshot(self, case_id):
+    def snapshot(self, case_id, *, optional):
+        self.assertTrue(optional)
         if self.drained:
             return self.final[case_id]
         if case_id not in self.seen:
@@ -176,16 +177,43 @@ class RecoveryWindowTest(unittest.TestCase):
         self.health.assert_called_once()
         self.assertEqual(self.now, 120)
 
+    def transfer_at_deadline(self, t):
+        owner, peer = Mock(), Mock()
+        t.input.return_value = {}
+        t.send.return_value = {"case_id": "case"}
+        owner.events.return_value = [{"partition": 1, "offset": 17}]
+        peer.events.return_value = []
+        t.kafka.offsets.return_value = {"backlog": 1, "committed_next_offset": 17}
+        self.clock.monotonic.side_effect = [0, 120]
+        with (patch.object(trial, "spawn", side_effect=[Mock(), owner, peer]),
+              patch.object(trial, "until", side_effect=[1, 1, 1, owner.events.return_value])):
+            trial.transfer(t, "mock", None, None)
+
+    def test_accepted_case_sql_outcomes_at_deadline(self):
+        pending = {"status": "ai_active", "messages": [], "audits": []}
+        for row, sql_error, expected, reason in (
+            (None, None, observe.Failed, "Caso aceito ausente.*case"),
+            ((pending,), None, AssertionError, "Prazo de 120s"),
+            (None, OSError("consulta interrompida"), OSError, "consulta interrompida"),
+        ):
+            with self.subTest(expected=reason):
+                t = Mock()
+                db = object.__new__(observe.Database)
+                db.connection = Mock()
+                db.connection.execute.side_effect = sql_error
+                db.connection.execute.return_value.fetchone.return_value = row
+                t.db.case.side_effect = db.case
+                t.http.call.return_value = {"status": "ok"}
+                with patch.object(trial, "emit"), self.assertRaisesRegex(expected, reason):
+                    self.transfer_at_deadline(t)
+                db.connection.execute.assert_called_once()
+                self.assertEqual(db.connection.execute.call_args.args[1], ("case",))
+
     def test_deadline_uses_http_status_and_health_body(self):
         for code, body_status in ((500, "ok"), (502, "ok"), (503, "ok"), (504, "ok"),
                                   (200, "degraded"), (200, "ok")):
             with self.subTest(code=code, body=body_status):
-                t, owner, peer = Mock(), Mock(), Mock()
-                t.input.return_value = {}
-                t.send.return_value = {"case_id": "case"}
-                owner.events.return_value = [{"partition": 1, "offset": 17}]
-                peer.events.return_value = []
-                t.kafka.offsets.return_value = {"backlog": 1, "committed_next_offset": 17}
+                t = Mock()
                 t.db.case.return_value = {"status": "ai_active"}
                 t.http = http_client.Browser()
                 body = io.BytesIO(json.dumps({"status": body_status}).encode())
@@ -195,15 +223,12 @@ class RecoveryWindowTest(unittest.TestCase):
                     t.http.http.open = Mock(return_value=body)
                 else:
                     t.http.http.open = Mock(side_effect=HTTPError("http://api/health", code, "", {}, body))
-                self.clock.monotonic.side_effect = [0, 120]
                 healthy = code == 200 and body_status == "ok"
-                with (patch.object(trial, "spawn", side_effect=[Mock(), owner, peer]),
-                      patch.object(trial, "until", side_effect=[1, 1, 1, owner.events.return_value]),
-                      patch.object(trial, "emit") as emit,
+                with (patch.object(trial, "emit") as emit,
                       self.assertRaisesRegex(AssertionError if healthy else observe.Blocked,
                                              "120s" if healthy else "Rails")):
-                    trial.transfer(t, "mock", None, None)
-                t.db.case.assert_called_once_with("case")
+                    self.transfer_at_deadline(t)
+                t.db.case.assert_called_once_with("case", optional=True)
                 self.assertEqual(t.http.http.open.call_args.args[0].selector, "/api/v1/health")
                 self.assertEqual(emit.call_count, int(healthy))
 
@@ -227,7 +252,8 @@ class ReportTest(unittest.TestCase):
     def test_versions_and_failure_verdicts(self):
         # Executa o ponto de entrada e intercepta a abertura do banco antes de qualquer conexão.
         imports = {**fallback, "observe": observe, "scenarios": scenarios, "http_client": http_client}
-        for error, status in ((AssertionError("prazo"), "reprovado"), (observe.Blocked("sonda"), "inconclusivo")):
+        for error, status in ((AssertionError("prazo"), "reprovado"), (observe.Failed("caso ausente"), "reprovado"),
+                              (OSError("consulta interrompida"), "inconclusivo"), (observe.Blocked("sonda"), "inconclusivo")):
             with self.subTest(status=status), patch.dict(sys.modules, imports), redirect_stdout(io.StringIO()) as output:
                 sdk = nullcontext()
                 if "confluent_kafka" in fallback:

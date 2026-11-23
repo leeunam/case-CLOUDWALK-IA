@@ -89,6 +89,12 @@ def require_rails_health(t):
         raise Blocked("Rails indisponível na consulta de saúde")
 
 
+def accepted_case(db, case_id):
+    row = db.case(case_id, optional=True)
+    verify(row is not None, f"Caso aceito ausente no PostgreSQL: {case_id}")
+    return row
+
+
 def transfer(t, role, directory, stack):
     topic = TOPIC[role]
     group = GROUPS[topic]
@@ -110,7 +116,7 @@ def transfer(t, role, directory, stack):
 
     def check_observers():
         offset = t.kafka.offsets(group, topic, p)
-        case = t.db.case(case_id)
+        case = accepted_case(t.db, case_id)
         require_rails_health(t)
         emit("prazo_recuperacao", role=role, deadline=DRAIN_SECONDS, offset=offset,
              case_id=case_id, status=case["status"])
@@ -137,10 +143,10 @@ def transfer(t, role, directory, stack):
     b.process.terminate()
     b.process.wait(timeout=5)
     new_id = wait("A reassumiu a partição", lambda: ownership(t, topic, p, "A"))
-    wait("primeira resposta persistida", lambda: types(t.db.case(case_id)) == ["customer", "ai"])
+    wait("primeira resposta persistida", lambda: types(accepted_case(t.db, case_id)) == ["customer", "ai"])
     t.send(channel, json_bytes({**data, "source_event_id": str(uuid.uuid4()), "text": "Entendi."}))
     def resolved():
-        row = t.db.case(case_id)
+        row = accepted_case(t.db, case_id)
         return row if row["status"] == "resolved" else None
     row = wait("resolução", resolved)
     offsets = wait("lag zero nos dois grupos", lambda: drained(t))
@@ -200,7 +206,7 @@ def canonical(t, directory, stack):
     expired = {}
     supervisor, _ = t.staff("supervisor")
     for case_id, action in zip(cases, ["retry_agent", "force_handoff"]):
-        row = until("timeout do produto", lambda: t.db.case(case_id),
+        row = until("timeout do produto", lambda: accepted_case(t.db, case_id),
                     lambda x: x["integration_status"] == "failed" and bool(audit(x, "agent.result.expired")), timeout=90)
         verify(len(row["outbox"]) == 1, f"rodada inicial ambígua: {case_id}")
         expired[case_id] = row["outbox"][0]["event_id"]
@@ -211,9 +217,9 @@ def canonical(t, directory, stack):
             command["summary"] = "Cliente aguarda retorno"
         supervisor.call(f"/api/v1/cases/{case_id}/actions", payload=command,
                         headers=supervisor.write_headers(str(uuid.uuid4())))
-    human = until("responsável humano", lambda: t.db.case(cases[1]), lambda x: x["status"] == "human_active")
+    human = until("responsável humano", lambda: accepted_case(t.db, cases[1]), lambda x: x["status"] == "human_active")
     retry_id, handoff_id = cases
-    published = until("publicação da nova rodada", lambda: t.db.case(retry_id),
+    published = until("publicação da nova rodada", lambda: accepted_case(t.db, retry_id),
                       lambda x: len(x["outbox"]) == 2 and all(entry["published"] for entry in x["outbox"]))
     fresh = [entry["event_id"] for entry in published["outbox"] if entry["event_id"] != expired[retry_id]]
     verify(len(fresh) == 1, f"retry sem nova solicitação distinta: {retry_id}")
@@ -221,7 +227,7 @@ def canonical(t, directory, stack):
         spawn(stack, directory, role, "canonical")
     # Primeiro escoa requests, depois events. Os efeitos precedem os commits dos dois grupos.
     offsets = until("drenagem após ação canônica", lambda: drained(t))
-    retried, assigned = t.db.case(retry_id), t.db.case(handoff_id)
+    retried, assigned = accepted_case(t.db, retry_id), accepted_case(t.db, handoff_id)
     verify(types(retried) == ["customer", "ai"] and
            all(human[k] == assigned[k] for k in ("assignee_id", "assignment_generation", "messages", "status")),
            "histórico do retry ou atribuição humana alterada")
