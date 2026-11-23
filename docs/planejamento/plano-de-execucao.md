@@ -57,8 +57,10 @@ Os 60 rótulos foram revisados para referência exploratória: oito casos
 diretamente pelo responsável e 52 pela IA sob delegação explícita, conforme o
 [registro da C01](classificacao-comparativa/revisao-de-rotulos.md). Critérios e
 divisão 24/36 foram aprovados no [protocolo](classificacao-comparativa/protocolo-comparacao.md).
-Os contratos v1.0.0 passaram na verificação local, conforme o
-[aceite C01](classificacao-comparativa/aceite-c01.md). A revisão final da C01 foi aprovada; C02 está implementada com fixtures e em revisão. Vencedor e orçamento real continuam pendentes.
+Os contratos v1.1.0 passaram na verificação local, conforme o
+[aceite C01](classificacao-comparativa/aceite-c01.md). A revisão final da C01 foi aprovada. A revisão da C02 levou à emenda técnica
+1.1.0 de proveniência dos controles; o avaliador conclui sua integração com
+fixtures antes da passagem aos adaptadores. Vencedor e orçamento real continuam pendentes.
 Criar os cards não equivale a autorizar inferência paga nem escolher o fornecedor.
 
 Ordem: C01 → C02 → C03/C04 em paralelo → C05 → C06 → C07. R01 e R02 podem

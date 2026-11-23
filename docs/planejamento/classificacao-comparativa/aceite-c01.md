@@ -56,3 +56,9 @@ correções independentes e E01 continua posterior à conclusão/publicação.
 Abra `ctl-sem-assunto` nas fixtures de entrada, observação e decisão. Localize
 a escolha bruta `urgent`, a abstenção de categoria e a prioridade aplicada
 nula. O campo correto fica auditável, mas o complemento completo vai à revisão.
+
+## Emenda técnica 1.1.0 integrada
+
+A revisão da C02 revelou a necessidade de distinguir controles injetados da inferência do candidato. A [decisão técnica](ajuste-de-proveniencia-c02.md) preservou os critérios aprovados, os dados, a divisão, a rubrica e o orçamento pendente. O contrato 1.1.0 foi integrado em `70f96d08538dcf5798b569ef718cd16171b6e14f` após revisão independente e correção dirigida.
+
+A verificação integrada passou com cinco schemas, 13 entradas, nove observações, 13 decisões, 64 rejeições esperadas e 11 regressões. A política de controle possui caminho, versão e hash fixados no protocolo. O controle misto não depende do comportamento natural do candidato e fica excluído de seus totais de inferência. [Formato e reprodução](contratos/ajuste-1.1.md). C02 consome essa versão antes da liberação C03/C04.
