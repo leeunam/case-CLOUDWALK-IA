@@ -2,6 +2,7 @@
 import json
 import os
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import time
@@ -167,6 +168,60 @@ class RoundOne(unittest.TestCase):
                 with failure, self.assertRaises(OSError):
                     self.execute(stage, answers)
                 self.check_interrupted_final()
+
+    def run_timed_control_cli(self, inference_ms):
+        rows = c01.read_records(c01.FIXTURES / "observations.jsonl")
+        first = next(o for o in rows if o["id"] == "ctl-simples")
+        first.update(inference_ms=inference_ms, elapsed_ms=None)
+        answers = self.path / "answers.jsonl"
+        answers.write_text("".join(encode(o) + "\n" for o in rows), encoding="utf-8")
+        config = c01.read(HERE / "fixture.json")
+        config["identity"]["mode"] = "real"
+        config["command"] = [sys.executable, "-B", str(Path(__file__).resolve()), "--adapter", "timed", str(answers)]
+        config_path = self.path / "config.json"
+        config_path.write_text(encode(config), encoding="utf-8")
+        self.output = self.path / "run"
+        return subprocess.run([sys.executable, "-B", str(HERE / "run.py"), "--mode", "real", "--split", "control",
+                               "--config", str(config_path), "--output", str(self.output)],
+                              capture_output=True, text=True, timeout=30)
+
+    def test_cli_rejects_inference_longer_than_final_elapsed_at_first_dispatch(self):
+        result = self.run_timed_control_cli(500)
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("inference_duration: ctl-simples", result.stderr)
+        m = c01.read(self.output / "interruption.json")
+        self.assertEqual(m["completed_ids"], ["ctl-completo"])
+        self.assertEqual(m["dispatched_ids"], ["ctl-simples"])
+        self.assertEqual(m["interrupted_id"], "ctl-simples")
+        self.assertEqual(m["not_started_ids"], c01.read(self.output / "plan.json")["control_ids"][2:])
+        self.assertEqual(m["eligibility"], "inconclusive")
+        self.assertIsNone(m["interrupted_observation"]["elapsed_ms"])
+        self.assertEqual(m["interrupted_usage"]["requests"], 1)
+        self.assertEqual(m["interrupted_usage"]["observed_api_usd"], .01)
+        self.assertEqual(m["verified_prefix_usage"]["attempts"]["value"], 0)
+        self.assertFalse((self.output / "report.json").exists())
+        self.assertFalse((self.output / "report.md").exists())
+        self.assertEqual(c01.read_records(self.output / "observations.jsonl"), [])
+
+        validation, protocol, split, catalog, cases, _ = runner.preflight()
+        prefix = c01.load_bundle(validation, self.output / "prefix-report.json")
+        c01.verify_run(prefix, validation, protocol, split, catalog, cases)
+        self.assertEqual(prefix["report"]["eligibility"], "inconclusive")
+        self.assertEqual(prefix["observations"], [])
+        self.assertEqual([d["id"] for d in prefix["decisions"]], ["ctl-completo"])
+
+    def test_cli_commits_compatible_final_elapsed_and_continues(self):
+        result = self.run_timed_control_cli(.001)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        observations = c01.read_records(self.output / "observations.jsonl")
+        first = observations[0]
+        self.assertEqual(first["id"], "ctl-simples")
+        self.assertEqual(first["inference_ms"], .001)
+        self.assertGreaterEqual(first["elapsed_ms"], first["inference_ms"])
+        report = c01.read(self.output / "report.json")
+        self.assertEqual(len(report["control_ids"]), 13)
+        self.assertEqual(report["usage"]["attempts"]["value"], 8)
+        self.assertFalse((self.output / "interruption.json").exists())
 
     def check_interruption(self, action, error):
         with self.assertRaises(error):

@@ -141,7 +141,10 @@ def run_batch(inputs, config, report, catalog, validation, journal, policy):
                     end = time.monotonic()
                     check_deadline(obs, deadline, end)
                     if config["identity"]["mode"] == "real":
-                        obs["elapsed_ms"] = (end - start) * 1000
+                        # O diário conserva a resposta original se a medição final for incompatível.
+                        obs = dict(obs, elapsed_ms=(end - start) * 1000)
+                        c01.structure(validation, "observation", obs)
+                        c01.verify_observation(obs, missing, report, catalog)
                 journal.complete(d, obs)
             proc.stdin.close()
             responses.finish()
