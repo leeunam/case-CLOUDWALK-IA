@@ -9,6 +9,7 @@ from contextlib import nullcontext, redirect_stdout
 from importlib.util import find_spec
 from pathlib import Path
 from unittest.mock import Mock, patch
+from urllib.error import HTTPError
 
 ROOT = Path(__file__).resolve().parents[2]
 # A lógica de leitura de snapshots é a mesma da sonda; estes testes não abrem conexões.
@@ -174,6 +175,37 @@ class RecoveryWindowTest(unittest.TestCase):
             self.wait(lambda: False)
         self.health.assert_called_once()
         self.assertEqual(self.now, 120)
+
+    def test_deadline_uses_http_status_and_health_body(self):
+        for code, body_status in ((500, "ok"), (502, "ok"), (503, "ok"), (504, "ok"),
+                                  (200, "degraded"), (200, "ok")):
+            with self.subTest(code=code, body=body_status):
+                t, owner, peer = Mock(), Mock(), Mock()
+                t.input.return_value = {}
+                t.send.return_value = {"case_id": "case"}
+                owner.events.return_value = [{"partition": 1, "offset": 17}]
+                peer.events.return_value = []
+                t.kafka.offsets.return_value = {"backlog": 1, "committed_next_offset": 17}
+                t.db.case.return_value = {"status": "ai_active"}
+                t.http = http_client.Browser()
+                body = io.BytesIO(json.dumps({"status": body_status}).encode())
+                # urllib entrega HTTPErrors ao mesmo decodificador que trata HTTP 200.
+                if code == 200:
+                    body.code = code
+                    t.http.http.open = Mock(return_value=body)
+                else:
+                    t.http.http.open = Mock(side_effect=HTTPError("http://api/health", code, "", {}, body))
+                self.clock.monotonic.side_effect = [0, 120]
+                healthy = code == 200 and body_status == "ok"
+                with (patch.object(trial, "spawn", side_effect=[Mock(), owner, peer]),
+                      patch.object(trial, "until", side_effect=[1, 1, 1, owner.events.return_value]),
+                      patch.object(trial, "emit") as emit,
+                      self.assertRaisesRegex(AssertionError if healthy else observe.Blocked,
+                                             "120s" if healthy else "Rails")):
+                    trial.transfer(t, "mock", None, None)
+                t.db.case.assert_called_once_with("case")
+                self.assertEqual(t.http.http.open.call_args.args[0].selector, "/api/v1/health")
+                self.assertEqual(emit.call_count, int(healthy))
 
     def test_late_positive_observation(self):
         def late():

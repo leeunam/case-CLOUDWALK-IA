@@ -295,6 +295,21 @@ def classify_commit_error(error, group, record):
         raise MembershipLost(str(error))
 
 
+def poll_error_action(error, partition, offset):
+    if error.fatal():
+        return "interromper"
+    name = error.name()
+    if name == "_PARTITION_EOF":
+        return "aviso"
+    global_notice = (partition is None or partition < 0) and (offset is None or offset < 0)
+    if global_notice:
+        if name == "_MAX_POLL_EXCEEDED":
+            return "reingresso"
+        if name in {"_TRANSPORT", "_ALL_BROKERS_DOWN"}:
+            return "aviso"
+    return "interromper"
+
+
 def consume(topic, group, handle, publisher, brokers):
     from confluent_kafka import Consumer, KafkaException
 
@@ -324,15 +339,13 @@ def consume(topic, group, handle, publisher, brokers):
                     continue
                 error = record.error()
                 if error is not None:
-                    name = error.name()
                     partition, offset = record.partition(), record.offset()
-                    global_notice = (partition is None or partition < 0) and (offset is None or offset < 0)
-                    safe = not error.fatal() and (name == "_PARTITION_EOF" or
-                           (global_notice and name in {"_TRANSPORT", "_ALL_BROKERS_DOWN"}))
-                    logging.warning("poll classe=%s grupo=%s topico=%s particao=%s offset=%s codigo=%s numero=%s causa=%s",
-                                    "aviso" if safe else "interromper", group, record.topic(), partition, offset,
-                                    name, error.code(), error)
-                    if not safe:
+                    action = poll_error_action(error, partition, offset)
+                    logging.warning("poll grupo=%s classe=%s topico=%s particao=%s offset=%s codigo=%s numero=%s causa=%s",
+                                    group, action, record.topic(), partition, offset, error.name(), error.code(), error)
+                    if action == "reingresso":
+                        break
+                    if action == "interromper":
                         raise KafkaException(error)
                     continue
                 try:

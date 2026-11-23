@@ -16,7 +16,7 @@ from pathlib import Path
 
 from confluent_kafka import libversion
 from http_client import REQUESTS
-from observe import GROUPS, Blocked, Database, Kafka, until, verify
+from observe import GROUPS, Blocked, Database, Failed, Kafka, until, verify
 from scenarios import Trial, audit, json_bytes, types
 
 TOPIC = {"mock": "agent.requests", "events": "agent.events"}
@@ -80,6 +80,15 @@ def wait_recovery(label, sample, deadline, check_observers):
         time.sleep(min(0.2, deadline - now))
 
 
+def require_rails_health(t):
+    try:
+        health = t.http.call("/api/v1/health", expected=200)
+    except Failed as error:
+        raise Blocked(f"Falha na sonda Rails: {error}") from error
+    if not isinstance(health, dict) or health.get("status") != "ok":
+        raise Blocked("Rails indisponível na consulta de saúde")
+
+
 def transfer(t, role, directory, stack):
     topic = TOPIC[role]
     group = GROUPS[topic]
@@ -102,8 +111,7 @@ def transfer(t, role, directory, stack):
     def check_observers():
         offset = t.kafka.offsets(group, topic, p)
         case = t.db.case(case_id)
-        if t.http.call("/api/v1/health", expected=(200, 503)).get("status") != "ok":
-            raise Blocked("Rails indisponível ao verificar o prazo")
+        require_rails_health(t)
         emit("prazo_recuperacao", role=role, deadline=DRAIN_SECONDS, offset=offset,
              case_id=case_id, status=case["status"])
 
@@ -239,9 +247,9 @@ def main():
 
         def routes_ready():
             try:
-                health = t.http.call("/api/v1/health", expected=(200, 503))
+                require_rails_health(t)
                 t.http.call("/webhooks/v1/agent/requests", target=REQUESTS, expected=501)
-                return health.get("status") == "ok"
+                return True
             except Blocked:
                 return False
 

@@ -182,9 +182,62 @@ class PollTest(unittest.TestCase):
             consumer.commit.assert_not_called()
 
     def test_localized_poll_error_never_reaches_offset_18(self):
-        for code in ("_NOT_IMPLEMENTED", "_TRANSPORT"):
+        for code in ("_NOT_IMPLEMENTED", "_TRANSPORT", "_MAX_POLL_EXCEEDED"):
             with self.subTest(code=code):
                 self.exercise(code)
+
+    def test_global_poll_timeout_rejoins_from_group_position(self):
+        old, new = Mock(), Mock()
+        topic, group = flow.EVENTS, "platform-agent-events-v1"
+        notice = Mock()
+        notice.topic.return_value = None
+        notice.partition.return_value = -1
+        notice.offset.return_value = None
+        if KafkaError is None:
+            error = Mock()
+            error.name.return_value = "_MAX_POLL_EXCEEDED"
+            error.fatal.return_value = False
+        else:
+            error = KafkaError(KafkaError._MAX_POLL_EXCEEDED)
+        notice.error.return_value = error
+        old.poll.side_effect = [notice, AssertionError("cursor antigo reutilizado")]
+
+        pending = Mock()
+        pending.topic.return_value = topic
+        pending.partition.return_value = 1
+        pending.offset.return_value = 17
+        pending.error.return_value = None
+        new.poll.side_effect = [pending, EndTrial()]
+        new.assignment.return_value = [SimpleNamespace(topic=topic, partition=1)]
+        new.commit.return_value = [SimpleNamespace(error=None)]
+        sessions = iter((old, new))
+
+        def create(config):
+            client = next(sessions)
+            self.assertEqual(config["group.id"], group)
+            self.assertFalse(config["enable.auto.commit"])
+            if client is new:
+                old.close.assert_called_once_with()
+            return client
+
+        publisher, handle = Mock(), Mock()
+        driver = SimpleNamespace(Consumer=create, KafkaException=BrokerException)
+        with (patch.dict(sys.modules, {"confluent_kafka": driver}), patch.object(flow.time, "sleep"),
+              self.assertRaises(EndTrial)):
+            flow.consume(topic, group, handle, publisher, "broker")
+        old.poll.assert_called_once()
+        old.commit.assert_not_called()
+        self.assertEqual(new.subscribe.call_args.args, ([topic],))
+        new.seek.assert_not_called()
+        handle.assert_called_once_with(pending)
+        new.commit.assert_called_once_with(message=pending, asynchronous=False)
+        publisher.publish.assert_not_called()
+        new.close.assert_called_once_with()
+
+    def test_fatal_or_partially_localized_poll_timeout_stops(self):
+        self.exercise("_MAX_POLL_EXCEEDED", partition=-1, offset=None, fatal=True)
+        self.exercise("_MAX_POLL_EXCEEDED", partition=1, offset=None)
+        self.exercise("_MAX_POLL_EXCEEDED", partition=-1, offset=17)
 
     def test_only_known_nonfatal_notices_allow_progress(self):
         self.exercise("_PARTITION_EOF", safe=True)
