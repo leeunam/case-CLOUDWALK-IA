@@ -8,7 +8,7 @@ import sqlite3
 import uuid
 
 MAX_CAP = Decimal("10")
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 CORRECTIONS_SCHEMA = """
 CREATE TABLE receipt_corrections (
     receipt TEXT PRIMARY KEY NOT NULL,
@@ -48,6 +48,9 @@ CREATE TABLE reservations (
     prior_observed TEXT,
     prior_receipt TEXT UNIQUE,
     gateway_usage TEXT,
+    gateway_observed TEXT,
+    gateway_receipt TEXT,
+    gateway_pending TEXT,
     detail TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (run_id, case_id),
@@ -69,8 +72,15 @@ def usd(value):
         amount = Decimal(value)
     except InvalidOperation:
         raise BudgetError("valor USD inválido") from None
-    if (not amount.is_finite() or amount < 0 or amount.as_tuple().exponent < -30
-            or amount.adjusted() > 12):
+    if not amount.is_finite() or amount < 0 or amount.adjusted() > 12:
+        raise BudgetError("valor USD inválido ou fora da precisão aceita")
+    sign, digits, exponent = amount.as_tuple()
+    if exponent < -30 and not amount:
+        return Decimal(0)
+    if exponent < -30:
+        excess = -30 - exponent
+        if excess < len(digits) and not any(digits[-excess:]):
+            return Decimal((sign, digits[:-excess], -30))
         raise BudgetError("valor USD inválido ou fora da precisão aceita")
     return amount
 
@@ -92,6 +102,7 @@ def reference(value):
     if not isinstance(value, str) or not value.strip():
         raise BudgetError("recibo exige referência explícita")
     return value.strip()
+
 
 def receipt_reference(value):
     normalized = reference(value)
@@ -143,13 +154,17 @@ class Account:
     def _account(self, db):
         row = db.execute("SELECT * FROM account WHERE singleton = 1").fetchone()
         version = db.execute("PRAGMA user_version").fetchone()[0]
-        if (version not in {1, SCHEMA_VERSION} or row is None
+        if (version not in {1, 2, SCHEMA_VERSION} or row is None
                 or row["id"] != self.id or row["scope"] != self.scope):
             raise BudgetError("identidade, escopo ou versão da conta incompatível")
         if usd(row["previous_spend"]) > cap_usd(row["cap"]):
             raise BudgetError("gasto anterior incompatível com a conta")
         if version == 1:
             self._upgrade_receipts(db)
+        if version in {1, 2}:
+            for column in ("gateway_observed", "gateway_receipt", "gateway_pending"):
+                db.execute(f"ALTER TABLE reservations ADD COLUMN {column} TEXT")
+            db.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
         return row
 
     def _upgrade_receipts(self, db):
@@ -166,25 +181,28 @@ class Account:
                     raise BudgetError("conta antiga com recibo atribuído a mais de um caso")
             db.execute("""UPDATE reservations SET receipt = ?, prior_receipt = ?
                           WHERE run_id = ? AND case_id = ?""", (current, prior, *owner))
-        db.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
 
     def _expenditure(self, db, account):
         costs = [usd(account["previous_spend"])]
         corrections = {(row["run_id"], row["case_id"]): usd(row["observed"])
                        for row in db.execute("SELECT run_id, case_id, observed FROM receipt_corrections ORDER BY rowid")}
-        for row in db.execute("SELECT run_id, case_id, state, reserved, observed FROM reservations"):
+        for row in db.execute("SELECT * FROM reservations"):
             reserved = usd(row["reserved"])
-            observed = usd(row["observed"]) if row["observed"] is not None else None
-            corrected = corrections.get((row["run_id"], row["case_id"]), observed)
+            adjusted = corrections.get((row["run_id"], row["case_id"]))
+            observed = self._observed_total(row, adjusted)
             if row["state"] == "settled":
-                if observed is None or observed > reserved:
+                if row["observed"] is None or usd(row["observed"]) > reserved:
                     raise BudgetError("reserva conciliada inconsistente")
-                costs.append(corrected)
-            elif row["state"] == "violation" and corrected is not None:
-                costs.append(max(reserved, corrected))
+                floor = reserved if row["gateway_pending"] is not None else Decimal(0)
+                costs.append(max(floor, observed))
             else:
-                costs.append(reserved)
+                costs.append(reserved if observed is None else max(reserved, observed))
         return total_usd(*costs)
+
+    @staticmethod
+    def _observed_total(row, adjusted=None):
+        return max((usd(amount) for amount in (row["observed"], row["gateway_observed"], adjusted)
+                    if amount is not None), default=None)
 
     def validate(self, cap):
         with self.transaction() as db:
@@ -201,7 +219,7 @@ class Account:
         if total_usd(self._expenditure(db, account), additional) > cap_usd(account["cap"]):
             raise BudgetError("saldo global insuficiente para a reserva")
 
-    def claim(self, run_id, manifest_id, manifest_sha, binding_sha, configuration):
+    def claim(self, run_id, manifest_id, manifest_sha, binding_sha, configuration, *, prepare=None):
         with self.transaction() as db:
             account = self._account(db)
             self._check_available(db, account, Decimal(0))
@@ -209,6 +227,8 @@ class Account:
                              WHERE id = ? OR manifest_id = ? OR manifest_sha256 = ? OR binding_sha256 = ?""",
                           (run_id, manifest_id, manifest_sha, binding_sha)).fetchone():
                 raise BudgetError("manifesto ou vinculação já usados")
+            if prepare is not None:
+                prepare()
             db.execute("""INSERT INTO runs (id, manifest_id, manifest_sha256, binding_sha256, configuration, state)
                           VALUES (?, ?, ?, ?, ?, 'claimed')""",
                        (run_id, manifest_id, manifest_sha, binding_sha, json.dumps(configuration)))
@@ -267,9 +287,9 @@ class Account:
 
     def _receipt_owners(self, db, evidence):
         return {(row["run_id"], row["case_id"]) for row in db.execute(
-            """SELECT run_id, case_id FROM reservations WHERE receipt = ? OR prior_receipt = ?
+            """SELECT run_id, case_id FROM reservations WHERE receipt = ? OR prior_receipt = ? OR gateway_receipt = ?
                UNION ALL SELECT run_id, case_id FROM receipt_corrections WHERE receipt = ?""",
-            (evidence, evidence, evidence))}
+            (evidence, evidence, evidence, evidence))}
 
     def _above_reservation(self, row, amount):
         if amount is not None and amount > usd(row["reserved"]):
@@ -301,29 +321,60 @@ class Account:
             self._freeze(db, *owner, violation)
         return violation
 
-    def stage(self, run_id, case_id, *, amount, evidence, violation=None, gateway_usage=None):
-        """Guarda evidência do gateway. Só o caso verificado pode reduzir saldo reservado."""
+    def stage(self, run_id, case_id, *, amount, evidence, violation=None, gateway_usage=None, pending=None):
+        """Persiste a evidência recebida, antes de a C02 avaliar o resultado."""
         with self.transaction() as db:
-            self._account(db)
+            account = self._account(db)
             row = self._reservation(db, run_id, case_id)
-            if row["state"] != "dispatched":
-                raise BudgetError("resposta sem despacho registrado")
-            self._record(db, row, amount, evidence, state="staged", violation=violation)
-            if gateway_usage:
-                db.execute("""UPDATE reservations SET gateway_usage = ?
+            if row["state"] == "dispatched":
+                self._record(db, row, amount, evidence, state="staged", violation=violation)
+            elif row["state"] in {"settled", "violation"} and row["gateway_usage"] is None:
+                # O recibo manual pode chegar enquanto o transporte ainda aguarda a resposta.
+                amount = usd(amount) if amount is not None else None
+                if amount is not None or evidence is not None:
+                    evidence = receipt_reference(evidence)
+                excessive = self._above_reservation(row, amount)
+                violation = ". ".join(reason for reason in (violation, excessive) if reason)
+                if evidence is not None and self._receipt_owners(db, evidence) - {(run_id, case_id)}:
+                    if not violation:
+                        raise BudgetError("recibo já atribuído a um caso")
+                    violation += ". Recibo com atribuição duplicada"
+                    amount, evidence = None, None
+                db.execute("""UPDATE reservations SET gateway_observed = ?, gateway_receipt = ?
                               WHERE run_id = ? AND case_id = ?""",
-                           (json.dumps(gateway_usage), run_id, case_id))
+                           (str(amount) if amount is not None else None, evidence, run_id, case_id))
+            else:
+                raise BudgetError("resposta sem despacho registrado ou já preservada")
+            if pending is not None:
+                recorded = self._known_cost(db, row)
+                if recorded is not None and recorded >= pending:
+                    pending = None
+            db.execute("""UPDATE reservations SET gateway_usage = ?, gateway_pending = ?
+                          WHERE run_id = ? AND case_id = ?""",
+                       (json.dumps(gateway_usage or {}), str(pending) if pending is not None else None,
+                        run_id, case_id))
+            if row["state"] in {"settled", "violation"}:
+                cap_violation = self._above_cap(db, account)
+                violation = ". ".join(reason for reason in (violation, cap_violation) if reason)
+                if violation:
+                    self._freeze(db, run_id, case_id, violation)
 
-    def complete_case(self, run_id, case_id):
+    def complete_case(self, run_id, case_id, *, timed_out=False):
         with self.transaction() as db:
-            self._account(db)
+            account = self._account(db)
             row = self._reservation(db, run_id, case_id)
             if row["state"] == "violation":
                 raise BudgetError(f"{case_id}: {row['detail']}")
+            if account["frozen_reason"] is not None:
+                raise BudgetError(f"conta congelada: {account['frozen_reason']}")
+            if timed_out:
+                raise BudgetError(f"{case_id}: custo USD inconciliável automaticamente após timeout")
+            if row["gateway_pending"] is not None:
+                raise BudgetError(f"{case_id}: custo USD inconciliável na precisão aceita")
             if row["state"] == "settled":
                 return
             if row["state"] != "staged" or row["observed"] is None:
-                raise BudgetError(f"{case_id}: custo USD inconciliável; reserva mantida")
+                raise BudgetError(f"{case_id}: custo USD inconciliável. Reserva mantida")
             db.execute("UPDATE reservations SET state = 'settled' WHERE run_id = ? AND case_id = ?",
                        (run_id, case_id))
 
@@ -338,6 +389,12 @@ class Account:
         with self.transaction() as db:
             account = self._account(db)
             row = self._reservation(db, run_id, case_id)
+            pending = row["gateway_pending"]
+            if pending is not None:
+                if amount < Decimal(pending):
+                    raise BudgetError("recibo inferior ao custo informado pelo gateway")
+                db.execute("""UPDATE reservations SET gateway_pending = NULL
+                              WHERE run_id = ? AND case_id = ?""", (run_id, case_id))
             if row["state"] in {"settled", "violation"}:
                 violation = self._correct_observed_cost(db, account, row, amount, evidence)
             elif row["state"] in {"dispatched", "staged"}:
@@ -354,28 +411,34 @@ class Account:
         if violation:
             raise BudgetError(violation)
 
+    def _known_cost(self, db, row):
+        latest = db.execute("""SELECT observed FROM receipt_corrections WHERE run_id = ? AND case_id = ?
+                               ORDER BY rowid DESC LIMIT 1""", (row["run_id"], row["case_id"])).fetchone()
+        return self._observed_total(row, latest["observed"] if latest is not None else None)
+
     def _correct_observed_cost(self, db, account, row, amount, evidence):
         owner = (row["run_id"], row["case_id"])
-        latest = db.execute("""SELECT observed FROM receipt_corrections
-                               WHERE run_id = ? AND case_id = ? ORDER BY rowid DESC LIMIT 1""", owner).fetchone()
-        observed = latest["observed"] if latest is not None else row["observed"]
-        if observed is not None and amount <= usd(observed):
+        observed = self._known_cost(db, row)
+        if observed is not None and amount <= observed:
             raise BudgetError("reserva já conciliada ou com custo observado igual ou superior")
         if self._receipt_owners(db, evidence):
             raise BudgetError("recibo já atribuído a um caso")
         # O recibo tardio revisa o total do mesmo caso. Ele não liquida de novo a reserva.
         db.execute("""INSERT INTO receipt_corrections (receipt, run_id, case_id, observed)
                       VALUES (?, ?, ?, ?)""", (evidence, *owner, str(amount)))
-        violation = self._above_reservation(row, amount)
-        expenditure = self._expenditure(db, account)
-        cap = cap_usd(account["cap"])
-        if expenditure > cap:
-            exceeded_cap = f"total USD {expenditure} acima do teto global {cap}"
-            violation = ". ".join(reason for reason in (violation, exceeded_cap) if reason)
+        violation = ". ".join(reason for reason in (self._above_reservation(row, amount),
+                                                       self._above_cap(db, account)) if reason)
         if violation:
             db.execute("UPDATE receipt_corrections SET violation = ? WHERE receipt = ?", (violation, evidence))
             self._freeze(db, *owner, violation)
         return violation
+
+    def _above_cap(self, db, account):
+        expenditure = self._expenditure(db, account)
+        cap = cap_usd(account["cap"])
+        if expenditure > cap:
+            return f"total USD {expenditure} acima do teto global {cap}"
+        return None
 
     def status(self):
         with self.transaction() as db:

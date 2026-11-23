@@ -4,14 +4,17 @@ import os
 from pathlib import Path
 import sys
 import tempfile
+import time
 from argparse import Namespace
 from decimal import Decimal
+from types import SimpleNamespace
 from unittest import TestCase, main, mock
 
 sys.dont_write_bytecode = True
 from budget import Account, BudgetError, cap_usd, usd
-from execute import run_evaluation
+from execute import credential_present, run_evaluation
 from final_adapter import fixture_gateway, main as adapter_main, observed_cost
+from adapters.qwen import adapter as historical
 from settings import HERE, Plan, VERSIONS
 from common import c01, decode, encode
 
@@ -42,10 +45,22 @@ def claim(account, run_id, candidate_ids=("case-a",), value=PER_REQUEST):
 
 def run_scenario(scenario):
     calls = 0
+    deadline_saved = None
+    if scenario in {"late-parse", "late-low", "late-body"}:
+        historical.IPC_MARGIN_SECONDS = 4.65
+        previous_parse = historical.parse_object
+
+        def slow_parse(data):
+            if isinstance(data, bytes) and scenario != "late-body":
+                time.sleep(max(0, deadline_saved - time.monotonic() + .002))
+            return previous_parse(data)
+
+        historical.parse_object = slow_parse
 
     def transport(body, deadline, dispatched):
-        nonlocal calls
+        nonlocal calls, deadline_saved
         calls += 1
+        deadline_saved = deadline
         request = decode(body)
         assert request["max_tokens"] == 128 and request["reasoning"] == {"enabled": False}
         if scenario == "timeout":
@@ -55,6 +70,24 @@ def run_scenario(scenario):
             dispatched()
             os._exit(9)
         status, response = fixture_gateway(body, deadline, dispatched)
+        if scenario in {"late-parse", "late-low", "late-body", "precision", "precision-block", "manual-first"}:
+            obj = decode(response)
+            if scenario in {"late-parse", "late-body", "precision", "manual-first"}:
+                obj["usage"]["cost"] = "2.25"
+            if scenario == "precision":
+                obj["usage"]["credits"] = "0.050000000000000000000000000000"
+            if scenario == "precision-block":
+                obj["usage"]["credits"] = "20.00000000000000000000000000001"
+            if scenario == "manual-first":
+                account = Account(sys.argv[sys.argv.index("--account") + 1],
+                                  sys.argv[sys.argv.index("--account-id") + 1], "fixture")
+                row, = account.status()["reservations"]
+                account.reconcile({"unit": "USD", "cost_usd": "0.001", "reference": "dashboard/in-flight",
+                                   "run_id": row["run_id"], "case_id": row["case_id"]})
+                obj["id"] = "synthetic-one"
+            if scenario == "late-body":
+                time.sleep(max(0, deadline - time.monotonic() + .002))
+            response = encode(obj).encode("utf-8")
         if scenario == "charged-without-counter":
             obj = decode(response)
             obj["usage"]["cost"] = "2.25"
@@ -266,6 +299,8 @@ class AccountTest(TestCase):
         account.complete_case("run", "case-a")
         with account.transaction() as db:
             db.execute("DROP TABLE receipt_corrections")
+            for column in ("gateway_observed", "gateway_receipt", "gateway_pending"):
+                db.execute(f"ALTER TABLE reservations DROP COLUMN {column}")
             db.execute("UPDATE reservations SET receipt = ' gateway: one ' WHERE case_id = 'case-a'")
             db.execute("PRAGMA user_version = 1")
 
@@ -273,6 +308,26 @@ class AccountTest(TestCase):
         self.assertEqual(reopened.status()["reservations"][0]["receipt"], "gateway:one")
         with self.assertRaisesRegex(BudgetError, "já atribuído"):
             reopened.stage("run", "case-b", amount=Decimal("0.25"), evidence="gateway:one ")
+
+
+    def test_lower_gateway_receipt_arriving_after_manual_preserves_both_and_cannot_be_reused(self):
+        account = self.account(previous="1")
+        claim(account, "run", ("case-a", "case-b"))
+        for case_id in ("case-a", "case-b"):
+            account.reserve("run", case_id, PER_REQUEST)
+            account.mark_dispatched("run", case_id)
+        account.reconcile({"unit": "USD", "cost_usd": "0.2", "run_id": "run",
+                           "case_id": "case-a", "reference": "dashboard/first"})
+        account.stage("run", "case-a", amount=Decimal("0.1"), evidence=" gateway: second ")
+        account.complete_case("run", "case-a")
+        status = account.status()
+        self.assertEqual(status["accounted_usd"], "2.6004736")
+        original = status["reservations"][0]
+        self.assertEqual(original["receipt"], "dashboard/first")
+        self.assertEqual((original["gateway_receipt"], original["gateway_observed"]), ("gateway:second", "0.1"))
+        with self.assertRaisesRegex(BudgetError, "já atribuído"):
+            account.stage("run", "case-b", amount=Decimal("0.1"), evidence="gateway:second")
+        self.assertEqual(account.status()["accounted_usd"], "2.6004736")
 
     def test_over_reservation_reconciliation_ledgers_cost_and_freezes_after_restart(self):
         account = self.account(previous="8")
@@ -321,8 +376,11 @@ class ExecutorTest(TestCase):
         args = Namespace(mode="real", config=REAL_EXAMPLE, output=self.output / "plan",
                          account=self.db, account_id="nonexistent", cap_usd=Decimal("10"),
                          dry_run=True, manifest=None, confirm_execution=False)
-        with mock.patch("execute.run_batch") as batch, mock.patch.object(Account, "transaction") as database:
+        with (mock.patch("execute.run_batch") as batch,
+              mock.patch.object(Account, "transaction") as database,
+              mock.patch("execute.credential_present") as credential):
             run_evaluation(args)
+        credential.assert_not_called()
         batch.assert_not_called()
         database.assert_not_called()
         self.assertFalse(self.db.exists())
@@ -341,7 +399,9 @@ class ExecutorTest(TestCase):
 
     def test_full_fixture_can_complete_with_per_case_reservation_and_retains_c02_decisions(self):
         account, args = self.setup_run()
-        run_evaluation(args)
+        with mock.patch("execute.credential_present") as credential:
+            run_evaluation(args)
+        credential.assert_not_called()
         report_path = args.output / "report.json"
         c01.verify_report(report_path, "observed-total-1.1")
         report = c01.read(report_path)
@@ -474,6 +534,10 @@ class ExecutorTest(TestCase):
         args.output = self.output / "retry"
         with self.assertRaisesRegex(BudgetError, "já usados"):
             run_evaluation(args, fixture_command=self.command("crash"))
+        orphan = status["reservations"][-1]
+        reopened.reconcile({"unit": "USD", "cost_usd": "0.001", "reference": "dashboard/orphan",
+                              "run_id": orphan["run_id"], "case_id": orphan["case_id"]})
+        self.assertEqual(reopened.status()["accounted_usd"], "0.002613")
 
     def test_observed_violation_retains_cost_and_freezes_before_next_dispatch(self):
         account, args = self.setup_run()
@@ -552,6 +616,136 @@ class ExecutorTest(TestCase):
             run_evaluation(args)
         batch.assert_not_called()
         self.assertEqual(account.status()["runs"], [])
+
+
+    def test_late_parse_and_late_body_preserve_timeout_and_freeze_known_excess(self):
+        output = self.output
+        for scenario in ("late-parse", "late-body"):
+            with self.subTest(scenario=scenario):
+                self.db = self.scratch / f"{scenario}.sqlite3"
+                self.output = output / scenario
+                self.output.mkdir()
+                account, args = self.setup_run(previous="7.10")
+                with self.assertRaisesRegex(BudgetError, "acima da reserva"):
+                    run_evaluation(args, fixture_command=self.command(scenario))
+                self.prefix(args, completed=1)
+                observation, = c01.read_records(args.output / "verified_observations.jsonl")
+                self.assertEqual({choice["reason"] for choice in observation["choices"].values()}, {"timeout"})
+                self.assertEqual(observation["request_usage"][0]["observed_api_usd"], 2.25)
+                status = account.status()
+                self.assertEqual(status["accounted_usd"], "9.35")
+                self.assertIn("acima da reserva", status["frozen_reason"])
+                self.assertEqual(status["reservations"][0]["gateway_usage"], {"cost_usd": "2.25"})
+
+    def test_low_cost_received_with_timeout_holds_reserve_until_explicit_receipt(self):
+        account, args = self.setup_run(previous="7.10")
+        with self.assertRaisesRegex(BudgetError, "USD inconciliável automaticamente após timeout"):
+            run_evaluation(args, fixture_command=self.command("late-low"))
+        self.prefix(args, completed=1)
+        status = account.status()
+        row, = status["reservations"]
+        self.assertEqual((row["state"], row["observed"]), ("staged", "0.000547"))
+        self.assertEqual(status["accounted_usd"], "8.5004736")
+        self.assertIsNone(status["frozen_reason"])
+        account.reconcile({"unit": "USD", "cost_usd": "0.000547", "reference": "dashboard/timeout",
+                           "run_id": row["run_id"], "case_id": row["case_id"]})
+        self.assertEqual(account.status()["accounted_usd"], "7.100547")
+
+    def test_zero_suffix_in_credit_scale_does_not_erase_higher_usd(self):
+        config = self.scratch / "confirmed-sources.json"
+        config.write_text(encode(dict(c01.read(FIXTURE), usage_credits=CREDIT_CONVERSION)), encoding="utf-8")
+        account, args = self.setup_run(previous="7.10", config=config)
+        with self.assertRaisesRegex(BudgetError, "acima da reserva"):
+            run_evaluation(args, fixture_command=self.command("precision"))
+        self.prefix(args, completed=1)
+        status = account.status()
+        self.assertEqual(status["accounted_usd"], "9.35")
+        row, = status["reservations"]
+        self.assertIsNone(row["gateway_pending"])
+        self.assertEqual(row["observed"], "2.25")
+        self.assertEqual(Decimal(row["gateway_usage"]["converted_credits_usd"]), Decimal("0.0005"))
+
+    def test_larger_unrepresentable_credit_holds_reserve_without_erasing_usd(self):
+        config = self.scratch / "confirmed-sources.json"
+        config.write_text(encode(dict(c01.read(FIXTURE), usage_credits=CREDIT_CONVERSION)), encoding="utf-8")
+        account, args = self.setup_run(previous="7.10", config=config)
+        with self.assertRaisesRegex(BudgetError, "precisão aceita"):
+            run_evaluation(args, fixture_command=self.command("precision-block"))
+        self.prefix(args, completed=1)
+        status = account.status()
+        row, = status["reservations"]
+        self.assertEqual(row["observed"], "0.000547")
+        self.assertGreater(Decimal(row["gateway_pending"]), Decimal("0.2"))
+        self.assertEqual(status["accounted_usd"], "8.5004736")
+        self.assertIsNone(status["frozen_reason"])
+        receipt = {"unit": "USD", "cost_usd": "0.2", "reference": "dashboard/rounding",
+                   "run_id": row["run_id"], "case_id": row["case_id"]}
+        with self.assertRaisesRegex(BudgetError, "inferior ao custo informado"):
+            account.reconcile(receipt)
+        account.reconcile(dict(receipt, cost_usd="0.200000000000000000000000000001"))
+        self.assertIsNone(account.status()["reservations"][0]["gateway_pending"])
+
+    def test_gateway_cost_after_in_flight_manual_receipt_combines_both_without_duplicate_charge(self):
+        account, args = self.setup_run(previous="8")
+        with self.assertRaisesRegex(BudgetError, "acima da reserva"):
+            run_evaluation(args, fixture_command=self.command("manual-first"))
+        self.prefix(args, completed=1)
+        status = account.status()
+        row, = status["reservations"]
+        self.assertEqual((row["observed"], row["receipt"]), ("0.001", "dashboard/in-flight"))
+        self.assertEqual((row["gateway_observed"], row["gateway_receipt"]), ("2.25", "gateway:synthetic-one"))
+        self.assertEqual(row["gateway_usage"], {"cost_usd": "2.25"})
+        self.assertEqual(status["accounted_usd"], "10.25")
+        self.assertIn("acima do teto global", status["frozen_reason"])
+        with self.assertRaisesRegex(BudgetError, "conta congelada"):
+            claim(account, "after-response")
+
+    def test_real_credential_check_obeys_gates_and_preserves_unclaimed_manifest(self):
+        account = Account.initialize(self.db, scope="fixture", cap="10", previous_spend="0")
+        config = self.scratch / "synthetic-real-settings.json"
+        settings = dict(c01.read(REAL_EXAMPLE), billable_limits_confirmed=True, tariff_verified=True)
+        config.write_text(encode(settings), encoding="utf-8")
+        args = Namespace(mode="real", config=config, output=self.output / "run", account=self.db,
+                         account_id=account.id, cap_usd=Decimal(10), dry_run=False,
+                         manifest=self.scratch / "manifest.json", confirm_execution=True)
+        plan = Plan("real", "c05-offline", config)
+        manifest = {"enabled": True, "manifest_id": "offline-check",
+                    "binding": plan.bound_account(account, args.cap_usd)}
+        # O banco continua fixture e o runner é substituído antes de iniciar qualquer adaptador.
+        with (mock.patch("execute.resolve_account", return_value=account),
+              mock.patch("execute.credential_present", return_value=False) as credential,
+              mock.patch("execute.run_batch", side_effect=BudgetError("despacho simulado")) as batch):
+            args.manifest.write_text(encode(dict(manifest, enabled=False)), encoding="utf-8")
+            with self.assertRaisesRegex(BudgetError, "manifesto desabilitado"):
+                run_evaluation(args)
+            credential.assert_not_called()
+
+            args.manifest.write_text(encode(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(BudgetError, "credencial local Feita ausente"):
+                run_evaluation(args)
+            self.assertFalse(args.output.exists())
+            self.assertEqual(account.status()["runs"], [])
+            self.assertEqual(account.status()["reservations"], [])
+            batch.assert_not_called()
+
+            credential.return_value = True
+            with self.assertRaisesRegex(BudgetError, "despacho simulado"):
+                run_evaluation(args)
+            batch.assert_called_once()
+            self.assertEqual(len(account.status()["runs"]), 1)
+            self.assertEqual(account.status()["reservations"], [])
+
+            credential.reset_mock()
+            args.output = self.output / "replay"
+            with self.assertRaisesRegex(BudgetError, "vinculação já usados"):
+                run_evaluation(args)
+            credential.assert_not_called()
+
+    def test_credential_presence_uses_only_non_blank_environment_value(self):
+        for environment, verdict in (({}, False), ({"FEITA_API_KEY": " \t"}, False),
+                                     ({"FEITA_API_KEY": "fixture-only"}, True)):
+            with mock.patch("execute.os", SimpleNamespace(environ=environment)):
+                self.assertEqual(credential_present(), verdict)
 
     def test_observed_cost_retains_exact_numeric_json_and_flags_token_limit(self):
         raw = (b'{"id":"abc","usage":{"prompt_tokens":1024001,"completion_tokens":20,'

@@ -149,7 +149,7 @@ def run_batch(inputs, config, report, catalog, validation, journal, policy, *,
                         c01.verify_observation(obs, missing, report, catalog)
                 journal.complete(d, obs)
                 if after_candidate is not None and obs is not None and obs["origin"] == "candidate":
-                    after_candidate(item)
+                    after_candidate(item, obs)
             proc.stdin.close()
             responses.finish()
             if proc.wait(timeout=5):

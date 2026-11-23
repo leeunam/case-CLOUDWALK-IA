@@ -8,7 +8,6 @@ import os
 from pathlib import Path
 import platform
 import sys
-import time
 
 sys.dont_write_bytecode = True
 from budget import BudgetError, usd
@@ -53,6 +52,7 @@ class GatewayUsage:
     amount: Decimal | None = None
     receipt: str | None = None
     violation: str | None = None
+    pending: Decimal | None = None
     evidence: dict = field(default_factory=dict)
 
 
@@ -97,6 +97,7 @@ def observed_cost(raw, settings, run_id, case_id, reservation):
     if conversion and conversion["confirmed"] and usage.get("credits_unit", "credits") == "credits":
         credits = nonnegative_decimal(usage.get("credits"))
         if credits is not None:
+            result.evidence["credits"] = str(credits)
             components = credits.as_tuple()
             # Deslocamento decimal exato para a taxa documentada de US$ 0,01 por crédito.
             try:
@@ -104,9 +105,10 @@ def observed_cost(raw, settings, run_id, case_id, reservation):
                                      components.exponent + USD_PER_CREDIT.as_tuple().exponent))
             except InvalidOperation:
                 converted = None
+                # Se o expoente já era mínimo, a conversão positiva é menor que a unidade aceita.
+                result.pending = Decimal("1e-30") if credits else None
             if converted is not None:
                 candidates["converted_credits_usd"] = converted
-                result.evidence["credits"] = str(credits)
 
     verified = []
     for name, candidate in candidates.items():
@@ -116,9 +118,14 @@ def observed_cost(raw, settings, run_id, case_id, reservation):
         except BudgetError:
             if candidate > reservation:
                 violations.append(f"custo USD {candidate} acima da reserva {reservation}")
-    result.violation = "; ".join(violations) or None
-    if verified and len(verified) == len(candidates):
-        result.amount = max(verified)
+    result.violation = ". ".join(violations) or None
+    result.amount = max(verified, default=None)
+    if candidates or result.pending is not None:
+        possible = [*candidates.values()]
+        if result.pending is not None:
+            possible.append(result.pending)
+        highest = max(possible)
+        result.pending = highest if result.amount is None or highest > result.amount else None
         request_id = response.get("id")
         if isinstance(request_id, str) and request_id.strip():
             result.receipt = f"gateway:{request_id.strip()}"
@@ -143,13 +150,22 @@ def serve(args, transport=None):
     instructions = "\n\n".join(c01.source_path(plan.report["sources"][key]).read_text(encoding="utf-8")
                                 for key in ("prompt", "rubric"))
     gateway = transport or (fixture_gateway if args.mode == "fixture" else FeitaTransport())
-    captured = None
+    usage = None
 
     def capture(body, deadline, dispatched):
-        nonlocal captured
-        result = gateway(body, deadline, dispatched)
-        if time.monotonic() < deadline:
-            captured = result[1]
+        nonlocal usage
+        sent = False
+
+        def mark_sent():
+            nonlocal sent
+            sent = True
+            dispatched()
+
+        result = gateway(body, deadline, mark_sent)
+        if sent:
+            usage = observed_cost(result[1], budget.settings, run_id, case_id, plan.settings.reservation)
+            account.stage(run_id, case_id, amount=usage.amount, evidence=usage.receipt,
+                          violation=usage.violation, gateway_usage=usage.evidence, pending=usage.pending)
         return result
 
     budget = RequestBudget(account, plan)
@@ -162,13 +178,9 @@ def serve(args, transport=None):
         case_id = item["id"]
         if plan.candidates.get(case_id) != item:
             raise BudgetError("caso ou conteúdo fora da projeção final autorizada")
-        captured = None
+        usage = None
         observation = adapter.classify(item)
-        timed_out = any(choice["reason"] == "timeout" for choice in observation["choices"].values())
-        if captured is not None and observation["requests"] == 1 and not timed_out:
-            usage = observed_cost(captured, budget.settings, run_id, case_id, plan.settings.reservation)
-            account.stage(run_id, case_id, amount=usage.amount, evidence=usage.receipt,
-                          violation=usage.violation, gateway_usage=usage.evidence)
+        if usage is not None:
             observation["request_usage"][0]["observed_api_usd"] = numeric_cost(usage.amount)
         print(encode(observation), flush=True)
     final = os.environ.get("CLASSIFICATION_FINAL_FILE")

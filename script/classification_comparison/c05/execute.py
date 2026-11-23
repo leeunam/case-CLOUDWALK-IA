@@ -50,6 +50,10 @@ def write_plan(output, plan, args, account, manifest_sha):
                                                            binding=binding))
 
 
+def credential_present():
+    return bool(os.environ.get("FEITA_API_KEY", "").strip())
+
+
 def run_evaluation(args, *, fixture_command=None):
     if args.mode not in {"real", "fixture"} or (args.mode == "real" and fixture_command is not None):
         raise BudgetError("transporte de teste só é aceito no modo fixture")
@@ -64,10 +68,17 @@ def run_evaluation(args, *, fixture_command=None):
 
     manifest_id, manifest_sha, binding_sha = plan.authorize(args.manifest, account, args.cap_usd, args.confirm_execution)
     account.validate(args.cap_usd)
-    write_plan(output, plan, args, account, manifest_sha)
+    if output.exists():
+        raise FileExistsError("diretório de saída já existe")
+
+    def prepare():
+        if args.mode == "real" and not credential_present():
+            raise BudgetError("credencial local Feita ausente")
+        write_plan(output, plan, args, account, manifest_sha)
+
     run_id = plan.report["run_id"]
     account.claim(run_id, manifest_id, manifest_sha, binding_sha,
-                  dict(plan.bound_account(account, args.cap_usd), settings=plan.settings.data))
+                  dict(plan.bound_account(account, args.cap_usd), settings=plan.settings.data), prepare=prepare)
     adapter = fixture_command or [sys.executable, "-B", str(HERE / "final_adapter.py")]
     config = {"identity": plan.identity, "contract_version": PROFILE.ipc_version,
               "command": [*adapter, "--mode", args.mode, "--config", str(args.config.resolve()),
@@ -81,8 +92,9 @@ def run_evaluation(args, *, fixture_command=None):
     def reserve(item):
         account.reserve(run_id, item["id"], plan.settings.reservation)
 
-    def settle(item):
-        account.complete_case(run_id, item["id"])
+    def settle(item, observation):
+        timed_out = any(choice["reason"] == "timeout" for choice in observation["choices"].values())
+        account.complete_case(run_id, item["id"], timed_out=timed_out)
 
     finished = False
     try:
