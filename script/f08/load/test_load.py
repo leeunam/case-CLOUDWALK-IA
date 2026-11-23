@@ -17,6 +17,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 from protocol import BRANDS, DIRECTORY, KINDS, append, bytes_json, plan, write_json
+from reanalyze_r02 import compare_fields
 from report import chat_summary, distribution, human_summary, index_cases, publish, reconcile, render, resource_summary, times
 from run import Blocked, arguments, configurations, console, main, round_run, Stack, RESERVATION
 
@@ -388,6 +389,29 @@ class ReconciliationTests(unittest.TestCase):
         self.assertEqual(report["kafka"]["repeated_records_observed"], 0)
         self.assertIn("leitura de eventos Kafka incompleta", report["measurement_gaps"])
 
+    def test_dead_letters_and_causal_offsets_count_distinct_positions(self):
+        request, result = self.records()[:2]
+        failure = dict(request, topic="agent.failures", event_id="dead-id")
+        for offset, count in ((0, 1), (1, 2)):
+            with self.subTest(offset=offset):
+                report, turn = self.aggregate(records=[request, result, dict(result, offset=offset),
+                                                       failure, dict(failure, offset=offset)])
+                kafka = report["kafka"]
+                self.assertEqual(kafka["evidence"]["records_read"], 5)
+                self.assertEqual(kafka["dead_letter_records_observed"], count)
+                self.assertEqual(kafka["distinct_dead_letter_event_ids"], 1)
+                self.assertEqual(turn["kafka_offsets"]["agent.events"],
+                                 [{"partition": 0, "offset": n} for n in range(count)])
+                self.assertEqual("leitura de eventos Kafka incompleta" in report["measurement_gaps"], offset == 0)
+
+    def test_comparison_detects_missing_section_and_excludes_publish_metadata(self):
+        rates = {"accepted_initial_per_s": 5}
+        original = {"rates": rates, "state": "aprovado", "revision": "base", "units": {}}
+        self.assertEqual(compare_fields(original, {"state": "aprovado"}), (["rates"], []))
+        self.assertEqual(compare_fields(original, {"state": "aprovado", "rates": rates}), ([], []))
+        self.assertEqual(compare_fields(original, {"state": "aprovado", "rates": {}}),
+                         (["rates.accepted_initial_per_s"], []))
+
     def chat_report(self, cases, **changes):
         write = {"type": "chat_write", "client": 1, "key": "key", "source_event_id": self.body["source_event_id"],
                  "channel_id": "channel", "status": 0, "case_id": None, "correlation_id": None,
@@ -422,6 +446,7 @@ class ReconciliationTests(unittest.TestCase):
                 report, write = self.chat_report(cases)
                 self.assertEqual(write["entry_count"], expected)
                 self.assertIsNone(write["stored_case_id"])
+                self.assertEqual(report["integrity"]["unplanned_entries"], [])
                 self.assertEqual(report["integrity"]["persisted_without_http_202"], 0)
                 self.assertEqual(report["integrity"]["unattributed_message_count"], 2 * expected)
                 self.assertEqual("múltiplas entradas SQL para a identidade de uma escrita de chat"

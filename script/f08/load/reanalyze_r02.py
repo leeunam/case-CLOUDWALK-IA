@@ -14,12 +14,10 @@ def digest(raw):
     return hashlib.sha256(raw).hexdigest()
 
 
-def compare(directory):
-    read = lambda name: json.loads((directory / name).read_bytes())
-    original, manifest, plan = read("report.json"), read("manifest.json"), read("plan.json")
-    events = list(console(directory / "k6-console.jsonl"))
-    turns, kafka, cases = evidence(directory, manifest, plan, events)
-    updated = summarize(directory, manifest, plan, events, turns, kafka, cases)
+PUBLISH_METADATA = {"parameters", "revision", "run_id", "scenario", "schema_version", "units", "window_utc"}
+
+
+def compare_fields(original, updated):
     changed, added = [], []
 
     def inspect(before, after, path):
@@ -35,7 +33,17 @@ def compare(directory):
         elif before != after:
             changed.append(path)
 
-    inspect({k: original[k] for k in updated if k in original}, json.loads(json.dumps(updated)), "")
+    inspect({k: value for k, value in original.items() if k not in PUBLISH_METADATA}, json.loads(json.dumps(updated)), "")
+    return changed, added
+
+
+def compare(directory):
+    read = lambda name: json.loads((directory / name).read_bytes())
+    original, manifest, plan = read("report.json"), read("manifest.json"), read("plan.json")
+    events = list(console(directory / "k6-console.jsonl"))
+    turns, kafka, cases = evidence(directory, manifest, plan, events)
+    updated = summarize(directory, manifest, plan, events, turns, kafka, cases)
+    changed, added = compare_fields(original, updated)
     original_turns = list(rows(directory / "reconciliation.jsonl"))
     different = sum(a != b for a, b in zip(original_turns, turns)) + abs(len(original_turns) - len(turns))
     return {"run_id": manifest["run_id"], "original": original["state"], "reanalisado": updated["state"],

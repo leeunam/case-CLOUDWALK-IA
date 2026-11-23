@@ -139,12 +139,16 @@ def kafka_offsets(row, records_by_id):
         ("agent.requests", row["request_event_id"], "agent.turn.requested"),
         ("agent.events", row["expected_result_event_id"], row["expected_result_type"]),
     ):
-        offsets[topic] = [{"partition": entry["partition"], "offset": entry["offset"]}
-                          for entry in records_by_id.get((topic, event_id), [])
-                          if event_id and entry.get("event_type") == event_type
-                          and all(row[k] and entry.get(k) == row[k] for k in ("turn_id", "case_id", "correlation_id"))
-                          and (topic == "agent.requests" or entry.get("request_event_id") == row["request_event_id"])
-                          and isinstance(entry.get("partition"), int) and isinstance(entry.get("offset"), int)]
+        matching_positions = (
+            (entry["partition"], entry["offset"])
+            for entry in records_by_id.get((topic, event_id), [])
+            if event_id and entry.get("event_type") == event_type
+            and all(row[k] and entry.get(k) == row[k] for k in ("turn_id", "case_id", "correlation_id"))
+            and (topic == "agent.requests" or entry.get("request_event_id") == row["request_event_id"])
+            and isinstance(entry.get("partition"), int) and isinstance(entry.get("offset"), int)
+        )
+        offsets[topic] = [{"partition": partition, "offset": offset}
+                          for partition, offset in dict.fromkeys(matching_positions)]
     return offsets
 
 
@@ -188,7 +192,9 @@ def evidence(output, manifest, plan, events):
     for event in events:
         if event["type"] == "chat_write":
             source = event["source_event_id"]
-            matching = existing.get((event["channel_id"], source), [])
+            identity = (event["channel_id"], source)
+            known_entries.add(identity)
+            matching = existing.get(identity, [])
             if len(matching) == 1:
                 extra_sources[matching[0][0]["case_id"]].add(source)
     for event in rows(output / "human.jsonl"):
@@ -643,7 +649,7 @@ def summarize(output, manifest, plan, events, reconciled, kafka, cases):
                   "repeated_ids": [{"topic": topic, "event_id": event, "copies": count}
                                    for (topic, event), count in duplicates.items() if count > 1],
                   "distinct_dead_letter_event_ids": len(failure_offsets),
-                  "dead_letter_records_observed": sum(row["topic"] == "agent.failures" for row in kafka),
+                  "dead_letter_records_observed": sum(topic == "agent.failures" for topic, _, _ in captured_positions),
                   "evidence": manifest.get("observation", {}).get("kafka_records")} if window else None,
         "http": {"initial_and_followup_reqs": len(emissions) + second_metrics["offered"],
                  "initial_and_followup_non_202": initial_metrics["non_202"] + second_metrics["non_202"]}
