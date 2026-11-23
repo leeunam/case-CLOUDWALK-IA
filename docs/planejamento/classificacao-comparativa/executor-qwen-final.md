@@ -64,6 +64,13 @@ Atualizar `docs/c05.md` com comandos offline, configuração e limitações.
    manter a reserva. Estimativa não libera saldo. Conciliação posterior precisa
    de recibo/atribuição explícitos e não pode liquidar duas vezes ou ocultar
    custo acima do reservado. Violação congela próximos despachos e fica visível.
+   Como alternativa pequena, aceitar `usage.credits` com fonte, confirmação e
+   conversão explícitas: a página oficial documenta esse campo e informa que
+   um crédito equivale a US$ 0,01. Não inferir daí a unidade de `usage.cost`.
+   Converter com Decimal, preservar a evidência original e, se duas fontes
+   monetárias verificadas existirem, contabilizar o maior valor. Créditos
+   ausentes/inválidos não viram custo zero. A conversão fica desligada no
+   exemplo real até confirmação no manifesto. Cobrir essas condições nos testes.
 7. Não exigir reservar antecipadamente o pior custo das 44 chamadas juntas.
    Aplicar a guarda antes de cada despacho; saldo insuficiente interrompe com
    prefixo auditável da C02 e motivo financeiro, sem inferir o restante nem
