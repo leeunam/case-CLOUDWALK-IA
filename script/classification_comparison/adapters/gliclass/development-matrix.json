@@ -1,0 +1,74 @@
+{
+  "version": "1.0.0",
+  "scope": "development_only",
+  "profiles": {
+    "A": {
+      "config": "real-dev-2048.json",
+      "config_sha256": "b55b79a6054e921620b20429e2def0cf74249c0b15acd8333304b8deb96d8f73",
+      "prompt": {
+        "path": "script/classification_comparison/adapters/gliclass/prompt.json",
+        "version": "1.1.0",
+        "sha256": "4d391db33a41240d0acd24a518afa569c1176b48875c474334edf056bd786ad9"
+      },
+      "policy": {
+        "path": "script/classification_comparison/adapters/gliclass/policy-dev-2048.json",
+        "version": "1.2.0-dev.1",
+        "sha256": "488bc88dee4195305460c91a5eedf4af0bad93058a77da624f5eb5564be21906"
+      },
+      "threads": 4,
+      "label_representation": "codes",
+      "forward_layout": "separate"
+    },
+    "B": {
+      "config": "real-dev-b.json",
+      "config_sha256": "43450e91043ddcd9aeba592b6a8bba293a14f80939a7252f8ca86b67fe962e81",
+      "prompt": {
+        "path": "script/classification_comparison/adapters/gliclass/prompt-dev-descriptive.json",
+        "version": "1.2.0",
+        "sha256": "e3d8e60a324045d16c797980a1722484b3b9e87fc1bff32d4fa45331ab566b11"
+      },
+      "policy": {
+        "path": "script/classification_comparison/adapters/gliclass/policy-dev-b.json",
+        "version": "1.3.0-dev.b",
+        "sha256": "dd44e3ee3d065e0ec5cb538b011d3250fcb6499cff3acfe992a4445072668027"
+      },
+      "threads": 4,
+      "label_representation": "descriptive",
+      "forward_layout": "separate"
+    },
+    "C": {
+      "config": "real-dev-c.json",
+      "config_sha256": "f707f1b0614a94dda7b451b03a4d1a86546bb86e8e02a6e8591a259a8c88d5aa",
+      "prompt": {
+        "path": "script/classification_comparison/adapters/gliclass/prompt-dev-descriptive.json",
+        "version": "1.2.0",
+        "sha256": "e3d8e60a324045d16c797980a1722484b3b9e87fc1bff32d4fa45331ab566b11"
+      },
+      "policy": {
+        "path": "script/classification_comparison/adapters/gliclass/policy-dev-c.json",
+        "version": "1.3.0-dev.c",
+        "sha256": "723136eee676b2becf1f5ac12d410ddd941536b8cf07a8c2c594df676c95e880"
+      },
+      "threads": 4,
+      "label_representation": "descriptive",
+      "forward_layout": "grouped"
+    },
+    "D": {
+      "config": "real-dev-d.json",
+      "config_sha256": "3f9186d50e13245e7122f23baa62452829fd82cdc0dcc961a36439bd4099dff3",
+      "prompt": {
+        "path": "script/classification_comparison/adapters/gliclass/prompt-dev-descriptive.json",
+        "version": "1.2.0",
+        "sha256": "e3d8e60a324045d16c797980a1722484b3b9e87fc1bff32d4fa45331ab566b11"
+      },
+      "policy": {
+        "path": "script/classification_comparison/adapters/gliclass/policy-dev-d.json",
+        "version": "1.3.0-dev.d",
+        "sha256": "610cc099cd74e4770d9fd26023c98b6e326624dc6b07f51d738cfa60bd86dc9c"
+      },
+      "threads": 2,
+      "label_representation": "descriptive",
+      "forward_layout": "grouped"
+    }
+  }
+}

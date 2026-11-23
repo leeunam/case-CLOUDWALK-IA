@@ -12,7 +12,7 @@ import signal
 import sys
 import time
 
-from model import MODEL, REVISION, ContextOverflow
+from model import LABEL_SEPARATOR, MODEL, REVISION, ContextOverflow
 
 ROOT = Path(__file__).resolve().parents[4]
 FIELDS = ("category", "priority")
@@ -33,11 +33,19 @@ def atomic_json(path, value):
 
 
 @dataclass(frozen=True)
+class Request:
+    text: str
+    labels_by_field: dict
+    prompt: str
+
+
+@dataclass(frozen=True)
 class Context:
     catalog: dict
     prompts: dict
     rubric: str
     policy: dict
+    abstention_descriptions: dict
 
     @classmethod
     def load(cls, env):
@@ -47,10 +55,33 @@ class Context:
         policy = read_json(env["CLASSIFICATION_POLICY"])
         if policy["examples"]:
             raise ValueError("baseline exige zero exemplos")
-        return cls(catalog, prompts, rubric, policy)
+        representation = policy.get("label_representation", "codes")
+        layout = policy.get("forward_layout", "separate")
+        if representation not in ("codes", "descriptive") or layout not in ("separate", "grouped"):
+            raise ValueError("representação ou estratégia de forward inválida")
+        descriptions = {}
+        if representation == "descriptive":
+            for field, heading in zip(FIELDS, ("Categoria", "Prioridade"), strict=True):
+                section = rubric.partition(f"\n## {heading}\n")[2].partition("\n## ")[0]
+                definition = re.search(rf"(?m)^- `{ABSTENTION}`: (.*(?:\n[ ]+[^\n]+)*)", section)
+                if not definition:
+                    raise ValueError(f"rubrica sem descrição de abstenção para {field}")
+                descriptions[field] = " ".join(definition.group(1).split())
+        return cls(catalog, prompts, rubric, policy, descriptions)
 
-    def request(self, item, field):
-        labels = {code: code for code in (*self.catalog[field], ABSTENTION)}
+    def groups(self, missing):
+        if self.policy.get("forward_layout") == "grouped" and len(missing) == 2:
+            return [tuple(missing)]
+        return [(field,) for field in missing]
+
+    def request(self, item, fields):
+        labels_by_field = {}
+        for field in fields:
+            if self.abstention_descriptions:
+                descriptions = {**self.catalog[field], ABSTENTION: self.abstention_descriptions[field]}
+                labels_by_field[field] = {f"{code}: {description}": code for code, description in descriptions.items()}
+            else:
+                labels_by_field[field] = {code: code for code in (*self.catalog[field], ABSTENTION)}
         received = {
             key: {"valor": value, "significado": self.catalog[key][value]}
             if key not in item["missing"] else {"valor": value, "significado": "campo ausente"}
@@ -61,12 +92,13 @@ class Context:
             "campos_recebidos": received, "catalogo": self.catalog,
         }
         context_json = json.dumps(context, ensure_ascii=False, separators=(",", ":"))
+        task, instructions = (fields[0], "context") if len(fields) == 1 else ("both", "both_context")
         prompt = (
-            f"{self.prompts[field]}\n{self.prompts['context']}\n"
+            f"{self.prompts[task]}\n{self.prompts[instructions]}\n"
             f"Contexto do atendimento (JSON):\n{context_json}\n"
             f"Rubrica comum (integral):\n{self.rubric}\nRelato:\n"
         )
-        return item["text"], labels, prompt
+        return Request(item["text"], labels_by_field, prompt)
 
     def eligible(self, item):
         if item.get("contract_version") != VERSION or item.get("catalog") != self.catalog:
@@ -126,10 +158,33 @@ def choice_from_output(output, labels, score_kind):
 
 
 def infer(pipeline, request, policy):
-    text, labels, prompt = request
-    result = pipeline(text, list(labels), prompt=prompt, examples=None,
-                      batch_size=1, threshold=policy["pipeline_threshold"])
-    return choice_from_output(result, labels, policy["score_kind"])
+    by_field = request.labels_by_field
+    options = dict(prompt=request.prompt, examples=None, batch_size=1, threshold=policy["pipeline_threshold"])
+    if len(by_field) == 1:
+        field, labels = next(iter(by_field.items()))
+        result = pipeline(request.text, list(labels), **options)
+        return {field: choice_from_output(result, labels, policy["score_kind"])}
+
+    hierarchy = {field: list(labels) for field, labels in by_field.items()}
+    result = pipeline(request.text, hierarchy, classification_type="multi-label",
+                      return_hierarchical=False, **options)
+    flat = {field: {f"{field}{LABEL_SEPARATOR}{label}": code for label, code in labels.items()}
+            for field, labels in by_field.items()}
+    if result is None or (isinstance(result, list) and result in ([], [[]])):
+        return {field: choice_from_output(result, labels, policy["score_kind"]) for field, labels in flat.items()}
+
+    # A forma plana preserva nomes originais e evita o zero implícito do retorno hierárquico.
+    owners = {label: field for field, labels in flat.items() for label in labels}
+    rows = {field: [] for field in by_field}
+    if not isinstance(result, list) or len(result) != 1 or not isinstance(result[0], list):
+        return {field: invalid_output(result, labels) for field, labels in flat.items()}
+    for row in result[0]:
+        label = row.get("label") if isinstance(row, dict) else None
+        if not isinstance(label, str) or label not in owners:
+            return {field: invalid_output(result, labels) for field, labels in flat.items()}
+        rows[owners[label]].append(row)
+    return {field: choice_from_output([rows[field]], labels, policy["score_kind"])
+            for field, labels in flat.items()}
 
 
 def worker_main(parent, request_pipe, result_pipe, unused_request, unused_result, loader, context):
@@ -139,16 +194,23 @@ def worker_main(parent, request_pipe, result_pipe, unused_request, unused_result
     if ctypes.CDLL(None, use_errno=True).prctl(1, signal.SIGKILL, 0, 0, 0) != 0 or os.getppid() != parent:
         return
     os.dup2(sys.stderr.fileno(), sys.stdout.fileno())
+    warming = True
+
+    def on_forward():
+        if not warming:
+            result_pipe.send(("forward", None))
+
     try:
         started = time.monotonic()
-        pipeline, metadata = loader(context.policy)
+        pipeline, metadata = loader(context.policy, on_forward)
         loaded = time.monotonic()
         sample = dict(brand="marca-sintetica", text="Mensagem sintética usada para aquecer o runtime.",
                       received={}, missing=list(FIELDS))
-        for field in FIELDS:
-            observed = infer(pipeline, context.request(sample, field), context.policy)
-            if observed["status"] == "invalid":
+        for fields in context.groups(FIELDS):
+            observed = infer(pipeline, context.request(sample, fields), context.policy)
+            if any(choice["status"] == "invalid" for choice in observed.values()):
                 raise RuntimeError("saída do aquecimento fora da interface")
+        warming = False
         result_pipe.send(dict(metadata, load_ms=(loaded - started) * 1000,
                               warmup_ms=(time.monotonic() - loaded) * 1000))
     except Exception as exc:
@@ -161,14 +223,14 @@ def worker_main(parent, request_pipe, result_pipe, unused_request, unused_result
             return
         started = time.monotonic()
         try:
-            choice = infer(pipeline, request, context.policy)
+            choices = infer(pipeline, request, context.policy)
         except ContextOverflow as exc:
             print(f"C04 limite de representação: {exc}", file=sys.stderr, flush=True)
-            choice = error("adapter_error")
+            choices = {field: error("adapter_error") for field in request.labels_by_field}
         except Exception as exc:
             print(f"C04 erro na inferência: {type(exc).__name__}", file=sys.stderr, flush=True)
-            choice = error("adapter_error")
-        result_pipe.send((choice, (time.monotonic() - started) * 1000))
+            choices = {field: error("adapter_error") for field in request.labels_by_field}
+        result_pipe.send(("result", (choices, (time.monotonic() - started) * 1000)))
 
 
 class Worker:
@@ -219,40 +281,52 @@ def observe(item, worker, context, identity, run_id, model, revision):
     policy = context.policy
     deadline = started + (policy["case_timeout_ms"] - policy["response_reserve_ms"]) / 1000
     choices = {}
-    requests = 0
+    requests = questions = 0
+    started_groups = 0
     durations = []
     unavailable = None
-    for field in item["missing"]:
+    for fields in context.groups(item["missing"]):
+        if unavailable is None:
+            if worker.stopped or not worker.process.is_alive():
+                unavailable = "adapter_error"
+            elif time.monotonic() >= deadline:
+                unavailable = "timeout"
         if unavailable:
-            choices[field] = error(unavailable)
+            choices.update({field: error(unavailable) for field in fields})
             continue
-        if worker.stopped or not worker.process.is_alive():
-            unavailable = "adapter_error"
-            choices[field] = error(unavailable)
-            continue
-        if time.monotonic() >= deadline:
-            unavailable = "timeout"
-            choices[field] = error(unavailable)
-            continue
+
+        forwarded = False
         try:
-            worker.requests.send(context.request(item, field))
-            requests += 1
-            choice, duration = worker.receive(deadline)
-            choices[field] = choice
-            durations.append(duration)
+            worker.requests.send(context.request(item, fields))
+            event, payload = worker.receive(deadline)
+            while event == "forward":
+                requests += 1
+                if not forwarded:
+                    questions += len(fields)
+                    started_groups += 1
+                    forwarded = True
+                event, payload = worker.receive(deadline)
+            if event != "result":
+                raise ValueError("evento inesperado do worker")
+            response, duration = payload
+            if not forwarded and any(choice["status"] != "error" for choice in response.values()):
+                raise ValueError("resultado do worker sem forward")
+            choices.update(response)
+            if forwarded:
+                durations.append(duration)
         except TimeoutError:
             unavailable = "timeout"
-            choices[field] = error(unavailable)
-        except (EOFError, OSError, MemoryError):
+        except (EOFError, OSError, MemoryError, ValueError):
             unavailable = "adapter_error"
-            choices[field] = error(unavailable)
+        if unavailable:
+            choices.update({field: error(unavailable) for field in fields})
     real = identity["mode"] == "real"
-    inference_ms = sum(durations) if real and requests and len(durations) == requests else None
+    inference_ms = sum(durations) if real and started_groups and len(durations) == started_groups else None
     return dict(contract_version=VERSION, id=item["id"], run_id=run_id, attempt=1, origin="candidate",
                 identity=identity, returned_model=model, weights_revision=revision, choices=choices,
                 temperature_state="warm" if real and requests else "unknown",
                 elapsed_ms=(time.monotonic() - started) * 1000 if real else None,
-                load_ms=None, inference_ms=inference_ms, requests=requests, questions=requests,
+                load_ms=None, inference_ms=inference_ms, requests=requests, questions=questions,
                 request_usage=[dict(LOCAL_USAGE, observed_api_usd=0 if real else None)
                                for _ in range(requests)])
 

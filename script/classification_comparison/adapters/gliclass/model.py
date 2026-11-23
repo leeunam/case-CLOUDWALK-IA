@@ -14,6 +14,7 @@ SNAPSHOT = HERE / ".cache" / "weights" / REVISION
 MANIFEST = HERE / "snapshot-manifest.json"
 FILES = ("model.safetensors", "config.json", "tokenizer.json", "tokenizer_config.json",
          "special_tokens_map.json", "spm.model", "added_tokens.json")
+LABEL_SEPARATOR = "."
 PINS = {"gliclass": "0.1.22", "torch": "2.12.0+cpu", "transformers": "5.8.1"}
 
 
@@ -75,7 +76,7 @@ def manifest_sha256():
     return hashlib.sha256(MANIFEST.read_bytes()).hexdigest()
 
 
-def load_pipeline(policy):
+def load_pipeline(policy, on_forward=None):
     os.environ.update(HF_HOME=str(HERE / ".cache" / "hf"), HF_HUB_OFFLINE="1",
                       TRANSFORMERS_OFFLINE="1", HF_HUB_DISABLE_IMPLICIT_TOKEN="1",
                       TOKENIZERS_PARALLELISM="false", CUDA_VISIBLE_DEVICES="",
@@ -106,8 +107,10 @@ def load_pipeline(policy):
         raise ValueError("limite de contexto fora das políticas da C04")
     pipeline = ZeroShotClassificationPipeline(
         model, FullTokenizer(tokenizer, limit), classification_type="multi-label",
-        device="cpu", progress_bar=False, max_length=limit,
+        device="cpu", progress_bar=False, max_length=limit, label_separator=LABEL_SEPARATOR,
     )
+    if on_forward is not None:
+        model.register_forward_pre_hook(lambda _model, _args: on_forward())
     return pipeline, {
         "runtime": installed, "weights_sha256": digest, "snapshot_manifest_sha256": manifest_sha256(),
         "context_profile": policy["context_profile"], "configured_context_tokens": limit,
