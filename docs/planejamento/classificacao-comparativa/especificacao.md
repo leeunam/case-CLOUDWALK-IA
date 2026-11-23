@@ -40,9 +40,9 @@ Jev, novos canais reais ou uma plataforma genérica de roteamento entre modelos.
 8. A integração conserva idempotência, versões, descarte auditado de resultados
    tardios e prevalência de uma correção humana posterior.
 
-## Contrato do experimento congelado em C01
+## Contrato do experimento
 
-O [contrato v1.0.0](contratos/README.md) contém JSON Schema, exemplos válidos
+O [contrato v1.1.0](contratos/README.md) contém JSON Schema, exemplos válidos
 e inválidos e semântica única para os dois adaptadores. Ele pertence ao
 experimento, separadamente do contrato HTTP público Rails.
 

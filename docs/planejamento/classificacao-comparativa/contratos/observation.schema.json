@@ -8,6 +8,7 @@
     "id",
     "run_id",
     "attempt",
+    "origin",
     "identity",
     "returned_model",
     "weights_revision",
@@ -25,7 +26,8 @@
     "id": {"$ref": "common.schema.json#/$defs/id"},
     "run_id": {"$ref": "common.schema.json#/$defs/id"},
     "attempt": {"const": 1},
-    "identity": {"$ref": "common.schema.json#/$defs/identity"},
+    "origin": {"enum": ["candidate", "injected_control"]},
+    "identity": {"type": "object"},
     "returned_model": {"anyOf": [{"type": "string", "minLength": 1, "pattern": "\\S"}, {"type": "null"}]},
     "weights_revision": {"anyOf": [{"type": "string", "minLength": 1, "pattern": "\\S"}, {"type": "null"}]},
     "choices": {
@@ -47,6 +49,24 @@
       "items": {"$ref": "#/$defs/request_usage"}
     }
   },
+  "if": {"properties": {"origin": {"const": "injected_control"}}},
+  "then": {
+    "properties": {
+      "identity": {"$ref": "common.schema.json#/$defs/control_identity"},
+      "returned_model": {"type": "null"},
+      "weights_revision": {"type": "null"},
+      "temperature_state": {"const": "unknown"},
+      "elapsed_ms": {"type": "null"},
+      "load_ms": {"type": "null"},
+      "inference_ms": {"type": "null"},
+      "requests": {"const": 0},
+      "questions": {"const": 0},
+      "request_usage": {"maxItems": 0},
+      "version_error_raw": false,
+      "choices": {"additionalProperties": {"properties": {"score": {"type": "null"}}}}
+    }
+  },
+  "else": {"properties": {"identity": {"$ref": "common.schema.json#/$defs/identity"}}},
   "$defs": {
     "choice": {
       "type": "object",

@@ -16,6 +16,7 @@
     "planned_ids",
     "completed_ids",
     "control_ids",
+    "injected_controls",
     "gates",
     "by_field",
     "by_mask",
@@ -83,6 +84,20 @@
     "planned_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/id"}, "uniqueItems": true},
     "control_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/id"}, "uniqueItems": true},
     "completed_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/id"}, "uniqueItems": true},
+    "injected_controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["count", "ids"],
+      "properties": {
+        "count": {"$ref": "common.schema.json#/$defs/count"},
+        "ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/id"}, "uniqueItems": true},
+        "identity": {"$ref": "common.schema.json#/$defs/control_identity"},
+        "policy": {"$ref": "common.schema.json#/$defs/source"}
+      },
+      "if": {"properties": {"count": {"const": 0}}},
+      "then": {"properties": {"ids": {"maxItems": 0}, "identity": false, "policy": false}},
+      "else": {"required": ["identity", "policy"], "properties": {"ids": {"minItems": 1}}}
+    },
     "gates": {
       "type": "object",
       "additionalProperties": false,
@@ -153,7 +168,7 @@
     "latency_p50_ms": {"$ref": "#/$defs/metric"},
     "eligibility": {"enum": ["pass", "fail", "inconclusive"]},
     "usage": {
-      "description": "Execution counters sample attempts; token and charge totals sample individual requests.",
+      "description": "Candidate counters sample candidate attempts; token and charge totals sample individual requests.",
       "type": "object",
       "additionalProperties": false,
       "required": [

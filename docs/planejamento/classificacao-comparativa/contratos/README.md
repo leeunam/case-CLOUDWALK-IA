@@ -1,4 +1,4 @@
-# CLASS-001 · Contratos do experimento 1.0.0
+# CLASS-001 · Contratos do experimento 1.1.0
 
 Um relato sintético produz uma decisão mesmo quando o classificador recebe zero
 chamadas. A chave de uma decisão é o par `(run_id, id)`. A observação da
@@ -10,7 +10,7 @@ adaptadores, com zero exemplos na linha de base.
 | Arquivo do lote | Unidade | Exemplo estático |
 | --- | --- | --- |
 | [input.schema.json](input.schema.json) | Uma entrada por relato | [inputs.jsonl](fixtures/inputs.jsonl) |
-| [observation.schema.json](observation.schema.json) | Uma observação por tentativa, inclusive falhas | [observations.jsonl](fixtures/observations.jsonl) |
+| [observation.schema.json](observation.schema.json) | Uma observação por tentativa com resultado documentado, inclusive erro do adaptador | [observations.jsonl](fixtures/observations.jsonl) |
 | [decision.schema.json](decision.schema.json) | Uma decisão por relato, inclusive controles | [decisions.jsonl](fixtures/decisions.jsonl) |
 | [report.schema.json](report.schema.json) | Um manifesto/relatório JSON por execução | [report.json](fixtures/report.json) |
 
@@ -31,8 +31,11 @@ C02 define a linha de comando e como ligar os processos. Um único processo
 local carrega os pesos uma vez por lote e responde na ordem de entrada. Cada
 processo registra tempo de inicialização/carregamento separado. Processar os
 dois campos de um relato pode envolver uma ou duas perguntas dentro da mesma
-tentativa. Uma falha gera uma observação identificada, inclusive quando não
-houve resposta do fornecedor. Nunca inferir o ID de uma resposta por sua posição.
+tentativa. Quando o adaptador informa uma falha, a observação registra seu
+ID, mesmo que o fornecedor tenha dado timeout. Se o próprio processo cair
+após o despacho, a C02 registra a tentativa interrompida e o uso desconhecido
+em diário/manifesto separado. O prefixo concluído contém somente observações
+recebidas e validadas. O ID acompanha cada resposta.
 
 O avaliador projeta `id`, `text`, `received` e `missing` do dataset, acrescenta
 `contract_version`, a marca fixa `marca-sintetica` e o objeto do catálogo
@@ -56,7 +59,7 @@ para revisão. Dois campos válidos encerram a classificação com zero tentativ
 
 ## Observação e aplicação
 
-A observação identifica modo, fornecedor, modelo solicitado e retornado, revisão
+A observação de origem `candidate` identifica modo, fornecedor, modelo solicitado e retornado, revisão
 dos pesos, versões do adaptador e da política. Um identificador de modelo
 pode ser um alias. Quando houver versão esperada, fixar
 `identity.expected_returned_model` e/ou `identity.expected_weights_revision`
@@ -88,8 +91,8 @@ pergunta, resposta bruta e aplicação.
 Uma saída que omitiu uma escolha é normalizada como `invalid`, com
 `reason: "missing_output"` e `raw: null`. Em erro operacional de um dos campos,
 registrar o erro nele e conservar quaisquer respostas já obtidas nos demais.
-Uma tentativa totalmente sem resposta registra erro em todos os campos
-solicitados. `requests` conta invocações ao fornecedor/motor local.
+Se o adaptador documentar falha de todas as perguntas, registrar erro em todos
+os campos solicitados. `requests` conta invocações ao fornecedor/motor local.
 `questions` conta campos efetivamente perguntados. Uma falha antes do envio
 pode registrar zero para ambos. O protocolo conta uma tentativa nesse caso.
 
@@ -102,9 +105,63 @@ pelo futuro avaliador para reconhecimento bruto de urgência.
 
 `score` omitido ou `null` significa ausência de score. Quando existe, sua
 natureza é `provider_probability` (0 a 1), `ranking` (número da escala do
-modelo) ou `self_report` (texto do fornecedor). O relatório v1.0.0 registra calibração **não avaliada**
+modelo) ou `self_report` (texto do fornecedor). O relatório registra calibração **não avaliada**
 em `score_calibration`. Preservar a escala original. A fixture inclui um ranking
 de 2,7 que não pode ser interpretado como probabilidade.
+
+## Origem e controle de aplicação parcial
+
+`origin` é obrigatório em cada observação. O adaptador produz observações
+`candidate`, inclusive quando ele próprio é uma fixture. Essas observações
+usam `report.identity` e incluem suas medições. O avaliador é a fonte das
+observações `injected_control`. A política de controles fixa a identidade,
+o ID reservado, a entrada e as escolhas. A versão inicial é 1.0.0. [Política de controles](politica-controles.json)
+
+| Elemento | Valor para o controle reservado |
+| --- | --- |
+| Entrada | ID `ctl-injetado-aplicacao-parcial`, texto e `received` de `policy.controls[id]`, catálogo congelado, marca comum, máscara `["category","priority"]` |
+| Origem e identidade | `origin: "injected_control"`, `identity` igual a `policy.identity`, mesmo `run_id` do lote, `attempt: 1` |
+| Escolhas | Copiar `policy.controls[id].choices`. A categoria tem escolha bruta `pix` e a prioridade tem abstenção explícita |
+| Uso e medições | `requests: 0`, `questions: 0`, `request_usage: []`, `temperature_state: "unknown"`. `returned_model`, `weights_revision`, `elapsed_ms`, `load_ms` e `inference_ms` são nulos. Omitir `version_error_raw`. Cada `score` pode ser omitido ou nulo |
+| Decisão | O validador e a regra comum de aplicação produzem `attempts: 1`, `review`, `incomplete_prediction` e ambos os valores aplicados nulos |
+
+Acrescentar o ID reservado a `report.control_ids` e declarar em
+`report.injected_controls` o inventário das injeções concluídas.
+
+```json
+{
+  "count": 1,
+  "ids": ["ctl-injetado-aplicacao-parcial"],
+  "identity": {
+    "mode": "fixture",
+    "name": "controle-aplicacao-parcial",
+    "policy_version": "1.0.0"
+  },
+  "policy": {
+    "path": "docs/planejamento/classificacao-comparativa/contratos/politica-controles.json",
+    "version": "1.0.0",
+    "sha256": "2611786ddde1eb2b064b02f7dda7bb7a0aae06cc8f127a9fc7e8fec14e937fb7"
+  }
+}
+```
+
+Um lote sem injeções registra `{"count":0,"ids":[]}`. A ordem de `ids`
+reproduz o subconjunto reservado de `control_ids` e a ordem das observações
+injetadas. O protocolo congelado fixa o caminho, a versão e o SHA-256 dos
+bytes da política em `control_policy`. Antes de usar a política, conferir seus
+bytes com essa referência. Para uma injeção, o relatório repete os três
+valores. A mesma conferência se aplica a um lote salvo.
+`sources.policy` continua identificando a política do candidato. Os IDs dos
+60 relatos permanecem exclusivos do dataset.
+
+Os totais de tentativas, perguntas, requisições, tokens e custos em `usage`
+usam somente observações `candidate`, inclusive as dos controles atendidos
+pelo adaptador. O controle injetado participa do gate de aplicação parcial.
+No exemplo, nove observações correspondem a oito tentativas do candidato,
+nove requisições, onze perguntas e uma injeção. Os percentis, as fatias e as
+métricas de qualidade do teste usam os relatos concluídos do dataset.
+Os controles completos e inválidos continuam com zero tentativas e zero
+observações. [Exemplo mínimo para C02 e verificações](ajuste-1.1.md)
 
 ## Medições e manifesto
 
@@ -180,10 +237,25 @@ omitidos pode pertencer a ambas as fatias por campo.
 
 Os gates têm populações explícitas no [protocolo](../protocolo-comparacao.md).
 Preservação usa os campos válidos recebidos. Chamadas proibidas usam os controles
-completos/inválidos. Aplicação parcial usa como população os relatos examinados
-para detectar aplicação indevida depois de falha ou abstenção. Os controles
-devem provocar esses caminhos inclusive se o candidato sempre responder com
-códigos válidos. Separar controles das métricas calculadas sobre o teste.
+completos/inválidos.
+
+Para `partial_application_after_abstention_or_error`, contar uma vez cada
+relato com observação concluída que contenha ao menos uma escolha `abstained`,
+`invalid` ou `error`. Esse conjunto inclui as duas origens e coincide com
+as decisões `incomplete_prediction` após validação. Um campo inválido na
+**entrada** bloqueia a tentativa e fica fora da população. O numerador conta
+os relatos dessa população em que algum campo originalmente ausente teve
+valor aplicado. A preservação de um valor fornecido pelo canal fica fora do
+numerador. Se houver população, o gate tem `state: "measured"`, denominador
+igual ao número de relatos e `value` igual ao numerador. Com população vazia,
+registrar `unmeasured`, denominador zero, numerador e valor nulos. O cálculo
+usa todas as decisões concluídas inclusive em um relatório de prefixo.
+
+Na fixture integral há zero violações em sete relatos. Quando somente a
+injeção provoca uma escolha incompleta, há zero violações em um relato.
+O controle misto injetado precisa provar a retenção de uma escolha bruta,
+inclusive se o candidato sempre responder com códigos válidos. Sua ausência
+impede uma decisão de elegibilidade, mesmo que haja abstenções naturais. Separar controles das métricas calculadas sobre o teste.
 O gate de acerto aplicado de cada campo reproduz o estado, o numerador, o
 denominador e o valor da métrica `applied_accuracy` em `by_field`. Com zero
 aplicações em um campo, o gate fica sem medição e a elegibilidade fica
