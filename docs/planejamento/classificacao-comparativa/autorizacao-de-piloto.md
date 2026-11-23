@@ -1,5 +1,7 @@
 # Autorização de um piloto pago
 
+**Registro histórico anterior ao primeiro piloto.** A autorização posterior de até US$ 10 e o recorte de uma requisição estão em [autorização do piloto econômico](autorizacao-piloto-economico.md). O primeiro piloto real foi concluído; [recibo](../../evidencias/c03/piloto-unitario-real.json). O responsável aprovou depois substituir o critério aquecido pelo tempo total da classificação, conforme o [plano prospectivo](plano-latencia-total.md). As condições abaixo explicam a decisão original de configuração.
+
 Decisão técnica do integrador durante a revisão C03, em 23 de novembro de
 2026. A autorização atual continua **pendente**, sem teto ou chamada paga.
 

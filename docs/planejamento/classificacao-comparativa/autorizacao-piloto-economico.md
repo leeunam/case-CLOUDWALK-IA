@@ -23,3 +23,9 @@ A reserva não representa gasto esperado. O payload real será curto, pedirá 12
 Se houver timeout ou cobrança indisponível, a reserva continua comprometida no registro do piloto. Não iniciar outro lote automaticamente nem tratar uso desconhecido como zero. A próxima decisão técnica é analisar o recibo desta tentativa antes de considerar chamadas adicionais dentro do teto total.
 
 O protocolo de qualidade e o exemplo de autorização financeira anteriores permanecem congelados e desabilitados. Esta autorização nova não libera os 36 casos reservados da C05, escolha de vencedor, integração C06 ou implantação.
+
+## Resultado e controle do teto
+
+Uma requisição foi executada, sem repetição: `jev-003` retornou os dois campos corretos em 1,826 s. O painel Feita registrou uma chamada e exibiu custo de aproximadamente US$ 0,000518 (seis casas decimais), compatível com a estimativa de US$ 0,00051765 pelos tokens retornados. O registro local contabiliza conservadoramente US$ 0,000519. A reserva inicial não foi confundida com gasto. [Recibo e limitações](../../evidencias/c03/piloto-unitario-real.json).
+
+O responsável aprovou depois usar tempo total na meta de latência. A implementação desse novo perfil de avaliação é offline e não autoriza outra chamada por si só. O piloto real de um caso permanece com o protocolo registrado no momento de sua coleta.
