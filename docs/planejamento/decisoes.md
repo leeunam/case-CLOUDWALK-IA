@@ -629,6 +629,13 @@ e integração operacional ainda pendentes.
 Especificação, cards SDD, dependências e passagem entre chats estão em
 [CLASS-001](classificacao-comparativa/README.md).
 
+Em 2026-11-23, o responsável delegou expressamente à IA a revisão individual
+dos rótulos restantes. A revisão dos 60 casos foi concluída para referência
+exploratória, preservando oito aprovações diretas e registrando 52 revisões por
+IA delegada. Essa autorização substitui a exigência de revisão humana caso a
+caso, sem aprovar orçamento, vencedor ou protocolo completo. A origem e as
+ressalvas constam no [registro](classificacao-comparativa/revisao-de-rotulos.md).
+
 ## Relações de domínio já confirmadas
 
 O diagrama representa relações de negócio, sem fixar tabelas ou tecnologias.

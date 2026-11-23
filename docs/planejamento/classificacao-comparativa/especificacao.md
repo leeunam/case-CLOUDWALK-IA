@@ -1,14 +1,16 @@
 # CLASS-SPEC-001 — comparação e seleção do classificador
 
-Versão: 0.1, de 2026-11-23. SDD significa **Specification Driven Development**:
+Versão: 0.2, de 2026-11-23. SDD significa **Specification Driven Development**:
 o comportamento e suas provas são definidos antes da implementação.
 
 ## Estado e objetivo
 
 A comparação **Qwen pela Feita × GLiClass local** foi escolhida pelo responsável.
-O vencedor, os limites de aceitação, os dados finais revisados e o orçamento de
-execução ainda não foram aprovados. C01 resolve esses pontos antes de liberar
-as tarefas dependentes. Esta especificação não declara um vencedor antecipado.
+O vencedor, os limites de aceitação, a separação dos dados e o orçamento de
+execução ainda não foram aprovados. A revisão dos 60 rótulos está documentada:
+oito casos aprovados diretamente pelo responsável e 52 pela IA sob delegação
+explícita, para referência exploratória. C01 resolve os pontos restantes antes
+de liberar as tarefas dependentes. Esta especificação não declara um vencedor.
 
 O objetivo é escolher um classificador para completar categoria e prioridade
 ausentes, com acerto, tratamento de urgência, abstenção, latência e custo
@@ -64,12 +66,16 @@ e a conversão de saída segundo o schema congelado.
 - A base existente tem 60 relatos, 20 com categoria omitida, 20 com prioridade
   omitida e 20 com ambas omitidas. Versão 1.1.0, SHA-256
   `0e7e4c342c2a39cefd89855d8c0513f447d7878303eb4091488ca8af78928880`.
-- Esse conjunto é provisório. Os campos ausentes de `jev-001`, `jev-002`,
-  `jev-003`, `jev-005`, `jev-008`, `jev-009`, `jev-041` e `jev-044` possuem
-  aprovação humana registrada na [revisão parcial](revisao-de-rotulos.md).
-  Os outros 52 relatos aguardam revisão.
-- C01 registra a revisão humana de todos os rótulos e justificativas. Alterar
-  texto, rótulo, catálogo ou máscara exige nova versão/hash e registro do motivo.
+- A revisão dos campos ausentes dos 60 casos foi concluída em 2026-11-23:
+  oito casos com aprovação direta e 52 pela IA sob delegação explícita do
+  responsável. As origens, justificativas e ressalvas constam no
+  [registro da revisão](revisao-de-rotulos.md) e no
+  [manifesto por caso](revisao-de-rotulos.json). Nenhum rótulo foi alterado.
+- O conjunto permanece uma referência exploratória, sem validação humana
+  independente de todos os casos. O metadado legado `review: provisional`
+  permanece inalterado; a revisão não conclui o protocolo nem a separação dos dados.
+- C01 registra quem revisou cada caso, dúvidas e justificativas. Alterar texto,
+  rótulo, catálogo ou máscara exige nova versão/hash e registro do motivo.
 - Separar exemplos de desenvolvimento/calibração do conjunto final de teste.
   Prompts, limiares e política de abstenção não podem ser ajustados usando os
   resultados do teste final. C01 escolhe e registra a separação e os tamanhos.
@@ -80,8 +86,10 @@ e a conversão de saída segundo o schema congelado.
   deve ser registrada antes do teste, sem favorecer um dos candidatos.
   Controles de entrada completa/inválida, abstenção, resposta inválida, timeout
   e transporte ficam identificados separadamente.
-- Os rótulos nunca são inferidos da resposta de um dos modelos nem aprovados
-  automaticamente por outro LLM. Não usar dados pessoais reais.
+- Não derivar nem ajustar rótulos a partir das respostas dos candidatos sob
+  avaliação. A revisão por IA aqui foi expressamente delegada pelo responsável
+  antes do ensaio e deve ser declarada como tal nos resultados. Não atribuir
+  aprovação humana aos 52 casos delegados. Não usar dados pessoais reais.
 
 ## Métricas e decisão
 

@@ -1,0 +1,894 @@
+{
+  "version": "1.0.0",
+  "task": "C01",
+  "reviewed_on": "2026-11-23",
+  "status": "reviewed_for_exploratory_use",
+  "source_dataset": {
+    "path": "script/f08/jev/dataset.json",
+    "version": "1.1.0",
+    "sha256": "0e7e4c342c2a39cefd89855d8c0513f447d7878303eb4091488ca8af78928880",
+    "review": "provisional"
+  },
+  "delegation": {
+    "authority": "responsável pelo projeto, no chat central",
+    "request": "tem como skippar todos os 60 casos e vocÊ aprovar?",
+    "scope": "Revisar e aprovar os rótulos restantes para referência exploratória, preservando as aprovações diretas anteriores.",
+    "method": "Duas frentes de revisão por IA (casos 001–030 e 031–060, excluindo os oito já aprovados), consolidadas pelo integrador.",
+    "limits": "A delegação cobre os rótulos; protocolo final, separação dos dados, orçamento e escolha do classificador continuam pendentes."
+  },
+  "summary": {
+    "cases": 60,
+    "human_direct_cases": 8,
+    "agent_delegated_cases": 52,
+    "human_direct_target_fields": 10,
+    "agent_delegated_target_fields": 70,
+    "retained_cases": 60,
+    "changed_cases": 0
+  },
+  "limitations": [
+    "Referência sintética exploratória com 52 casos revisados por IA; não é validação humana independente de todo o conjunto.",
+    "Não ajustar rótulos às respostas futuras de Qwen ou GLiClass.",
+    "O conjunto ainda depende da separação desenvolvimento/calibração e teste final e do protocolo de comparação."
+  ],
+  "cases": [
+    {
+      "id": "jev-001",
+      "review_source": "human_direct",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "informacao_insuficiente"
+      },
+      "decision": "retain",
+      "rationale": "O QR identifica como a cobrança foi iniciada, mas o relato não indica o meio de pagamento necessário para determinar a categoria.",
+      "caveats": []
+    },
+    {
+      "id": "jev-002",
+      "review_source": "human_direct",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "urgent"
+      },
+      "decision": "retain",
+      "rationale": "O caixa inteiro está interrompido em horário ativo e não há alternativa.",
+      "caveats": []
+    },
+    {
+      "id": "jev-003",
+      "review_source": "human_direct",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "pix",
+        "priority": "urgent"
+      },
+      "decision": "retain",
+      "rationale": "São transferências Pix com perda em andamento e necessidade imediata de bloqueio.",
+      "caveats": []
+    },
+    {
+      "id": "jev-004",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "payouts"
+      },
+      "decision": "retain",
+      "rationale": "A informação ausente é o assunto da solicitação: o lote de uma venda no crédito não apareceu na conta, embora os demais tenham aparecido. Isso descreve recebimento/liquidação de venda.",
+      "caveats": []
+    },
+    {
+      "id": "jev-005",
+      "review_source": "human_direct",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "basic"
+      },
+      "decision": "retain",
+      "rationale": "É uma orientação preventiva sem problema operacional atual.",
+      "caveats": []
+    },
+    {
+      "id": "jev-006",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "terminal",
+        "priority": "basic"
+      },
+      "decision": "retain",
+      "rationale": "Aumentar a letra da tela é uma configuração da maquininha. O equipamento ainda será colocado no balcão e não há falha ou prejuízo atual relatado, compatível com orientação básica.",
+      "caveats": []
+    },
+    {
+      "id": "jev-007",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "terminal"
+      },
+      "decision": "retain",
+      "rationale": "O leitor de cartão da maquininha não reconhece chip; a prioridade avançada já foi fornecida pelo canal e não foi avaliada aqui.",
+      "caveats": []
+    },
+    {
+      "id": "jev-008",
+      "review_source": "human_direct",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "intermediate"
+      },
+      "decision": "retain",
+      "rationale": "Há um atraso pontual com a operação preservada.",
+      "caveats": []
+    },
+    {
+      "id": "jev-009",
+      "review_source": "human_direct",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "payouts",
+        "priority": "advanced"
+      },
+      "decision": "retain",
+      "rationale": "A agenda de liquidação tem divergência relevante sem prazo imediato.",
+      "caveats": []
+    },
+    {
+      "id": "jev-010",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "pix"
+      },
+      "decision": "retain",
+      "rationale": "O texto identifica pagamentos por Pix e falhas nos códigos de cobrança. A prioridade urgente já veio do canal e não foi avaliada aqui.",
+      "caveats": []
+    },
+    {
+      "id": "jev-011",
+      "review_source": "agent_delegated",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "intermediate"
+      },
+      "decision": "retain",
+      "rationale": "A conexão da maquininha falha intermitentemente, gerando repetição de cobranças, enquanto outro caixa funciona. Há impacto moderado com alternativa operacional.",
+      "caveats": []
+    },
+    {
+      "id": "jev-012",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "terminal",
+        "priority": "intermediate"
+      },
+      "decision": "retain",
+      "rationale": "O visor lento e a repetição de cobranças apontam para a maquininha. O segundo equipamento mantém as vendas; o retrabalho sugere impacto moderado.",
+      "caveats": []
+    },
+    {
+      "id": "jev-013",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "informacao_insuficiente"
+      },
+      "decision": "retain",
+      "rationale": "A descrição vaga de dinheiro passado pelo aparelho e exibido no aplicativo não distingue transação no terminal, Pix ou liquidação de venda.",
+      "caveats": [
+        "A expressão 'passou pelo aparelho' pode sugerir cartão, mas o percurso e o problema não estão especificados o bastante para fixar a categoria."
+      ]
+    },
+    {
+      "id": "jev-014",
+      "review_source": "agent_delegated",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "advanced"
+      },
+      "decision": "retain",
+      "rationale": "As cobranças Pix falham para quase todos os clientes e há perda relevante de vendas, mas o recebimento por cartão continua disponível; isso é impacto significativo sem interrupção total.",
+      "caveats": [
+        "O texto não informa duração prevista nem quantifica 'boa parte'; a classificação como avançado pressupõe que a perda descrita seja relevante."
+      ]
+    },
+    {
+      "id": "jev-015",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "informacao_insuficiente",
+        "priority": "basic"
+      },
+      "decision": "retain",
+      "rationale": "O relato pede um histórico de uma operação sem identificar qual tipo; treinamento e funcionamento normal sustentam prioridade básica.",
+      "caveats": []
+    },
+    {
+      "id": "jev-016",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "payouts"
+      },
+      "decision": "retain",
+      "rationale": "A solicitação trata de lote de vendas marcado como pago que não apareceu no extrato bancário, assunto de recebimento/liquidação. A prioridade avançada já foi fornecida pelo canal e não foi avaliada aqui.",
+      "caveats": []
+    },
+    {
+      "id": "jev-017",
+      "review_source": "agent_delegated",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "urgent"
+      },
+      "decision": "retain",
+      "rationale": "Nenhum recebimento caiu, a conta está sem saldo e há consequência iminente nesta manhã se o pagamento não for feito. A necessidade de ação imediata atende ao critério de urgente.",
+      "caveats": [
+        "A urgência depende do prazo explícito do fornecedor nesta manhã; não é inferida apenas do montante ou da falta de saldo."
+      ]
+    },
+    {
+      "id": "jev-018",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "payouts",
+        "priority": "urgent"
+      },
+      "decision": "retain",
+      "rationale": "O lote de vendas não caiu antes da abertura e o fornecedor está presente, com consequência imediata caso não haja pagamento. O assunto é liquidação de vendas e o prazo sustenta urgência.",
+      "caveats": [
+        "A mensagem não declara expressamente que não existe outra fonte de pagamento; a urgência é sustentada pela condição imediata do fornecedor, sem afirmar a inexistência de alternativas."
+      ]
+    },
+    {
+      "id": "jev-019",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "terminal"
+      },
+      "decision": "retain",
+      "rationale": "A alteração desejada é o nome impresso no comprovante do aparelho de cartão, uma configuração da maquininha. A prioridade básica já foi fornecida pelo canal e não foi avaliada aqui.",
+      "caveats": []
+    },
+    {
+      "id": "jev-020",
+      "review_source": "agent_delegated",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "advanced"
+      },
+      "decision": "retain",
+      "rationale": "Duas maquininhas deixaram de imprimir comprovantes e o fechamento terá retrabalho considerável, mas as vendas continuam. O efeito é relevante sem bloquear a operação.",
+      "caveats": []
+    },
+    {
+      "id": "jev-021",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "pix",
+        "priority": "intermediate"
+      },
+      "decision": "retain",
+      "rationale": "O cliente pagou por Pix, mas a confirmação de um pedido está pendente; os demais pedidos passam. A categoria é Pix e o problema localizado, com operação em geral disponível, é compatível com impacto moderado.",
+      "caveats": [
+        "Não há informação sobre valor, duração ou se o pedido específico ficou bloqueado; a prioridade intermediária é plausível, mas a evidência de impacto é limitada."
+      ]
+    },
+    {
+      "id": "jev-022",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "pix"
+      },
+      "decision": "retain",
+      "rationale": "A pergunta é sobre um Pix enviado ao telefone antigo e a devolução ao banco de origem. A prioridade intermediária já foi fornecida pelo canal e não foi avaliada aqui.",
+      "caveats": []
+    },
+    {
+      "id": "jev-023",
+      "review_source": "agent_delegated",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "informacao_insuficiente"
+      },
+      "decision": "retain",
+      "rationale": "'Não está do jeito de sempre' não informa estado, alcance nem consequência. Não há base para escolher nível de urgência.",
+      "caveats": []
+    },
+    {
+      "id": "jev-024",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "terminal",
+        "priority": "informacao_insuficiente"
+      },
+      "decision": "retain",
+      "rationale": "Código após atualização identifica assunto da maquininha. Como o cliente não sabe se ela ainda aceita cartão, o impacto operacional permanece desconhecido e a prioridade deve abster-se.",
+      "caveats": []
+    },
+    {
+      "id": "jev-025",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "terminal"
+      },
+      "decision": "retain",
+      "rationale": "O teclado travado é de uma maquininha e nenhum cartão passa. A prioridade urgente já veio do canal e não foi avaliada aqui.",
+      "caveats": []
+    },
+    {
+      "id": "jev-026",
+      "review_source": "agent_delegated",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "basic"
+      },
+      "decision": "retain",
+      "rationale": "É uma consulta para planejamento do próximo trimestre sobre datas habituais de recebimento, sem atraso atual ou prejuízo relatado.",
+      "caveats": []
+    },
+    {
+      "id": "jev-027",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "informacao_insuficiente",
+        "priority": "urgent"
+      },
+      "decision": "retain",
+      "rationale": "Cobranças e recebimentos sumiram da tela, sem causa de domínio suficiente para distinguir Pix, repasse ou terminal; contudo, ambas as unidades foram fechadas por impossibilidade de pagamento, evidência forte de interrupção imediata.",
+      "caveats": [
+        "A causa da interrupção permanece desconhecida; isso sustenta abstenção de categoria, sem impedir reconhecer o impacto urgente."
+      ]
+    },
+    {
+      "id": "jev-028",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "informacao_insuficiente"
+      },
+      "decision": "retain",
+      "rationale": "O relato refere-se apenas a 'uma operação' sem identificar se é Pix, recebimento ou terminal. A prioridade avançada já foi fornecida pelo canal e não foi avaliada aqui.",
+      "caveats": []
+    },
+    {
+      "id": "jev-029",
+      "review_source": "agent_delegated",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "informacao_insuficiente"
+      },
+      "decision": "retain",
+      "rationale": "Uma luz diferente, sem venda de teste nem falha observada, não demonstra prejuízo nem urgência. Não há base para inferir prioridade.",
+      "caveats": []
+    },
+    {
+      "id": "jev-030",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "payouts",
+        "priority": "basic"
+      },
+      "decision": "retain",
+      "rationale": "A consulta é sobre separar vendas conforme o dia de depósito, portanto liquidação/repasse. Os recebimentos ocorreram normalmente e o pedido é apenas de relatório, compatível com básico.",
+      "caveats": []
+    },
+    {
+      "id": "jev-031",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "payouts"
+      },
+      "decision": "retain",
+      "rationale": "A solicitação trata de escolher a conta que receberá vendas futuras; isso pertence a repasse/liquidação. Os recebimentos atuais estão corretos.",
+      "caveats": []
+    },
+    {
+      "id": "jev-032",
+      "review_source": "agent_delegated",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "urgent"
+      },
+      "decision": "retain",
+      "rationale": "Pagamentos continuam sendo desviados para outra conta e o cliente precisa suspender cobranças imediatamente; há possível prejuízo em curso.",
+      "caveats": [
+        "O texto aponta para ação imediata, mas não explicita se o mecanismo de suspensão está disponível ao cliente."
+      ]
+    },
+    {
+      "id": "jev-033",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "pix",
+        "priority": "advanced"
+      },
+      "decision": "retain",
+      "rationale": "O fluxo é de cobranças por Pix. A correção abrange todos os contratos, mas o envio foi pausado e boletos seguem disponíveis, permitindo resolver sem interrupção imediata.",
+      "caveats": [
+        "A expressão 'todos os contratos' indica abrangência alta; avançado é plausível dado que existe alternativa e a falha está pausada."
+      ]
+    },
+    {
+      "id": "jev-034",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "terminal"
+      },
+      "decision": "retain",
+      "rationale": "O botão físico afundou em um leitor de cartão; isso é defeito de maquininha. O balcão continua atendendo com outro leitor.",
+      "caveats": []
+    },
+    {
+      "id": "jev-035",
+      "review_source": "agent_delegated",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "advanced"
+      },
+      "decision": "retain",
+      "rationale": "A diferença em todo o lote é grande, caracterizando impacto relevante. A reserva cobre os compromissos da semana, então o texto não indica necessidade de ação imediata.",
+      "caveats": [
+        "O caso não informa se há prazo para contestar a diferença; a categoria avançado é razoável conforme a definição atual, mas esse sinal pode ser útil na rubrica final."
+      ]
+    },
+    {
+      "id": "jev-036",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "terminal",
+        "priority": "urgent"
+      },
+      "decision": "retain",
+      "rationale": "A única leitora apagou, não há alternativa de pagamento e o caixa parou durante uma feira; a categoria é maquininha e a interrupção exige ação imediata.",
+      "caveats": []
+    },
+    {
+      "id": "jev-037",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "payouts"
+      },
+      "decision": "retain",
+      "rationale": "As vendas foram autorizadas; o dinheiro está ausente na liquidação dos lotes, que é assunto de repasses. A prioridade urgente já veio do canal e deve ser preservada.",
+      "caveats": [
+        "A prioridade recebida não foi reavaliada nesta revisão, que cobre somente o campo ausente."
+      ]
+    },
+    {
+      "id": "jev-038",
+      "review_source": "agent_delegated",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "basic"
+      },
+      "decision": "retain",
+      "rationale": "O leitor funciona e a pessoa quer exportar o manual para treinar um turno novo; é uma orientação de rotina sem prejuízo atual.",
+      "caveats": []
+    },
+    {
+      "id": "jev-039",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "informacao_insuficiente",
+        "priority": "informacao_insuficiente"
+      },
+      "decision": "retain",
+      "rationale": "'Aquele negócio no canto' não identifica o produto nem relata impacto ou urgência; faltam evidências para ambos os campos.",
+      "caveats": [
+        "A frase depende de contexto visual compartilhado que não existe no relato recebido."
+      ]
+    },
+    {
+      "id": "jev-040",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "pix"
+      },
+      "decision": "retain",
+      "rationale": "O cliente pergunta sobre gerar um QR Pix de valor livre para recebimento futuro; o assunto é Pix.",
+      "caveats": []
+    },
+    {
+      "id": "jev-041",
+      "review_source": "human_direct",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "informacao_insuficiente"
+      },
+      "decision": "retain",
+      "rationale": "A pendência afeta um reembolso, mas o relato não informa prazo nem consequência desse caso para estabelecer a prioridade.",
+      "caveats": []
+    },
+    {
+      "id": "jev-042",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "pix",
+        "priority": "basic"
+      },
+      "decision": "retain",
+      "rationale": "Remover uma chave Pix antiga é assunto Pix. A chave atual segue funcionando, então é manutenção sem impacto operacional, compatível com básico.",
+      "caveats": []
+    },
+    {
+      "id": "jev-043",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "informacao_insuficiente"
+      },
+      "decision": "retain",
+      "rationale": "Uma repetição que depois funcionou não esclarece se a origem foi o terminal, Pix ou liquidação; categoria insuficiente é apropriada. A prioridade intermediária fornecida é preservada.",
+      "caveats": [
+        "O usuário pergunta qual componente falhou; uma pergunta de esclarecimento pode resolver a categoria."
+      ]
+    },
+    {
+      "id": "jev-044",
+      "review_source": "human_direct",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "informacao_insuficiente"
+      },
+      "decision": "retain",
+      "rationale": "Faltam valor, prazo e efeito operacional.",
+      "caveats": []
+    },
+    {
+      "id": "jev-045",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "payouts",
+        "priority": "intermediate"
+      },
+      "decision": "retain",
+      "rationale": "A parcela ausente é de uma venda já realizada, portanto assunto de liquidação. É uma divergência isolada e os outros lotes cobrem o caixa, compatível com impacto moderado.",
+      "caveats": []
+    },
+    {
+      "id": "jev-046",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "terminal"
+      },
+      "decision": "retain",
+      "rationale": "A aproximação falha em parte das maquininhas, enquanto inserir o cartão continua possível; categoria maquininha. A prioridade avançada recebida é preservada.",
+      "caveats": [
+        "O relato informa queda significativa no fluxo, mas a revisão do campo ausente não altera a prioridade fornecida."
+      ]
+    },
+    {
+      "id": "jev-047",
+      "review_source": "agent_delegated",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "urgent"
+      },
+      "decision": "retain",
+      "rationale": "O único equipamento trava antes de concluir pagamentos durante o evento; todo o caixa está parado e não há método alternativo, exigindo ação imediata.",
+      "caveats": []
+    },
+    {
+      "id": "jev-048",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "terminal",
+        "priority": "advanced"
+      },
+      "decision": "retain",
+      "rationale": "A função desativada pertence às leitoras. A venda padrão segue, mas reservas de toda a rede precisarão ser reprocessadas, impacto amplo sem urgência imediata.",
+      "caveats": [
+        "A abrangência é alta, mas uma via de venda permanece disponível."
+      ]
+    },
+    {
+      "id": "jev-049",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "payouts"
+      },
+      "decision": "retain",
+      "rationale": "Antecipar parcelas de vendas é assunto de recebíveis e liquidação. Nenhum atraso foi relatado.",
+      "caveats": []
+    },
+    {
+      "id": "jev-050",
+      "review_source": "agent_delegated",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "basic"
+      },
+      "decision": "retain",
+      "rationale": "A dúvida é sobre reutilizar um QR de cobrança no futuro, antes do início das vendas; não há prejuízo atual, compatível com orientação básica.",
+      "caveats": []
+    },
+    {
+      "id": "jev-051",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "pix",
+        "priority": "urgent"
+      },
+      "decision": "retain",
+      "rationale": "A devolução duplica em cada tentativa por Pix e a automação continua reduzindo o saldo; há perda ativa que exige interrupção imediata.",
+      "caveats": []
+    },
+    {
+      "id": "jev-052",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "pix"
+      },
+      "decision": "retain",
+      "rationale": "As devoluções não autorizadas que continuam entrando são por Pix; o campo urgente recebido pelo canal é preservado.",
+      "caveats": [
+        "A prioridade fornecida não foi reavaliada nesta revisão."
+      ]
+    },
+    {
+      "id": "jev-053",
+      "review_source": "agent_delegated",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "intermediate"
+      },
+      "decision": "retain",
+      "rationale": "Dois créditos atrasaram um dia, mas o comércio continua aberto e apenas uma compra menor foi adiada; impacto localizado e operação disponível.",
+      "caveats": []
+    },
+    {
+      "id": "jev-054",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "payouts",
+        "priority": "informacao_insuficiente"
+      },
+      "decision": "retain",
+      "rationale": "A mudança ocorreu na agenda de repasses, identificando a categoria. Como o cliente não sabe se algo venceu e não informa impacto, a prioridade não pode ser determinada.",
+      "caveats": []
+    },
+    {
+      "id": "jev-055",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "terminal"
+      },
+      "decision": "retain",
+      "rationale": "Ajustar o tempo de bloqueio de tela em uma maquininha reserva é configuração do terminal. A prioridade básica veio do canal e é preservada.",
+      "caveats": [
+        "A prioridade fornecida não foi reavaliada nesta revisão."
+      ]
+    },
+    {
+      "id": "jev-056",
+      "review_source": "agent_delegated",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "advanced"
+      },
+      "decision": "retain",
+      "rationale": "A falha afeta a aproximação em todas as leitoras e prejudica compras corporativas, mas chip e link mantêm vendas; impacto relevante sem paralisação total.",
+      "caveats": []
+    },
+    {
+      "id": "jev-057",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "terminal",
+        "priority": "basic"
+      },
+      "decision": "retain",
+      "rationale": "Habilitar comprovante por mensagem na maquininha de treinamento é configuração do terminal. A leitora do caixa funciona, sem prejuízo atual.",
+      "caveats": []
+    },
+    {
+      "id": "jev-058",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "payouts"
+      },
+      "decision": "retain",
+      "rationale": "A venda já foi dividida e o problema é que uma parte não aparece no extrato, portanto recebimento/liquidação. A prioridade intermediária recebida fica intacta.",
+      "caveats": [
+        "A prioridade fornecida não foi reavaliada nesta revisão."
+      ]
+    },
+    {
+      "id": "jev-059",
+      "review_source": "agent_delegated",
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "urgent"
+      },
+      "decision": "retain",
+      "rationale": "Todos os pagamentos Pix falham e a retirada de pedidos está interrompida sem alternativa, exigindo ação imediata.",
+      "caveats": []
+    },
+    {
+      "id": "jev-060",
+      "review_source": "agent_delegated",
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "pix",
+        "priority": "informacao_insuficiente"
+      },
+      "decision": "retain",
+      "rationale": "A mensagem é explicitamente sobre Pix; não se sabe se houve débito ou nova tentativa, então o impacto/prioridade é insuficiente.",
+      "caveats": []
+    }
+  ],
+  "source_catalog": {
+    "path": "script/f08/jev/catalog.json",
+    "version": "1.0.0",
+    "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271"
+  }
+}

@@ -7,17 +7,19 @@ Issue publicada: [#2](https://github.com/leeunam/case-CLOUDWALK-IA/issues/2). Co
 [Quadro CLASS-001](../README.md) · [CLASS-SPEC-001](../especificacao.md).
 Estado inicial: planejamento com participação humana; não libera ensaio pago.
 
-Progresso de revisão em 2026-11-23: oito casos com aprovação dos campos
-ausentes e 52 pendentes, conforme o [registro parcial](../revisao-de-rotulos.md).
-C01 continua em andamento; o dataset completo permanece provisório.
+Progresso em 2026-11-23: revisão dos 60 casos concluída para referência
+exploratória, com oito aprovações diretas e 52 pela IA sob delegação explícita,
+conforme o [registro da revisão](../revisao-de-rotulos.md). C01 continua em
+andamento; protocolo, separação dos dados e limites ainda estão pendentes.
 
 ## O que construir
 
 Como responsável pelo projeto, conseguir aprovar um protocolo executável antes
 de comparar modelos: entrada sintética, decisão por campo, aplicação ou revisão,
 catálogos, dados revisados, métricas e critérios numéricos de escolha. O agente
-prepara exemplos e explica as escolhas; o responsável aprova rótulos, limites
-e orçamento. Esta tarefa não escolhe o vencedor.
+prepara exemplos e explica as escolhas; a revisão individual dos rótulos foi
+delegada à IA. O responsável decide os limites e o orçamento. Esta tarefa não
+escolhe o vencedor.
 
 ## Critérios de aceite
 
@@ -25,8 +27,9 @@ e orçamento. Esta tarefa não escolhe o vencedor.
   omissões simples/duplas, inválidos, abstenção, erro e aplicação tudo-ou-revisão.
 - [ ] A origem válida do canal é preservada; entrada completa/inválida não
   solicita inferência; scores opcionais têm natureza explícita, sem falsa calibração.
-- [ ] Os 60 relatos atuais continuam provisórios até revisão humana documentada.
-  Registrar revisão por caso, dúvidas, alterações, versão e hashes finais.
+- [x] Revisão dos 60 relatos documentada por caso, com origem, justificativas,
+  ressalvas e hash preservado: oito aprovações diretas e 52 pela IA delegada.
+  Registrar a limitação de referência exploratória; o protocolo final segue pendente.
 - [ ] Separar dados de desenvolvimento/calibração dos de teste final. Fixar IDs,
   tamanhos, catálogos e contagem de urgentes com prioridade omitida no holdout;
   declarar se o resultado sustenta decisão inicial ou apenas estudo exploratório.
@@ -56,8 +59,8 @@ Nenhum card técnico. Requer revisão e decisões do responsável neste chat cen
 Papel: chat central com o responsável. Antes de trabalhar, ler AGENTS.md e a
 especificação vinculante; declarar tarefa, base e diretório. Só especificação e
 fixtures contratuais, em ambiente isolado conforme AGENTS.md. Entregar diff,
-hashes, validação dos exemplos e perguntas humanas ainda pendentes. Não marcar
-como aprovado por conta própria nem interpretar saldo disponível como orçamento.
+hashes, validação dos exemplos e perguntas humanas ainda pendentes. A delegação
+registrada cobre os rótulos; não aprova a C01 inteira, o vencedor nem o orçamento.
 
 ## Exercício de aprendizagem
 

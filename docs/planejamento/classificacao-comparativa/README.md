@@ -8,8 +8,10 @@ implementada ou executada como parte deste planejamento.
 
 ## Decisões e limites
 
-Está confirmado comparar Qwen pela Feita com GLiClass local. Ainda precisam
-ser aprovados em C01 os rótulos, a separação de dados, os limites de aceitação
+Está confirmado comparar Qwen pela Feita com GLiClass local. Os 60 rótulos
+foram revisados para referência exploratória: oito casos diretamente pelo
+responsável e 52 pela IA sob delegação, conforme o [registro](revisao-de-rotulos.md).
+Ainda precisam ser aprovados em C01 a separação de dados, os limites de aceitação
 e o orçamento real. A integração operacional só começa depois de C05 registrar
 um vencedor elegível aprovado pelo responsável. O resultado pode ser inconclusivo.
 

@@ -38,6 +38,12 @@ aceitação, orçamento, contratos compartilhados, análise dos resultados e esc
 humana do classificador. O responsável pode estudar e executar qualquer card
 neste mesmo chat; a separação abaixo serve para permitir trabalho independente.
 
+Em 2026-11-23, o responsável delegou a revisão individual dos rótulos à IA.
+Os 60 casos foram revisados para referência exploratória: oito aprovações
+diretas e 52 por IA delegada, documentadas na [revisão](revisao-de-rotulos.md).
+Manter essa origem explícita. A delegação não aprova orçamento, vencedor ou
+o protocolo completo da C01.
+
 Use o [quadro](README.md), a [especificação](especificacao.md) e o card inteiro.
 A base fonte estudada é `cb9683179d713e7bcbfc95c54003dc30630ab7ad`. O SHA de
 execução deve conter o planejamento aprovado e as dependências integradas.

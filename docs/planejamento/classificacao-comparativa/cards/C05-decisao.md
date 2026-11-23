@@ -48,7 +48,9 @@ expandir a outros modelos, treinar pesos ou afirmar capacidade de dez mil chats.
 
 Papel: chat central com o responsável. Integrador fornece SHA contendo C02–C04
 integradas; ler AGENTS.md/especificação e usar ambiente próprio para o ensaio.
-Os executores não podem aprovar rótulos ou escolher o vencedor pelo responsável.
+Usar os rótulos congelados conforme a revisão autorizada em C01, declarando
+oito aprovações diretas e 52 revisões por IA delegada. Não ajustar rótulos às
+respostas dos candidatos. A escolha do vencedor continua com o responsável.
 Retornar comandos, artefatos, gastos, limitações e ADR assinada pela decisão humana.
 
 ## Exercício de aprendizagem
