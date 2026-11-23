@@ -66,9 +66,17 @@ completou `pix` e `urgent` em 1,826 s, com cobrança exibida de aproximadamente
 US$ 0,000518. O comparativo final permanece pendente. A C04 tem código revisado e dez lotes reais adicionais de
 desenvolvimento, incluindo falhas por prazo e um rebaixamento de urgência.
 Sua configuração não está aprovada para C05. A [passagem atual](classificacao-comparativa/passagem-autonoma.md)
-registra as evidências e o bloqueio do piloto Qwen. Vencedor e orçamento real
-continuam pendentes.
+registra as evidências e as decisões pendentes. O teto de US$ 10 foi aprovado
+para o piloto Qwen, com mínimo de requisições; uma chamada foi suficiente.
+O escopo do teste final e a escolha do vencedor continuam pendentes.
 Criar os cards não equivale a autorizar inferência paga nem escolher o fornecedor.
+
+A atualização C01-L/C02-L foi aceita e integrada em `933836e`. As próximas
+avaliações usam explicitamente `observed-total-1.1`: p95 do tempo total da
+classificação até 3.000 ms, incluindo falhas e timeouts observados, sem depender
+de aquecimento comprovado. Protocolo de qualidade 1.1, relatório 1.2 e IPC 1.1;
+39 testes do avaliador passaram, sem novas chamadas externas. Os 17 relatórios
+históricos conservaram seus hashes. [Plano e aceite](classificacao-comparativa/plano-latencia-total.md).
 
 Ordem: C01 → C02 → C03/C04 em paralelo → C05 → C06 → C07. R01 e R02 podem
 andar independentemente e bloqueiam o fechamento da demonstração C07.

@@ -73,6 +73,13 @@ para integração. A [passagem atual](docs/planejamento/classificacao-comparativ
 registra os próximos passos e as decisões pendentes.
 A comparação real e a escolha do classificador ainda estão pendentes.
 
+A regra aprovada de latência foi integrada em `933836e`: as próximas avaliações
+selecionam `--profile observed-total-1.1`, com meta de p95 até 3 s para o tempo
+total da classificação, incluindo erros e timeouts com duração observada.
+Passaram 39 testes do avaliador, e os 17 relatórios históricos foram preservados.
+Essa atualização foi offline. O [aceite e a reprodução](docs/c02.md#c02-l--tempo-total-observado)
+separam essa medição do tempo de inicialização e do atendimento posterior.
+
 - [Escopo e arquitetura](docs/planejamento/especificacao-mvp.md)
 - [Backlog e critérios de aceite](docs/planejamento/plano-de-execucao.md)
 - [Decisões confirmadas](docs/planejamento/decisoes.md)

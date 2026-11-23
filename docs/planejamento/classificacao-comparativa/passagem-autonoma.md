@@ -1,6 +1,12 @@
 # Passagem da execução autônoma · 23/11/2026
 
-**Atualização posterior:** o responsável configurou a chave, autorizou até US$ 10 com mínimo de requisições, e o piloto real C03 usou uma chamada. Retornou `pix` + `urgent` corretamente em 1,826 s; o painel exibiu cobrança aproximada de US$ 0,000518. [Recibo](../../evidencias/c03/piloto-unitario-real.json). Foi aprovado depois usar o tempo total da classificação na meta de 3 s; protocolo e avaliador serão atualizados offline antes do teste final. O checkpoint abaixo descreve o estado anterior ao piloto e é preservado como histórico.
+**Estado atual:** o responsável configurou a chave, autorizou até US$ 10 com mínimo de requisições, e o piloto real C03 usou uma chamada. Retornou `pix` + `urgent` corretamente em 1,826 s; o painel exibiu cobrança aproximada de US$ 0,000518. [Recibo](../../evidencias/c03/piloto-unitario-real.json). A decisão posterior de usar o tempo total da classificação foi implementada e integrada em `933836e`: selecionar explicitamente `--profile observed-total-1.1`, com p95 até 3.000 ms. Passaram 39 testes do avaliador; os 17 históricos conservaram seus hashes e nenhuma nova inferência foi feita. [Aceite](../../evidencias/latencia-total/avaliador-aceite.json).
+
+**Próxima decisão:** definir a continuidade do comparativo diante das limitações reais do GLiClass, congelar os candidatos e preparar o escopo próprio do teste final. Os 36 relatos de teste continuam reservados, sem inferência. Nenhum vencedor foi escolhido nem integrado ao Rails. C06/C07 continuam dependentes de decisão elegível; F09/F10 e E01 mantêm suas dependências.
+
+**Decisão técnica:** o relatório passou a 1.2 sob protocolo de qualidade 1.1, preservando o IPC 1.1 e os adaptadores. Isso permite verificar os resultados históricos pela regra original. Se essa divisão se mostrar inadequada, o custo será revisar o despacho dos perfis e seus metadados, sem reescrever as medições antigas.
+
+O checkpoint abaixo descreve o estado anterior ao piloto e é preservado como histórico; suas antigas pendências de chave, teto e método de latência já foram resolvidas.
 
 Base técnica integrada localmente: `93cdbd79cf318ffa4be8888a366a1368c06b250c`.
 Este registro é um checkpoint; retomar pelo HEAD atual e conferir alterações e worktrees antes de editar. O código não foi enviado ao remoto. Os cards públicos foram atualizados separadamente.

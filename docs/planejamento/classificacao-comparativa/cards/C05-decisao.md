@@ -21,7 +21,9 @@ o relatório; a decisão operacional é do responsável neste chat.
   denominador e modelo efetivo. Não ajustar os candidatos ao ver o holdout.
 - [ ] Publicar acerto bruto/aplicado por campo, urgentes rebaixados/abstenções/
   falhas, cobertura, inválidos, p50/p95 com amostras e custo real/estimado/local.
-- [ ] Separar latência local fria/aquecida e chamada remota; documentar hardware,
+- [ ] Usar `observed-total-1.1`: p95 do tempo total da classificação até
+  3.000 ms, incluindo falhas/timeouts observados e todos os estados térmicos.
+  Registrar inicialização e estado térmico separadamente, além de hardware,
   rede e condições. Modelos no mesmo host não têm benchmarks concorrentes.
 - [ ] Relatório inclui dados brutos, hashes/inventário e instruções de reprodução,
   com checagem independente das contagens. Credenciais e saldo ficam ausentes.
@@ -64,6 +66,11 @@ O executor do piloto C03 aceita apenas desenvolvimento e controles. Sua
 autorização não libera automaticamente os 36 relatos reservados. Depois do
 piloto real aceito, preparar escopo e autorização próprios para o lote final,
 vinculados aos IDs e hashes congelados, sem reutilizar a permissão do piloto.
-A latência remota permanece com aquecimento desconhecido; comprovar o estado
-ou discutir o método remoto/local antes de C05. A meta aprovada não pode ser
-considerada satisfeita por presunção. Esses pontos não iniciam o ensaio final.
+A decisão posterior do responsável usa o tempo total da classificação, sem
+exigir aquecimento comprovado. C01-L/C02-L foram aceitas e integradas em
+`933836e`, com protocolo de qualidade 1.1, relatório 1.2 e IPC 1.1.
+Selecionar explicitamente `--profile observed-total-1.1`; o default antigo
+permanece apenas para reprodução histórica. [Método e aceite](../plano-latencia-total.md).
+Os 39 testes do avaliador passaram e os 17 históricos conservaram os hashes,
+sem novas chamadas de modelo. A fixture não comprova a meta de nenhum candidato.
+Essa atualização técnica não inicia o ensaio final nem escolhe o vencedor.

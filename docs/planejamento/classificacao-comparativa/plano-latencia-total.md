@@ -2,6 +2,24 @@
 
 Decisão do responsável em 23/11/2026: usar o tempo total que o usuário espera para a classificação. O teto inclusivo permanece **3.000 ms no p95**. Esta implementação é offline, anterior ao teste final, sem novas chamadas pagas, sem novos modelos e sem escolha de vencedor.
 
+**Concluído e integrado em `933836e`.** C01-L partiu de `dcc3963`, na branch
+`feat/latencia-total-contratos` e worktree `.worktrees/c01-latencia-total`;
+C02-L partiu do aceite integrado `125835e`, na branch
+`feat/latencia-total-avaliador` e worktree `.worktrees/c02-latencia-total`.
+Ambas tiveram revisão da tarefa e revisão ampla final aprovadas, sem achados
+pendentes. O código final revisado é `3abbfe1`; o aceite e a fixture regenerada
+estão em `af13908`. O integrador confirmou novamente os 17 hashes históricos
+e o exemplo novo após a integração.
+
+As próximas avaliações selecionam explicitamente `--profile observed-total-1.1`.
+O default `warm-1.0` preserva a reprodução histórica. [Aceite do contrato](../../evidencias/latencia-total/contrato-aceite.json),
+[aceite do avaliador](../../evidencias/latencia-total/avaliador-aceite.json) e
+[reprodução](../../c02.md#c02-l--tempo-total-observado). A fixture tem 24 relatos
+e 13 controles, com elegibilidade inconclusiva e latência real não medida.
+Passaram 39 testes C02, sete verificações Qwen simuladas e duas GLiClass com
+runtime falso. A contraprova sintética de timeout de 5,130 s entrou na medição.
+Nenhum modelo foi chamado nesta mudança.
+
 ## Especificação vinculante
 
 - O cronômetro monotônico C02 começa antes de validar a entrada e termina depois de validar a decisão. Inclui despacho, fornecedor, perguntas dos dois campos, parse e validação. A população é de relatos reais concluídos com observação válida do candidato, inclusive abstenção, saída inválida, erro e timeout com duração observada. Cada relato conta uma vez. Warm, cold e unknown entram igualmente. Controles e fixtures ficam fora.

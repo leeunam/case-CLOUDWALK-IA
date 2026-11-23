@@ -12,7 +12,9 @@ Está confirmado comparar Qwen pela Feita com GLiClass local. Os 60 rótulos
 foram revisados para referência exploratória: oito casos diretamente pelo
 responsável e 52 pela IA sob delegação, conforme o [registro](revisao-de-rotulos.md).
 A separação de dados e os limites de aceitação foram aprovados; contratos
-v1.1.0 passaram na verificação local e o orçamento real segue pendente.
+v1.1.0 passaram na verificação local. O piloto Qwen recebeu teto de US$ 10,
+com orientação de minimizar requisições; consumiu uma chamada. O escopo
+financeiro do teste final ainda precisa ser definido.
 A integração operacional só começa depois de C05 registrar
 um vencedor elegível aprovado pelo responsável. O resultado pode ser inconclusivo.
 
@@ -27,6 +29,12 @@ real mínimo aceitos, com uma chamada e cobrança de aproximadamente US$ 0,00051
 revisado e investigação local preservada, com falhas de latência e um
 rebaixamento de urgência. Sua configuração não está aprovada para C05.
 A [passagem atual](passagem-autonoma.md) identifica a próxima decisão humana.
+
+C01-L/C02-L estão aceitas e integradas em `933836e`: as próximas avaliações
+selecionam `--profile observed-total-1.1`, com p95 do tempo total da classificação
+até 3.000 ms. O relatório 1.2 preserva o IPC 1.1. Passaram 39 testes C02;
+os 17 relatórios históricos conservaram seus hashes. A atualização não fez
+novas inferências. [Plano, aceites e limites](plano-latencia-total.md).
 
 ## Cards e dependências
 
