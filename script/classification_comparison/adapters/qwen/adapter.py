@@ -214,19 +214,22 @@ def pilot_budget(args, scope, identity, has_credential):
     protocol_path = c01.PLAN / "protocolo-comparacao.json"
     cap = authorized_cap(c01.read(authorization), scope=scope, identity=identity,
                          protocol_sha256=c01.digest(protocol_path), pilot_sha256=args.pilot_sha256)
-    protocol = c01.read(protocol_path)
+    lock = c01.read(HERE.parents[1] / "sources.lock.json")
+    protocol_ref = protocol_path.relative_to(c01.ROOT).as_posix()
+    protocol = c01.read(c01.source_path({"path": protocol_ref, "sha256": lock[protocol_ref]}))
     settings = c01.read(path)
-    split = c01.read(c01.PLAN / "divisao-dados.json")
+    split_ref = (c01.PLAN / protocol["data_split_file"]).relative_to(c01.ROOT).as_posix()
+    split = c01.read(c01.source_path({"path": split_ref, "sha256": protocol["data_split_sha256"]}))
     development = [case for cases in split["development"].values() for case in cases]
     policy = c01.read(c01.source_path(protocol["control_policy"]))
+    report_ref = (c01.FIXTURES / "report.json").relative_to(c01.ROOT).as_posix()
+    report = c01.read(c01.source_path({"path": report_ref, "sha256": lock[report_ref]}))
     controls = []
-    with (c01.FIXTURES / "inputs.jsonl").open("rb") as stream:
-        for line in stream:
-            item = decode(line)
-            if item["id"] not in policy["controls"] and item["catalog"]["version"] == "1.0.0":
-                fields, invalid, _ = c01.normalize_input(item, item["catalog"])
-                if fields and not invalid:
-                    controls.append(item["id"])
+    for item in c01.read_records(c01.source_path(report["artifacts"]["inputs"])):
+        if item["id"] not in policy["controls"] and item["catalog"]["version"] == "1.0.0":
+            fields, invalid, _ = c01.normalize_input(item, item["catalog"])
+            if fields and not invalid:
+                controls.append(item["id"])
     return Budget(settings, cap, development, controls, has_credential)
 
 

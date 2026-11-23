@@ -1,4 +1,6 @@
 import json
+from contextlib import redirect_stderr, redirect_stdout
+from io import StringIO
 import os
 import subprocess
 import sys
@@ -10,6 +12,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
+import adapter
 import transport
 from adapter import Adapter, HERE, MODEL, VERSION, c01, decode, request_body, usage_from
 from common import decide
@@ -379,6 +382,81 @@ class IPCTest(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertEqual(result.stdout, "")
         self.assertIn("manifesto sem autorização de execução", result.stderr)
+
+    def test_pilot_rejects_tampered_split_or_controls_before_credentials_and_ready(self):
+        protocol_path = c01.PLAN / "protocolo-comparacao.json"
+        protocol = c01.read(protocol_path)
+        split_path = c01.PLAN / protocol["data_split_file"]
+        controls_path = c01.FIXTURES / "inputs.jsonl"
+        repo_root = c01.ROOT
+        with tempfile.TemporaryDirectory() as scratch:
+            root = Path(scratch)
+
+            def local(path):
+                return root / path.relative_to(repo_root)
+
+            lock_path = HERE.parents[1] / "sources.lock.json"
+            files = (protocol_path, split_path, controls_path, c01.FIXTURES / "report.json", lock_path,
+                     repo_root / protocol["control_policy"]["path"], HERE / "real.json")
+            for path in files:
+                copy = local(path)
+                copy.parent.mkdir(parents=True, exist_ok=True)
+                copy.write_bytes(path.read_bytes())
+
+            config = c01.read(HERE / "real.json")
+            pilot = root / "pilot.json"
+            pilot.write_text(json.dumps(setup_limits(max_cases=9, max_requests=9)))
+            authorization = root / "authorization.json"
+            authorization.write_text(json.dumps({
+                "scope": "synthetic", "model": MODEL, "authorized": True, "budget_cap_usd": "1",
+                "model_identity_sha256": identity_digest(config["identity"]),
+                "protocol_sha256": c01.digest(protocol_path), "pilot_sha256": c01.digest(pilot),
+            }))
+            arguments = SimpleNamespace(pilot=pilot, pilot_sha256=c01.digest(pilot), authorization=authorization,
+                                        authorization_sha256=c01.digest(authorization))
+            cli_args = ["qwen", "--pilot", str(pilot), "--pilot-sha256", arguments.pilot_sha256,
+                        "--authorization", str(authorization), "--authorization-sha256", arguments.authorization_sha256]
+
+            reordered = c01.read(split_path)
+            ids = next(iter(reordered["development"].values()))
+            ids[0], ids[1] = ids[1], ids[0]
+            replaced = c01.read(split_path)
+            next(iter(replaced["development"].values()))[0] = "dev-substituido"
+            controls = c01.read_records(controls_path)
+            next(row for row in controls if row["id"] == "ctl-simples")["id"] = "ctl-substituido"
+            variations = (
+                ("reordered", split_path, json.dumps(reordered)),
+                ("replaced", split_path, json.dumps(replaced)),
+                ("changed_control", controls_path, "\n".join(map(json.dumps, controls)) + "\n"),
+            )
+            for name, path, altered in variations:
+                with self.subTest(name=name), patch.multiple(
+                    c01, ROOT=root, PLAN=local(c01.PLAN), FIXTURES=local(c01.FIXTURES)
+                ), patch.object(adapter, "HERE", local(HERE)):
+                    local(path).write_text(altered, encoding="utf-8")
+                    credential = Mock()
+                    try:
+                        with self.assertRaises(c01.ContractError) as rejected:
+                            adapter.pilot_budget(arguments, "synthetic", config["identity"], credential)
+                        self.assertEqual(rejected.exception.code, "artifact_hash")
+                        self.assertIn(path.relative_to(repo_root).as_posix(), str(rejected.exception))
+                        credential.assert_not_called()
+                        gateway = Mock()
+                        environment = {"CLASSIFICATION_IDENTITY": json.dumps(config["identity"]),
+                                       "CLASSIFICATION_CONTRACT_VERSION": VERSION}
+                        for command in (cli_args + ["--preflight"], cli_args):
+                            with (patch.object(sys, "argv", command),
+                                  patch.object(adapter, "os", SimpleNamespace(environ=environment)),
+                                  patch.object(adapter, "atomic") as ready,
+                                  redirect_stdout(StringIO()) as stdout, redirect_stderr(StringIO())):
+                                with self.assertRaises(SystemExit) as exit_code:
+                                    adapter.main(synthetic_transport=gateway)
+                                self.assertEqual(exit_code.exception.code, 2)
+                                self.assertEqual(stdout.getvalue(), "")
+                                ready.assert_not_called()
+                        gateway.assert_not_called()
+                    finally:
+                        local(path).write_bytes(path.read_bytes())
 
     def test_c02_authorized_synthetic_pilot_with_original_source_hashes(self):
         locked = c01.read(HERE.parents[1] / "sources.lock.json")
