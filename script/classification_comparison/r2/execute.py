@@ -8,9 +8,9 @@ import sys
 import uuid
 
 sys.dont_write_bytecode = True
-from plan import HERE, PROFILE, STAGES, VERSIONS, Plan, gate_reference
-import gate
-import seal
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from r2.plan import R2, STAGES, Plan, gate_reference
+from r2 import gate, seal
 from adapters.qwen.fixture import completion
 from budget import Account, BudgetError, cap_usd
 from common import c01, decode, encode
@@ -38,13 +38,13 @@ def write_plan(output, plan, args, binding, manifest_id, manifest_sha=None):
         stream.flush()
         os.fsync(stream.fileno())
     input_sha = plan.binding["inputs_sha256"]
-    plan_sha = write_json(output / "plan.json", dict(VERSIONS, run_id=plan.report["run_id"], binding=binding,
+    plan_sha = write_json(output / "plan.json", dict(plan.round.versions, run_id=plan.report["run_id"], binding=binding,
         input={"path": str(inputs.relative_to(c01.ROOT)), "sha256": input_sha},
         injected_controls=plan.injections, settings=plan.settings.data))
-    command = ["rtk", "proxy", "python3", "-B", str((HERE / "execute.py").relative_to(c01.ROOT)), "run",
+    command = ["rtk", "proxy", "python3", "-B", str(plan.round.entrypoint.relative_to(c01.ROOT)), "run",
                *options_for(args), "--output", "NOVO_DIRETORIO"]
     command += ["--dry-run"] if args.dry_run else ["--manifest", str(args.manifest.resolve()), "--confirm-execution"]
-    invocation_sha = write_json(output / "invocation.json", dict(VERSIONS, stage=plan.stage, git_revision=plan.report["git_revision"],
+    invocation_sha = write_json(output / "invocation.json", dict(plan.round.versions, stage=plan.stage, git_revision=plan.report["git_revision"],
                command=shlex.join(command), config_sha256=plan.settings.sha256, manifest_id=manifest_id,
                manifest_sha256=manifest_sha, dry_run=args.dry_run, synthetic_transport=plan.mode == "fixture",
                concurrency=1, attempts=1))
@@ -66,7 +66,7 @@ def authorize(args, plan, account, proof, confirmed):
     return authorization
 
 
-def run_evaluation(args, *, fixture_command=None):
+def run_evaluation(args, *, fixture_command=None, round_spec=R2):
     if args.mode != "fixture" and fixture_command is not None:
         raise BudgetError("processo de teste só é aceito no modo fixture")
     output = args.output.resolve()
@@ -74,8 +74,8 @@ def run_evaluation(args, *, fixture_command=None):
         raise ValueError("artefatos exigem diretório novo dentro do checkout")
     if output.exists():
         raise FileExistsError("diretório de saída já existe")
-    run_id = "r2-" + uuid.uuid4().hex
-    plan = Plan(args.stage, args.mode, run_id, args.config)
+    run_id = round_spec.prefix + uuid.uuid4().hex
+    plan = Plan(args.stage, args.mode, run_id, args.config, round_spec=round_spec)
     account = resolve_account(args, args.mode)
     proof = proof_reference(args)
     if args.dry_run:
@@ -100,10 +100,13 @@ def run_evaluation(args, *, fixture_command=None):
                   dict(binding, settings=plan.settings.data), prepare=prepare)
     finished = False
     try:
-        adapter = fixture_command or [sys.executable, "-B", str(HERE / "execute.py"), "_adapter"]
-        config = {"identity": plan.identity, "contract_version": PROFILE.ipc_version,
+        adapter = fixture_command or [sys.executable, "-B", str(plan.round.entrypoint), "_adapter"]
+        config = {"identity": plan.identity, "contract_version": plan.round.profile.ipc_version,
                   "command": [*adapter, *options_for(args), "--manifest", str(args.manifest.resolve()),
                               "--manifest-sha256", manifest_sha]}
+
+        if plan.round.profile.name == c01.LUNA:
+            config["share_case_deadline"] = True
 
         def publish(inputs, obs, decisions, prefix=False):
             return write_report(output, plan.report.copy(), inputs, obs, decisions, plan.validation, plan.protocol,
@@ -115,10 +118,13 @@ def run_evaluation(args, *, fixture_command=None):
         def settle(item, observation):
             timed_out = any(choice["reason"] == "timeout" for choice in observation["choices"].values())
             account.complete_case(run_id, item["id"], timed_out=timed_out)
+            if plan.round.stop_on_error and any(
+                    choice["status"] in {"error", "invalid"} for choice in observation["choices"].values()):
+                raise BudgetError("falha técnica na candidata, lote interrompido após conciliação")
 
         with Journal(output, run_id, plan.inputs, plan.injections, publish,
                      track_output=plan.stage == "development",
-                     profile_metadata=dict(VERSIONS, contract_version=PROFILE.report_version)) as journal:
+                     profile_metadata=dict(plan.round.versions, contract_version=plan.round.profile.report_version)) as journal:
             observations, decisions = run_batch(
                 plan.inputs, config, plan.report, plan.catalog, plan.validation, journal, plan.control_policy,
                 before_exchange=reserve, after_candidate=settle)
@@ -162,8 +168,8 @@ def development_fixture(plan):
     return gateway
 
 
-def serve(args):
-    plan = Plan(args.stage, args.mode, os.environ["CLASSIFICATION_RUN_ID"], args.config)
+def serve(args, round_spec=R2):
+    plan = Plan(args.stage, args.mode, os.environ["CLASSIFICATION_RUN_ID"], args.config, round_spec=round_spec)
     account = resolve_account(args, args.mode)
     _, manifest_sha, _, _ = authorize(args, plan, account, proof_reference(args), confirmed=True)
     transport = development_fixture(plan) if args.mode == "fixture" and plan.stage == "development" else None
@@ -179,13 +185,13 @@ def plan_arguments(parser):
     account_from_args(parser)
 
 
-def main():
+def main(round_spec=R2):
     parser = argparse.ArgumentParser(description=__doc__)
     try:
         if sys.argv[1:2] == ["_adapter"]:
             plan_arguments(parser)
             parser.add_argument("--manifest-sha256", required=True)
-            serve(parser.parse_args(sys.argv[2:]))
+            serve(parser.parse_args(sys.argv[2:]), round_spec)
             return
 
         commands = parser.add_subparsers(dest="command", required=True)
@@ -208,21 +214,22 @@ def main():
                 command.add_argument("--receipt", type=Path, required=True)
         args = parser.parse_args()
         if args.command == "run":
-            status = run_evaluation(args)
+            status = run_evaluation(args, round_spec=round_spec)
             if status == "failed":
                 raise BudgetError(f"gate de development reprovado em {args.output / gate.FILENAME}")
             print(args.output)
             return
+        account = Account(args.account, getattr(args, "account_id", None), args.mode)
+        if round_spec.check_account is not None:
+            round_spec.check_account(account)
         if args.command == "init-account":
-            account = Account.initialize(args.account, scope="fixture", cap=args.cap_usd,
+            account = Account.initialize(account.path, scope="fixture", cap=args.cap_usd,
                                          previous_spend=args.previous_spend_usd)
-        else:
-            account = Account(args.account, args.account_id, args.mode)
-            if args.command == "reconcile":
-                account.reconcile(decode(args.receipt.read_bytes()))
+        elif args.command == "reconcile":
+            account.reconcile(decode(args.receipt.read_bytes()))
         print(encode(account.status(), indent=2))
     except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError) as exc:
-        parser.exit(2, f"R2 interrompida ({type(exc).__name__}): {exc}\n")
+        parser.exit(2, f"{round_spec.prefix[:-1].upper()} interrompida ({type(exc).__name__}): {exc}\n")
 
 
 if __name__ == "__main__":
