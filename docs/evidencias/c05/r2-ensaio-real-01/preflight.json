@@ -1,0 +1,39 @@
+{
+  "task": "C05-R2",
+  "checked_on": "2026-11-24",
+  "source": "https://feita.ai/models/qwen/qwen3.8-27b",
+  "method": "Read-only public browser Overview/API; no inference probe; no credential or account UI accessed.",
+  "model": "qwen/qwen3.8-27b",
+  "endpoint": "https://api.feita.ai/gateway/v1/chat/completions",
+  "public_status_display": "Degraded",
+  "published_context_display": "1.02M",
+  "published_max_output_display": "236K",
+  "published_usd_per_million_display": {
+    "input": "0.425",
+    "output": "2.55",
+    "cache_read": "0.085",
+    "cache_write": "0.531"
+  },
+  "published_cache_write_credits_per_million_display": "53.13",
+  "published_credit_unit_usd": "0.01",
+  "documented_response_includes_usage_credits": true,
+  "reservation_bounds": {
+    "input_tokens": 1100000,
+    "output_tokens": 250000,
+    "cache_write_usd_per_million": "0.532",
+    "per_dispatch_usd": "1.783700",
+    "basis": "Rounded upward beyond abbreviated context and current 236K max output; cache write rounded above USD and credits displays. Full model capacity reserved without assuming max_tokens bounds all billable reasoning."
+  },
+  "account_before": {
+    "accounted_usd": "0.02300927",
+    "cap_usd": "10",
+    "pending_reservations": 0,
+    "existing_finished_runs": 1,
+    "settled_reservations": 44
+  },
+  "financial_policy": "Same existing SQLite v4 account. Documented usage.credits x USD0.01; usage.cost unit unknown. Timeout or unknown money retains reservation and interrupts. No retries/resume. Up to6development and only on realpass up to44final.",
+  "limitations": [
+    "Provider status is transient; six authorized development requests are the first inference and no separate probe is made.",
+    "Public limits are abbreviated; bounds are conservative preflight assumptions, not independent billing certification."
+  ]
+}
