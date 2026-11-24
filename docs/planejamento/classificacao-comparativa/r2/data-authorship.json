@@ -6,7 +6,7 @@
     "role": "autoria independente do final R2"
   },
   "base_commit": "c00ac5431630c92d30349c13529d5071ad9879b4",
-  "dataset_sha256": "de29a2de28e9b643dfe82eff97ef54263afa3eca7ad0b8642f5c3fc4ee22d4b8",
+  "dataset_sha256": "4f1d712b87bbee326e3602b3fb74398558f929b08c1709b11407676869a21145",
   "references": [
     "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
     "script/f08/jev/catalog.json"
@@ -65,5 +65,26 @@
     "labels": "Revisão exploratória dos 36 casos por outro agente com a rubrica e o catálogo, antes da inferência.",
     "similarity": "Conferência por um terceiro papel entre os textos novos e antigos, com registro independente.",
     "human_approval": "Pendente de decisão do responsável em caso de divergências persistentes."
-  }
+  },
+  "revision_history": [
+    {
+      "round": 1,
+      "base_commit": "29973d74209796c54076fcaf9348c14a37ab1743",
+      "origin": "Triagem independente de similaridade consolidada pelo integrador em feedback de autoria.",
+      "changes": "Substituição do fato central e da justificativa de dez relatos, preservando campos recebidos, alvos, rótulos e estratos.",
+      "changed_case_ids": [
+        "r2-001",
+        "r2-007",
+        "r2-014",
+        "r2-019",
+        "r2-020",
+        "r2-022",
+        "r2-023",
+        "r2-030",
+        "r2-031",
+        "r2-033"
+      ],
+      "status": "pending_independent_review"
+    }
+  ]
 }

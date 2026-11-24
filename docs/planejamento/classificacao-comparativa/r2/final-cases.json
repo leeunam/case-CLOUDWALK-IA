@@ -5,7 +5,7 @@
   "cases": [
     {
       "id": "r2-001",
-      "text": "Dá para pôr o nome da feira de domingo no comprovante que sai da maquininha de cartão da Triz Lunar? Quero deixar pronto o leitor reserva. Os caixas da loja estão funcionando com os leitores de sempre.",
+      "text": "Fechamos o ponto sazonal e a maquininha de cartão vai ficar seis meses no armário. Qual é a orientação da Triz Lunar para conservar a bateria com o equipamento guardado? Volto a usar na próxima temporada.",
       "received": {
         "category": null,
         "priority": "basic"
@@ -17,7 +17,7 @@
         "category": "terminal"
       },
       "stratum": "rotina",
-      "rationale": "A dúvida é sobre o ajuste das informações no comprovante emitido pela maquininha de cartão."
+      "rationale": "O pedido é de orientação para armazenar e conservar a bateria da maquininha de cartão fora do período de uso."
     },
     {
       "id": "r2-002",
@@ -99,7 +99,7 @@
     },
     {
       "id": "r2-007",
-      "text": "Sou do posto de atendimento da Vela Salina. Antes de colocar a maquininha nova no balcão de acessibilidade, queria saber se posso ampliar o que aparece no visor na hora de confirmar o valor. Hoje usamos o equipamento antigo normalmente.",
+      "text": "Estou escrevendo o manual para os caixas da próxima edição do bazar. Na maquininha da Pinhão Violeta, como divido o valor de uma mesma venda entre dois cartões, um de cada pessoa? A edição deste ano já encerrou.",
       "received": {
         "category": null,
         "priority": "basic"
@@ -111,7 +111,7 @@
         "category": "terminal"
       },
       "stratum": "rotina",
-      "rationale": "Ampliar a informação no visor é uma configuração do equipamento em que se confirma o valor da venda."
+      "rationale": "O pedido trata da operação da maquininha de cartão para dividir uma venda entre dois cartões."
     },
     {
       "id": "r2-008",
@@ -208,7 +208,7 @@
     },
     {
       "id": "r2-014",
-      "text": "Fiz um Pix só na Pinhão Violeta. O extrato já mostrou três saídas iguais, e, enquanto eu escrevia, apareceu uma quarta. Não fiz novas tentativas. O saldo continua baixando.",
+      "text": "Colaram outro código por cima do nosso Pix na placa de fichas do sarau. Peguei três comprovantes e todos mostram alguém de fora da organização como recebedor. Tem gente comprando ficha por essa placa enquanto o salão ainda está no intervalo.",
       "received": {
         "category": "pix",
         "priority": null
@@ -220,7 +220,7 @@
         "priority": "urgent"
       },
       "stratum": "urgente",
-      "rationale": "Os débitos indevidos seguem surgindo durante o relato, caracterizando perda em andamento."
+      "rationale": "Há pagamentos que já foram desviados pelo código sobreposto. A placa continua em uso e pode desviar os próximos pagamentos."
     },
     {
       "id": "r2-015",
@@ -287,7 +287,7 @@
     },
     {
       "id": "r2-019",
-      "text": "Escrevendo do furgão de lanches. A única máquina apagou no meio da fila e não volta nem ligada à tomada. Estamos no evento agora, com pedidos prontos e sem outra forma de receber.",
+      "text": "A maquininha da Cedro Níquel começou a soltar fumaça pela emenda da carcaça. Tirei o carregador da tomada, mas a fumaça continua e o aparelho está no balcão junto aos clientes. Para quem passo isso?",
       "received": {
         "category": "terminal",
         "priority": null
@@ -299,11 +299,11 @@
         "priority": "urgent"
       },
       "stratum": "urgente",
-      "rationale": "O único meio de cobrança parou durante a atividade e os pedidos já prontos aguardam pagamento."
+      "rationale": "A fumaça persiste mesmo com o aparelho fora da tomada e há pessoas próximas, o que exige ação imediata."
     },
     {
       "id": "r2-020",
-      "text": "Os pagamentos por Pix entram, mas a baixa não aparece sozinha para os pedidos do guichê de retirada. Estamos liberando por conferência no comprovante. Nos outros guichês, a baixa segue automática.",
+      "text": "O convênio recusou uma despesa porque no PDF do comprovante Pix da Pinhão Violeta o identificador está cortado na margem. O reembolso dessa compra ficou preso até eu substituir o documento. Os outros itens já seguiram para análise.",
       "received": {
         "category": "pix",
         "priority": "   "
@@ -315,7 +315,7 @@
         "priority": "intermediate"
       },
       "stratum": "rotina",
-      "rationale": "A dificuldade de conciliação está limitada a um guichê, que segue liberando os pedidos após conferência."
+      "rationale": "O documento defeituoso bloqueou um reembolso específico. As outras despesas seguem em análise."
     },
     {
       "id": "r2-021",
@@ -334,7 +334,7 @@
     },
     {
       "id": "r2-022",
-      "text": "O crédito das vendas da Vela Salina previsto para hoje ficou pendente. O guichê da cooperativa fecha em quinze minutos e sem esse dinheiro perdemos a retirada da carga que está na doca. Não temos reserva para quitar por fora.",
+      "text": "No detalhe do repasse de cartões, toda a agenda de créditos do mês foi marcada para liquidação antecipada. Ninguém aqui pediu isso. Às 18h a confirmação é automática, faltam seis minutos e a tarifa calculada vai consumir o que separamos para a folha. A opção de suspender não está abrindo.",
       "received": {
         "category": "payouts",
         "priority": null
@@ -346,11 +346,11 @@
         "priority": "urgent"
       },
       "stratum": "urgente",
-      "rationale": "Sem o crédito pendente e sem reserva, a retirada da carga está condicionada a um pagamento com prazo de quinze minutos."
+      "rationale": "A confirmação da antecipação está a seis minutos de causar um desconto que compromete a folha e o cliente não consegue suspendê-la pelo painel."
     },
     {
       "id": "r2-023",
-      "text": "Na bancada de retirada, a maquininha deixou de aceitar cartão com chip. As vendas por aproximação seguem nela e, quando precisa inserir o cartão, a gente encaminha a pessoa para a bancada ao lado.",
+      "text": "O relógio da maquininha do caixa de encomendas virou para um fuso que põe as vendas na data seguinte. Os cartões seguem aprovando ali, mas para conferir o turno preciso buscar cada pagamento pelo número da transação. Só esse caixa está com as datas trocadas.",
       "received": {
         "category": "terminal",
         "priority": ""
@@ -362,7 +362,7 @@
         "priority": "intermediate"
       },
       "stratum": "rotina",
-      "rationale": "A falha afeta uma forma de pagamento em uma bancada. A aproximação e o atendimento no caixa vizinho mantêm as vendas."
+      "rationale": "O problema de data exige conferência manual em um caixa. Os pagamentos continuam sendo aprovados nesse equipamento."
     },
     {
       "id": "r2-024",
@@ -466,7 +466,7 @@
     },
     {
       "id": "r2-030",
-      "text": "Só a devolução por Pix de um pedido está falhando na Vela Salina. Os outros recebimentos e estornos passam. Tenho como acertar com esse cliente pelo caixa, mas queria completar a devolução no aplicativo.",
+      "text": "O Pix recorrente do entregador continua aparecendo para segunda mesmo depois de eu mudar a programação para quarta. Depois de dois acertos de data feitos com ele, suspendi essa série e assumi o pagamento do contrato à mão. Os demais pagamentos do negócio seguem normalmente.",
       "received": {
         "category": "",
         "priority": "   "
@@ -480,11 +480,11 @@
         "priority": "intermediate"
       },
       "stratum": "rotina",
-      "rationale": "A falha é na devolução de um Pix específico. Os demais pedidos seguem e o caixa permite resolver esse caso."
+      "rationale": "A falha afeta a programação de uma série recorrente de Pix. Um contrato passou a exigir pagamento manual e os demais seguem normalmente."
     },
     {
       "id": "r2-031",
-      "text": "Uma atualização desativou os atalhos de venda nas maquininhas de cinco lojas. Ainda passamos cartão pelo menu manual, mas agora cada operador precisa reconfigurar os atalhos de todos os postos. As lojas estão atendendo enquanto refazemos isso.",
+      "text": "O lote de bobinas que usamos no fim de semana deixou resíduos na impressora de 38 maquininhas. Os caixas conseguem vender e mandar a via por mensagem. Para voltar a imprimir, vamos ter de tirar cada aparelho do balcão para limpeza, em rodízio nas próximas duas semanas.",
       "received": {
         "priority": ""
       },
@@ -497,7 +497,7 @@
         "priority": "advanced"
       },
       "stratum": "rotina",
-      "rationale": "A atualização afeta o uso das maquininhas de cinco lojas e exige reconfiguração em muitos postos. As vendas seguem por operação manual."
+      "rationale": "O uso das impressoras de 38 maquininhas foi afetado e a limpeza de todos os aparelhos exige retrabalho. As vendas e a emissão digital seguem, com manutenção programada em rodízio."
     },
     {
       "id": "r2-032",
@@ -518,7 +518,7 @@
     },
     {
       "id": "r2-033",
-      "text": "O crédito de duas vendas no débito ficou fora do depósito do dia da Favo Índigo. O restante caiu normalmente e o ponto segue vendendo. Preciso saber quando entram essas duas vendas.",
+      "text": "O crédito das vendas da banca do térreo já entrou no banco, mas no painel da Cedro Níquel esse lote continua em trânsito. A conciliação automática pula esse repasse por causa do status. A banca continua aberta e estou fechando esse turno com o lançamento à mão.",
       "received": {
         "category": null,
         "priority": null
@@ -532,7 +532,7 @@
         "priority": "intermediate"
       },
       "stratum": "rotina",
-      "rationale": "O problema está na liquidação de duas vendas. Os demais créditos entraram e a operação segue disponível."
+      "rationale": "O pedido é sobre o estado de um lote de repasse já recebido. Só a conciliação dessa banca exige registro manual e as vendas continuam."
     },
     {
       "id": "r2-034",
