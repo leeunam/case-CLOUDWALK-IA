@@ -9,7 +9,10 @@ chamada real da Luna. A demonstração pública continua em fixture.
 O adaptador e o transporte foram aceitos em `cda8fc8` e congelados em `7f04b9b`,
 antes de executar o novo perfil. O executor foi entregue em `8580343` e corrigido
 em `3b085fc`: uma conta sintética não pode ocupar o caminho reservado à conta real,
-inclusive por link de diretório. A revisão por tarefa aprovou a correção.
+inclusive por link de diretório. A revisão por tarefa aprovou a correção. A revisão ampla encontrou uma corrida
+com conciliação manual, corrigida em `aafc8ce`: custo ausente na resposta original
+interrompe o lote mesmo com recibo manual já registrado. O recibo é preservado.
+A re-revisão ampla aprovou SPEC e QUALITY, sem achados residuais.
 
 O perfil `observed-total-luna-1.0` usa relatório 1.4.0 e preserva os dados,
 instruções semânticas e critérios R2. Mantém o executor, o diário, o gate e o livro
@@ -18,7 +21,8 @@ As evidências de implementação e revisão estão em
 [luna-planejamento](evidencias/c05/luna-planejamento/).
 
 O autor executou 148 testes na entrega inicial; depois da correção passaram o
-teste da guarda, o percurso Luna completo e a inicialização histórica R2. O
+teste da guarda, o percurso Luna completo e a inicialização histórica R2. Na correção final passaram os três testes
+dirigidos de conciliação concorrente, erros/custos e percurso completo. O
 integrador também reproduziu o percurso de CLI. Foram seis chamadas sintéticas
 de desenvolvimento e 44 finais, com 50 reservas sintéticas liquidadas. O resultado
 permanece inconclusivo e a latência do modelo fica sem medição.
