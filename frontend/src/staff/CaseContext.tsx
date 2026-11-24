@@ -1,16 +1,7 @@
 import type { StaffCase } from '../api/contract'
 import type { Brand, Message } from '../simulator/contract'
 import { categoryLabels, formatTimestamp, priorityLabels } from '../simulator/presentation'
-
-const blocks: Record<string, string> = {
-  active_capacity: 'O perfil não comporta mais casos ativos.',
-  portfolio_limit: 'A carteira atingiu o limite.',
-  different_operating_brand: 'O responsável está operando em outra marca.',
-  analyst_unavailable: 'O responsável está indisponível para novas atribuições.',
-  brand_switch_pending: 'O responsável está preparando a troca de marca.',
-  no_eligible_analyst: 'A fila aguarda um analista elegível.',
-  queue_access_revoked: 'O responsável perdeu acesso à fila.',
-}
+import { blockingMessage } from './blockingReason'
 
 const sourceNames = { channel: 'Canal', jev: 'Classificador', supervisor: 'Supervisão' }
 const integrationLabels = { idle: 'Sem tentativa em andamento', pending_delivery: 'Aguardando entrega', awaiting_result: 'Aguardando resposta', failed: 'Falha na integração' }
@@ -45,7 +36,7 @@ export function CaseContext({ detail, brand, queue, owned, messages, onOpen, onR
         {detail.human_queue_since && <div><dt>Na fila desde</dt><dd><time dateTime={detail.human_queue_since}>{formatTimestamp(detail.human_queue_since)}</time></dd></div>}
         {detail.status === 'ai_active' && <div><dt>Integração</dt><dd>{integrationLabels[detail.integration_status]}</dd></div>}
       </dl>
-      {detail.blocking_reason && <p className="warning">{blocks[detail.blocking_reason] ?? detail.blocking_reason}</p>}
+      {detail.blocking_reason && <p className="warning">{blockingMessage(detail.blocking_reason, detail.status, detail.integration_status)}</p>}
     </section>
     <section><h3>Classificação</h3>
       <dl className="attributes">
@@ -57,6 +48,7 @@ export function CaseContext({ detail, brand, queue, owned, messages, onOpen, onR
     </section>
     <details className="record-details"><summary>Registro do caso</summary>
       <dl className="attributes"><div><dt>Identificador</dt><dd><code>{detail.id}</code></dd></div>
+        {detail.blocking_reason && <div><dt>Código do bloqueio</dt><dd><code>{detail.blocking_reason}</code></dd></div>}
         <div><dt>Aberto em</dt><dd>{formatTimestamp(detail.created_at)}</dd></div>
         <div><dt>Atualizado em</dt><dd>{formatTimestamp(detail.updated_at)}</dd></div></dl>
     </details>

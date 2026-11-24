@@ -17,10 +17,10 @@
 .channel-picker { min-width: 0; margin: 0; padding: 0; border: 0; }
 .channel-picker legend { padding: 0; margin-bottom: .35rem; }
 .channel-picker > div { display: flex; flex-wrap: wrap; gap: .3rem; }
-.channel-picker label { display: inline-flex; align-items: center; justify-content: center; gap: .33rem; padding: .45rem .65rem; min-height: 2.5rem; border: 1px solid var(--control); border-radius: var(--radius); color: var(--muted); cursor: pointer; position: relative; }
+.channel-picker label { display: inline-flex; align-items: center; justify-content: center; gap: .33rem; padding: .45rem .65rem; min-height: 2.5rem; border: 1px solid var(--control); border-radius: var(--radius); color: var(--muted); cursor: pointer; }
 .channel-picker svg { width: 1rem; height: 1rem; }
 .channel-picker label.selected { color: var(--accent); border-color: var(--accent); background: var(--tint); }
-.channel-picker input { position: absolute; inset: 0; height: 100%; width: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.channel-picker input { width: .9rem; height: .9rem; flex: none; margin: 0; cursor: pointer; }
 .channel-picker label:has(input:focus-visible) { outline: 3px solid #278265; outline-offset: 2px; }
 .channel-picker label:has(input:disabled) { opacity: .6; cursor: default; }
 .metadata { padding: .65rem .8rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--canvas); }

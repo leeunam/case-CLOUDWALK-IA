@@ -7,7 +7,7 @@ import { caseLabels, channelLabels } from './presentation'
 import { useResource } from './useResource'
 
 export function Conversation({
-  id, latestCaseId, brands, channels, repository, demo, headingRef, onHistoryChanged, onOpen,
+  id, latestCaseId, brands, channels, repository, demo, headingRef, onHistoryChanged, onOpen, onReceipt,
 }: {
   id: string
   latestCaseId?: string
@@ -17,7 +17,8 @@ export function Conversation({
   demo: boolean
   headingRef: Ref<HTMLHeadingElement>
   onHistoryChanged: () => void
-  onOpen: (id: string) => void
+  onOpen: (id: string, trigger: HTMLButtonElement) => void
+  onReceipt: (id: string) => void
 }) {
   const [revision, setRevision] = useState(0)
   const refresh = useCallback(() => setRevision(previous => previous + 1), [])
@@ -38,7 +39,7 @@ export function Conversation({
 
   function handleSent(receipt: SimulatorReceipt) {
     if (receipt.case_id === id) refresh()
-    onOpen(receipt.case_id)
+    onReceipt(receipt.case_id)
   }
 
   return (
@@ -52,7 +53,7 @@ export function Conversation({
       </div>
       {previousCaseId && (
         <div className="previous-case">
-          <button className="text-button" onClick={() => onOpen(previousCaseId)}>Ver atendimento anterior</button>
+          <button className="text-button" onClick={event => onOpen(previousCaseId, event.currentTarget)}>Ver atendimento anterior</button>
         </div>
       )}
       <div className="transcript" tabIndex={0} role="region" aria-label="Histórico da conversa">
@@ -68,7 +69,7 @@ export function Conversation({
       {(latestCaseId || (channel && detail)) && (
         <div className="conversation-footer">
           {latestCaseId ? (
-            <button className="secondary" onClick={() => onOpen(latestCaseId)}>Abrir atendimento mais recente</button>
+            <button className="secondary" onClick={event => onOpen(latestCaseId, event.currentTarget)}>Abrir atendimento mais recente</button>
           ) : channel && detail && (
             <div className="conversation-tools">
               <p className="muted">
