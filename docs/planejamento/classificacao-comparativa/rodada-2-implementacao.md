@@ -185,6 +185,15 @@ execução. Não alterar textos congelados ou gabarito para acomodar testes.
    protocolo, config financeira e revisão de código. Prova fixture não libera
    real; prefixo, fonte/custo adulterados ou gate failed não liberam final.
    Referência de gate e hashes entram no manifesto final, antes de chave/rede.
+   Fixar na conclusão os hashes das sete saídas originais e da prova em selo
+   persistente junto da conta, fora da pasta pública fornecida como prova.
+   O selo é JSON privado, criado exclusivamente uma vez com O_EXCL e fsync,
+   vinculado à conta/run/manifest_id, sem valores financeiros novos. Não muda
+   SQLite/schema v4. Somente o caminho de conclusão da execução escreve o selo,
+   inclusive para development failed; collect/verify nunca selam nem reparam.
+   O final exige selo presente e compatível, além do ledger; ausência/corrupção
+   bloqueia, sem migração/regeneração automática. Preservar selo e conta juntos.
+   Não alegar resistência a quem pode editar o próprio programa ou seus selos.
    O report de development continua inconclusive para elegibilidade do modelo;
    seu gate operacional é separado. Em fixture, tempos de LLM não são medidos:
    resultado `fixture_ready` pode liberar apenas final fixture, após conferir
