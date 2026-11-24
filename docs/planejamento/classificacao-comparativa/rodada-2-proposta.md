@@ -6,6 +6,11 @@ apresentada abaixo. Novas chamadas pagas continuam exigindo autorização
 posterior; a escolha não aprova adoção operacional. B e C ficam como registro
 das alternativas ponderadas. [Plano de implementação](rodada-2-implementacao.md).
 
+O aceite por tarefa e o roteiro CLI fixture do integrador foram concluídos
+no código `3f66bec`, com zero chamadas pagas. A revisão ampla final e a
+integração são registradas no [guia R2](../../c05-r2.md). Isso não aprova o
+modelo nem libera C06.
+
 Tarefa C05-R2; base `1a7cd4235ce44b01213f685439af3523989e5097`.
 Planejamento no checkout principal, branch `main`, diretório
 `/home/inteli/Documents/projetos/case-CLOUDWALK-IA`. As worktrees de instruções
