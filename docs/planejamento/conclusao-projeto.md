@@ -138,3 +138,21 @@ Exigir evidência e veto verificável é uma alternativa de maior mudança.
 Nenhuma nova candidata foi implementada, nenhum gabarito foi alterado e
 nenhum consumo extra foi autorizado ou executado após a reprovação. C06/C07
 continuam necessários; a demonstração pública permanece em fixture.
+
+## Continuação autorizada — instrução Luna e frontend
+
+Em 24/11/2026 o responsável escolheu revisar somente a instrução de quando
+encaminhar para revisão, mantendo Luna, uma chamada, critérios e gabaritos.
+A aprovação cobre preparação offline; não autoriza nova inferência paga.
+Preservar integralmente a candidata e as evidências R3. Separar nova instrução
+de pares novos de diagnóstico: autores distintos e revisão cega dos rótulos.
+Congelar a instrução antes de reunir os pares e não acessar os 36 finais.
+O diagnóstico offline confere contratos e desenho; não mede a nova Luna.
+
+O responsável também pediu melhoria do frontend com referências Chatwoot,
+Zammad e painel Web do Sidekiq. As orientações locais de interface já estão
+disponíveis. A análise usa padrões operacionais das referências, sem copiar
+marca ou inventar funções/indicadores. O escopo visual proposto cobre analista,
+supervisão, login e simulador; a reorganização foi apresentada para escolha.
+Rails, Kafka, contratos, autenticação e o orçamento do classificador permanecem
+fora desta mudança de interface. As frentes usam branches/worktrees separadas.
