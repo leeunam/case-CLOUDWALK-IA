@@ -68,9 +68,12 @@ foi enviado. A auditoria conferiu os registros, e a conciliação conservadora
 da cobrança tardia preservou a interrupção. Acumulado conservador
 US$ 0,02687405, sem reservas pendentes. O [resultado](../c05-r2-resultado.md)
 registra origem, custo exato indisponível no último caso e limitações.
-Uma pergunta de escopo foi enviada ao responsável: concluir a demonstração
-com fixture identificada e evolução real pendente, ou preparar outra estratégia
-antes do fechamento. O trabalho independente F09/F10 continua enquanto isso.
+O responsável decidiu que a classificação real continua necessária antes do
+fechamento e aprovou D — GPT-5.6 Luna, uma chamada — para preparação offline,
+conforme a [proposta R3](classificacao-comparativa/rodada-3-proposta.md).
+O trabalho independente F09/F10 continua; novas chamadas pagas só serão
+propostas após a revisão do executor. Não encerrar C06/C07 por simples
+substituição do modo real por fixture.
 
 ## Destino gratuito confirmado — F10
 

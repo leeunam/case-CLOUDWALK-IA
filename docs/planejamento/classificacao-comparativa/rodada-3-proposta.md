@@ -1,6 +1,8 @@
 # C05-R3 · Proposta de outra estratégia real
 
-Estado: proposta para decisão, sem implementação ou novas chamadas pagas.
+Estado: opção D — GPT-5.6 Luna, uma chamada — aprovada pelo responsável em
+24/11/2026 para preparação offline. Implementação e revisão ainda pendentes,
+sem novas chamadas pagas autorizadas. B/C permanecem como alternativas históricas.
 Em 24/11/2026 o responsável escolheu preparar outra estratégia real antes de
 considerar o projeto concluído. Isso mantém C06/C07 como dependências da
 entrega. O [resultado R2](../../c05-r2-resultado.md) permanece negativo no
