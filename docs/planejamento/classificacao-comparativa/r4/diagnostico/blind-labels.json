@@ -1,0 +1,110 @@
+{
+  "task": "Task3-D2/blind-review",
+  "reviewer": "integrador IA, separado do autor dos dados e do autor da instrução",
+  "human_review": false,
+  "created_at": "2026-11-24T20:05:45.822530+00:00",
+  "inputs_sha256": "07777cf652d481c8f3c98f5c825679fe65bcafdb27919dd62ca92338af9e101b",
+  "annotations_opened_before_labels": false,
+  "new_prompt_opened_before_labels": false,
+  "labels": {
+    "R4-D-001": {
+      "expected": {
+        "category": "terminal"
+      },
+      "justification": "O pedido é sair de uma tela quando a tecla do aparelho não responde; QR é contexto."
+    },
+    "R4-D-002": {
+      "expected": {
+        "category": "payouts"
+      },
+      "justification": "Pergunta quando o total das vendas no cartão entra na conta."
+    },
+    "R4-D-003": {
+      "expected": {
+        "category": "pix"
+      },
+      "justification": "O pedido identifica confirmação de pagamento por Pix do pedido."
+    },
+    "R4-D-004": {
+      "expected": {
+        "category": "informacao_insuficiente"
+      },
+      "justification": "Origem e operação do dinheiro não são informadas; lançamentos podem ser de mais de um tipo."
+    },
+    "R4-D-005": {
+      "expected": {
+        "category": "informacao_insuficiente",
+        "priority": "urgent"
+      },
+      "justification": "Saídas atuais sem descrição não distinguem a operação; perda em curso exige urgência."
+    },
+    "R4-D-006": {
+      "expected": {
+        "category": "payouts"
+      },
+      "justification": "Pedido é falta do dinheiro das vendas na data combinada, com hardware em funcionamento."
+    },
+    "R4-D-007": {
+      "expected": {
+        "category": "terminal"
+      },
+      "justification": "Configuração de rede em leitor de cartões extra."
+    },
+    "R4-D-008": {
+      "expected": {
+        "category": "informacao_insuficiente"
+      },
+      "justification": "Pix é negado como objeto do pedido; o outro lançamento não está identificado."
+    },
+    "R4-D-009": {
+      "expected": {
+        "category": "pix"
+      },
+      "justification": "Pedido identifica se pagamento Pix de um QR foi concluído."
+    },
+    "R4-D-010": {
+      "expected": {
+        "category": "pix",
+        "priority": "urgent"
+      },
+      "justification": "As saídas em andamento estão identificadas como Pix e exigem interrupção imediata."
+    },
+    "R4-D-011": {
+      "expected": {
+        "category": "informacao_insuficiente"
+      },
+      "justification": "Pix é somente hipótese; ninguém identificou a operação confirmada."
+    },
+    "R4-D-012": {
+      "expected": {
+        "category": "payouts"
+      },
+      "justification": "Pedido liga a disponibilidade do dinheiro a vendas no crédito."
+    },
+    "R4-D-013": {
+      "expected": {
+        "category": "terminal"
+      },
+      "justification": "Pedido é imprimir segunda via na maquininha; vendas são contexto."
+    },
+    "R4-D-014": {
+      "expected": {
+        "category": "terminal"
+      },
+      "justification": "Configurar Wi-Fi em maquininha reserva para uso futuro."
+    },
+    "R4-D-015": {
+      "expected": {
+        "category": "payouts"
+      },
+      "justification": "Lote de vendas no cartão fechado e data em que valor será recebido pelo comerciante."
+    },
+    "R4-D-016": {
+      "expected": {
+        "category": "pix"
+      },
+      "justification": "Pedido identifica prazo do Pix ao fornecedor ainda em andamento."
+    }
+  },
+  "limitation": "Independent semantic annotation, not an inference or model quality measurement."
+}

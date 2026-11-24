@@ -28,3 +28,11 @@ Proveniência: relatos e anotações redigidos por IA na Task3-D2. A verificaç�
 desta entrega é estrutural e a rotulação cega fica pendente. Estes são dados de
 desenvolvimento e não integram o conjunto final nem registram resultados do
 Luna.
+
+## Revisão independente registrada
+
+Após o commit original, o integrador registrou rótulos cegos antes de abrir
+as anotações. As duas rotulações por IA concordaram nos 16 casos e 18 campos.
+As provas estão em `blind-labels.json` e `blind-comparison.json`. Aprovações
+humanas e chamadas à Luna permanecem em zero. A revisão estrutural independente
+foi aprovada. Isso verifica desenho e referências, sem medir o classificador.

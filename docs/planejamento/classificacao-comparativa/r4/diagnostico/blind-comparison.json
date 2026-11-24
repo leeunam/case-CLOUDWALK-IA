@@ -1,0 +1,15 @@
+{
+  "task": "Task3-D2/blind-comparison",
+  "compared_at": "2026-11-24T20:06:21.560131+00:00",
+  "inputs_sha256": "07777cf652d481c8f3c98f5c825679fe65bcafdb27919dd62ca92338af9e101b",
+  "blind_labels_sha256": "6a89cce9e98f70fd72ea0f819a606feec6cdc231d728155f0b0784f9aeda0e29",
+  "annotations_sha256": "d5668d33df87ba83f96aed7152249100b20dcd8a928f2d61eba3b7c6fd947897",
+  "agree_cases": 16,
+  "total_cases": 16,
+  "agree_missing_fields": 18,
+  "disagreements": [],
+  "human_approvals": 0,
+  "IA_review_only": true,
+  "inference_calls": 0,
+  "model_quality_measured": false
+}
