@@ -1,0 +1,19 @@
+{
+  "account_id": "903a037b4b9140438e152ade172889ca",
+  "scope": "real",
+  "cap_usd": "10",
+  "accounted_usd": "0.02687405",
+  "available_usd": "9.97312595",
+  "frozen_reason": null,
+  "observed_at": "2026-11-24T19:39:08.533861+00:00",
+  "method": "Read existing schema4 account status; no mutation, reset, reconciliation or API call.",
+  "runs_count": 2,
+  "runs_states": {
+    "finished": 1,
+    "interrupted": 1
+  },
+  "reservations_count": 50,
+  "reservations_states": {
+    "settled": 50
+  }
+}
