@@ -107,9 +107,16 @@ com referência exploratória por IA. O executor `3f66bec` passou no aceite
 offline e no roteiro CLI fixture do integrador. O [guia R2](../c05-r2.md)
 registra verificações, limites e revisão ampla final aprovada no código `b19a596`,
 sem achados residuais e com nova reprodução CLI fixture.
-Não há novo consumo autorizado; o plano futuro prevê até seis
-chamadas de desenvolvimento e 44 do final/controles, após revisão e
-autorização específica.
+O responsável autorizou até seis chamadas de desenvolvimento e, somente se
+aprovadas, até 44 do final/controles. As seis foram executadas em 24/11/2026:
+5/8 alvos corretos, uma conclusão indevida em três revisões esperadas,
+p95 de 4.995,002 ms e um timeout. O development foi interrompido e o final
+ficou bloqueado, sem repetição. O custo conservador da R2 é US$ 0,00386478,
+com acumulado US$ 0,02687405 e nenhuma reserva pendente após conciliação
+tardia. Isso não representa saldo do fornecedor. C06/C07 permanecem
+bloqueados até nova decisão. [Resultado e auditoria R2](../c05-r2-resultado.md).
+F09 e a publicação gratuita da demonstração seguem em preparação, sem
+atribuir qualidade real ao modo fixture.
 
 Ordem vigente: C01 → C02 → C03 → C05 → C06 → C07; C04 foi investigada em
 paralelo com C03 e seus ajustes foram encerrados nesta entrega. R01 e R02 podem

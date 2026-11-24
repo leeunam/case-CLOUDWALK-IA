@@ -60,6 +60,18 @@ de referência e um exercício. O chat central informa resultados e barreiras
 concretas e continua o trabalho independente quando aguarda informação.
 Este plano não declara o projeto concluído: o aceite depende das provas acima.
 
+### Resultado da frente real
+
+A R2 de desenvolvimento foi executada e interrompida: 5/8 alvos corretos,
+uma conclusão indevida, p95 4.995,002 ms e timeout no sexto caso. O final não
+foi enviado. A auditoria conferiu os registros, e a conciliação conservadora
+da cobrança tardia preservou a interrupção. Acumulado conservador
+US$ 0,02687405, sem reservas pendentes. O [resultado](../c05-r2-resultado.md)
+registra origem, custo exato indisponível no último caso e limitações.
+Uma pergunta de escopo foi enviada ao responsável: concluir a demonstração
+com fixture identificada e evolução real pendente, ou preparar outra estratégia
+antes do fechamento. O trabalho independente F09/F10 continua enquanto isso.
+
 ## Destino gratuito confirmado — F10
 
 O responsável informou não ter servidor e autorizou uma opção gratuita em
