@@ -87,14 +87,30 @@ Os limites continuam: preservação 100%, zero aplicação parcial, zero conclus
 automática nos sete casos de revisão, zero urgente automaticamente rebaixado,
 acerto aplicado ≥90% por campo, cobertura ≥21/29, reconhecimento urgente ≥5/6
 e p95 total ≤3.000 ms. Ausência de métrica ou execução incompleta não aprova.
+Zero urgente automaticamente rebaixado e reconhecimento bruto ≥5/6 são
+critérios diferentes, preservados do protocolo: uma abstenção/erro não é
+rebaixamento aplicado, mas conta como não reconhecimento. O relatório mostra
+separadamente os seis urgentes classificados, rebaixados, abstidos e com erro;
+não declara reconhecimento de 100% se apenas o limite de 5/6 foi cumprido.
 
 Um autor e um revisor de dados independentes da frente de instruções criam e
 revisam os novos relatos a partir da rubrica e das quotas, sem receber os erros
-ou os 60 textos antigos. Outro conferente pode comparar duplicatas/semelhanças
-antes do congelamento; isso não é uma garantia matemática de independência.
-Rótulos e justificativas ficam prontos antes das respostas, com origem de
-revisão por IA declarada e divergências conciliadas. Não declarar aprovação
-humana caso a caso se ela não ocorreu. O responsável aprova o protocolo.
+ou os 60 textos antigos. Um terceiro conferente de semelhanças fica fora da
+frente de instruções e da autoria. Ele pode comparar os textos antigos e os
+novos, mas não recebe respostas/erros do Qwen. Devolve ao autor/revisor somente
+os novos IDs que precisam ser substituídos por outros cenários, sem expor os
+textos antigos; nenhum texto novo ou par de semelhança vai à frente de prompt.
+A conferência ocorre antes do congelamento e não é uma garantia matemática
+de independência.
+
+Como proposta para esta amostra exploratória, os rótulos são escritos por um
+agente e revisados por outro a partir da rubrica, antes de qualquer resposta do
+Qwen. Não derivar o gabarito das respostas do candidato avaliado. Essa revisão
+por IA é declarada; não será chamada de gabarito humano ou validação em
+produção. Uma divergência entre revisores não prova insuficiência do relato:
+o caso precisa ser conciliado pela rubrica e, se persistir a dúvida, levado ao
+responsável antes do congelamento. Não editar rótulos após observar respostas.
+O responsável aprova o protocolo e pode optar por revisão humana adicional.
 
 A frente que ajusta instruções não lê o novo final. Trabalha apenas com os
 24 casos de desenvolvimento anteriores. O integrador não abre os textos do
@@ -171,6 +187,9 @@ deliberadamente conservadora e não substitui a avaliação final. Se a candidat
 não atender, registrar e interromper esta rodada para nova decisão, sem gastar
 automaticamente outro lote de ajustes. Não alterar esses seis IDs com base nas
 respostas.
+Nesse piloto de seis, o p95 nearest-rank é o maior tempo observado. O máximo de
+50 chamadas vem de 6 de desenvolvimento + 36 finais + 8 controles naturais;
+os outros cinco controles não fazem chamadas reais.
 
 Reutilizar a conta financeira existente em
 `.worktrees/c05-comparacao/.superpowers/financial/c05-qwen/account-v4.sqlite3`,
@@ -190,6 +209,7 @@ consumida. Nenhum resultado novo, melhoria de acerto ou custo futuro é afirmado
 Escolher A, B ou C. A recomendação é **A com novo teste independente**, mantendo
 os limites e a regra de revisão integral. Após a escolha, consolidar o contrato
 e liberar as frentes offline antes de solicitar qualquer consumo adicional.
+[Revisão documental e esclarecimentos](../../evidencias/c05/r2-planejamento/revisao-proposta.md).
 
 **Exercício.** Um relato pode deixar claro que há urgência e ainda não informar
 o assunto. Explique por que, nesse caso, a classificação completa deve continuar
