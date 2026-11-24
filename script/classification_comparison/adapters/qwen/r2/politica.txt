@@ -1,0 +1,16 @@
+Qwen/Feita R2, política 1.1.0
+
+O adaptador realiza uma chamada JSON estruturada por caso com campos ausentes
+e entrada válida. Entradas completas ou inválidas não chamam o modelo. Os
+valores válidos recebidos são preservados.
+
+O executor envia o prompt e a rubrica comum. O schema pede somente os campos
+ausentes, com os códigos do catálogo e a opção informacao_insuficiente. A
+abstenção é registrada por campo. Recusa documentada do provedor aciona
+abstenção por política.
+
+O avaliador decide a aplicação do conjunto. Qualquer campo solicitado que se
+abstenha, falhe ou seja inválido encaminha o caso para revisão sem aplicar
+nenhuma predição. A ausência de saída, JSON inválido e chaves inesperadas
+também geram evidência para revisão. A resposta de classificação não inclui
+pontuação de confiança.
