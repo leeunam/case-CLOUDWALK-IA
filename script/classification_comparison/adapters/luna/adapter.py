@@ -1,5 +1,6 @@
 """Candidata Luna fixa com IPC 1.1.0 e a política semântica da C05-R2."""
 from adapters.qwen.adapter import Adapter, encode, structured_request
+from adapters.qwen.pilot import rates
 
 MODEL = "openai/gpt-5.6-luna"
 MAX_COMPLETION_TOKENS = 128
@@ -36,6 +37,7 @@ class LunaAdapter(Adapter):
         if self._closed:
             raise ConnectionError("sessão Luna encerrada")
         try:
+            self._validate_budget()
             obs = super().classify(item)
             if self.budget is None:
                 for usage in obs["request_usage"]:
@@ -46,6 +48,22 @@ class LunaAdapter(Adapter):
         except BaseException:
             self.close()
             raise
+
+    def _validate_budget(self):
+        budget = self.budget
+        if budget is None:
+            if self.identity["mode"] == "real":
+                raise ValueError("candidata Luna real exige orçamento")
+            return
+        if not budget or not all(callable(getattr(budget, name, None)) for name in ("reserve", "observe")):
+            raise ValueError("orçamento Luna exige operações de reserva e registro de uso")
+        if not all(hasattr(budget, name) for name in ("max_tokens", "reasoning", "cost_unit", "tariff")):
+            raise ValueError("orçamento Luna sem os atributos exigidos pelo adaptador")
+        if type(budget.max_tokens) is not int or budget.max_tokens != MAX_COMPLETION_TOKENS:
+            raise ValueError("orçamento Luna exige limite solicitado de 128 tokens")
+        if budget.cost_unit not in (None, "USD"):
+            raise ValueError("orçamento Luna exige custo em USD ou unidade indisponível")
+        rates(budget.tariff)
 
     def close(self):
         if not self._closed:

@@ -1,5 +1,6 @@
 """Exercita a candidata com envelopes artificiais, isolados dos lotes C05."""
 from pathlib import Path
+from types import SimpleNamespace
 import unittest
 
 from adapters.luna.adapter import LunaAdapter, MODEL, request_body
@@ -78,6 +79,85 @@ class LunaAdapterTests(unittest.TestCase):
             with self.subTest(identity=identity), self.assertRaises(ValueError):
                 LunaAdapter(identity, RUN, INSTRUCTIONS, gateway)
         self.assertEqual(gateway.bodies, [])
+
+    def test_orcamento_falso_ou_sem_interface_bloqueia_gateway(self):
+        class FalsyBudget(SyntheticBudget):
+            def __bool__(self):
+                return False
+
+        valid = SyntheticBudget()
+        attributes = {name: getattr(valid, name) for name in
+                      ("reserve", "observe", "max_tokens", "reasoning", "cost_unit", "tariff")}
+        incomplete = {name: SimpleNamespace(**{key: value for key, value in attributes.items() if key != name})
+                      for name in attributes}
+        invalid = {
+            **incomplete,
+            "False": False,
+            "objeto falso": FalsyBudget(),
+            "reserve inválido": SimpleNamespace(**dict(attributes, reserve=None)),
+            "observe inválido": SimpleNamespace(**dict(attributes, observe=None)),
+            "limite inválido": SimpleNamespace(**dict(attributes, max_tokens=127)),
+            "unidade de custo inválida": SimpleNamespace(**dict(attributes, cost_unit="BRL")),
+        }
+        answer = completion({"category": "pix"}, usage={"prompt_tokens": 20, "completion_tokens": 3})
+        item = envelope(priority="urgent")
+        for label, budget in invalid.items():
+            for identity in (MANIFEST["identity"], IDENTITY):
+                with self.subTest(budget=label, mode=identity["mode"]):
+                    gateway = Gateway(answer)
+                    with self.assertRaisesRegex(ValueError, "orçamento Luna"):
+                        LunaAdapter(identity, RUN, INSTRUCTIONS, gateway, budget).classify(item)
+                    self.assertEqual(len(gateway.bodies), 0)
+
+    def test_tarifa_ausente_ou_invalida_bloqueia_gateway(self):
+        item = envelope(priority="urgent")
+        answer = completion({"category": "pix"}, usage={"prompt_tokens": 20, "completion_tokens": 3})
+        tariff = SyntheticBudget.tariff
+        invalid = (None, dict(tariff, unit="BRL"), dict(tariff, source=" "), dict(tariff, date="ontem"),
+                   dict(tariff, cache_read=None), dict(tariff, input="-1"), dict(tariff, output="NaN"))
+        for malformed in invalid:
+            for identity in (MANIFEST["identity"], IDENTITY):
+                with self.subTest(tariff=malformed, mode=identity["mode"]):
+                    budget = SyntheticBudget()
+                    budget.tariff = malformed
+                    gateway = Gateway(answer)
+                    with self.assertRaisesRegex(ValueError, "tarifa"):
+                        LunaAdapter(identity, RUN, INSTRUCTIONS, gateway, budget).classify(item)
+                    self.assertEqual(len(gateway.bodies), 0)
+                    self.assertEqual(budget.reservations, [])
+                    self.assertEqual(budget.usage, [])
+
+    def test_orcamento_valido_reserva_antes_do_envio_e_observa_uma_resposta(self):
+        item = envelope(priority="urgent")
+        budget = SyntheticBudget()
+        budget.cost_unit = None
+        answer = completion({"category": "pix"}, usage={"prompt_tokens": 20, "completion_tokens": 3})
+        gateway = Gateway(answer)
+
+        def capture(body, deadline, dispatched):
+            self.assertEqual(budget.reservations, [(item["id"], len(body))])
+            self.assertEqual(budget.usage, [])
+            return gateway(body, deadline, dispatched)
+
+        adapter = LunaAdapter(MANIFEST["identity"], RUN, INSTRUCTIONS, capture, budget)
+        self.addCleanup(adapter.close)
+        observation = adapter.classify(item)
+        self.assertEqual(observation["requests"], 1)
+        self.assertEqual(len(gateway.bodies), 1)
+        usage, = budget.usage
+        self.assertEqual(usage["tariff"]["source"], "fixture")
+
+    def test_revalida_tarifa_antes_de_usar_sessao_reutilizada(self):
+        budget = SyntheticBudget()
+        gateway = Gateway(completion({"category": "pix"}))
+        adapter = LunaAdapter(IDENTITY, RUN, INSTRUCTIONS, gateway, budget)
+        self.addCleanup(adapter.close)
+        item = envelope(priority="urgent")
+        self.assertEqual(adapter.classify(item)["requests"], 1)
+        budget.tariff = None
+        with self.assertRaisesRegex(ValueError, "tarifa"):
+            adapter.classify(dict(item, id="artificial-02"))
+        self.assertEqual((len(gateway.bodies), len(budget.reservations), len(budget.usage), gateway.closed), (1, 1, 1, 1))
 
     def test_dois_campos_em_uma_chamada_estrita(self):
         item = envelope()
