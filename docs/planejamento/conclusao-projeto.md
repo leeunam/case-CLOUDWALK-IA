@@ -115,10 +115,26 @@ registrando o período de disponibilidade e como parar/reabrir a URL.
 | C05-R2 real | Interrompida; final bloqueado, sem adoção. | [Resultado R2](../c05-r2-resultado.md). |
 | F09 preparação | Completa e integrada, CLI e conversa no navegador verificadas. | [Roteiro](../f09.md) e provas em `docs/evidencias/f09/`. |
 | F10 demonstração | Publicada em HTTPS com fixture; reinício e restauração real passaram. Responsável confirmou acesso pelo celular em dados móveis. | [Resultado e URL temporária](../f10-resultado.md). |
-| C05-R3 offline | Candidata congelada, executor integrado e revisão ampla aprovada após correção `aafc8ce`. Zero chamadas reais Luna. | [Guia e pré-voo](../c05-luna.md). |
-| C05-R3 real | Pendente de autorização específica; proposta até seis chamadas e até 44 somente se o gate real passar. Mesmo teto cumulativo US$ 10. | Manifesto permanece desabilitado; conta histórica sem reinicialização. |
+| C05-R3 offline | Candidata congelada, executor integrado e revisão ampla aprovada após correção `aafc8ce`. | [Guia e pré-voo](../c05-luna.md). |
+| C05-R3 real | Seis chamadas autorizadas e executadas, 7/8 alvos, gate reprovado. As 44 finais ficaram bloqueadas; sem adoção. | [Resultado auditado](../c05-luna-resultado.md), acumulado US$ 0,02869232, sem pendências. |
 | C06 e C07/F09 final | Aguardam qualificação real e decisão de adoção. | Contratos e classificação humana existentes preservados. |
 | E01 | Trabalho posterior à conclusão e publicação, se houver tempo e desenho aprovado. | Atendente conversacional real continua separado do classificador. |
 
 A preparação offline está concluída. O projeto inteiro permanece em andamento.
 A publicação fixture não foi tratada como conclusão da classificação real.
+
+### Resultado R3 real e decisão seguinte
+
+A autorização de até seis chamadas reais e 44 finais condicionais foi registrada
+em `e8434bb`. Foram feitas exatamente seis chamadas, sem sondagem ou repetição.
+A Luna atingiu 7/8 alvos, com uma conclusão indevida em caso de revisão, p95
+2.635,459 ms e custo US$ 0,00181827. A auditoria confirmou os resultados e os
+recibos. O gate reprovou e as 44 finais não foram enviadas. Evidências em
+[resultado Luna](../c05-luna-resultado.md), integrado a partir de `5c23d04`.
+
+A continuação proposta é discutir uma revisão da instrução de suficiência,
+com pares novos de desenvolvimento e rótulos independentes antes do ajuste.
+Exigir evidência e veto verificável é uma alternativa de maior mudança.
+Nenhuma nova candidata foi implementada, nenhum gabarito foi alterado e
+nenhum consumo extra foi autorizado ou executado após a reprovação. C06/C07
+continuam necessários; a demonstração pública permanece em fixture.
