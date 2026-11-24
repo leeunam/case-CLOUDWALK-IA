@@ -79,3 +79,15 @@ as suítes do executor inalterado. As evidências anteriores preservam a revisã
 em que foram produzidas. Os pacotes temporários deste plano podem ser removidos
 após a integração: os relatórios, os pares base/head e todos os rulings ficam
 versionados aqui. Conta financeira, selos e worktrees irmãs são preservados.
+
+
+Integração local concluída em `8b9aff5709952e30ec9734378acc50504c10f278`.
+A ancestralidade de `b19a596` e a igualdade de código, contratos e fontes foram
+conferidas após o merge. As issues [#1](https://github.com/leeunam/case-CLOUDWALK-IA/issues/1),
+[#6](https://github.com/leeunam/case-CLOUDWALK-IA/issues/6) e
+[#7](https://github.com/leeunam/case-CLOUDWALK-IA/issues/7) receberam a passagem
+e permanecem abertas, com C06 bloqueada. Os exemplos reais continuam
+desabilitados. A checagem dos links considera separadamente o link preexistente
+ao PDF excluído pelo usuário, preservando essa exclusão. Nenhum push ou novo
+consumo autorizado. A remoção do scratch é limitada ao diretório deste plano;
+conta financeira, selos, branches e demais worktrees ficam preservados.
