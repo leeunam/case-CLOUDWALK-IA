@@ -1,0 +1,11 @@
+# Task3-D3 revisão independente SPEC/QUALITY
+
+LeiaAGENTS/RTK e r4-executor-brief.md nesta pasta(normasintegral). Sóleitura,semchaves/.env/contaSQLitefinanceirareal/API/rede/inferência/subagentes/Gitmutation. Instânciapública e testUIforaescopo,nenhumDockernemCua.
+
+Basef9445ed4a05036c81d624123c0fe696e12822511 -> Head5aa4955d62f2fdf1f51fe9d22b02f778e29f33e6,WT.r4-luna-executor. Pacote review-f9445ed..5aa4955.diff nesta pasta;leiaumavezsemregenerarGitnemreleralteradossalvohunkcortado. Report r4-executor-report.md. Usetask-reviewer-promptSPEC+QUALITY.
+
+Nomearriscosconcretosseconsultarinalterados. Regressões160/distinct+5checkers+25históricos+protótipo eCLI6/44/50fixturejáexecutadas, nãorepetirsóparaconfirmar. Checarnewprofile/report1.5/equivalênciaR3/R2+mesmos6/44limiares,ownbindingaprovaçãosóoffline/fonteshash/freezehonesto/R4candidatamodelidentity1.1policycomnovoprompt1.2,nenhum16diagnósticocomofinal/ougabaritoenvoltoLLM.
+
+Foco:reusefinancialschema4econtarealcanonicajáexistente,reservedpathguardantesinit,currentbudgetspent.02869232emmetadata,origem/gateproducer-seal,modocruzado/round/account/proofalterados/replaynewconfig;R3FAILEDnãoliberaR4final;stopperorigcostmissingmesmomanualreceipt+timeout/technicalerrknownfee;deadlineincluipoststartup/reserve/coldDNS/TLS e finallyclosegateway. WrapperC02genericnegacallR4antesprocesso/key. Qualquerfixture_READYnuncaPASSREAL/p95measured. Modelnãoqualificadoainda,cfgreal/manifestodesabilitados. Nãoexigirnovoensaiorealpago paraaceiteoffline.
+
+Report r4-executor-review.md comSPEC/QUALITY,forças,achadosporgravidadearquivo:linha,limitações. Revisorindependente nãoescrevecódigo. Apósaceitecontroladormergeroot+amplaR4umaúnica,corteFEtemoutrarevisãoindependente.
