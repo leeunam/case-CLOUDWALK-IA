@@ -28,7 +28,7 @@ na sequência de [conclusão do projeto](../conclusao-projeto.md).
   `observed-total-luna-1.0`, protocoloqualidade1.3.0, relatório1.4.0, IPC1.1.0,
   vínculo de congelamento próprio apontando ao final R2 ainda não consumido.
   Não atribuir à Luna o congelamento Qwen nem aprovação humana dos36casos.
-- Preservar métricas, cronômetro, seis IDs e limiares R2: development6/8alvos
+- Preservar métricas, cronômetro, seis IDs e limiares R2: development6casos/8alvos,
   corretos8/8,4/4fornecidos,3completos/3revisões,1urgente,0erro/timeout,
   todoscustosconciliados,p95≤3000ms(n6). Final36+13controles/44chamadas;
   acertoaplicado≥90%porcampo,cobertura≥21/29,revisãoindevida0/7,
