@@ -118,9 +118,12 @@ def run_evaluation(args, *, fixture_command=None, round_spec=R2):
         def settle(item, observation):
             timed_out = any(choice["reason"] == "timeout" for choice in observation["choices"].values())
             account.complete_case(run_id, item["id"], timed_out=timed_out)
-            if plan.round.stop_on_error and any(
-                    choice["status"] in {"error", "invalid"} for choice in observation["choices"].values()):
-                raise BudgetError("falha técnica na candidata, lote interrompido após conciliação")
+            if plan.round.stop_on_error:
+                # Um recibo manual pode liquidar a reserva mesmo sem custo na resposta original.
+                if not any(usage["observed_api_usd"] is not None for usage in observation["request_usage"]):
+                    raise BudgetError("resposta original sem custo observado, lote interrompido")
+                if any(choice["status"] in {"error", "invalid"} for choice in observation["choices"].values()):
+                    raise BudgetError("falha técnica na candidata, lote interrompido após conciliação")
 
         with Journal(output, run_id, plan.inputs, plan.injections, publish,
                      track_output=plan.stage == "development",

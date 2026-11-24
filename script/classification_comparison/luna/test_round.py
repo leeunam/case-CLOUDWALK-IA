@@ -193,6 +193,44 @@ execute.main(LUNA)
                 c01.verify_report(args.output / "prefix-report.json", c01.LUNA)
                 self.assertFalse((args.output / gate.FILENAME).exists())
 
+    def test_manual_receipt_cannot_continue_after_missing_gateway_cost(self):
+        account = self.account("manual")
+        args = self.args("manual", account)
+        complete_case = Account.complete_case
+
+        def reconcile_before_close(active_account, run_id, case_id, *, timed_out):
+            reservations = account.status()["reservations"]
+            if len(reservations) == 1:
+                row = reservations[0]
+                self.assertEqual((row["case_id"], row["state"], row["gateway_usage"], row["observed"]),
+                                 (case_id, "staged", {}, None))
+                account.reconcile(dict(run_id=run_id, case_id=case_id, unit="USD", cost_usd="0.0017",
+                                       reference="manual-fixture"))
+            complete_case(active_account, run_id, case_id, timed_out=timed_out)
+
+        with patch.object(Account, "complete_case", reconcile_before_close), self.assertRaises(BudgetError):
+            execute.run_evaluation(args, fixture_command=self.scenario("unknown"), round_spec=LUNA)
+
+        status = account.status()
+        self.assertEqual(len(status["reservations"]), 1)
+        row = status["reservations"][0]
+        self.assertEqual((row["receipt"], row["state"], row["observed"], row["gateway_usage"]),
+                         ("manual-fixture", "settled", "0.0017", {}))
+        self.assertEqual(status["accounted_usd"], "0.0017")
+        self.assertEqual([r["state"] for r in status["runs"]], ["interrupted"])
+        events = c01.read_records(args.output / "journal.jsonl")
+        self.assertEqual([e["id"] for e in events if e["event"] == "dispatched"], [row["case_id"]])
+        prefix = args.output / "prefix-report.json"
+        c01.verify_report(prefix, c01.LUNA)
+        report = c01.read(prefix)
+        self.assertEqual(report["completed_ids"], [row["case_id"]])
+        self.assertEqual(report["eligibility"], "inconclusive")
+        observation, = c01.read_records(c01.source_path(report["artifacts"]["observations"]))
+        self.assertEqual(observation["requests"], 1)
+        self.assertIsNone(observation["request_usage"][0]["observed_api_usd"])
+        self.assertTrue(all(choice["status"] == "predicted" for choice in observation["choices"].values()))
+        self.assertFalse((args.output / gate.FILENAME).exists())
+
     def test_failed_gate_then_tamper_rejected(self):
         account = self.account("wrong")
         args = self.args("wrong", account)
