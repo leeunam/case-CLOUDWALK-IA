@@ -1,9 +1,10 @@
 # C05-R2 · Proposta para melhorar a abstenção
 
-**Estado:** investigação e planejamento autorizados pelo responsável em
-24/11/2026 («boa, vamos prosseuguir»). A escolha entre as abordagens abaixo
-ainda não foi confirmada. Este documento não autoriza novas chamadas pagas
-nem muda o classificador do produto.
+**Estado:** opção **A — melhorar as instruções, uma chamada** escolhida pelo
+responsável em 24/11/2026. A resposta confirmou a implementação offline
+apresentada abaixo. Novas chamadas pagas continuam exigindo autorização
+posterior; a escolha não aprova adoção operacional. B e C ficam como registro
+das alternativas ponderadas. [Plano de implementação](rodada-2-implementacao.md).
 
 Tarefa C05-R2; base `1a7cd4235ce44b01213f685439af3523989e5097`.
 Planejamento no checkout principal, branch `main`, diretório
@@ -206,9 +207,9 @@ consumida. Nenhum resultado novo, melhoria de acerto ou custo futuro é afirmado
 
 ## Decisão solicitada
 
-Escolher A, B ou C. A recomendação é **A com novo teste independente**, mantendo
-os limites e a regra de revisão integral. Após a escolha, consolidar o contrato
-e liberar as frentes offline antes de solicitar qualquer consumo adicional.
+O responsável escolheu **A com novo teste independente**, mantendo os limites
+e a regra de revisão integral. Consolidar o contrato e liberar as frentes
+offline antes de solicitar qualquer consumo adicional.
 [Revisão documental e esclarecimentos](../../evidencias/c05/r2-planejamento/revisao-proposta.md).
 
 **Exercício.** Um relato pode deixar claro que há urgência e ainda não informar
