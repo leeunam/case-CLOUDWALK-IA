@@ -2,7 +2,7 @@
   "version": "1.2.0",
   "task": "C05-R2",
   "status": "approved",
-  "created_on": "2026-11-23",
+  "created_on": "2026-11-24",
   "source_dataset": {
     "path": "docs/planejamento/classificacao-comparativa/r2/dataset.json",
     "sha256": "3f4e69af44f03c89d1767d54ba07264327d616f18b0548656cc00c7bb89e3845",
@@ -68,9 +68,9 @@
     "score_calibration": "Model scores are not assumed calibrated or comparable; abstention thresholds/prompt chosen only on development before final freeze."
   },
   "approval": {
-    "approved_on": "2026-11-23",
+    "approved_on": "2026-11-24",
     "approved_by": "responsável pelo projeto",
-    "evidence": "Opção A aprovada para implementação offline. Final R2 congelado como referência exploratória, com autorização paga separada.",
+    "evidence": "Em 24/11/2026, o responsável escolheu a opção A para implementação offline. Os 36 rótulos finais têm revisão exploratória por agentes. Gasto requer autorização específica.",
     "scope": [
       "perfil R2 de latência total e critérios de qualidade preservados",
       "24 casos de desenvolvimento preservados, seleção de seis para o gate e 36 novos finais",
@@ -84,7 +84,7 @@
     "version": "1.0.0",
     "sha256": "2611786ddde1eb2b064b02f7dda7bb7a0aae06cc8f127a9fc7e8fec14e937fb7"
   },
-  "data_split_sha256": "0a1deb39189fc059f3dcf4ea4261f5175afce874eda11ff3dc065e0b6faf6b14",
+  "data_split_sha256": "054f0d572e5cb35e15bcc8b1e96df992bc9bf443edf1d4cd512c61e74b017e62",
   "rubric": {
     "path": "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
     "version": "1.0.0",

@@ -11,10 +11,10 @@
     "policy_version": "1.1.0"
   },
   "split": "control",
-  "git_revision": "dcc396348e59e603e6ea236b33e2abb2cf8a2d9b",
+  "git_revision": "1e98c4583ed9dc073a502658125f0bcf810b7ba0",
   "environment": {
     "hardware": "fixture estática",
-    "runtime": "JSON estático",
+    "runtime": "Exemplo sintético estático. git_revision identifica a base de implementação da R2.",
     "seed": null,
     "concurrency": 1,
     "timeout_ms": 5000,
@@ -40,12 +40,12 @@
     },
     "protocol": {
       "path": "docs/planejamento/classificacao-comparativa/r2/protocol.json",
-      "sha256": "4dac44b9fcd378ec12df5b6e0b3243c9b05300710560fc579368899632954466",
+      "sha256": "4e89f10dcb15b4a9593532aa52d05917b68df4771972d570dd646a7ce11163d1",
       "version": "1.2.0"
     },
     "split": {
       "path": "docs/planejamento/classificacao-comparativa/r2/split.json",
-      "sha256": "0a1deb39189fc059f3dcf4ea4261f5175afce874eda11ff3dc065e0b6faf6b14",
+      "sha256": "054f0d572e5cb35e15bcc8b1e96df992bc9bf443edf1d4cd512c61e74b017e62",
       "version": "2.0.0"
     },
     "policy": {
@@ -66,7 +66,7 @@
     },
     "observations": {
       "path": "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.3/observations.jsonl",
-      "sha256": "45122247658025859a0cd0d69e280723a3762ec6e771906f51ceca5ae49cbe26"
+      "sha256": "5d67a4627a3fbce31eeab59da156fa3e27a1b0a2c89e4115a9c9a0fe94c88147"
     },
     "decisions": {
       "path": "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.3/decisions.jsonl",
@@ -724,7 +724,7 @@
     },
     "requests": {
       "state": "measured",
-      "value": 9,
+      "value": 8,
       "samples": 8,
       "expected_samples": 8
     },
@@ -738,25 +738,25 @@
       "state": "partial",
       "value": 10,
       "samples": 1,
-      "expected_samples": 9
+      "expected_samples": 8
     },
     "output_tokens": {
       "state": "unmeasured",
       "value": null,
       "samples": 0,
-      "expected_samples": 9
+      "expected_samples": 8
     },
     "observed_api_usd": {
       "state": "partial",
       "value": 0.01,
       "samples": 1,
-      "expected_samples": 9
+      "expected_samples": 8
     },
     "estimated_api_usd": {
       "state": "unmeasured",
       "value": null,
       "samples": 0,
-      "expected_samples": 9
+      "expected_samples": 8
     }
   },
   "ipc_contract_version": "1.1.0"

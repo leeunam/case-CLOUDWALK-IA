@@ -102,5 +102,61 @@
       }
     ],
     "expected_error": "schema/input//additionalProperties"
+  },
+  {
+    "id": "duas-requisicoes-em-caso-duplo",
+    "changes": [
+      {
+        "path": [
+          "observations",
+          1,
+          "requests"
+        ],
+        "value": 2
+      },
+      {
+        "path": [
+          "observations",
+          1,
+          "request_usage"
+        ],
+        "value": [
+          {
+            "input_tokens": 10,
+            "output_tokens": null,
+            "observed_api_usd": 0.01,
+            "estimated_api_usd": null,
+            "tariff": null
+          },
+          {
+            "input_tokens": null,
+            "output_tokens": null,
+            "observed_api_usd": null,
+            "estimated_api_usd": null,
+            "tariff": null
+          }
+        ]
+      }
+    ],
+    "expected_error": "r2_request_limit"
+  },
+  {
+    "id": "pontuacao-de-ranking",
+    "changes": [
+      {
+        "path": [
+          "observations",
+          7,
+          "choices",
+          "category",
+          "score"
+        ],
+        "value": {
+          "kind": "ranking",
+          "value": -1.4
+        }
+      }
+    ],
+    "expected_error": "r2_score"
   }
 ]

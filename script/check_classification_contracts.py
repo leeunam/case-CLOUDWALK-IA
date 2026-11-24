@@ -24,6 +24,7 @@ LEGACY = "warm-1.0"
 OBSERVED = "observed-total-1.1"
 R2 = "observed-total-r2"
 R2_FIXTURE_PROVIDER = "simulador-c05-r2"
+R2_OFFLINE_APPROVAL_DATE = "2026-11-24"
 WARM_GATE = "warm_total_latency_p95_ms_max"
 OBSERVED_GATE = "observed_total_latency_p95_ms_max"
 TIMEOUT_DELIVERY_MS = 250
@@ -65,9 +66,9 @@ PROFILES = {
                             "relatorio-1.2/report.json", "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.2/sources.lock.json",
                             "8640c343dd182f0e683f82525ed2f48616e4620503c12172e6dc6a70faf0bb22"),
     R2: ReportProfile(R2, "1.2.0", "1.3.0", "1.1.0", OBSERVED_GATE,
-                      "r2/protocol.json", "4dac44b9fcd378ec12df5b6e0b3243c9b05300710560fc579368899632954466",
+                      "r2/protocol.json", "4e89f10dcb15b4a9593532aa52d05917b68df4771972d570dd646a7ce11163d1",
                       "relatorio-1.3/report.json", "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.3/sources.lock.json",
-                      "9b83e6c85fcf25a061e93e28ad4c9682cb505e6f830c6dbc5ef08c37fc2159a6"),
+                      "f91f9325870cde169eba795195052908035af2c179de610a0a432f1eaa344df1"),
 }
 
 
@@ -217,6 +218,9 @@ def verify_observation(obs, missing, report, catalog):
     if injected:
         # Structure has already ruled out inference, scores, usage and model identity.
         return
+    if report.get("contract_version") == PROFILES[R2].report_version:
+        require(obs["requests"] <= 1, "r2_request_limit", case_id)
+        require(all(choice.get("score") is None for choice in choices.values()), "r2_score", case_id)
     pins = (("expected_returned_model", "returned_model"), ("expected_weights_revision", "weights_revision"))
     expected = [(identity[pin], obs[actual]) for pin, actual in pins if identity.get(pin) is not None]
     mismatch = any(actual is not None and actual != pin for pin, actual in expected)
@@ -663,6 +667,13 @@ def mutate(bundle, mutation):
 
 def verify_r2_package(protocol, split, data):
     r2 = protocol["r2"]
+    approval = protocol["approval"]
+    require(protocol["created_on"] == split["created_on"] == approval["approved_on"]
+            == split["approved_on"] == R2_OFFLINE_APPROVAL_DATE
+            and approval["evidence"] == split["approval_evidence"]
+            and approval["paid_execution_authorized"] is False
+            and protocol["execution"]["paid_execution_authorized"] is False,
+            "r2_offline_approval", "aprovação da abordagem offline")
     source = protocol["source_dataset"]
     require(split["source_dataset_version"] == source["version"] == data["version"]
             and split["source_dataset_sha256"] == source["sha256"], "r2_split_source", "dataset composto")
@@ -678,6 +689,11 @@ def verify_r2_package(protocol, split, data):
     authorship = read(source_path(r2["authorship"]))
     labels = read(source_path(r2["label_review"]))
     similarity = read(source_path(r2["similarity_review"]))
+    provenance = protocol["provenance"]["final"]
+    summary = split["summary"]["final_test"]
+    require(freeze["human_case_approvals"] == provenance["human_direct_cases"] == summary["human_direct_cases"] == 0
+            and provenance["agent_delegated_cases"] == summary["agent_delegated_cases"] == len(final)
+            and labels["human_approval"] is False, "r2_label_provenance", "referência exploratória final")
     final_sha = r2["final_cases"]["sha256"]
     require(freeze["status"] == "approved_frozen_offline" and freeze["dataset_sha256"] == final_sha
             and freeze["authorship_sha256"] == r2["authorship"]["sha256"]
