@@ -4,7 +4,7 @@
 - Commit-base: `1adc94127f3c66dcdc145117eda733781650cd46`.
 - Branch: `feat/estilo-cloudwalk`.
 - Worktree: `.worktrees/ux02-cloudwalk`.
-- Commit de entrega: será registrado após a criação do commit local.
+- Commit de implementação: `2c53263` (`feat: adaptar tema visual à CloudWalk`).
 
 ## Mudanças
 
