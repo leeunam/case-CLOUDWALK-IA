@@ -182,6 +182,12 @@ execução. Não alterar textos congelados ou gabarito para acomodar testes.
    protocolo, config financeira e revisão de código. Prova fixture não libera
    real; prefixo, fonte/custo adulterados ou gate failed não liberam final.
    Referência de gate e hashes entram no manifesto final, antes de chave/rede.
+   O report de development continua inconclusive para elegibilidade do modelo;
+   seu gate operacional é separado. Em fixture, tempos de LLM não são medidos:
+   resultado `fixture_ready` pode liberar apenas final fixture, após conferir
+   os campos/decisões sintéticos e custos simulados. Não fabricar p95 fixture
+   para passar a régua real. Development real exige status `pass` com todas as
+   seis durações reais e as demais condições; nenhum `fixture_ready` libera real.
 6. Execução não repete stage/binding/manifesto para completar interrompido.
    Real permanece bloqueado sem manifesto próprio habilitado e confirmação;
    exemplos/config real falsos. Limites faturáveis/referências verificados só
@@ -197,6 +203,13 @@ artefatos e históricos preservados. Documentar comandos reais e pendências.
 Não reexecutar suites sem mudança, falha ou preocupação nova. Se aparecer
 requisito financeiro fora do serviço existente, voltar ao integrador antes
 de mudar interface compartilhada.
+
+Para evitar duplicação do validador financeiro, está autorizada uma extensão
+pequena de `c05/settings.py`: parâmetro keyword de scope esperado em
+`Settings.load`, com padrão antigo preservado. O R2 passa seu scope fixo
+`c05-qwen-r2`. Mesmas restrições e cálculo de reserva; não relaxar preço,
+precisão, referências, unidade ou limites. Cobrir aceitação/rejeição por scope
+e regressões C05. Isso não autoriza alteração em `c05/budget.py`.
 
 ## Task 4: Revisar, registrar e integrar a preparação offline
 
