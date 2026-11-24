@@ -208,7 +208,7 @@
     },
     {
       "id": "r2-014",
-      "text": "Colaram outro código por cima do nosso Pix na placa de fichas do sarau. Peguei três comprovantes e todos mostram alguém de fora da organização como recebedor. Tem gente comprando ficha por essa placa enquanto o salão ainda está no intervalo.",
+      "text": "Fiz um Pix Saque no caixa eletrônico do cais. O débito foi confirmado, mas o compartimento abriu vazio e o saldo ficou zerado. O embarque da última balsa fecha em seis minutos. A passagem só é vendida em dinheiro e preciso atravessar para assumir o plantão na ilha.",
       "received": {
         "category": "pix",
         "priority": null
@@ -220,7 +220,7 @@
         "priority": "urgent"
       },
       "stratum": "urgente",
-      "rationale": "Há pagamentos que já foram desviados pelo código sobreposto. A placa continua em uso e pode desviar os próximos pagamentos."
+      "rationale": "O saque consumiu o saldo sem entregar cédulas. Sem dinheiro em espécie, o cliente perde o último embarque em seis minutos e não chega a tempo para o plantão."
     },
     {
       "id": "r2-015",
