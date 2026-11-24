@@ -39,7 +39,9 @@ module Api
       private
 
       def demo_password_valid?(email, password)
-        return false unless Rails.env.development? || Rails.env.test?
+        enabled = Rails.env.development? || Rails.env.test? ||
+                  (Rails.env.production? && ENV["CLOUDWALK_PUBLISH_DEMO_LOGIN"] == "1")
+        return false unless enabled
 
         raw = ENV.fetch("CLOUDWALK_DEMO_PASSWORDS", "{}")
         passwords = JSON.parse(raw)

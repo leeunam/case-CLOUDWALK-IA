@@ -1,0 +1,212 @@
+name: cloudwalk_publish
+
+x-backend: &backend
+  build: ./backend
+  image: ${PUBLISH_PROJECT:-cloudwalk_publish}-backend
+  environment: &backend-environment
+    RAILS_ENV: production
+    RAILS_LOG_LEVEL: warn
+    POSTGRES_HOST: db
+    POSTGRES_USER: cloudwalk
+    POSTGRES_PASSWORD: ${PUBLISH_DB_PASSWORD:?}
+    SECRET_KEY_BASE: ${PUBLISH_RAILS_SECRET:?}
+    CLOUDWALK_CHANNEL_SECRET: ${PUBLISH_CHANNEL_SECRET:?}
+    CLOUDWALK_AGENT_REQUESTS_SECRET: ${PUBLISH_REQUESTS_SECRET:?}
+    CLOUDWALK_AGENT_EVENTS_SECRET: ${PUBLISH_EVENTS_SECRET:?}
+    CLOUDWALK_AGENT_REQUEST_URL: http://requests:8080/webhooks/v1/agent/requests
+    CLOUDWALK_JEV_MODE: fixture
+    TYPESAFE_API_KEY: ""
+    FEITA_API_KEY: ""
+    CLOUDWALK_PUBLISH_BEHIND_PROXY: "1"
+    CLOUDWALK_PUBLISH_HTTPS_PORT: ${PUBLISH_HTTPS_PORT:-18443}
+  volumes:
+    - ./docs/contratos/schemas/v1.json:/workspace/docs/contratos/schemas/v1.json:ro
+
+x-bridge: &bridge
+  build: ./integration
+  image: ${PUBLISH_PROJECT:-cloudwalk_publish}-bridge
+  environment: &bridge-environment
+    KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    CLOUDWALK_CONTRACT_SCHEMA: /workspace/docs/contratos/schemas/v1.json
+  volumes:
+    - ./docs/contratos/schemas/v1.json:/workspace/docs/contratos/schemas/v1.json:ro
+  depends_on:
+    kafka_setup:
+      condition: service_completed_successfully
+  restart: unless-stopped
+
+services:
+  db:
+    image: postgres:17-alpine@sha256:a77aa70e641402a21411b92b721c58d10f23b50ae5fdd2333efd22d166e1e5f7
+    environment:
+      POSTGRES_USER: cloudwalk
+      POSTGRES_PASSWORD: ${PUBLISH_DB_PASSWORD:?}
+      POSTGRES_DB: cloudwalk_production
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+    restart: unless-stopped
+
+  kafka:
+    image: &kafka-image apache/kafka:4.4.0@sha256:833b867a9585a141da455dc2b57431c65cbccb27f11c91f694444cca9f777e0f
+    environment:
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_HEAP_OPTS: -Xms256m -Xmx512m
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: [CMD, /opt/kafka/bin/kafka-topics.sh, --bootstrap-server, "kafka:9092", --list]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 15s
+    restart: unless-stopped
+
+  kafka_setup:
+    image: *kafka-image
+    entrypoint: [/bin/bash, /setup_kafka.sh]
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    volumes:
+      - ./script/setup_kafka.sh:/setup_kafka.sh:ro
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  db_setup:
+    <<: *backend
+    command: [bundle, exec, rails, "db:prepare"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    <<: *backend
+    environment:
+      <<: *backend-environment
+      CLOUDWALK_PUBLISH_DEMO_LOGIN: "1"
+      CLOUDWALK_DEMO_PASSWORDS: ${PUBLISH_DEMO_PASSWORDS:?}
+      CLOUDWALK_PUBLIC_ORIGIN: ${PUBLISH_PUBLIC_ORIGIN:-}
+    depends_on:
+      db_setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - ruby
+        - -rnet/http
+        - -e
+        - "exit(Net::HTTP.get_response(URI('http://localhost:3000/api/v1/health')).code == '200' ? 0 : 1)"
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    restart: unless-stopped
+
+  worker:
+    <<: *backend
+    command: [bundle, exec, ruby, bin/jobs]
+    depends_on:
+      db_setup:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  outbox:
+    <<: *backend
+    command: [bundle, exec, rails, runner, script/f02_outbox.rb]
+    depends_on:
+      db_setup:
+        condition: service_completed_successfully
+      requests:
+        condition: service_healthy
+    restart: unless-stopped
+
+  requests:
+    <<: *bridge
+    environment:
+      <<: *bridge-environment
+      CLOUDWALK_AGENT_REQUESTS_SECRET: ${PUBLISH_REQUESTS_SECRET:?}
+    command: [requests]
+    healthcheck:
+      test: [CMD, python, -c, "import socket; socket.create_connection(('127.0.0.1', 8080), 2).close()"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  events:
+    <<: *bridge
+    environment:
+      <<: *bridge-environment
+      CLOUDWALK_AGENT_EVENTS_SECRET: ${PUBLISH_EVENTS_SECRET:?}
+      CLOUDWALK_AGENT_EVENTS_URL: http://api:3000/webhooks/v1/agent/events
+    command: [events]
+    depends_on:
+      kafka_setup:
+        condition: service_completed_successfully
+      api:
+        condition: service_healthy
+
+  mock:
+    <<: *bridge
+    command: [mock]
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.production
+      additional_contexts:
+        deployment: ./deploy
+    environment:
+      PUBLISH_PUBLIC_HOST: ${PUBLISH_PUBLIC_HOST:-disabled.invalid}
+    ports:
+      - "127.0.0.1:${PUBLISH_HTTP_PORT:-18080}:8080"
+      - "127.0.0.1:${PUBLISH_HTTPS_PORT:-18443}:8443"
+    networks: [default, edge]
+    volumes:
+      - caddy_data:/data
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, "http://127.0.0.1:8080/api/v1/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+    restart: unless-stopped
+
+  cloudflared:
+    image: cloudflare/cloudflared:2026.11.2@sha256:55c7e3e8d89d5e8d20b75a82f3602cbf98e06db406e73e282073cfdc5a9a3af6
+    profiles: [tunnel]
+    command: [tunnel, --no-autoupdate, --url, "http://web:8080"]
+    networks: [edge]
+    depends_on:
+      web:
+        condition: service_healthy
+
+networks:
+  default:
+    internal: true
+  edge:
+
+volumes:
+  postgres_data:
+  kafka_data:
+  caddy_data:
