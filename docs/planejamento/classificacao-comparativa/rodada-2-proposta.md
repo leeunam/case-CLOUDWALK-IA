@@ -8,8 +8,8 @@ das alternativas ponderadas. [Plano de implementação](rodada-2-implementacao.m
 
 Tarefa C05-R2; base `1a7cd4235ce44b01213f685439af3523989e5097`.
 Planejamento no checkout principal, branch `main`, diretório
-`/home/inteli/Documents/projetos/case-CLOUDWALK-IA`. Nenhuma worktree de
-implementação R2 foi criada. O primeiro resultado continua
+`/home/inteli/Documents/projetos/case-CLOUDWALK-IA`. As worktrees de instruções
+e dados foram criadas na base comum `c00ac54`. O primeiro resultado continua
 [não elegível](../../c05-resultado.md), e C06 permanece bloqueada.
 
 ## O problema a resolver
@@ -151,11 +151,12 @@ Fixtures verificam integração e relatório; não aprovam o modelo.
 | R2-03 — execução R2 | Perfil novo, dry-run, prova de proteção financeira, simulação completa e compatibilidade dos históricos. | Contrato comum aprovado; integra fontes das duas frentes após congelamento. `feat/r2-avaliador`, `.worktrees/r2-avaliador`. |
 | R2-04 — ensaio e decisão | Execução autorizada, resultados brutos, custos, auditorias e conclusão de elegibilidade; C06 somente após aprovação válida. | Três fatias aceitas, fonte integrada e autorização específica. Chat central. |
 
-Branches e diretórios foram conferidos livres durante a preparação, mas não
-foram criados nem reservados. O integrador fixa uma nova base comum contendo o
-contrato aprovado antes de despachar; não usar a base desta proposta como se
-já contivesse o contrato R2. Não criar novas issues públicas até fechar o
-desenho; usar este documento e o card C05 para acompanhar a escolha.
+Branches e diretórios foram conferidos livres durante a preparação; instruções
+e dados foram criados após a escolha, na base comum com contrato `c00ac54`.
+O avaliador recebe depois uma base integrada com as fontes revisadas e
+congeladas. Não usar a base anterior desta proposta como se já contivesse o
+contrato R2. Usar este documento e o card C05 para acompanhar a implementação;
+não criar novas issues públicas não solicitadas.
 
 ## Chamadas e orçamento
 

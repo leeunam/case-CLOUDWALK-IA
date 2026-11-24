@@ -8,10 +8,10 @@ O lote usou 44 chamadas, US$ 0,02197127. C05 aguarda deliberação humana; C06
 continua bloqueada. [Resultado](../../../c05-resultado.md) e
 [registro de decisão pendente](../decisao-qwen-01.md). Autorização consumida.
 
-**C05-R2 em planejamento:** o responsável autorizou continuar após receber o
-resultado. A [proposta de nova rodada](../rodada-2-proposta.md) apresenta três
-abordagens e uma avaliação independente. Aguardando a escolha da abordagem;
-nenhum código R2, dado final novo ou chamada paga foi produzido nesta etapa.
+**C05-R2 em implementação offline:** o responsável escolheu A, instruções de
+uma chamada, com avaliação independente. O [plano](../rodada-2-implementacao.md)
+separa instruções, dados e avaliador. A base comum é `c00ac54`; instruções e
+dados usam worktrees próprias. Nenhuma nova chamada paga está autorizada.
 
 ## Parent e especificação
 

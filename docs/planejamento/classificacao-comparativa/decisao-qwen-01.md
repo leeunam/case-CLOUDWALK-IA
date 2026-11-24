@@ -5,8 +5,9 @@ Data: 24/11/2026. Fonte executada:
 
 **Estado:** resultado técnico informado ao responsável, que em 24/11/2026
 autorizou prosseguir com o planejamento da melhoria de abstenção e de um novo
-teste. A escolha da abordagem R2 e a autorização de consumo futuro continuam
-pendentes. Não há aprovação de adoção do candidato reprovado.
+teste. Depois escolheu A, liberando sua implementação offline. A autorização
+de consumo futuro continua pendente. Não há aprovação de adoção do candidato
+reprovado.
 
 ## Contexto
 
@@ -33,7 +34,7 @@ reconhecimento de 6/6 urgentes passam, mas não eliminam esses dois vetos.
   e novo teste independente. Nenhum modelo foi escolhido automaticamente.
 
 O planejamento autorizado foi registrado na
-[proposta C05-R2](rodada-2-proposta.md). O responsável ainda precisa escolher
-entre as abordagens apresentadas. A recomendação do integrador é começar por
-instruções mais conservadoras de uma chamada, com avaliação independente,
-preservando este resultado negativo e o teto financeiro cumulativo.
+[proposta C05-R2](rodada-2-proposta.md). O responsável escolheu instruções mais
+conservadoras de uma chamada, com avaliação independente, preservando este
+resultado negativo e o teto financeiro cumulativo.
+[Implementação offline](rodada-2-implementacao.md), sem adoção ou nova inferência.

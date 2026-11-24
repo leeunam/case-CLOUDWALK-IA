@@ -97,13 +97,14 @@ independentes conferiram qualidade e finanças. C05 aguarda deliberação humana
 C06 continua bloqueada, sem modelo adotado. A autorização do lote foi consumida.
 [Resultado e verificações sem API](../c05-resultado.md).
 
-O responsável autorizou prosseguir com o planejamento da **C05-R2**. A
-[proposta](classificacao-comparativa/rodada-2-proposta.md) compara instruções
-de uma chamada, regras adicionais e uma segunda chamada verificadora.
-Recomendação: primeira opção, com novo final independente e preservação dos
-limites. A escolha de abordagem ainda não foi confirmada; não há implementação
-R2 nem novo consumo. O plano prevê até seis chamadas de desenvolvimento e
-44 do final/controles, somente após revisão e autorização específica.
+O responsável escolheu a opção A da **C05-R2**: instruções mais conservadoras
+de uma chamada, com novo final independente e preservação dos limites.
+A [implementação offline](classificacao-comparativa/rodada-2-implementacao.md)
+partiu da base comum `c00ac54`, com frentes de instruções e dados em worktrees
+separadas. A candidata será congelada antes de o integrador abrir os novos
+textos. Não há novo consumo autorizado; o plano futuro prevê até seis
+chamadas de desenvolvimento e 44 do final/controles, após revisão e
+autorização específica.
 
 Ordem vigente: C01 → C02 → C03 → C05 → C06 → C07; C04 foi investigada em
 paralelo com C03 e seus ajustes foram encerrados nesta entrega. R01 e R02 podem
