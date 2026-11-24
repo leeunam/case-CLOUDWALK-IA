@@ -21,6 +21,8 @@ KINDS = {"inputs": "input", "observations": "observation", "decisions": "decisio
 ABSTENTION = "informacao_insuficiente"
 LEGACY = "warm-1.0"
 OBSERVED = "observed-total-1.1"
+R2 = "observed-total-r2"
+R2_FIXTURE_PROVIDER = "simulador-c05-r2"
 WARM_GATE = "warm_total_latency_p95_ms_max"
 OBSERVED_GATE = "observed_total_latency_p95_ms_max"
 TIMEOUT_DELIVERY_MS = 250
@@ -61,6 +63,10 @@ PROFILES = {
                             "protocolo-comparacao-1.1.json", "061a91a0c9b1b054ca2c9579077453d77ac765f24d725667fb97b5749db1aed7",
                             "relatorio-1.2/report.json", "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.2/sources.lock.json",
                             "8640c343dd182f0e683f82525ed2f48616e4620503c12172e6dc6a70faf0bb22"),
+    R2: ReportProfile(R2, "1.2.0", "1.3.0", "1.1.0", OBSERVED_GATE,
+                      "r2/protocol.json", "8b65cd24c08162fea3ba4ed281aa38598d58a16219251c8184d2d6c5cd4d034c",
+                      "relatorio-1.3/report.json", "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.3/sources.lock.json",
+                      "b2ad29171936ca41c0fa99ac79886563cad041ee8009c9beebc6b21c156d056c"),
 }
 
 
@@ -154,7 +160,7 @@ def validators(profile_name=LEGACY):
             resolver.lookup(reference)
     selected = {path.name.split(".")[0]: schema for path, schema in schemas.items()
                 if path.parent == CONTRACTS}
-    if profile_name == OBSERVED:
+    if profile.latency_gate == OBSERVED_GATE:
         selected["report"] = schemas[profile.golden_path.with_name("report.schema.json")]
     return {k: Draft202012Validator(v, registry=registry, format_checker=FormatChecker())
             for k, v in selected.items()}
@@ -427,6 +433,13 @@ def verify_sources(report, protocol, split):
         "split": {"version": split["version"], "path": str((PLAN / protocol["data_split_file"]).relative_to(ROOT)),
                   "sha256": protocol["data_split_sha256"]},
     }
+    if profile.name == R2:
+        candidate = read(source_path(protocol["r2"]["candidate"]))
+        identity = candidate["identity"]
+        if report["identity"]["mode"] == "fixture":
+            identity = dict(identity, mode="fixture", provider=R2_FIXTURE_PROVIDER)
+        require(report["identity"] == identity, "r2_identity", report["run_id"])
+        expected.update(prompt=candidate["prompt"], policy=candidate["policy"])
     for name, entry in report["sources"].items():
         source_path(entry)
         require(all(entry[k] == v for k, v in expected.get(name, {}).items()), "source_version", name)
@@ -519,6 +532,32 @@ def has_complete_evidence(report, observations, decisions, latency_samples):
             and any(c["status"] != "error" for i in completed for c in observations[i]["choices"].values()))
 
 
+def verify_r2_scope(report, protocol, split, inputs, catalog, dataset):
+    stage = report["split"]
+    planned, completed, controls = (report[k] for k in ("planned_ids", "completed_ids", "control_ids"))
+    r2 = protocol["r2"]
+    final_ids = [case for mask in ("category", "priority", "category+priority") for case in split["final_test"][mask]]
+    wanted = {"development": r2["development_ids"], "final_test": final_ids, "control": []}
+    require(planned == wanted[stage] and completed == planned[:len(completed)], "r2_stage_order", stage)
+    approved_controls = read_records(source_path(r2["control_inputs"]))
+    prefix = Path(report["artifacts"]["inputs"]["path"]).name == "verified_inputs.jsonl"
+    if stage == "development" or (stage == "final_test" and completed != planned):
+        allowed = []
+    elif stage == "final_test" and prefix:
+        allowed = approved_controls[:len(controls)]
+    else:
+        allowed = approved_controls
+    require(stage != "control" or report["identity"]["mode"] == "fixture", "r2_stage_order", stage)
+    require(controls == [item["id"] for item in allowed] and [inputs[i] for i in controls] == allowed,
+            "r2_control_inputs", stage)
+    for case_id in completed:
+        item, case = inputs[case_id], dataset[case_id]
+        expected = {**{k: case[k] for k in ("id", "text", "received", "missing")},
+                    "brand": "marca-sintetica", "catalog": catalog,
+                    "contract_version": protocol["ipc_contract_version"]}
+        require(json.dumps(item, sort_keys=True) == json.dumps(expected, sort_keys=True), "dataset_projection", case_id)
+
+
 def verify_run(bundle, validation, protocol, split, catalog, dataset):
     report = bundle["report"]
     structure(validation, "report", report)
@@ -550,6 +589,8 @@ def verify_run(bundle, validation, protocol, split, catalog, dataset):
     order = completed + controls
     for kind in ("inputs", "decisions"):
         require(list(indexed[kind]) == order, "stream_ids", kind)
+    if profile.name == R2:
+        verify_r2_scope(report, protocol, split, indexed["inputs"], catalog, dataset)
     observations = indexed["observations"]
     require(list(observations) == [i for i in order if i in observations], "stream_ids", "observations")
     verify_injected_controls(report, indexed, protocol)
@@ -559,7 +600,7 @@ def verify_run(bundle, validation, protocol, split, catalog, dataset):
             require(all(item[k] == dataset[i][k] for k in ("received", "missing", "text")) and
                     item["catalog"] == catalog, "dataset_projection", i)
         verify_case(item, observations.get(i), indexed["decisions"][i], report, catalog)
-    if profile.name == OBSERVED:
+    if profile.latency_gate == OBSERVED_GATE:
         population = protocol["execution"]["full_test_cases_per_candidate"] if split_name == "final_test" else len(completed)
         latency_samples = verify_observed_latency(report, observations, population)
     else:
@@ -576,6 +617,8 @@ def verify_run(bundle, validation, protocol, split, catalog, dataset):
             if metric["state"] in ("measured", "partial"):
                 require(metric["denominator"] <= latency_samples, "latency_denominator", report["run_id"])
     full = has_complete_evidence(report, observations, indexed["decisions"], latency_samples)
+    if profile.name == R2 and Path(inventory["inputs"]["path"]).name == "verified_inputs.jsonl":
+        full = False
     verify_partial_application(report, observations, indexed["decisions"])
     verify_usage(report, list(observations.values()))
     verify_metrics(report, protocol, full, dataset, indexed["decisions"], profile.latency_gate)
@@ -609,6 +652,55 @@ def mutate(bundle, mutation):
     node[mutation["path"][-1]] = mutation["value"]
 
 
+def verify_r2_package(protocol, split, data):
+    r2 = protocol["r2"]
+    historical_split = read(source_path(r2["historical_split"]))
+    historical_data = read(source_path(r2["historical_dataset"]))
+    final = read(source_path(r2["final_cases"]))["cases"]
+    freeze = read(source_path(r2["freeze"]))
+    authorship = read(source_path(r2["authorship"]))
+    labels = read(source_path(r2["label_review"]))
+    similarity = read(source_path(r2["similarity_review"]))
+    final_sha = r2["final_cases"]["sha256"]
+    require(freeze["status"] == "approved_frozen_offline" and freeze["dataset_sha256"] == final_sha
+            and freeze["authorship_sha256"] == r2["authorship"]["sha256"]
+            and authorship["dataset_sha256"] == labels["dataset_sha256"] == final_sha
+            and similarity["sources"]["r2_final"]["file_sha256"] == final_sha
+            and freeze["candidate_sha256"] == r2["candidate"]["sha256"], "r2_freeze", "fontes")
+    for name, key in (("labels", "label_review"), ("similarity", "similarity_review")):
+        require(freeze["reviews"][name] == dict(r2[key], verdict="pass", open_findings=0), "r2_freeze", name)
+    require(labels["spec_verdict"] == labels["quality_verdict"] == "pass" and not labels["open_disputes"]
+            and labels["authorship_sha256"] == r2["authorship"]["sha256"]
+            and similarity["sources"]["historical"]["file_sha256"] == r2["historical_dataset"]["sha256"]
+            and similarity["summary"]["verdict_counts"] == {"manter": 36}
+            and not similarity["summary"]["replacement_ids"], "r2_freeze", "pareceres")
+    dev_ids = {i for ids in historical_split["development"].values() for i in ids}
+    development = [case for case in historical_data["cases"] if case["id"] in dev_ids]
+    require(split["development"] == historical_split["development"] and len(development) == 24
+            and json.dumps(data["cases"], ensure_ascii=False) == json.dumps(development + final, ensure_ascii=False),
+            "r2_membership", "pacote composto")
+    expected_masks = {"category": (1, 12, 2), "priority": (13, 24, 2), "category+priority": (25, 36, 3)}
+    require(len(final) == 36 and [c["id"] for c in final] == [f"r2-{i:03d}" for i in range(1, 37)],
+            "r2_membership", "ordem final")
+    for mask, (first, last, reviews) in expected_masks.items():
+        rows = [case for case in final if "+".join(case["missing"]) == mask]
+        ids = [case["id"] for case in rows]
+        require(ids == split["final_test"][mask] == [f"r2-{i:03d}" for i in range(first, last + 1)]
+                and sum(ABSTENTION in case["expected"].values() for case in rows) == reviews,
+                "r2_quota", mask)
+    dual = [c["expected"] for c in final[24:] if ABSTENTION in c["expected"].values()]
+    dual_priorities = [c["priority"] for c in dual]
+    urgent_ids = [c["id"] for c in final if c["expected"].get("priority") == "urgent"]
+    require(all(c["category"] == ABSTENTION for c in dual) and dual_priorities.count(ABSTENTION) == 1
+            and dual_priorities.count("urgent") == 1 and len(urgent_ids) == 6
+            and sum(c["expected"].get("priority") == "urgent" for c in final[12:24]) == 3
+            and split["summary"]["final_test"]["urgent_priority_omitted_ids"] == urgent_ids,
+            "r2_quota", "insuficientes e urgentes")
+    require(len(labels["cases"]) == 36
+            and {c["id"]: c["reviewed_expected"] for c in labels["cases"]} == {c["id"]: c["expected"] for c in final},
+            "r2_freeze", "alvos revisados")
+
+
 def profile_context(profile_name=LEGACY):
     profile = get_profile(profile_name)
     validation = validators(profile_name)
@@ -617,6 +709,8 @@ def profile_context(profile_name=LEGACY):
     split = read(source_path({"path": split_path, "sha256": protocol["data_split_sha256"]}))
     catalog = read(source_path(protocol["source_catalog"]))
     data = read(source_path(protocol["source_dataset"]))
+    if profile_name == R2:
+        verify_r2_package(protocol, split, data)
     dataset = {row["id"]: row for row in data["cases"]}
     return validation, protocol, split, catalog, dataset
 

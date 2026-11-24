@@ -1,0 +1,143 @@
+{
+  "source_dataset_version": "1.1.0",
+  "source_dataset_sha256": "0e7e4c342c2a39cefd89855d8c0513f447d7878303eb4091488ca8af78928880",
+  "development": {
+    "category": [
+      "jev-004",
+      "jev-007",
+      "jev-010",
+      "jev-013",
+      "jev-019",
+      "jev-028",
+      "jev-037",
+      "jev-040"
+    ],
+    "priority": [
+      "jev-002",
+      "jev-005",
+      "jev-008",
+      "jev-014",
+      "jev-023",
+      "jev-032",
+      "jev-035",
+      "jev-041"
+    ],
+    "category+priority": [
+      "jev-003",
+      "jev-006",
+      "jev-009",
+      "jev-015",
+      "jev-018",
+      "jev-024",
+      "jev-033",
+      "jev-039"
+    ]
+  },
+  "final_test": {
+    "category": [
+      "r2-001",
+      "r2-002",
+      "r2-003",
+      "r2-004",
+      "r2-005",
+      "r2-006",
+      "r2-007",
+      "r2-008",
+      "r2-009",
+      "r2-010",
+      "r2-011",
+      "r2-012"
+    ],
+    "priority": [
+      "r2-013",
+      "r2-014",
+      "r2-015",
+      "r2-016",
+      "r2-017",
+      "r2-018",
+      "r2-019",
+      "r2-020",
+      "r2-021",
+      "r2-022",
+      "r2-023",
+      "r2-024"
+    ],
+    "category+priority": [
+      "r2-025",
+      "r2-026",
+      "r2-027",
+      "r2-028",
+      "r2-029",
+      "r2-030",
+      "r2-031",
+      "r2-032",
+      "r2-033",
+      "r2-034",
+      "r2-035",
+      "r2-036"
+    ]
+  },
+  "version": "2.0.0",
+  "created_on": "2026-11-23",
+  "method": "Desenvolvimento histórico preservado e final R2 independente congelado antes das inferências.",
+  "summary": {
+    "development": {
+      "cases": 24,
+      "target_fields": 32,
+      "strata": {
+        "rotina": 11,
+        "urgente": 6,
+        "ambiguo": 7
+      },
+      "expected_full_classification": 17,
+      "expected_review": 7,
+      "urgent_priority_omitted_ids": [
+        "jev-002",
+        "jev-032",
+        "jev-003",
+        "jev-018"
+      ],
+      "human_direct_cases": 6,
+      "agent_delegated_cases": 18
+    },
+    "final_test": {
+      "cases": 36,
+      "target_fields": 48,
+      "strata": {
+        "rotina": 24,
+        "ambiguo": 7,
+        "urgente": 5
+      },
+      "expected_full_classification": 29,
+      "expected_review": 7,
+      "urgent_priority_omitted_ids": [
+        "r2-014",
+        "r2-019",
+        "r2-022",
+        "r2-028",
+        "r2-032",
+        "r2-034"
+      ],
+      "human_direct_cases": 0,
+      "agent_delegated_cases": 36
+    }
+  },
+  "model_visible_fields": [
+    "id",
+    "text",
+    "received",
+    "missing",
+    "brand_catalog_and_definitions"
+  ],
+  "model_hidden_fields": [
+    "expected",
+    "rationale",
+    "stratum",
+    "review_source",
+    "caveats",
+    "review_decisions"
+  ],
+  "status": "approved",
+  "approved_on": "2026-11-23",
+  "approval_evidence": "Responsável respondeu \"aprovo\" à proposta 24/36 e à régua no chat central."
+}

@@ -212,6 +212,8 @@ def describe(report, prefix=False):
 def run(args):
     selected_profile = getattr(args, "profile", None)
     profile = c01.get_profile(c01.LEGACY if selected_profile is None else selected_profile)
+    if profile.name == c01.R2:
+        raise ValueError("perfil R2 exige script/classification_comparison/r2/execute.py")
     validation, protocol, split, catalog, cases, example = preflight(profile.name)
     config = c01.read(args.config)
     report = example["report"].copy()
@@ -314,6 +316,8 @@ def write_report(output, report, inputs, obs, decisions, validation, protocol, s
             partial(value, counts["urgent_priority_omitted_cases"])
         partial(report["latency_p50_ms"], len(report["planned_ids"]))
     report["eligibility"] = eligibility(report, protocol, obs, decisions)
+    if profile.name == c01.R2 and prefix:
+        report["eligibility"] = "inconclusive"
     stream_prefix = "verified_" if prefix else ""
     report["artifacts"] = {k: inventory(output / f"{stream_prefix}{k}.jsonl") for k in c01.KINDS}
     bundle = dict(inputs=inputs, observations=obs, decisions=decisions, report=report)
@@ -336,7 +340,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True, help="diretório novo dentro do checkout")
     parser.add_argument("--config", type=Path, default=HERE / "fixture.json")
-    parser.add_argument("--profile", choices=c01.PROFILES, help="perfil do relatório (padrão: warm-1.0)")
+    parser.add_argument("--profile", choices=[name for name in c01.PROFILES if name != c01.R2],
+                        help="perfil do relatório (padrão: warm-1.0)")
     parser.add_argument("--mode", choices=("fixture", "real"), default="fixture")
     parser.add_argument("--split", choices=("development", "control", "final_test"), default="development")
     parser.add_argument("--limit", type=int)

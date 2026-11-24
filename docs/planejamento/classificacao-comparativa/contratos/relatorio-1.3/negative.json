@@ -1,0 +1,106 @@
+[
+  {
+    "id": "relatorio-antigo",
+    "changes": [
+      {
+        "path": [
+          "report",
+          "contract_version"
+        ],
+        "value": "1.2.0"
+      }
+    ],
+    "expected_error": "schema/report/contract_version/const"
+  },
+  {
+    "id": "ipc-divergente",
+    "changes": [
+      {
+        "path": [
+          "report",
+          "ipc_contract_version"
+        ],
+        "value": "1.2.0"
+      }
+    ],
+    "expected_error": "schema/report/ipc_contract_version/const"
+  },
+  {
+    "id": "protocolo-antigo",
+    "changes": [
+      {
+        "path": [
+          "report",
+          "sources",
+          "protocol"
+        ],
+        "value": {
+          "path": "docs/planejamento/classificacao-comparativa/protocolo-comparacao-1.1.json",
+          "sha256": "061a91a0c9b1b054ca2c9579077453d77ac765f24d725667fb97b5749db1aed7",
+          "version": "1.1.0"
+        }
+      }
+    ],
+    "expected_error": "profile_protocol"
+  },
+  {
+    "id": "dataset-antigo",
+    "changes": [
+      {
+        "path": [
+          "report",
+          "sources",
+          "dataset"
+        ],
+        "value": {
+          "path": "script/f08/jev/dataset.json",
+          "version": "1.1.0",
+          "sha256": "0e7e4c342c2a39cefd89855d8c0513f447d7878303eb4091488ca8af78928880"
+        }
+      }
+    ],
+    "expected_error": "source_version"
+  },
+  {
+    "id": "candidata-antiga",
+    "changes": [
+      {
+        "path": [
+          "report",
+          "identity",
+          "adapter_version"
+        ],
+        "value": "1.1.0"
+      }
+    ],
+    "expected_error": "r2_identity"
+  },
+  {
+    "id": "controle-adulterado",
+    "changes": [
+      {
+        "path": [
+          "inputs",
+          0,
+          "text"
+        ],
+        "value": "Texto não autorizado."
+      }
+    ],
+    "expected_error": "r2_control_inputs"
+  },
+  {
+    "id": "vazamento-gabarito",
+    "changes": [
+      {
+        "path": [
+          "inputs",
+          0,
+          "expected"
+        ],
+        "value": {}
+      }
+    ],
+    "expected_error": "schema/input//additionalProperties"
+  }
+]

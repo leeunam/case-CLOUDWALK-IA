@@ -140,6 +140,11 @@ def serve(args, transport=None):
     plan = Plan(args.mode, run_id, args.config)
     account = resolve_account(args, args.mode)
     _, manifest_sha, _ = plan.authorize(args.manifest, account, args.cap_usd, confirmed=True)
+    serve_authorized(args, plan, account, manifest_sha, transport)
+
+
+def serve_authorized(args, plan, account, manifest_sha, transport=None, *, candidate_order=None):
+    run_id = plan.report["run_id"]
     if (manifest_sha != args.manifest_sha256
             or plan.identity != decode(os.environ["CLASSIFICATION_IDENTITY"])
             or os.environ["CLASSIFICATION_CONTRACT_VERSION"] != plan.report["ipc_contract_version"]):
@@ -179,7 +184,8 @@ def serve(args, transport=None):
     for line in sys.stdin.buffer:
         item = decode(line)
         case_id = item["id"]
-        if plan.candidates.get(case_id) != item:
+        if (plan.candidates.get(case_id) != item
+                or (candidate_order is not None and next(candidate_order, None) != case_id)):
             raise BudgetError("caso ou conteúdo fora da projeção final autorizada")
         usage = None
         financial_deadline = None

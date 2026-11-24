@@ -54,12 +54,12 @@ class Settings:
     reservation: Decimal
 
     @classmethod
-    def load(cls, path, mode):
+    def load(cls, path, mode, *, expected_scope=SCOPE):
         data, pin = read_pinned(path)
         expected = {"scope", "mode", "max_tokens", "reasoning", "billable_input_token_ceiling",
                     "billable_output_token_ceiling", "billable_limits_reference", "billable_limits_confirmed",
                     "tariff_verified", "tariff", "usage_cost_unit", "usage_cost_reference", "usage_credits"}
-        if (not isinstance(data, dict) or set(data) != expected or data["scope"] != SCOPE or data["mode"] != mode
+        if (not isinstance(data, dict) or set(data) != expected or data["scope"] != expected_scope or data["mode"] != mode
                 or type(data["max_tokens"]) is not int or data["max_tokens"] != MAX_TOKENS
                 or not isinstance(data["reasoning"], dict) or set(data["reasoning"]) != {"enabled"}
                 or data["reasoning"]["enabled"] is not False):

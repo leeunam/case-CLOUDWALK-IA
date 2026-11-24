@@ -112,7 +112,7 @@ def summarize(cases, inputs, observations, decisions, catalog, completed, fixtur
             elapsed = obs["elapsed_ms"]
             if elapsed is None:
                 continue
-            if profile.name == c01.OBSERVED:
+            if profile.latency_gate == c01.OBSERVED_GATE:
                 if obs["origin"] == "candidate" and isfinite(elapsed) and elapsed >= 0:
                     durations.append(elapsed)
             elif obs["temperature_state"] == "warm":
