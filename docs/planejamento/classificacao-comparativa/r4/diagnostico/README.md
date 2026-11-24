@@ -24,10 +24,9 @@ anotações e registra divergências para revisão. Os campos fornecidos em
 `received` continuam válidos mesmo quando o caso segue para revisão.
 Uma abstenção em qualquer campo pedido impede a aplicação do complemento.
 
-Proveniência: relatos e anotações redigidos por IA na Task3-D2. A verificação
-desta entrega é estrutural e a rotulação cega fica pendente. Estes são dados de
-desenvolvimento e não integram o conjunto final nem registram resultados do
-Luna.
+A IA redigiu os relatos e as anotações na Task3-D2. O commit original
+registrou a verificação estrutural. A seção seguinte documenta a rotulação
+cega realizada depois. Os pares pertencem ao conjunto de desenvolvimento.
 
 ## Revisão independente registrada
 

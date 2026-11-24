@@ -99,15 +99,19 @@ rtk proxy env -u FEITA_API_KEY python3 -B -m unittest discover -s script/classif
 rtk proxy env -u FEITA_API_KEY PYTHONPATH=script/classification_comparison:script/classification_comparison/adapters/qwen python3 -B -m unittest adapters.luna.test_adapter adapters.luna.test_transport
 rtk proxy env -u FEITA_API_KEY PYTHONPATH=script/classification_comparison python3 -B -m unittest -v luna.test_round luna_r4.test_round
 rtk proxy python3 -B script/check_classification_contracts.py --profile observed-total-luna-r4
-rtk proxy python3 -B /tmp/cw-r4-d3-history.py
+rtk proxy python3 -B docs/evidencias/c05/r4-instrucao/conferir_historico.py
 ```
 
 Para os outros quatro checkers, os perfis usados foram `warm-1.0`,
 `observed-total-1.1`, `observed-total-r2` e `observed-total-luna-1.0`.
-O script temporário de inventário enumera com `git ls-tree` os relatórios em
-script/classification_comparison, contratos e docs/evidencias/c05 do commit
-base, compara os bytes com `git show` e chama `verify_report`, sem imprimir
-os casos. O guia público reproduz o percurso completo em uma conta temporária.
+Na execução original de D3, o inventário foi chamado com
+`rtk proxy python3 -B /tmp/cw-r4-d3-history.py`. O
+[verificador versionado](conferir_historico.py) reproduz essa conferência a partir
+da raiz do checkout. Ele enumera os relatórios da base `f9445ed`, compara os
+bytes atuais com o Git e verifica os 25 relatórios nos perfis de origem.
+Confere separadamente os bytes do protótipo 1.0 e as fontes congeladas R3 e R4.
+A comparação dos diretórios protegidos usa a base e o commit da entrega D3,
+`5aa4955`, para delimitar a mudança auditada. O guia público reproduz o percurso completo em uma conta temporária.
 
 ## Pendências
 
