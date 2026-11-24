@@ -5,7 +5,7 @@
 .rail-group h2 { margin: .25rem .6rem .45rem; color: var(--muted); font-size: .75rem; font-weight: 600; letter-spacing: .01em; }
 .rail-group button, .rail-bottom a { display: flex; width: 100%; align-items: center; gap: .55rem; padding: .6rem; min-height: 2.5rem; border: 0; border-radius: var(--radius); color: var(--ink); background: transparent; text-decoration: none; font-size: .8125rem; font-weight: 550; text-align: left; }
 .rail-group button:hover, .rail-bottom a:hover, .account button:hover { background: var(--surface-raised); }
-.rail-group button[aria-current] { background: var(--navigation-selected); color: #fff; }
+.rail-group button[aria-current] { background: var(--navigation-selected); color: #fff; box-shadow: inset 3px 0 var(--focus); }
 .rail-group svg, .rail-bottom svg { width: 1.1rem; }
 .rail-bottom { margin-top: auto; }
 .account { border-top: 1px solid var(--line); margin-top: .65rem; padding: .75rem .4rem 0; display: flex; justify-content: space-between; align-items: center; gap: .4rem; }

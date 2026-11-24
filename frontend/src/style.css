@@ -22,7 +22,6 @@
   --neutral-text: #d0cfcd;
   --selection-border: #797979;
   --selection-bg: #4a4a4a;
-  --scroll-thumb: #555;
   --navigation-selected: #303030;
   --button-ink: #111;
   --radius: .45rem;
@@ -49,7 +48,7 @@ button:disabled, fieldset:disabled button { opacity: .55; cursor: default; }
 a { color: var(--accent); text-underline-offset: .22em; text-decoration-thickness: .08em; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 ::selection { background: var(--selection-bg); color: #fff; }
-html { scrollbar-color: var(--scroll-thumb) var(--canvas); }
+html { scrollbar-color: var(--control) var(--canvas); }
 h1, h2, h3, p, dl, dd { margin: 0; }
 h1, h2, h3 { text-wrap: balance; }
 h1 { font-size: 1.75rem; font-weight: 600; letter-spacing: -.035em; line-height: 1.16; }
@@ -123,7 +122,7 @@ summary::marker { color: var(--accent); }
 .history { list-style: none; margin: 0; padding: .3rem; }
 .history li + li { border-top: 1px solid var(--line); }
 .history button { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: .15rem .4rem; width: 100%; border: 1px solid transparent; border-radius: var(--radius); padding: .8rem .7rem; color: var(--ink); text-align: start; background: transparent; overflow-wrap: anywhere; }
-.history button:hover { background: var(--canvas); }
+.history button:hover:not([aria-current]) { background: var(--surface-raised); }
 .history button[aria-current] { background: var(--tint); border-color: var(--selection-border); }
 .history button[aria-current]::after {
   content: ''; grid-area: 1 / 2; justify-self: end; align-self: center;
