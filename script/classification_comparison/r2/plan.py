@@ -1,4 +1,5 @@
 """Seleção, projeção e vínculo canônicos das duas etapas R2."""
+from dataclasses import dataclass
 import json
 from pathlib import Path
 import platform
@@ -23,6 +24,30 @@ VERSIONS = {"profile": PROFILE.name, "protocol_version": PROFILE.quality_version
 EXECUTION_FILES = (*EXECUTOR_FILES, *(HERE / name for name in ("execute.py", "plan.py", "gate.py", "seal.py")))
 
 
+@dataclass(frozen=True)
+class Round:
+    profile: c01.ReportProfile
+    scope: str
+    prefix: str
+    fixture_provider: str
+    entrypoint: Path
+    settings_class: type
+    execution_files: tuple
+    check_account: object = None
+    adapter: type = None
+    live_gateway: object = None
+    stop_on_error: bool = False
+
+    @property
+    def versions(self):
+        profile = self.profile
+        return dict(profile=profile.name, protocol_version=profile.quality_version,
+                    report_version=profile.report_version, ipc_contract_version=profile.ipc_version)
+
+
+R2 = Round(PROFILE, SCOPE, "r2-", c01.R2_FIXTURE_PROVIDER, HERE / "execute.py", Settings, EXECUTION_FILES)
+
+
 def canonical_digest(value):
     return digest(json.dumps(value, sort_keys=True, separators=(",", ":")).encode())
 
@@ -35,19 +60,21 @@ def gate_reference(path):
 
 
 class Plan:
-    def __init__(self, stage, mode, run_id, config):
+    def __init__(self, stage, mode, run_id, config, *, round_spec=R2):
+        self.round = round_spec
+        profile = round_spec.profile
         if stage not in STAGES or mode not in {"real", "fixture"}:
             raise BudgetError("etapa ou modo inválido")
         self.stage, self.mode, self.config = stage, mode, config
-        self.settings = Settings.load(config, mode, expected_scope=SCOPE)
-        self.validation, self.protocol, self.split, self.catalog, self.cases, golden = preflight(PROFILE.name)
-        self.sources = self.protocol["r2"]
+        self.settings = round_spec.settings_class.load(config, mode, expected_scope=round_spec.scope)
+        self.validation, self.protocol, self.split, self.catalog, self.cases, golden = preflight(profile.name)
+        self.sources = c01.round_sources(self.protocol)
         candidate = c01.read(c01.source_path(self.sources["candidate"]))
-        if candidate["contract_version"] != PROFILE.ipc_version:
+        if candidate["contract_version"] != profile.ipc_version:
             raise BudgetError("IPC da candidata diverge do perfil")
         self.identity = candidate["identity"]
         if mode == "fixture":
-            self.identity = dict(self.identity, mode=mode, provider=c01.R2_FIXTURE_PROVIDER)
+            self.identity = dict(self.identity, mode=mode, provider=round_spec.fixture_provider)
 
         reference = self.protocol["control_policy"]
         self.control_policy = c01.read(c01.source_path(reference))
@@ -60,7 +87,7 @@ class Plan:
         control_ids = [i["id"] for i in controls]
         self.injections = injected_inventory([i for i in control_ids if i in self.control_policy["controls"]],
                                              reference, self.control_policy)
-        self.inputs = [project(self.cases[i], self.catalog, ipc_version=PROFILE.ipc_version) for i in ids] + controls
+        self.inputs = [project(self.cases[i], self.catalog, ipc_version=profile.ipc_version) for i in ids] + controls
         self.candidates = {}
         for item in self.inputs:
             c01.structure(self.validation, "input", item)
@@ -81,27 +108,32 @@ class Plan:
                                             hardware=platform.machine(), peak_memory_bytes=None))
         c01.structure(self.validation, "report", self.report)
         c01.verify_sources(self.report, self.protocol, self.split)
-        self.binding = dict(VERSIONS, scope=SCOPE, stage=stage, git_revision=revision, identity=self.identity,
+        self.binding = dict(round_spec.versions, scope=round_spec.scope, stage=stage, git_revision=revision, identity=self.identity,
                             sources=self.report["sources"], candidate=self.sources["candidate"], data_freeze=self.sources["freeze"],
                             final_cases=self.sources["final_cases"], config_sha256=self.settings.sha256,
                             control_policy=reference, inputs_sha256=digest(self.input_bytes), selected_ids=ids,
                             control_ids=control_ids, candidate_ids=list(self.candidates),
                             concurrency=1, attempts=1, max_requests=request_limit,
-                            reservation_usd=str(self.settings.reservation),
+                            reservation_usd=None if self.settings.reservation is None else str(self.settings.reservation),
                             executor_sha256={file.relative_to(c01.ROOT).as_posix(): c01.digest(file)
-                                             for file in EXECUTION_FILES})
+                                             for file in round_spec.execution_files})
+        if "operational" in self.sources:
+            self.binding.update(operational=self.sources["operational"],
+                                source_lock={"path": profile.lock_file, "sha256": profile.lock_sha256})
 
     def bound_account(self, account, cap, gate=None):
         if account is None or not account.id or cap is None or account.scope != self.mode:
             raise BudgetError("informe caminho, identidade, modo e teto da conta")
         cap = cap_usd(cap)
+        if self.round.check_account is not None:
+            self.round.check_account(account)
         if self.mode == "real" and cap != cap_usd("10"):
-            raise BudgetError("R2 real exige o teto global de US$ 10")
+            raise BudgetError("execução real exige o teto global de US$ 10")
         return dict(self.binding, development_gate=gate, account={"path": str(account.path), "id": account.id,
                                                                   "scope": account.scope, "cap_usd": str(cap)})
 
     def manifest_id(self, account):
-        return "r2-" + canonical_digest(dict(account_id=account.id, stage=self.stage,
+        return self.round.prefix + canonical_digest(dict(account_id=account.id, stage=self.stage,
             candidate_sha256=self.sources["candidate"]["sha256"], final_cases_sha256=self.sources["final_cases"]["sha256"]))
 
     def authorize(self, path, account, cap, confirmed, gate=None):
@@ -116,5 +148,5 @@ class Plan:
         if (not isinstance(manifest, dict) or set(manifest) != {"enabled", "manifest_id", "binding"}
                 or manifest["enabled"] is not True or manifest["manifest_id"] != manifest_id
                 or canonical_digest(manifest["binding"]) != canonical_digest(binding)):
-            raise BudgetError("manifesto R2 desabilitado ou divergente da etapa, conta, código, fontes ou prova")
+            raise BudgetError(f"manifesto {self.round.prefix[:-1].upper()} desabilitado ou divergente da etapa, conta, código, fontes ou prova")
         return manifest_id, pin, canonical_digest(binding), binding

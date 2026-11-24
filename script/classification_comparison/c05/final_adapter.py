@@ -155,13 +155,23 @@ def serve_authorized(args, plan, account, manifest_sha, transport=None, *, candi
     account.activate(run_id, manifest_sha)
     instructions = "\n\n".join(c01.source_path(plan.report["sources"][key]).read_text(encoding="utf-8")
                                 for key in ("prompt", "rubric"))
-    gateway = transport or (fixture_gateway if args.mode == "fixture" else FeitaTransport())
+    round_spec = getattr(plan, "round", None)
+    live_gateway = getattr(round_spec, "live_gateway", None) or FeitaTransport
+    gateway = transport or (fixture_gateway if args.mode == "fixture" else live_gateway())
     usage = None
     financial_deadline = None
 
     def capture(body, deadline, dispatched):
         nonlocal usage, financial_deadline
+        if getattr(round_spec, "profile", None) == c01.PROFILES[c01.LUNA]:
+            clock = Path(os.environ["CLASSIFICATION_READY_FILE"]).with_name("case-deadline.json")
+            clock_id, outer_deadline = c01.read(clock)
+            if clock_id != case_id:
+                raise BudgetError("prazo da classificação pertence a outro caso")
+            deadline = min(outer_deadline, deadline)
         financial_deadline = deadline
+        if getattr(round_spec, "stop_on_error", False) and time.monotonic() >= deadline:
+            raise TimeoutError
         sent = False
 
         def mark_sent():
@@ -176,29 +186,37 @@ def serve_authorized(args, plan, account, manifest_sha, transport=None, *, candi
                           violation=usage.violation, gateway_usage=usage.evidence, pending=usage.pending)
         return result
 
-    budget = RequestBudget(account, plan)
-    adapter = Adapter(plan.identity, run_id, instructions, capture, budget,
-                      timeout_ms=int(os.environ["CLASSIFICATION_TIMEOUT_MS"]))
-    atomic(os.environ["CLASSIFICATION_READY_FILE"], {"runtime": platform.python_version(),
-                                                     "hardware": platform.machine()})
-    for line in sys.stdin.buffer:
-        item = decode(line)
-        case_id = item["id"]
-        if (plan.candidates.get(case_id) != item
-                or (candidate_order is not None and next(candidate_order, None) != case_id)):
-            raise BudgetError("caso ou conteúdo fora da projeção final autorizada")
-        usage = None
-        financial_deadline = None
-        observation = adapter.classify(item)
-        # O motivo canônico pode priorizar divergência de versão sobre o prazo.
-        if financial_deadline is not None and time.monotonic() >= financial_deadline:
-            account.mark_expired(run_id, case_id)
-        if usage is not None:
-            observation["request_usage"][0]["observed_api_usd"] = numeric_cost(usage.amount)
-        print(encode(observation), flush=True)
-    final = os.environ.get("CLASSIFICATION_FINAL_FILE")
-    if final:
-        atomic(final, {"peak_memory_bytes": None})
+    try:
+        budget = RequestBudget(account, plan)
+        if getattr(round_spec, "adapter", None):
+            budget.reasoning = None
+        factory = getattr(round_spec, "adapter", None) or Adapter
+        adapter = factory(plan.identity, run_id, instructions, capture, budget,
+                          timeout_ms=int(os.environ["CLASSIFICATION_TIMEOUT_MS"]))
+        atomic(os.environ["CLASSIFICATION_READY_FILE"], {"runtime": platform.python_version(),
+                                                         "hardware": platform.machine()})
+        for line in sys.stdin.buffer:
+            item = decode(line)
+            case_id = item["id"]
+            if (plan.candidates.get(case_id) != item
+                    or (candidate_order is not None and next(candidate_order, None) != case_id)):
+                raise BudgetError("caso ou conteúdo fora da projeção final autorizada")
+            usage = None
+            financial_deadline = None
+            observation = adapter.classify(item)
+            # O motivo canônico pode priorizar divergência de versão sobre o prazo.
+            if financial_deadline is not None and time.monotonic() >= financial_deadline:
+                account.mark_expired(run_id, case_id)
+            if usage is not None:
+                observation["request_usage"][0]["observed_api_usd"] = numeric_cost(usage.amount)
+            print(encode(observation), flush=True)
+        final = os.environ.get("CLASSIFICATION_FINAL_FILE")
+        if final:
+            atomic(final, {"peak_memory_bytes": None})
+    finally:
+        close = getattr(gateway, "close", None)
+        if close is not None:
+            close()
 
 
 def main(transport=None):

@@ -2,8 +2,8 @@
 from io import BytesIO
 from pathlib import Path
 
-from plan import VERSIONS, Plan, canonical_digest
-import seal
+from r2.plan import Plan, canonical_digest
+from r2 import seal
 from adapters.qwen.adapter import numeric_cost
 from budget import BudgetError, total_usd, usd
 from common import c01, decode
@@ -103,8 +103,8 @@ def collect(output, plan, account, cap, *, original_hashes=None):
             or artifacts["inputs.jsonl"]["sha256"] != binding["inputs_sha256"]):
         raise BudgetError("binding ou projeção de development adulterado")
 
-    expected_events = [dict(event="planned", plan=artifacts["plan.json"], **VERSIONS,
-                            contract_version=VERSIONS["report_version"])]
+    expected_events = [dict(event="planned", plan=artifacts["plan.json"], **plan.round.versions,
+                            contract_version=plan.round.profile.report_version)]
     for case_id in ids:
         expected_events.extend(dict(event=event, id=case_id, attempt=1) for event in ("dispatch_started", "dispatched"))
         expected_events.append(dict(event="completed", id=case_id, attempts=1))
@@ -127,7 +127,7 @@ def collect(output, plan, account, cap, *, original_hashes=None):
     costs = settled_costs(snapshot, bundle["observations"], run_id, plan.settings.reservation)
     result = assess(plan, bundle, costs)
     observed = total_usd(*(usd(cost["observed_usd"]) for cost in costs.values()))
-    return dict(VERSIONS, **result, run_id=run_id, mode=plan.mode, binding_sha256=run["binding_sha256"],
+    return dict(plan.round.versions, **result, run_id=run_id, mode=plan.mode, binding_sha256=run["binding_sha256"],
                 manifest_sha256=run["manifest_sha256"], observed_usd=str(observed), costs=costs, artifacts=artifacts)
 
 
@@ -137,7 +137,8 @@ def verify(reference, final_plan, account, cap):
     required = "pass" if final_plan.mode == "real" else "fixture_ready"
     if not isinstance(supplied, dict) or supplied.get("mode") != final_plan.mode or supplied.get("status") != required:
         raise BudgetError("gate de development falhou ou pertence a outro modo")
-    development = Plan("development", final_plan.mode, "r2-verificacao", final_plan.config)
+    development = Plan("development", final_plan.mode, final_plan.round.prefix + "verificacao",
+                       final_plan.config, round_spec=final_plan.round)
     seal.verify(development, account, supplied, reference["sha256"])
     expected = collect(Path(path).parent, development, account, cap)
     if expected["status"] != required or canonical_digest(supplied) != canonical_digest(expected):

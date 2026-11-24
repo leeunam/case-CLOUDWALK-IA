@@ -2,7 +2,7 @@
 import os
 import stat
 
-from plan import canonical_digest
+from r2.plan import canonical_digest
 from budget import BudgetError
 from common import decode, encode
 from journal import sync_directory

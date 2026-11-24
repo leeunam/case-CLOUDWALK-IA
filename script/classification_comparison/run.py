@@ -127,6 +127,9 @@ def run_batch(inputs, config, report, catalog, validation, journal, policy, *,
                     if before_exchange is not None:
                         journal.active = item["id"]
                         before_exchange(item)
+                    if config.get("share_case_deadline"):
+                        # Mesmo relógio monotônico nos dois processos locais. O IPC de entrada é imutável.
+                        (ready.parent / "case-deadline.json").write_text(encode([item["id"], deadline]))
                     obs = exchange(proc, item, responses, journal, deadline)
                 if obs is not None:
                     c01.structure(validation, "observation", obs)
@@ -215,6 +218,8 @@ def describe(report, prefix=False):
 def run(args):
     selected_profile = getattr(args, "profile", None)
     profile = c01.get_profile(c01.LEGACY if selected_profile is None else selected_profile)
+    if profile.name == c01.LUNA:
+        raise ValueError("perfil Luna exige script/classification_comparison/luna/execute.py")
     if profile.name == c01.R2:
         raise ValueError("perfil R2 exige script/classification_comparison/r2/execute.py")
     validation, protocol, split, catalog, cases, example = preflight(profile.name)
@@ -308,7 +313,7 @@ def write_report(output, report, inputs, obs, decisions, validation, protocol, s
     apply_final_populations(summary, report, protocol, profile.latency_gate)
     report.update(summary)
     report["eligibility"] = eligibility(report, protocol, obs, decisions)
-    if profile.name == c01.R2 and prefix:
+    if profile.name in c01.DEDICATED and prefix:
         report["eligibility"] = "inconclusive"
     stream_prefix = "verified_" if prefix else ""
     report["artifacts"] = {k: inventory(output / f"{stream_prefix}{k}.jsonl") for k in c01.KINDS}
@@ -325,7 +330,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True, help="diretório novo dentro do checkout")
     parser.add_argument("--config", type=Path, default=HERE / "fixture.json")
-    parser.add_argument("--profile", choices=[name for name in c01.PROFILES if name != c01.R2],
+    parser.add_argument("--profile", choices=[name for name in c01.PROFILES if name not in c01.DEDICATED],
                         help="perfil do relatório (padrão: warm-1.0)")
     parser.add_argument("--mode", choices=("fixture", "real"), default="fixture")
     parser.add_argument("--split", choices=("development", "control", "final_test"), default="development")

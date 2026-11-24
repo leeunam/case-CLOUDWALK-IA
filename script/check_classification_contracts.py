@@ -23,6 +23,9 @@ ABSTENTION = "informacao_insuficiente"
 LEGACY = "warm-1.0"
 OBSERVED = "observed-total-1.1"
 R2 = "observed-total-r2"
+LUNA = "observed-total-luna-1.0"
+DEDICATED = (R2, LUNA)
+LUNA_FIXTURE_PROVIDER = "simulador-c05-luna"
 R2_FIXTURE_PROVIDER = "simulador-c05-r2"
 R2_OFFLINE_APPROVAL_DATE = "2026-11-24"
 WARM_GATE = "warm_total_latency_p95_ms_max"
@@ -69,6 +72,10 @@ PROFILES = {
                       "r2/protocol.json", "4e89f10dcb15b4a9593532aa52d05917b68df4771972d570dd646a7ce11163d1",
                       "relatorio-1.3/report.json", "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.3/sources.lock.json",
                       "f91f9325870cde169eba795195052908035af2c179de610a0a432f1eaa344df1"),
+    LUNA: ReportProfile(LUNA, "1.3.0", "1.4.0", "1.1.0", OBSERVED_GATE,
+                        "luna/protocol.json", "a9fe9fc8fd55420986ca9a1e63ed09d9be8b88d55cd3373235f471d5e50b288b",
+                        "relatorio-1.4/report.json", "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.4/sources.lock.json",
+                        "7a826e8217be8f5a0ca00b3d51d596dd724b620efcf7ac932744fc02bc18ae1b"),
 }
 
 
@@ -218,7 +225,7 @@ def verify_observation(obs, missing, report, catalog):
     if injected:
         # Structure has already ruled out inference, scores, usage and model identity.
         return
-    if report.get("contract_version") == PROFILES[R2].report_version:
+    if report.get("contract_version") in {PROFILES[name].report_version for name in DEDICATED}:
         require(obs["requests"] <= 1, "r2_request_limit", case_id)
         require(all(choice.get("score") is None for choice in choices.values()), "r2_score", case_id)
     pins = (("expected_returned_model", "returned_model"), ("expected_weights_revision", "weights_revision"))
@@ -438,11 +445,11 @@ def verify_sources(report, protocol, split):
         "split": {"version": split["version"], "path": str((PLAN / protocol["data_split_file"]).relative_to(ROOT)),
                   "sha256": protocol["data_split_sha256"]},
     }
-    if profile.name == R2:
-        candidate = read(source_path(protocol["r2"]["candidate"]))
+    if profile.name in DEDICATED:
+        candidate = read(source_path(round_sources(protocol)["candidate"]))
         identity = candidate["identity"]
         if report["identity"]["mode"] == "fixture":
-            identity = dict(identity, mode="fixture", provider=R2_FIXTURE_PROVIDER)
+            identity = dict(identity, mode="fixture", provider=LUNA_FIXTURE_PROVIDER if profile.name == LUNA else R2_FIXTURE_PROVIDER)
         require(report["identity"] == identity, "r2_identity", report["run_id"])
         expected.update(prompt=candidate["prompt"], policy=candidate["policy"])
     for name, entry in report["sources"].items():
@@ -537,10 +544,14 @@ def has_complete_evidence(report, observations, decisions, latency_samples):
             and any(c["status"] != "error" for i in completed for c in observations[i]["choices"].values()))
 
 
+def round_sources(protocol):
+    return protocol["luna"] if "luna" in protocol else protocol["r2"]
+
+
 def verify_r2_scope(report, protocol, split, inputs, catalog, dataset):
     stage = report["split"]
     planned, completed, controls = (report[k] for k in ("planned_ids", "completed_ids", "control_ids"))
-    r2 = protocol["r2"]
+    r2 = round_sources(protocol)
     final_ids = [case for mask in ("category", "priority", "category+priority") for case in split["final_test"][mask]]
     wanted = {"development": r2["development_ids"], "final_test": final_ids, "control": []}
     require(planned == wanted[stage] and completed == planned[:len(completed)], "r2_stage_order", stage)
@@ -594,7 +605,7 @@ def verify_run(bundle, validation, protocol, split, catalog, dataset):
     order = completed + controls
     for kind in ("inputs", "decisions"):
         require(list(indexed[kind]) == order, "stream_ids", kind)
-    if profile.name == R2:
+    if profile.name in DEDICATED:
         verify_r2_scope(report, protocol, split, indexed["inputs"], catalog, dataset)
     observations = indexed["observations"]
     require(list(observations) == [i for i in order if i in observations], "stream_ids", "observations")
@@ -622,11 +633,11 @@ def verify_run(bundle, validation, protocol, split, catalog, dataset):
             if metric["state"] in ("measured", "partial"):
                 require(metric["denominator"] <= latency_samples, "latency_denominator", report["run_id"])
     full = has_complete_evidence(report, observations, indexed["decisions"], latency_samples)
-    if profile.name == R2 and Path(inventory["inputs"]["path"]).name == "verified_inputs.jsonl":
+    if profile.name in DEDICATED and Path(inventory["inputs"]["path"]).name == "verified_inputs.jsonl":
         full = False
     verify_partial_application(report, observations, indexed["decisions"])
     verify_usage(report, list(observations.values()))
-    if profile.name == R2:
+    if profile.name in DEDICATED:
         derived = canonical_summary(dataset, bundle["inputs"], bundle["observations"], bundle["decisions"],
                                     catalog, completed, fixture=report["identity"]["mode"] == "fixture",
                                     latency_gate=profile.latency_gate, observed_latency=True,
@@ -734,6 +745,35 @@ def verify_r2_package(protocol, split, data):
             "r2_freeze", "alvos revisados")
 
 
+def verify_luna_package(protocol, split, data):
+    sources = protocol["luna"]
+    binding = read(source_path(sources["freeze"]))
+    historical = read(source_path(binding["historical_protocol"]))
+    require(binding["historical_protocol"]["sha256"] == PROFILES[R2].protocol_sha256,
+            "luna_origin", "protocolo R2")
+    verify_r2_package(historical, split, data)
+    shared = set(historical) - {"version", "contract_version", "approval", "task", "r2"}
+    require(all(protocol[k] == historical[k] for k in shared)
+            and all(sources[k] == historical["r2"][k] for k in
+                    ("final_cases", "development_ids", "development_gate", "control_inputs")),
+            "luna_criteria", "projeção ou critérios divergentes da R2")
+    freeze = read(source_path(binding["candidate_freeze"]))
+    candidate = read(source_path(sources["candidate"]))
+    require(binding["candidate"] == sources["candidate"] == freeze["candidate"]
+            and binding["operational"] == sources["operational"] == freeze["operational"]
+            and binding["historical_data_freeze"] == historical["r2"]["freeze"] == freeze["historical_data_freeze"]
+            and binding["final_cases"] == sources["final_cases"]
+            and freeze["final_case_sha256"] == binding["final_cases"]["sha256"]
+            and candidate["rubric"] == historical["rubric"]
+            and protocol["approval"]["decision"] == "D"
+            and protocol["approval"]["source"] == binding["offline_approval"]
+            and binding["paid_execution_authorized"] is protocol["approval"]["paid_execution_authorized"] is False
+            and binding["new_final_human_case_approvals"] == freeze["new_final_human_case_approvals"] == 0,
+            "luna_freeze", "aprovação offline e origens")
+    for path, pin in freeze["runtime_and_semantic_sources_sha256"].items():
+        source_path({"path": path, "sha256": pin})
+
+
 def profile_context(profile_name=LEGACY):
     profile = get_profile(profile_name)
     validation = validators(profile_name)
@@ -744,6 +784,8 @@ def profile_context(profile_name=LEGACY):
     data = read(source_path(protocol["source_dataset"]))
     if profile_name == R2:
         verify_r2_package(protocol, split, data)
+    if profile_name == LUNA:
+        verify_luna_package(protocol, split, data)
     dataset = {row["id"]: row for row in data["cases"]}
     return validation, protocol, split, catalog, dataset
 

@@ -53,18 +53,29 @@ class Settings:
     sha256: str
     reservation: Decimal
 
+    request_keys = {"max_tokens", "reasoning"}
+    extra_keys = set()
+    real_minimum = (MIN_INPUT_CEILING, MIN_OUTPUT_CEILING)
+
+    @classmethod
+    def valid_request(cls, data):
+        return (type(data["max_tokens"]) is int and data["max_tokens"] == MAX_TOKENS
+                and isinstance(data["reasoning"], dict) and set(data["reasoning"]) == {"enabled"}
+                and data["reasoning"]["enabled"] is False)
+
     @classmethod
     def load(cls, path, mode, *, expected_scope=SCOPE):
-        data, pin = read_pinned(path)
-        expected = {"scope", "mode", "max_tokens", "reasoning", "billable_input_token_ceiling",
+        return cls.from_pinned(*read_pinned(path), mode, expected_scope)
+
+    @classmethod
+    def from_pinned(cls, data, pin, mode, expected_scope):
+        expected = {"scope", "mode", *cls.request_keys, *cls.extra_keys, "billable_input_token_ceiling",
                     "billable_output_token_ceiling", "billable_limits_reference", "billable_limits_confirmed",
                     "tariff_verified", "tariff", "usage_cost_unit", "usage_cost_reference", "usage_credits"}
         if (not isinstance(data, dict) or set(data) != expected or data["scope"] != expected_scope or data["mode"] != mode
-                or type(data["max_tokens"]) is not int or data["max_tokens"] != MAX_TOKENS
-                or not isinstance(data["reasoning"], dict) or set(data["reasoning"]) != {"enabled"}
-                or data["reasoning"]["enabled"] is not False):
+                or not cls.valid_request(data)):
             raise BudgetError("configuração de requisição ou escopo incompatível com a C05")
-        in_min, out_min = (MIN_INPUT_CEILING, MIN_OUTPUT_CEILING) if mode == "real" else (1, MAX_TOKENS)
+        in_min, out_min = cls.real_minimum if mode == "real" else (1, MAX_TOKENS)
         input_limit = data["billable_input_token_ceiling"]
         output_limit = data["billable_output_token_ceiling"]
         if (type(input_limit) is not int or input_limit < in_min
