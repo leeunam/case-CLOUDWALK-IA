@@ -1,0 +1,17 @@
+{
+  "scope": "c05-feita-luna-r4",
+  "mode": "real",
+  "billable_input_token_ceiling": 1050000,
+  "billable_output_token_ceiling": 140000,
+  "billable_limits_reference": null,
+  "billable_limits_confirmed": false,
+  "tariff_verified": false,
+  "tariff": null,
+  "usage_cost_unit": null,
+  "usage_cost_reference": null,
+  "usage_credits": null,
+  "max_completion_tokens": 128,
+  "reasoning_effort": "none",
+  "stream": false,
+  "financial_evidence": null
+}

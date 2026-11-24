@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://class-001.invalid/v1.5/report.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "ipc_contract_version",
+    "run_id",
+    "identity",
+    "score_calibration",
+    "split",
+    "git_revision",
+    "environment",
+    "sources",
+    "artifacts",
+    "planned_ids",
+    "completed_ids",
+    "control_ids",
+    "injected_controls",
+    "gates",
+    "by_field",
+    "by_mask",
+    "by_stratum",
+    "urgent_outcomes",
+    "latency_p50_ms",
+    "usage",
+    "eligibility"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "1.5.0"
+    },
+    "ipc_contract_version": {
+      "const": "1.1.0"
+    },
+    "run_id": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/run_id"
+    },
+    "identity": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/identity"
+    },
+    "score_calibration": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/score_calibration"
+    },
+    "split": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/split"
+    },
+    "git_revision": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/git_revision"
+    },
+    "environment": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/environment"
+    },
+    "sources": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/sources"
+    },
+    "artifacts": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/artifacts"
+    },
+    "planned_ids": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/planned_ids"
+    },
+    "completed_ids": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/completed_ids"
+    },
+    "control_ids": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/control_ids"
+    },
+    "injected_controls": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/injected_controls"
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "channel_field_preservation_ratio",
+        "complete_or_invalid_controls_model_calls",
+        "partial_application_after_abstention_or_error",
+        "automatic_completion_on_expected_review_cases",
+        "automatic_non_urgent_applied_when_expected_urgent",
+        "automatic_coverage_on_fully_classifiable_cases_min",
+        "raw_urgent_recognition_min",
+        "observed_total_latency_p95_ms_max",
+        "applied_category_accuracy",
+        "applied_priority_accuracy"
+      ],
+      "properties": {
+        "channel_field_preservation_ratio": {
+          "$ref": "https://class-001.invalid/v1/report.schema.json#/$defs/metric"
+        },
+        "complete_or_invalid_controls_model_calls": {
+          "$ref": "https://class-001.invalid/v1/report.schema.json#/$defs/metric"
+        },
+        "partial_application_after_abstention_or_error": {
+          "$ref": "https://class-001.invalid/v1/report.schema.json#/$defs/metric"
+        },
+        "automatic_completion_on_expected_review_cases": {
+          "$ref": "https://class-001.invalid/v1/report.schema.json#/$defs/metric"
+        },
+        "automatic_non_urgent_applied_when_expected_urgent": {
+          "$ref": "https://class-001.invalid/v1/report.schema.json#/$defs/metric"
+        },
+        "automatic_coverage_on_fully_classifiable_cases_min": {
+          "$ref": "https://class-001.invalid/v1/report.schema.json#/$defs/metric"
+        },
+        "raw_urgent_recognition_min": {
+          "$ref": "https://class-001.invalid/v1/report.schema.json#/$defs/metric"
+        },
+        "observed_total_latency_p95_ms_max": {
+          "$ref": "https://class-001.invalid/v1/report.schema.json#/$defs/metric"
+        },
+        "applied_category_accuracy": {
+          "$ref": "https://class-001.invalid/v1/report.schema.json#/$defs/metric"
+        },
+        "applied_priority_accuracy": {
+          "$ref": "https://class-001.invalid/v1/report.schema.json#/$defs/metric"
+        }
+      }
+    },
+    "by_field": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/by_field"
+    },
+    "by_mask": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/by_mask"
+    },
+    "by_stratum": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/by_stratum"
+    },
+    "urgent_outcomes": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/urgent_outcomes"
+    },
+    "latency_p50_ms": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/latency_p50_ms"
+    },
+    "usage": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/usage"
+    },
+    "eligibility": {
+      "$ref": "https://class-001.invalid/v1/report.schema.json#/properties/eligibility"
+    }
+  }
+}

@@ -24,7 +24,9 @@ LEGACY = "warm-1.0"
 OBSERVED = "observed-total-1.1"
 R2 = "observed-total-r2"
 LUNA = "observed-total-luna-1.0"
-DEDICATED = (R2, LUNA)
+LUNA_R4 = "observed-total-luna-r4"
+LUNA_PROFILES = (LUNA, LUNA_R4)
+DEDICATED = (R2, *LUNA_PROFILES)
 LUNA_FIXTURE_PROVIDER = "simulador-c05-luna"
 R2_FIXTURE_PROVIDER = "simulador-c05-r2"
 R2_OFFLINE_APPROVAL_DATE = "2026-11-24"
@@ -45,6 +47,10 @@ class ReportProfile:
     golden_file: str
     lock_file: str
     lock_sha256: str
+
+    @property
+    def is_luna(self):
+        return self.name in LUNA_PROFILES
 
     @property
     def protocol_path(self):
@@ -76,6 +82,10 @@ PROFILES = {
                         "luna/protocol.json", "a9fe9fc8fd55420986ca9a1e63ed09d9be8b88d55cd3373235f471d5e50b288b",
                         "relatorio-1.4/report.json", "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.4/sources.lock.json",
                         "7a826e8217be8f5a0ca00b3d51d596dd724b620efcf7ac932744fc02bc18ae1b"),
+    LUNA_R4: ReportProfile(LUNA_R4, "1.4.0", "1.5.0", "1.1.0", OBSERVED_GATE,
+                           "r4/protocol.json", "85590d95926acc76c05e50bae420180f869ff1084856f4c1fcf11542175df8fd",
+                           "relatorio-1.5/report.json", "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.5/sources.lock.json",
+                           "ea1531d622ea21c0db68f71b576acea59cef829d765ed16a76a36312b25584be"),
 }
 
 
@@ -449,7 +459,7 @@ def verify_sources(report, protocol, split):
         candidate = read(source_path(round_sources(protocol)["candidate"]))
         identity = candidate["identity"]
         if report["identity"]["mode"] == "fixture":
-            identity = dict(identity, mode="fixture", provider=LUNA_FIXTURE_PROVIDER if profile.name == LUNA else R2_FIXTURE_PROVIDER)
+            identity = dict(identity, mode="fixture", provider=LUNA_FIXTURE_PROVIDER if profile.is_luna else R2_FIXTURE_PROVIDER)
         require(report["identity"] == identity, "r2_identity", report["run_id"])
         expected.update(prompt=candidate["prompt"], policy=candidate["policy"])
     for name, entry in report["sources"].items():
@@ -745,7 +755,7 @@ def verify_r2_package(protocol, split, data):
             "r2_freeze", "alvos revisados")
 
 
-def verify_luna_package(protocol, split, data):
+def verify_luna_package(profile, protocol, split, data):
     sources = protocol["luna"]
     binding = read(source_path(sources["freeze"]))
     historical = read(source_path(binding["historical_protocol"]))
@@ -759,6 +769,9 @@ def verify_luna_package(protocol, split, data):
             "luna_criteria", "projeção ou critérios divergentes da R2")
     freeze = read(source_path(binding["candidate_freeze"]))
     candidate = read(source_path(sources["candidate"]))
+    if profile.name == LUNA_R4:
+        verify_luna_r4_freeze(protocol, binding, historical, freeze, candidate)
+        return
     require(binding["candidate"] == sources["candidate"] == freeze["candidate"]
             and binding["operational"] == sources["operational"] == freeze["operational"]
             and binding["historical_data_freeze"] == historical["r2"]["freeze"] == freeze["historical_data_freeze"]
@@ -774,6 +787,34 @@ def verify_luna_package(protocol, split, data):
         source_path({"path": path, "sha256": pin})
 
 
+def verify_luna_r4_freeze(protocol, binding, historical, freeze, candidate):
+    sources = protocol["luna"]
+    approval = read(source_path(binding["offline_approval"]))
+    previous = read(source_path(binding["previous_luna_protocol"]))
+    previous_candidate = read(source_path(previous["luna"]["candidate"]))
+    require(binding["previous_luna_protocol"]["sha256"] == PROFILES[LUNA].protocol_sha256
+            and sources["operational"] == binding["operational"] == previous["luna"]["operational"]
+            and binding["historical_data_freeze"] == historical["r2"]["freeze"]
+            and binding["final_cases"] == sources["final_cases"]
+            and approval["task"] == protocol["task"] == binding["task"] == "C05-R4"
+            and protocol["approval"]["source"] == binding["offline_approval"]
+            and approval["paid_execution_authorized"] is binding["paid_execution_authorized"]
+            is protocol["approval"]["paid_execution_authorized"] is False
+            and binding["new_final_human_case_approvals"] == 0,
+            "luna_freeze", "aprovação offline e origens R4")
+    require(binding["candidate"] == sources["candidate"] == freeze["candidate"]
+            and approval["candidate_sha256"] == sources["candidate"]["sha256"]
+            and freeze["candidate_commit"] == approval["candidate_commit"]
+            and candidate["identity"] == previous_candidate["identity"]
+            and candidate["policy"] == previous_candidate["policy"]
+            and candidate["rubric"] == previous_candidate["rubric"] == historical["rubric"]
+            and candidate["prompt"]["version"] == "1.2.0"
+            and candidate["prompt"]["sha256"] != previous_candidate["prompt"]["sha256"],
+            "luna_freeze", "instrução R4 congelada e runtime R3")
+    for path, pin in freeze["sources_sha256"].items():
+        source_path({"path": path, "sha256": pin})
+
+
 def profile_context(profile_name=LEGACY):
     profile = get_profile(profile_name)
     validation = validators(profile_name)
@@ -784,8 +825,8 @@ def profile_context(profile_name=LEGACY):
     data = read(source_path(protocol["source_dataset"]))
     if profile_name == R2:
         verify_r2_package(protocol, split, data)
-    if profile_name == LUNA:
-        verify_luna_package(protocol, split, data)
+    if profile.is_luna:
+        verify_luna_package(profile, protocol, split, data)
     dataset = {row["id"]: row for row in data["cases"]}
     return validation, protocol, split, catalog, dataset
 

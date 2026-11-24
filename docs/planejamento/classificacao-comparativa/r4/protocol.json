@@ -1,0 +1,134 @@
+{
+  "version": "1.4.0",
+  "task": "C05-R4",
+  "status": "approved",
+  "created_on": "2026-11-24",
+  "source_dataset": {
+    "path": "docs/planejamento/classificacao-comparativa/r2/dataset.json",
+    "sha256": "3f4e69af44f03c89d1767d54ba07264327d616f18b0548656cc00c7bb89e3845",
+    "version": "2.0.0"
+  },
+  "source_catalog": {
+    "path": "script/f08/jev/catalog.json",
+    "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271",
+    "version": "1.0.0"
+  },
+  "data_split_file": "r2/split.json",
+  "provenance": {
+    "human_direct_cases": 6,
+    "agent_delegated_cases": 54,
+    "scope": "synthetic_exploratory_reference",
+    "development": {
+      "human_direct_cases": 6,
+      "agent_delegated_cases": 18
+    },
+    "final": {
+      "human_direct_cases": 0,
+      "agent_delegated_cases": 36
+    }
+  },
+  "gates": {
+    "channel_field_preservation_ratio": 1.0,
+    "complete_or_invalid_controls_model_calls": 0,
+    "partial_application_after_abstention_or_error": 0,
+    "automatic_completion_on_expected_review_cases": 0,
+    "automatic_non_urgent_applied_when_expected_urgent": 0,
+    "applied_accuracy_per_field_min": 0.9,
+    "automatic_coverage_on_fully_classifiable_cases_min": 0.7,
+    "raw_urgent_recognition_min": 0.8,
+    "observed_total_latency_p95_ms_max": 3000
+  },
+  "execution": {
+    "concurrency": 1,
+    "attempts_per_case": 1,
+    "timeout_ms_per_case": 5000,
+    "full_test_cases_per_candidate": 36,
+    "paid_execution_authorized": false,
+    "budget_cap_usd": 10,
+    "budget_status": "global_cap_approved_separate_execution_scope_required"
+  },
+  "exact_test_denominators": {
+    "fully_classifiable_cases": 29,
+    "min_automatic_completions": 21,
+    "expected_review_cases": 7,
+    "urgent_priority_omitted_cases": 6,
+    "min_raw_urgent_choices": 5,
+    "target_fields": 48
+  },
+  "metric_semantics": {
+    "applied_accuracy_per_field": "Correct target fields / all applied target fields for that field; valid channel fields excluded; abstention, error and non-applied choices excluded and reported separately; zero applied fields makes gate inconclusive.",
+    "automatic_coverage": "Cases completely auto-applied / 29 cases for which all missing targets have deterministic labels; wrong but applied cases remain in numerator and are penalized in accuracy; report correct-completion coverage separately.",
+    "urgent_recognition": "Raw choice urgent / all six test cases with priority omitted and expected urgent; any transport error, abstention or other choice is not a correct recognition, even when the overall case goes to review.",
+    "expected_review": "All seven cases containing at least one expected informacao_insuficiente must go to review; choosing the other field correctly does not permit partial application.",
+    "latency": "Monotonic elapsed_ms measured by C02 per completed real candidate case, from before input validation through validation of the decision. Include all outcomes with observed duration, including errors and timeouts, independent of thermal state; exclude control IDs and fixtures. One case is one sample, including when both fields are missing. Report provisioning, download and pre-READY local startup separately. Use nearest-rank ceil(p*n) for p50 and p95. No observed durations gives unmeasured with the planned population (36 for final_test); an incomplete sample gives partial with the observed count. The 3000 ms limit is inclusive.",
+    "eligibility": "All gates and a complete observed test are required; a partial run, missing metric, or zero denominator gives inconclusive, never a pass."
+  },
+  "decision": {
+    "policy": "Safety gates first. Among eligible candidates, compare correct case completions, per-field accuracy, urgent outcomes, latency and API cost/local resources. Responsible records justified choice; inconclusive or no eligible candidate are allowed.",
+    "score_calibration": "Model scores are not assumed calibrated or comparable; abstention thresholds/prompt chosen only on development before final freeze."
+  },
+  "approval": {
+    "approved_on": "2026-11-24",
+    "decision": "Revisar instrução da Luna",
+    "scope": "Preparação offline da instrução R4 com fixtures",
+    "source": {
+      "path": "docs/evidencias/c05/r4-instrucao/offline-approval.json",
+      "sha256": "bc1ff0dc085764e2f3ff41698f6097bd7e95f0bad48c4f7f89c4a3773e2df1ef"
+    },
+    "paid_execution_authorized": false
+  },
+  "contract_version": "1.5.0",
+  "control_policy": {
+    "path": "docs/planejamento/classificacao-comparativa/contratos/politica-controles.json",
+    "version": "1.0.0",
+    "sha256": "2611786ddde1eb2b064b02f7dda7bb7a0aae06cc8f127a9fc7e8fec14e937fb7"
+  },
+  "data_split_sha256": "054f0d572e5cb35e15bcc8b1e96df992bc9bf443edf1d4cd512c61e74b017e62",
+  "rubric": {
+    "path": "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
+    "version": "1.0.0",
+    "sha256": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac"
+  },
+  "ipc_contract_version": "1.1.0",
+  "luna": {
+    "final_cases": {
+      "path": "docs/planejamento/classificacao-comparativa/r2/final-cases.json",
+      "sha256": "17f5bae372983f90aa1956d0d583db25483a77a3ff35e4f1041ad4d51b897af9"
+    },
+    "control_inputs": {
+      "path": "docs/planejamento/classificacao-comparativa/contratos/fixtures/inputs.jsonl",
+      "sha256": "78773100a5c1b20a8b94d66a832372f20e18be3676f16af083d14f8cf66a7744"
+    },
+    "development_ids": [
+      "jev-004",
+      "jev-013",
+      "jev-002",
+      "jev-023",
+      "jev-006",
+      "jev-039"
+    ],
+    "development_gate": {
+      "correct_targets": 8,
+      "preserved_fields": 4,
+      "correct_completions": 3,
+      "integral_reviews": 3,
+      "raw_urgent": 1,
+      "errors": 0,
+      "settled_requests": 6,
+      "p95_ms_max": 3000
+    },
+    "candidate": {
+      "path": "script/classification_comparison/adapters/luna/r4/candidate.json",
+      "sha256": "ba0701bd3b003cb146f8212bef1753d45c9a2ef8d548472ffe3d04d83cced888"
+    },
+    "operational": {
+      "path": "script/classification_comparison/adapters/luna/operational.json",
+      "version": "1.0.0",
+      "sha256": "0666cdd1c99f58c52512681563b72ddcaf4f97593071a1797104526d062678da"
+    },
+    "freeze": {
+      "path": "docs/planejamento/classificacao-comparativa/r4/binding.json",
+      "sha256": "fdccf2127947da876720cd501c972000d52af365111787f096111748300855b5"
+    }
+  }
+}

@@ -105,7 +105,7 @@ def run_evaluation(args, *, fixture_command=None, round_spec=R2):
                   "command": [*adapter, *options_for(args), "--manifest", str(args.manifest.resolve()),
                               "--manifest-sha256", manifest_sha]}
 
-        if plan.round.profile.name == c01.LUNA:
+        if plan.round.profile.is_luna:
             config["share_case_deadline"] = True
 
         def publish(inputs, obs, decisions, prefix=False):

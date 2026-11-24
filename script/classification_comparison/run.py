@@ -218,10 +218,10 @@ def describe(report, prefix=False):
 def run(args):
     selected_profile = getattr(args, "profile", None)
     profile = c01.get_profile(c01.LEGACY if selected_profile is None else selected_profile)
-    if profile.name == c01.LUNA:
-        raise ValueError("perfil Luna exige script/classification_comparison/luna/execute.py")
-    if profile.name == c01.R2:
-        raise ValueError("perfil R2 exige script/classification_comparison/r2/execute.py")
+    if profile.name in c01.DEDICATED:
+        label, entry = {c01.R2: ("R2", "r2"), c01.LUNA: ("Luna", "luna"),
+                        c01.LUNA_R4: ("Luna R4", "luna_r4")}[profile.name]
+        raise ValueError(f"perfil {label} exige script/classification_comparison/{entry}/execute.py")
     validation, protocol, split, catalog, cases, example = preflight(profile.name)
     config = c01.read(args.config)
     report = example["report"].copy()

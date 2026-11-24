@@ -9,23 +9,32 @@ import sys
 import unittest
 from unittest.mock import patch
 
-from luna.round_spec import ACCOUNT_ID, ACCOUNT_RELATIVE, HERE, LUNA, LunaSettings, check_account
+from luna.round_spec import ACCOUNT_ID, ACCOUNT_RELATIVE, HERE, LUNA, check_account
 from r2 import execute, gate, seal
 from r2.plan import Plan, gate_reference
 from budget import Account, BudgetError, cap_usd
 from common import c01, decode, encode
 from run import run
 
-FIXTURE = HERE / "config-fixture.json"
 CAP = cap_usd("10")
 
 
-def cli(*args, check=True):
-    return subprocess.run([sys.executable, "-B", str(HERE / "execute.py"), *map(str, args)],
-                          cwd=c01.ROOT, capture_output=True, text=True, check=check)
-
-
 class LunaTest(unittest.TestCase):
+    round = LUNA
+    round_name = "LUNA"
+    scope = "c05-feita-luna"
+    prefix = "luna-"
+    previous_spend = "0.02687405"
+    expected_total = "0.05422405"
+
+    @property
+    def fixture(self):
+        return self.round.entrypoint.with_name("config-fixture.json")
+
+    def cli(self, *args):
+        return subprocess.run([sys.executable, "-B", str(self.round.entrypoint), *map(str, args)],
+                              cwd=c01.ROOT, capture_output=True, text=True, check=True)
+
     def setUp(self):
         self.output = Path(self.enterContext(TemporaryDirectory(dir=c01.ROOT)))
         self.finance = Path(self.enterContext(TemporaryDirectory()))
@@ -33,11 +42,11 @@ class LunaTest(unittest.TestCase):
     def account(self, name):
         return Account.initialize(self.finance / name, scope="fixture", cap=CAP, previous_spend="0")
 
-    def args(self, name, account, *, stage="development", gate_file=None, config=FIXTURE):
-        args = Namespace(mode="fixture", stage=stage, development_gate=gate_file, config=config,
+    def args(self, name, account, *, stage="development", gate_file=None, config=None):
+        args = Namespace(mode="fixture", stage=stage, development_gate=gate_file, config=config or self.fixture,
                          account=account.path, account_id=account.id, cap_usd=CAP, confirm_execution=True,
                          manifest=None, output=self.output / (name + "-dry"), dry_run=True)
-        execute.run_evaluation(args, round_spec=LUNA)
+        execute.run_evaluation(args, round_spec=self.round)
         template = c01.read(args.output / "manifest-template.json")
         self.assertFalse(template["enabled"])
         template["enabled"] = True
@@ -52,7 +61,7 @@ class LunaTest(unittest.TestCase):
         script.write_text(f"""
 import sys
 sys.path.insert(0, {str(HERE.parent)!r})
-from luna.round_spec import LUNA
+from {self.round.entrypoint.parent.name}.execute import main, {self.round_name} as round_spec
 from r2 import execute
 from common import decode, encode
 if {kind!r} == "expired":
@@ -88,7 +97,7 @@ def fixture(plan):
         return status, encode(response).encode()
     return intercept
 execute.development_fixture = fixture
-execute.main(LUNA)
+main(round_spec)
 """)
         return [sys.executable, "-B", str(script), "_adapter"]
 
@@ -101,11 +110,11 @@ execute.main(LUNA)
         alias.symlink_to(reserved.parent, target_is_directory=True)
 
         def initialize(path):
-            argv = ["luna/execute.py", "init-account", "--mode", "fixture", "--account", str(path),
+            argv = [str(self.round.entrypoint), "init-account", "--mode", "fixture", "--account", str(path),
                     "--cap-usd", "10", "--previous-spend-usd", "0"]
             stdout = StringIO()
             with patch.object(sys, "argv", argv), redirect_stdout(stdout):
-                execute.main(LUNA)
+                execute.main(self.round)
             return decode(stdout.getvalue())
 
         with patch.object(subprocess, "check_output", return_value=str(git_dir)):
@@ -128,50 +137,50 @@ execute.main(LUNA)
 
     def test_cli_two_stages_and_replay(self):
         path = self.finance / "fixture.sqlite"
-        info = decode(cli("init-account", "--mode", "fixture", "--account", path, "--cap-usd", 10,
-                          "--previous-spend-usd", "0.02687405").stdout)
+        info = decode(self.cli("init-account", "--mode", "fixture", "--account", path, "--cap-usd", 10,
+                          "--previous-spend-usd", self.previous_spend).stdout)
         account = Account(path, info["account_id"], "fixture")
-        options = ["--mode", "fixture", "--config", FIXTURE, "--account", path, "--account-id", account.id,
+        options = ["--mode", "fixture", "--config", self.fixture, "--account", path, "--account-id", account.id,
                    "--cap-usd", 10]
         proof = []
         for stage, n, controls, calls in (("development", 6, 0, 6), ("final", 36, 13, 44)):
             args = ["run", "--stage", stage, *options, *proof]
             dry = self.output / (stage + "-dry")
             out = self.output / stage
-            cli(*args, "--dry-run", "--output", dry)
+            self.cli(*args, "--dry-run", "--output", dry)
             manifest = dry / "manifest-template.json"
             template = c01.read(manifest)
             self.assertFalse(template["enabled"])
-            self.assertTrue(template["manifest_id"].startswith("luna-"))
+            self.assertTrue(template["manifest_id"].startswith(self.prefix))
             binding = template["binding"]
-            self.assertEqual(binding["scope"], "c05-feita-luna")
+            self.assertEqual(binding["scope"], self.scope)
             self.assertEqual(binding["operational"]["sha256"], "0666cdd1c99f58c52512681563b72ddcaf4f97593071a1797104526d062678da")
-            self.assertIn(str(HERE.relative_to(c01.ROOT) / "execute.py"), binding["executor_sha256"])
+            self.assertIn(str(self.round.entrypoint.relative_to(c01.ROOT)), binding["executor_sha256"])
             manifest.write_text(encode(dict(template, enabled=True)))
-            cli(*args, "--manifest", manifest, "--confirm-execution", "--output", out)
-            c01.verify_report(out / "report.json", c01.LUNA)
+            self.cli(*args, "--manifest", manifest, "--confirm-execution", "--output", out)
+            c01.verify_report(out / "report.json", self.round.profile.name)
             report = c01.read(out / "report.json")
             self.assertEqual((len(report["completed_ids"]), len(report["control_ids"]),
                               report["usage"]["requests"]["value"]), (n, controls, calls))
             self.assertEqual(report["eligibility"], "inconclusive")
             self.assertEqual(report["gates"][c01.OBSERVED_GATE], dict(state="unmeasured", denominator=n,
                                                                      value=None, numerator=None))
-            self.assertIn("luna/execute.py", c01.read(out / "invocation.json")["command"])
+            self.assertIn(str(self.round.entrypoint.relative_to(c01.ROOT)), c01.read(out / "invocation.json")["command"])
             if stage == "development":
                 result = c01.read(out / gate.FILENAME)
                 self.assertEqual([result[k] for k in ("status", "correct_targets", "preserved_fields",
                                  "correct_completions", "integral_reviews", "raw_urgent", "errors")],
                                  ["fixture_ready", 8, 4, 3, 3, 1, 0])
                 proof = ["--development-gate", out / gate.FILENAME]
-        status = decode(cli("status", "--mode", "fixture", "--account", path, "--account-id", account.id).stdout)
+        status = decode(self.cli("status", "--mode", "fixture", "--account", path, "--account-id", account.id).stdout)
         self.assertEqual([r["state"] for r in status["runs"]], ["finished", "finished"])
         self.assertEqual([r["state"] for r in status["reservations"]], ["settled"] * 50)
-        self.assertEqual(status["accounted_usd"], "0.05422405")
+        self.assertEqual(status["accounted_usd"], self.expected_total)
         amended = self.output / "another.json"
-        amended.write_bytes(FIXTURE.read_bytes() + b"\n")
+        amended.write_bytes(self.fixture.read_bytes() + b"\n")
         retry = self.args("replay", account, config=amended)
         with self.assertRaisesRegex(BudgetError, "já usados"):
-            execute.run_evaluation(retry, round_spec=LUNA)
+            execute.run_evaluation(retry, round_spec=self.round)
 
     def test_technical_stop_and_financial_prefix(self):
         for scenario in ("invalid", "http_error", "unknown", "timeout", "expired"):
@@ -179,7 +188,7 @@ execute.main(LUNA)
                 account = self.account(scenario)
                 args = self.args(scenario, account)
                 with self.assertRaises(BudgetError):
-                    execute.run_evaluation(args, fixture_command=self.scenario(scenario), round_spec=LUNA)
+                    execute.run_evaluation(args, fixture_command=self.scenario(scenario), round_spec=self.round)
                 status = account.status()
                 self.assertEqual([r["state"] for r in status["runs"]], ["interrupted"])
                 self.assertEqual(len(status["reservations"]), 1)
@@ -190,7 +199,7 @@ execute.main(LUNA)
                     self.assertNotEqual(row["state"], "settled")
                     self.assertEqual(status["accounted_usd"], row["reserved"])
                     self.assertEqual(bool(row["financial_expired"]), scenario in {"timeout", "expired"})
-                c01.verify_report(args.output / "prefix-report.json", c01.LUNA)
+                c01.verify_report(args.output / "prefix-report.json", self.round.profile.name)
                 self.assertFalse((args.output / gate.FILENAME).exists())
 
     def test_manual_receipt_cannot_continue_after_missing_gateway_cost(self):
@@ -209,7 +218,7 @@ execute.main(LUNA)
             complete_case(active_account, run_id, case_id, timed_out=timed_out)
 
         with patch.object(Account, "complete_case", reconcile_before_close), self.assertRaises(BudgetError):
-            execute.run_evaluation(args, fixture_command=self.scenario("unknown"), round_spec=LUNA)
+            execute.run_evaluation(args, fixture_command=self.scenario("unknown"), round_spec=self.round)
 
         status = account.status()
         self.assertEqual(len(status["reservations"]), 1)
@@ -221,7 +230,7 @@ execute.main(LUNA)
         events = c01.read_records(args.output / "journal.jsonl")
         self.assertEqual([e["id"] for e in events if e["event"] == "dispatched"], [row["case_id"]])
         prefix = args.output / "prefix-report.json"
-        c01.verify_report(prefix, c01.LUNA)
+        c01.verify_report(prefix, self.round.profile.name)
         report = c01.read(prefix)
         self.assertEqual(report["completed_ids"], [row["case_id"]])
         self.assertEqual(report["eligibility"], "inconclusive")
@@ -234,10 +243,10 @@ execute.main(LUNA)
     def test_failed_gate_then_tamper_rejected(self):
         account = self.account("wrong")
         args = self.args("wrong", account)
-        self.assertEqual(execute.run_evaluation(args, fixture_command=self.scenario("wrong"), round_spec=LUNA), "failed")
+        self.assertEqual(execute.run_evaluation(args, fixture_command=self.scenario("wrong"), round_spec=self.round), "failed")
         proof = args.output / gate.FILENAME
-        development = Plan("development", "fixture", "check", FIXTURE, round_spec=LUNA)
-        final = Plan("final", "fixture", "check", FIXTURE, round_spec=LUNA)
+        development = Plan("development", "fixture", "check", self.fixture, round_spec=self.round)
+        final = Plan("final", "fixture", "check", self.fixture, round_spec=self.round)
         self.assertTrue(seal.path_for(development, account).exists())
         with self.assertRaisesRegex(BudgetError, "falhou"):
             gate.verify(gate_reference(proof), final, account, CAP)
@@ -253,14 +262,14 @@ execute.main(LUNA)
         manifest["binding"]["candidate"] = c01.read(c01.get_profile(c01.R2).protocol_path)["r2"]["candidate"]
         args.manifest.write_text(encode(manifest))
         with self.assertRaisesRegex(BudgetError, "manifesto LUNA"):
-            execute.run_evaluation(args, round_spec=LUNA)
+            execute.run_evaluation(args, round_spec=self.round)
         self.assertEqual(account.status(), snapshots)
         final.mode = "real"
         with self.assertRaisesRegex(BudgetError, "outro modo"):
             gate.verify(gate_reference(proof), final, account, CAP)
 
     def test_financial_sources_must_cover_cache_long_context_and_usage(self):
-        config = c01.read(FIXTURE)
+        config = c01.read(self.fixture)
         model = "openai/gpt-5.6-luna"
         url = "https://feita.ai/models/" + model
         record = self.output / "evidence.json"
@@ -280,7 +289,7 @@ execute.main(LUNA)
             record.write_text(encode(evidence))
             config["financial_evidence"] = pin(record)
             path.write_text(encode(config))
-            return LunaSettings.load(path, "real")
+            return self.round.settings_class.load(path, "real")
         load().verify_execution()
         evidence["tiers"]["long_context"]["cache_write"] = "100"
         with self.assertRaisesRegex(BudgetError, "cache"):
@@ -295,22 +304,22 @@ execute.main(LUNA)
             load()
 
     def test_profile_binding_and_generic_cli(self):
-        with self.assertRaisesRegex(ValueError, "luna/execute.py"):
-            run(Namespace(profile=c01.LUNA))
-        example = HERE / "config-real-exemplo.json"
+        with self.assertRaisesRegex(ValueError, self.round.entrypoint.parent.name + "/execute.py"):
+            run(Namespace(profile=self.round.profile.name))
+        example = self.round.entrypoint.with_name("config-real-exemplo.json")
         with self.assertRaisesRegex(BudgetError, "pendente"):
-            LunaSettings.load(example, "real").verify_execution()
+            self.round.settings_class.load(example, "real").verify_execution()
         altered = dict(c01.read(example), tariff_verified=True, billable_limits_confirmed=True)
         bogus = self.output / "flags.json"
         bogus.write_text(encode(altered))
         with self.assertRaises(BudgetError):
-            LunaSettings.load(bogus, "real")
+            self.round.settings_class.load(bogus, "real")
         with self.assertRaisesRegex(BudgetError, "conta global"):
             check_account(Account(self.finance / "other.sqlite", ACCOUNT_ID, "real"))
         with self.assertRaisesRegex(c01.ContractError, "profile_mismatch"):
-            c01.verify_report(LUNA.profile.golden_path, c01.R2)
+            c01.verify_report(self.round.profile.golden_path, c01.R2)
         protected = HERE.parent / "adapters/luna/transport.py"
         original = c01.digest
         with patch.object(c01, "digest", side_effect=lambda path: "0"*64 if path == protected else original(path)):
             with self.assertRaisesRegex(c01.ContractError, "artifact_hash"):
-                Plan("development", "fixture", "check", FIXTURE, round_spec=LUNA)
+                Plan("development", "fixture", "check", self.fixture, round_spec=self.round)

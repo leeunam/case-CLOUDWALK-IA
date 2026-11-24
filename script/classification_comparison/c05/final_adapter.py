@@ -163,7 +163,7 @@ def serve_authorized(args, plan, account, manifest_sha, transport=None, *, candi
 
     def capture(body, deadline, dispatched):
         nonlocal usage, financial_deadline
-        if getattr(round_spec, "profile", None) == c01.PROFILES[c01.LUNA]:
+        if round_spec is not None and round_spec.profile.is_luna:
             clock = Path(os.environ["CLASSIFICATION_READY_FILE"]).with_name("case-deadline.json")
             clock_id, outer_deadline = c01.read(clock)
             if clock_id != case_id:

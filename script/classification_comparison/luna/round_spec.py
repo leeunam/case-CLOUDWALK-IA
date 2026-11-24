@@ -29,6 +29,8 @@ def check_account(account):
 
 
 class LunaSettings(Settings):
+    scope = SCOPE
+    pending_example = HERE / "config-real-exemplo.json"
     request_keys = {"max_completion_tokens", "reasoning_effort", "stream"}
     extra_keys = {"financial_evidence"}
     real_minimum = (1_050_000, 128_000)
@@ -39,13 +41,15 @@ class LunaSettings(Settings):
                 and data["reasoning_effort"] == "none" and data["stream"] is False)
 
     @classmethod
-    def load(cls, path, mode, *, expected_scope=SCOPE):
+    def load(cls, path, mode, *, expected_scope=None):
+        if expected_scope is None:
+            expected_scope = cls.scope
         # Um exemplo pendente não possui preços nem uma reserva calculável.
         data, pin = read_pinned(path)
         if not isinstance(data, dict):
             raise BudgetError("configuração Luna exige objeto JSON")
         if mode == "real" and data.get("tariff") is None:
-            if (data != c01.read(HERE / "config-real-exemplo.json") or data["scope"] != expected_scope
+            if (data != c01.read(cls.pending_example) or data["scope"] != expected_scope
                     or data["billable_limits_confirmed"] is not False or data["tariff_verified"] is not False):
                 raise BudgetError("tarifa real ou evidência financeira pendente")
             return cls(data, pin, None)
