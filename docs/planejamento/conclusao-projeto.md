@@ -156,3 +156,22 @@ marca ou inventar funções/indicadores. O escopo visual proposto cobre analista
 supervisão, login e simulador; a reorganização foi apresentada para escolha.
 Rails, Kafka, contratos, autenticação e o orçamento do classificador permanecem
 fora desta mudança de interface. As frentes usam branches/worktrees separadas.
+
+### Entregas aceitas desta continuação
+
+O responsável aprovou a reorganização completa do frontend. A UX01 foi integrada
+em `3c00691` após revisões por tarefa e ampla, incluindo as correções `0da3897`
+e `88d80be`. São 34 testes frontend aprovados, build com runtime e lock fixados,
+aceite de operação/supervisão pela API real e inspeção móvel/desktop. A nova
+interface foi publicada no mesmo túnel, preservando dados e conversa anterior.
+[Guia e evidências UX01](../ux01.md).
+
+A preparação R4 está concluída e revisada: instrução congelada, 16 diagnósticos
+separados com duas rotulações por IA concordantes e executor dedicado à nova
+candidata. O integrador reproduziu as duas etapas sintéticas; revisão ampla e
+correções documentais `f6d6b76` foram aprovadas. Zero novas chamadas pagas e
+zero medição de qualidade real R4. [Guia R4](../c05-luna-r4.md).
+
+C05 real, decisão de adoção, C06 e C07/F09 final permanecem pendentes.
+Um novo ensaio R4 exige pré-voo e autorização de consumo próprios. A publicação
+fixture e o aceite visual não encerram o projeto nem habilitam o modelo real.

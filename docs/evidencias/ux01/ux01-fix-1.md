@@ -1,0 +1,8 @@
+# UX01 correção dirigida round1
+
+LeiaAGENTS/RTK e ux01-review.md nesta pasta. Mesmoauthor/branch/worktree,basee0e2a0d. Únicoescopodirigido:doisP2a11y eajustefocalassociado. RootprojetoDockerisoladocloudwalk_demo_ux01_integrator45199/43129estárodandocódigoWBviaHMR; nãomexe.env/dados/containers/túnel/projetos,sembackend/contratos/Luna.
+
+1) Simuladormóvel abrircasopelohistóricoescondebotãofocado. Transferirfocoparaheadingnomeado/conversaapósaberturasemstealfocusdurantepoll/refresh. Usarref/eventoevitartimingad hoc;preservardraft/URL/seleçãoprévia. Na mesmaárea,tornarrolagemdotranscriptsimuladorfocalizável/nomeadacomonoStaffparaacessokeyboard.
+2) --controlatual#99ada2tem2.37:white/2.20:canvas. Escureceraobter>=3:1nos2fundos reais;contrastefocovisívelrótulospreservados. Semredesignadicional.
+
+Repro/testefocaldekeyboardseequipamento;rootCua farákeyboardmobileapósfix. NãoescrevertestessóCSSstring/promptmirror. Executarbuild/testesafetadossomentecomruntimeNodepinned,diffcheck;documentarlimites. CommitselecionadoConventionalPT+reportux01-fix-1-report.md. DebriefnovosourceparaRootGUI/review. Nãofazersubagentes/merge/push.
