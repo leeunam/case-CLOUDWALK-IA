@@ -74,19 +74,25 @@ def usage_from(response, tariff, cost_unit):
             "estimated_api_usd": estimate, "tariff": reference}
 
 
-def request_body(item, received, instructions, max_tokens, reasoning=None):
+def structured_request(item, received, instructions):
     fields = item["missing"]
     shape = {"type": "object", "required": fields, "additionalProperties": False, "properties": {
         field: {"type": "string", "enum": [*item["catalog"][field], c01.ABSTENTION]} for field in fields
     }}
     context = {key: item[key] for key in ("text", "brand", "catalog", "missing")}
     context["received"] = received
-    payload = {
-        "model": MODEL, "stream": False, "temperature": 0, "max_tokens": max_tokens,
+    return {
         "messages": [{"role": "system", "content": instructions}, {"role": "user", "content": encode(context)}],
         "response_format": {"type": "json_schema", "json_schema": {
             "name": "classificacao", "strict": True, "schema": shape,
         }},
+    }
+
+
+def request_body(item, received, instructions, max_tokens, reasoning=None):
+    payload = {
+        "model": MODEL, "stream": False, "temperature": 0, "max_tokens": max_tokens,
+        **structured_request(item, received, instructions),
     }
     if reasoning is not None:
         payload["reasoning"] = reasoning
@@ -127,13 +133,15 @@ def interpretation(response, fields, catalog):
 
 
 class Adapter:
-    def __init__(self, identity, run_id, instructions, transport=fake_gateway, budget=None, timeout_ms=5000):
+    def __init__(self, identity, run_id, instructions, transport=fake_gateway, budget=None, timeout_ms=5000,
+                 *, body_builder=request_body):
         self.identity = identity
         self.run_id = run_id
         self.instructions = instructions
         self.transport = transport
         self.budget = budget
         self.timeout_ms = timeout_ms
+        self.body_builder = body_builder
         self.validation = c01.validators()
 
     def classify(self, item):
@@ -156,8 +164,8 @@ class Adapter:
                "elapsed_ms": None, "load_ms": None, "inference_ms": None}
 
         try:
-            body = request_body(item, received, self.instructions, self.budget.max_tokens if self.budget else 128,
-                                self.budget.reasoning if self.budget else None)
+            body = self.body_builder(item, received, self.instructions, self.budget.max_tokens if self.budget else 128,
+                                     self.budget.reasoning if self.budget else None)
             if time.monotonic() >= deadline:
                 raise TimeoutError
             if self.budget:
