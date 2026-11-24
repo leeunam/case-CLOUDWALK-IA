@@ -3,8 +3,10 @@
 Data: 24/11/2026. Fonte executada:
 `19a56fe3dc4fb80a48122182fcc6bcdf1d9855d7`.
 
-**Estado:** conclusão técnica registrada; ciência e deliberação do responsável
-pendentes. Este registro não atribui uma aprovação humana que ainda não ocorreu.
+**Estado:** resultado técnico informado ao responsável, que em 24/11/2026
+autorizou prosseguir com o planejamento da melhoria de abstenção e de um novo
+teste. A escolha da abordagem R2 e a autorização de consumo futuro continuam
+pendentes. Não há aprovação de adoção do candidato reprovado.
 
 ## Contexto
 
@@ -30,6 +32,8 @@ reconhecimento de 6/6 urgentes passam, mas não eliminam esses dois vetos.
 - Uma nova rodada requer decisão explícita de escopo, dados de desenvolvimento
   e novo teste independente. Nenhum modelo foi escolhido automaticamente.
 
-O responsável ainda precisa deliberar sobre o próximo caminho. A recomendação
-do integrador é investigar a estratégia de abstenção antes de propor nova
-implementação ou consumo de API, preservando este resultado negativo.
+O planejamento autorizado foi registrado na
+[proposta C05-R2](rodada-2-proposta.md). O responsável ainda precisa escolher
+entre as abordagens apresentadas. A recomendação do integrador é começar por
+instruções mais conservadoras de uma chamada, com avaliação independente,
+preservando este resultado negativo e o teto financeiro cumulativo.

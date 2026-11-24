@@ -8,6 +8,11 @@ O lote usou 44 chamadas, US$ 0,02197127. C05 aguarda deliberação humana; C06
 continua bloqueada. [Resultado](../../../c05-resultado.md) e
 [registro de decisão pendente](../decisao-qwen-01.md). Autorização consumida.
 
+**C05-R2 em planejamento:** o responsável autorizou continuar após receber o
+resultado. A [proposta de nova rodada](../rodada-2-proposta.md) apresenta três
+abordagens e uma avaliação independente. Aguardando a escolha da abordagem;
+nenhum código R2, dado final novo ou chamada paga foi produzido nesta etapa.
+
 ## Parent e especificação
 
 [Quadro CLASS-001](../README.md) · [CLASS-SPEC-001](../especificacao.md).
