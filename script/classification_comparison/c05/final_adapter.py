@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import platform
 import sys
+import time
 
 sys.dont_write_bytecode = True
 from budget import BudgetError, usd
@@ -151,9 +152,11 @@ def serve(args, transport=None):
                                 for key in ("prompt", "rubric"))
     gateway = transport or (fixture_gateway if args.mode == "fixture" else FeitaTransport())
     usage = None
+    financial_deadline = None
 
     def capture(body, deadline, dispatched):
-        nonlocal usage
+        nonlocal usage, financial_deadline
+        financial_deadline = deadline
         sent = False
 
         def mark_sent():
@@ -179,7 +182,11 @@ def serve(args, transport=None):
         if plan.candidates.get(case_id) != item:
             raise BudgetError("caso ou conteúdo fora da projeção final autorizada")
         usage = None
+        financial_deadline = None
         observation = adapter.classify(item)
+        # O motivo canônico pode priorizar divergência de versão sobre o prazo.
+        if financial_deadline is not None and time.monotonic() >= financial_deadline:
+            account.mark_expired(run_id, case_id)
         if usage is not None:
             observation["request_usage"][0]["observed_api_usd"] = numeric_cost(usage.amount)
         print(encode(observation), flush=True)

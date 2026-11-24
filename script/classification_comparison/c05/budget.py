@@ -1,5 +1,5 @@
 """Conta cumulativa local da C05. Cada mutação usa uma transação SQLite."""
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from decimal import Decimal, InvalidOperation, localcontext
 import json
 import os
@@ -8,7 +8,7 @@ import sqlite3
 import uuid
 
 MAX_CAP = Decimal("10")
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 CORRECTIONS_SCHEMA = """
 CREATE TABLE receipt_corrections (
     receipt TEXT PRIMARY KEY NOT NULL,
@@ -51,6 +51,7 @@ CREATE TABLE reservations (
     gateway_observed TEXT,
     gateway_receipt TEXT,
     gateway_pending TEXT,
+    financial_expired INTEGER NOT NULL DEFAULT 0 CHECK (financial_expired IN (0, 1)),
     detail TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (run_id, case_id),
@@ -127,7 +128,7 @@ class Account:
         # mode=rw bloqueia a criação acidental em qualquer outra operação.
         fd = os.open(account.path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
         os.close(fd)
-        with account.transaction() as db:
+        with account.transaction(initializing=True) as db:
             for statement in SCHEMA.strip().removesuffix(";").split(";"):
                 db.execute(statement)
             db.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
@@ -135,16 +136,29 @@ class Account:
                        (account.id, scope, str(cap), str(previous)))
         return account
 
+    @staticmethod
+    def _check_version(db):
+        version = db.execute("PRAGMA user_version").fetchone()[0]
+        if version != SCHEMA_VERSION:
+            raise BudgetError(f"versão da conta incompatível: {version}. Exigida: {SCHEMA_VERSION}.")
+
     @contextmanager
-    def transaction(self):
+    def transaction(self, *, initializing=False):
         try:
-            db = sqlite3.connect(self.path.as_uri() + "?mode=rw", uri=True)
+            location = self.path.as_uri()
+            if not initializing:
+                # A sondagem somente leitura não recupera nem altera protótipos incompatíveis.
+                with closing(sqlite3.connect(location + "?mode=ro&immutable=1", uri=True)) as probe:
+                    self._check_version(probe)
+            db = sqlite3.connect(location + "?mode=rw", uri=True)
             try:
                 db.row_factory = sqlite3.Row
                 db.execute("PRAGMA foreign_keys = ON")
                 db.execute("PRAGMA synchronous = FULL")
                 db.execute("BEGIN IMMEDIATE")
                 with db:
+                    if not initializing:
+                        self._check_version(db)
                     yield db
             finally:
                 db.close()
@@ -153,34 +167,11 @@ class Account:
 
     def _account(self, db):
         row = db.execute("SELECT * FROM account WHERE singleton = 1").fetchone()
-        version = db.execute("PRAGMA user_version").fetchone()[0]
-        if (version not in {1, 2, SCHEMA_VERSION} or row is None
-                or row["id"] != self.id or row["scope"] != self.scope):
-            raise BudgetError("identidade, escopo ou versão da conta incompatível")
+        if row is None or row["id"] != self.id or row["scope"] != self.scope:
+            raise BudgetError("identidade ou escopo da conta incompatível")
         if usd(row["previous_spend"]) > cap_usd(row["cap"]):
             raise BudgetError("gasto anterior incompatível com a conta")
-        if version == 1:
-            self._upgrade_receipts(db)
-        if version in {1, 2}:
-            for column in ("gateway_observed", "gateway_receipt", "gateway_pending"):
-                db.execute(f"ALTER TABLE reservations ADD COLUMN {column} TEXT")
-            db.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
         return row
-
-    def _upgrade_receipts(self, db):
-        # A primeira versão usava a margem do recibo como parte da chave.
-        db.execute(CORRECTIONS_SCHEMA)
-        owners = {}
-        rows = db.execute("SELECT run_id, case_id, receipt, prior_receipt FROM reservations").fetchall()
-        for row in rows:
-            owner = (row["run_id"], row["case_id"])
-            current, prior = (receipt_reference(row[key]) if row[key] is not None else None
-                              for key in ("receipt", "prior_receipt"))
-            for evidence in (current, prior):
-                if evidence is not None and owners.setdefault(evidence, owner) != owner:
-                    raise BudgetError("conta antiga com recibo atribuído a mais de um caso")
-            db.execute("""UPDATE reservations SET receipt = ?, prior_receipt = ?
-                          WHERE run_id = ? AND case_id = ?""", (current, prior, *owner))
 
     def _expenditure(self, db, account):
         costs = [usd(account["previous_spend"])]
@@ -359,7 +350,16 @@ class Account:
                 if violation:
                     self._freeze(db, run_id, case_id, violation)
 
+    def mark_expired(self, run_id, case_id):
+        with self.transaction() as db:
+            self._account(db)
+            self._reservation(db, run_id, case_id)
+            db.execute("""UPDATE reservations SET financial_expired = 1
+                          WHERE run_id = ? AND case_id = ?""", (run_id, case_id))
+
     def complete_case(self, run_id, case_id, *, timed_out=False):
+        if timed_out:
+            self.mark_expired(run_id, case_id)
         with self.transaction() as db:
             account = self._account(db)
             row = self._reservation(db, run_id, case_id)
@@ -367,7 +367,7 @@ class Account:
                 raise BudgetError(f"{case_id}: {row['detail']}")
             if account["frozen_reason"] is not None:
                 raise BudgetError(f"conta congelada: {account['frozen_reason']}")
-            if timed_out:
+            if row["financial_expired"]:
                 raise BudgetError(f"{case_id}: custo USD inconciliável automaticamente após timeout")
             if row["gateway_pending"] is not None:
                 raise BudgetError(f"{case_id}: custo USD inconciliável na precisão aceita")

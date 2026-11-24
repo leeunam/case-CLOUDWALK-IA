@@ -46,8 +46,9 @@ def claim(account, run_id, candidate_ids=("case-a",), value=PER_REQUEST):
 def run_scenario(scenario):
     calls = 0
     deadline_saved = None
-    if scenario in {"late-parse", "late-low", "late-body"}:
-        historical.IPC_MARGIN_SECONDS = 4.65
+    if scenario in {"late-parse", "late-low", "late-body", "timeout-mismatch"}:
+        if scenario != "timeout-mismatch":
+            historical.IPC_MARGIN_SECONDS = 4.65
         previous_parse = historical.parse_object
 
         def slow_parse(data):
@@ -63,6 +64,8 @@ def run_scenario(scenario):
         deadline_saved = deadline
         request = decode(body)
         assert request["max_tokens"] == 128 and request["reasoning"] == {"enabled": False}
+        if scenario == "timeout-mismatch" and calls > 1:
+            raise AssertionError("a expiração financeira deve impedir outro envio")
         if scenario == "timeout":
             dispatched()
             raise TimeoutError
@@ -87,6 +90,10 @@ def run_scenario(scenario):
                 obj["id"] = "synthetic-one"
             if scenario == "late-body":
                 time.sleep(max(0, deadline - time.monotonic() + .002))
+            response = encode(obj).encode("utf-8")
+        if scenario == "timeout-mismatch":
+            obj = decode(response)
+            obj["model"] = "outro-modelo-sintetico"
             response = encode(obj).encode("utf-8")
         if scenario == "charged-without-counter":
             obj = decode(response)
@@ -289,26 +296,33 @@ class AccountTest(TestCase):
         with self.assertRaisesRegex(BudgetError, "conta congelada"):
             account.reserve("run", "case-c", PER_REQUEST)
 
-    def test_v1_receipts_keep_attribution_and_normalize_on_upgrade(self):
-        account = self.account()
-        claim(account, "run", ("case-a", "case-b"))
-        for case in ("case-a", "case-b"):
-            account.reserve("run", case, PER_REQUEST)
-            account.mark_dispatched("run", case)
-        account.stage("run", "case-a", amount=Decimal("0.25"), evidence="gateway:one")
-        account.complete_case("run", "case-a")
-        with account.transaction() as db:
-            db.execute("DROP TABLE receipt_corrections")
-            for column in ("gateway_observed", "gateway_receipt", "gateway_pending"):
-                db.execute(f"ALTER TABLE reservations DROP COLUMN {column}")
-            db.execute("UPDATE reservations SET receipt = ' gateway: one ' WHERE case_id = 'case-a'")
-            db.execute("PRAGMA user_version = 1")
+    def test_incompatible_accounts_are_refused_without_modifying_bytes(self):
+        for version in (0, 1, 2, 3, 5):
+            with self.subTest(version=version):
+                self.path = Path(self.scratch) / f"ledger-{version}.sqlite3"
+                account = self.account(previous="7.10")
+                claim(account, "run", ("case-a", "case-b"))
+                account.reserve("run", "case-a", PER_REQUEST)
+                account.mark_dispatched("run", "case-a")
+                account.stage("run", "case-a", amount=Decimal("0.01"), evidence="gateway:one")
+                with account.transaction() as db:
+                    db.execute(f"PRAGMA user_version = {version}")
 
-        reopened = Account(self.path, account.id, "fixture")
-        self.assertEqual(reopened.status()["reservations"][0]["receipt"], "gateway:one")
-        with self.assertRaisesRegex(BudgetError, "já atribuído"):
-            reopened.stage("run", "case-b", amount=Decimal("0.25"), evidence="gateway:one ")
-
+                before = self.path.read_bytes()
+                reopened = Account(self.path, account.id, "fixture")
+                receipt = {"unit": "USD", "cost_usd": "0.01", "run_id": "run",
+                           "case_id": "case-a", "reference": "dashboard/one"}
+                actions = (lambda: reopened.validate(Decimal(10)), reopened.status,
+                           lambda: reopened.activate("run", "run-pin"),
+                           lambda: reopened.reserve("run", "case-b", PER_REQUEST),
+                           lambda: reopened.reconcile(receipt))
+                for action in actions:
+                    with self.assertRaisesRegex(BudgetError, "versão da conta incompatível"):
+                        action()
+                    self.assertEqual(self.path.read_bytes(), before)
+                with self.assertRaises(FileExistsError):
+                    self.account()
+                self.assertEqual(self.path.read_bytes(), before)
 
     def test_lower_gateway_receipt_arriving_after_manual_preserves_both_and_cannot_be_reused(self):
         account = self.account(previous="1")
@@ -636,6 +650,28 @@ class ExecutorTest(TestCase):
                 self.assertEqual(status["accounted_usd"], "9.35")
                 self.assertIn("acima da reserva", status["frozen_reason"])
                 self.assertEqual(status["reservations"][0]["gateway_usage"], {"cost_usd": "2.25"})
+
+
+    def test_timeout_and_model_mismatch_retain_reserve_without_sending_next_case(self):
+        account, args = self.setup_run(previous="8.50")
+        with self.assertRaisesRegex(BudgetError, "USD inconciliável automaticamente após timeout"):
+            run_evaluation(args, fixture_command=self.command("timeout-mismatch"))
+        interrupted = self.prefix(args, completed=1)
+        self.assertEqual(interrupted["dispatched_ids"], ["jev-001"])
+        observation, = c01.read_records(args.output / "verified_observations.jsonl")
+        self.assertEqual(observation["returned_model"], "outro-modelo-sintetico")
+        self.assertEqual({choice["reason"] for choice in observation["choices"].values()}, {"version_mismatch"})
+        self.assertEqual(observation["request_usage"][0]["observed_api_usd"], 0.000547)
+
+        reopened = Account(self.db, account.id, "fixture")
+        status = reopened.status()
+        row, = status["reservations"]
+        self.assertEqual((row["state"], row["observed"], row["financial_expired"]), ("staged", "0.000547", 1))
+        self.assertEqual(row["gateway_usage"], {"cost_usd": "0.000547"})
+        self.assertEqual(status["accounted_usd"], "9.9004736")
+        with self.assertRaisesRegex(BudgetError, "USD inconciliável automaticamente após timeout"):
+            reopened.complete_case(row["run_id"], row["case_id"], timed_out=False)
+        self.assertEqual(reopened.status()["accounted_usd"], "9.9004736")
 
     def test_low_cost_received_with_timeout_holds_reserve_until_explicit_receipt(self):
         account, args = self.setup_run(previous="7.10")
