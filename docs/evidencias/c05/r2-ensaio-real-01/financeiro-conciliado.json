@@ -1,0 +1,63 @@
+{
+  "task": "C05-R2/development",
+  "ledger_schema": 4,
+  "cap_usd": "10",
+  "previous_accounted_usd": "0.02300927",
+  "development_accounted_usd": "0.00386478",
+  "cumulative_conservative_accounted_usd": "0.02687405",
+  "last_cost_basis": "UI rounded6decimals; upward bound0.000676, exact charge unavailable",
+  "unresolved_reservations": 0,
+  "run_state": "interrupted",
+  "final_started": false,
+  "gate_created": false,
+  "inference_repeated": false,
+  "frozen_reason": null,
+  "new_reservations": [
+    {
+      "case_id": "jev-004",
+      "reserved": "1.7837",
+      "state": "settled",
+      "observed": "0.00063325",
+      "financial_expired": 0
+    },
+    {
+      "case_id": "jev-013",
+      "reserved": "1.7837",
+      "state": "settled",
+      "observed": "0.0006307",
+      "financial_expired": 0
+    },
+    {
+      "case_id": "jev-002",
+      "reserved": "1.7837",
+      "state": "settled",
+      "observed": "0.00063113",
+      "financial_expired": 0
+    },
+    {
+      "case_id": "jev-023",
+      "reserved": "1.7837",
+      "state": "settled",
+      "observed": "0.00063495",
+      "financial_expired": 0
+    },
+    {
+      "case_id": "jev-006",
+      "reserved": "1.7837",
+      "state": "settled",
+      "observed": "0.00065875",
+      "financial_expired": 0
+    },
+    {
+      "case_id": "jev-039",
+      "reserved": "1.7837",
+      "state": "settled",
+      "observed": "0.000676",
+      "financial_expired": 1
+    }
+  ],
+  "limitations": [
+    "Reconciliation changes only financial accounting; timeout/classification and interruption are preserved.",
+    "This is experimental cumulative accounting, not provider balance."
+  ]
+}

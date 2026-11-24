@@ -1,0 +1,124 @@
+{
+  "enabled": false,
+  "manifest_id": "r2-300bbd5dd655900b13334d3a96f483c5e5b00de961fb890ad90d4fdea6162610",
+  "binding": {
+    "profile": "observed-total-r2",
+    "protocol_version": "1.2.0",
+    "report_version": "1.3.0",
+    "ipc_contract_version": "1.1.0",
+    "scope": "c05-qwen-r2",
+    "stage": "development",
+    "git_revision": "4d94094672f7170248ca083bbf0572c21c3494f5",
+    "identity": {
+      "mode": "real",
+      "provider": "feita",
+      "requested_model": "qwen/qwen3.8-27b",
+      "expected_returned_model": "qwen/qwen3.8-27b",
+      "adapter_version": "1.2.0",
+      "policy_version": "1.1.0"
+    },
+    "sources": {
+      "dataset": {
+        "path": "docs/planejamento/classificacao-comparativa/r2/dataset.json",
+        "sha256": "3f4e69af44f03c89d1767d54ba07264327d616f18b0548656cc00c7bb89e3845",
+        "version": "2.0.0"
+      },
+      "catalog": {
+        "path": "script/f08/jev/catalog.json",
+        "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271",
+        "version": "1.0.0"
+      },
+      "rubric": {
+        "path": "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
+        "version": "1.0.0",
+        "sha256": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac"
+      },
+      "protocol": {
+        "path": "docs/planejamento/classificacao-comparativa/r2/protocol.json",
+        "sha256": "4e89f10dcb15b4a9593532aa52d05917b68df4771972d570dd646a7ce11163d1",
+        "version": "1.2.0"
+      },
+      "split": {
+        "path": "docs/planejamento/classificacao-comparativa/r2/split.json",
+        "sha256": "054f0d572e5cb35e15bcc8b1e96df992bc9bf443edf1d4cd512c61e74b017e62",
+        "version": "2.0.0"
+      },
+      "policy": {
+        "path": "script/classification_comparison/adapters/qwen/r2/politica.txt",
+        "version": "1.1.0",
+        "sha256": "6893a119e6dc90aef81e10cc803dba8d66e3cf4c04cc4f3f2d333515c4b2a039"
+      },
+      "prompt": {
+        "path": "script/classification_comparison/adapters/qwen/r2/prompt.txt",
+        "version": "1.1.0",
+        "sha256": "c03848e1f9266ae2aadb5d28d8f82265034c0312067a5e3204aea723437cfa75"
+      }
+    },
+    "candidate": {
+      "path": "script/classification_comparison/adapters/qwen/r2/candidate.json",
+      "sha256": "db8005776018a1c94abaffe4ea0f5d6cdcf5a67836e19931bac747e68e1628f3"
+    },
+    "data_freeze": {
+      "path": "docs/planejamento/classificacao-comparativa/r2/final-freeze.json",
+      "sha256": "3bfe4604614e019ccfb07d63ca1ceceb5130dbcd30dae55f971c83c34952c7a1"
+    },
+    "final_cases": {
+      "path": "docs/planejamento/classificacao-comparativa/r2/final-cases.json",
+      "sha256": "17f5bae372983f90aa1956d0d583db25483a77a3ff35e4f1041ad4d51b897af9"
+    },
+    "config_sha256": "f419ccfaf0bd92417c354e7fbfeb2f00db4851e60fca2889ad020dabcea19e17",
+    "control_policy": {
+      "path": "docs/planejamento/classificacao-comparativa/contratos/politica-controles.json",
+      "version": "1.0.0",
+      "sha256": "2611786ddde1eb2b064b02f7dda7bb7a0aae06cc8f127a9fc7e8fec14e937fb7"
+    },
+    "inputs_sha256": "73d102c83d0267d71e4be63b4da489efdaca626e7c2200202d4031d5be990fab",
+    "selected_ids": [
+      "jev-004",
+      "jev-013",
+      "jev-002",
+      "jev-023",
+      "jev-006",
+      "jev-039"
+    ],
+    "control_ids": [],
+    "candidate_ids": [
+      "jev-004",
+      "jev-013",
+      "jev-002",
+      "jev-023",
+      "jev-006",
+      "jev-039"
+    ],
+    "concurrency": 1,
+    "attempts": 1,
+    "max_requests": 6,
+    "reservation_usd": "1.7837",
+    "executor_sha256": {
+      "script/classification_comparison/c05/execute.py": "cc488cf9110b2b80c67551a6ff912cd598d3f90981f20edc181aaef4697387ef",
+      "script/classification_comparison/c05/settings.py": "9a312e42b971692d02f4bcae00b98777ccf5bf3b0b0b3ac4bc5a799e121e6a73",
+      "script/classification_comparison/c05/budget.py": "d9a81084546db988ef8afc6f33732120749c749a9415bebae07f3402dbbef44e",
+      "script/classification_comparison/c05/final_adapter.py": "2823e972227d6702165a4805d72f00474b4f4bd9f60ba8d6cad909aa47c3f8ad",
+      "script/classification_comparison/adapters/qwen/adapter.py": "afa69f8a2b36d7300a7cfb854127ad1e44277cac918dbd54bf2e29e7d8bb93e7",
+      "script/classification_comparison/adapters/qwen/pilot.py": "5605c8cfc06af9acea2319aad2c9284c46ab381e3262362fbeda99e5e866c79b",
+      "script/classification_comparison/adapters/qwen/transport.py": "a93f322b347efe69096aa4fa1483ae003b2ef06a2e1e1077ed09cbcab4f030f2",
+      "script/classification_comparison/adapters/qwen/fixture.py": "7d0d2d3a86971481664652488afb4eb83bcd961be693b03dfdc1c1904b1a5dbf",
+      "script/classification_comparison/run.py": "2bc07b047ce9f2a046595145ad38ec0d454343a00e0381c452045b2acc337842",
+      "script/classification_comparison/common.py": "5429d8ca197516e03d01f97fa132c07e4fab0bc39f17cd425a025bed786fc547",
+      "script/classification_comparison/journal.py": "877847fe6552f465a13ebb823fda27b02284832a711f019acb6d8f9c53ce670b",
+      "script/classification_comparison/metrics.py": "a025054e9e3eecfb377020e95e8ac43f6b3cb671aedd295afcf59443a4a1474a",
+      "script/check_classification_contracts.py": "4a1b1c518c005938c18c0e8d39694c938d8f1e98d4ec90eb88e275a888292493",
+      "script/classification_comparison/r2/execute.py": "6b5f5f8dd8dba562af67993062f36ce049c1598b6e3dbc28630839f91d8eae59",
+      "script/classification_comparison/r2/plan.py": "433025928ff9f9e09cdcd2d10d614a075f8317e5a00c66c44f54c3c8251918ed",
+      "script/classification_comparison/r2/gate.py": "ec6a004ed13e7db4d48a8aa284d9e76a1cde18b355a9f4d5f464970418d0e441",
+      "script/classification_comparison/r2/seal.py": "01e1ecaea364ea40dbd951aea115bdf813f298aa241227b7ff12a981226de793"
+    },
+    "development_gate": null,
+    "account": {
+      "path": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/c05-comparacao/.superpowers/financial/c05-qwen/account-v4.sqlite3",
+      "id": "903a037b4b9140438e152ade172889ca",
+      "scope": "real",
+      "cap_usd": "10"
+    }
+  }
+}
