@@ -1,0 +1,3166 @@
+{
+  "task": "C05-R2",
+  "review": "conferencia_dirigida_de_similaridade_apos_segunda_substituicao",
+  "origin": "conferente independente /root/r2_similaridade, fora da autoria, da frente de prompt e da revisão dos rótulos",
+  "status": "sem_pendencia_de_similaridade",
+  "branch": "docs/r2-protocolo-dados",
+  "worktree": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/r2-dados",
+  "base_commit": "c00ac5431630c92d30349c13529d5071ad9879b4",
+  "previous_reviewed_commit": "96b9dfa920756236b5e81a08e04df2a3e71a4acf",
+  "reviewed_commit": "9648208b47112fa87a8e584bb30e2779f2449ed8",
+  "previous_review": {
+    "commit": "96b9dfa920756236b5e81a08e04df2a3e71a4acf",
+    "json_sha256": "ee08eaf4b3d165a54a3835b85de9dfa23acde45fabbb002bfb806ee2e2aa3e39",
+    "markdown_sha256": "799005abd0bc64063fc7bcd8a0bce58f103346002a1d5a4ef46b119370fd6676",
+    "replacement_ids": [
+      "r2-014"
+    ]
+  },
+  "sources": {
+    "historical": {
+      "commit": "9648208b47112fa87a8e584bb30e2779f2449ed8",
+      "path": "script/f08/jev/dataset.json",
+      "count": 60,
+      "file_sha256": "0e7e4c342c2a39cefd89855d8c0513f447d7878303eb4091488ca8af78928880",
+      "id_text_projection_sha256": "e7b6af54450e099f5954db7b6cb4204fbf03e16ff9cfc20e0e333150c4118f97",
+      "cases": [
+        {
+          "id": "jev-001",
+          "text_sha256": "ee2419368eaf4ae57e99b4d29b5b31782b07e8c6af96b0cd23a69feaed70ef12"
+        },
+        {
+          "id": "jev-002",
+          "text_sha256": "15cb364010610ed8cce875ba650cee43a0fee26ad9253c9a71645e1c4aca4a23"
+        },
+        {
+          "id": "jev-003",
+          "text_sha256": "25e03b2a52bdca02432a16d706ed0dcf7e542ddbd566983df65fd4b426164b6b"
+        },
+        {
+          "id": "jev-004",
+          "text_sha256": "bee3454a37e972147daffc8060297f0a92d397fc5f55e59f950689259e1703e6"
+        },
+        {
+          "id": "jev-005",
+          "text_sha256": "f4ef5bafe703829cb32cd9ad034f14cf13d4c047a7f89337c56877db676cf02b"
+        },
+        {
+          "id": "jev-006",
+          "text_sha256": "5a38455c10038fffb2c0cd9a5045f2a16fe665f03ecdd7029b3d00ff1e20c675"
+        },
+        {
+          "id": "jev-007",
+          "text_sha256": "2bcc57d86bf2c74f9a0d6a420d68de78267521b7f1012b6a6d22b0f5a6dda175"
+        },
+        {
+          "id": "jev-008",
+          "text_sha256": "e1a5309d03384ebd5459bcac7025ae7ac4c0e56509f7d7f8d1c9971d91df89a9"
+        },
+        {
+          "id": "jev-009",
+          "text_sha256": "ecab28bb1eec8de95b5ada7ad73d785511d231765e5e37beedc1a2738a748a17"
+        },
+        {
+          "id": "jev-010",
+          "text_sha256": "dfa8c52e72ffd3d938b6361c3356fec418372468f59580623776bff1ff40bb72"
+        },
+        {
+          "id": "jev-011",
+          "text_sha256": "5a2db97c270ed314cf08c31aa48ac123c0abe48e6a1030b6dc32d3b5d95f851e"
+        },
+        {
+          "id": "jev-012",
+          "text_sha256": "a99c7b54b585a0458cf65002191cd991b29fe6f38465af0c69a5e896cb20f601"
+        },
+        {
+          "id": "jev-013",
+          "text_sha256": "5b75673d3ddd0d324a1cb7a5e4a614e1370890c53756c591a78e64338e5af49e"
+        },
+        {
+          "id": "jev-014",
+          "text_sha256": "1c15182cb9685e03ac81c00d4bf46a98f11f2bff1a08f08070f6f033eec5a173"
+        },
+        {
+          "id": "jev-015",
+          "text_sha256": "daafdc01ce305abd9a9482efbb88d29680cab6b69b311a536b961af89a27b84e"
+        },
+        {
+          "id": "jev-016",
+          "text_sha256": "238d1f3156dc0c0b0b0dc3f2ce5b598da1e19259780f798ec4a81221f797096f"
+        },
+        {
+          "id": "jev-017",
+          "text_sha256": "f1f5bf3e03e7ddfa26d05ece2a2701c86e12a32c4d84af6e3373cfe13343900a"
+        },
+        {
+          "id": "jev-018",
+          "text_sha256": "811be2dcc234bdfa1ccd61742e5445a7d11f44486a5911fc109fe98210e292d8"
+        },
+        {
+          "id": "jev-019",
+          "text_sha256": "15d4a0eb347cd88b157e87f7ae4c4ab906da05bb34d129209a931de654b07dfa"
+        },
+        {
+          "id": "jev-020",
+          "text_sha256": "4b6e2f95bab5397567a1454f727222514afe2aa330888d271de0361f017b37b2"
+        },
+        {
+          "id": "jev-021",
+          "text_sha256": "62244dc849e1dc656320e64e8587bcffa33250c3224246c1bd9dce0346cdbea9"
+        },
+        {
+          "id": "jev-022",
+          "text_sha256": "c9ca4a1792fb3901af57fe0f4028ff54973960c31522ba033425163df8751dd5"
+        },
+        {
+          "id": "jev-023",
+          "text_sha256": "88acd68dbfdf95c8cd53351a3560976cb48e8766588ff2ae4b7265a63726c325"
+        },
+        {
+          "id": "jev-024",
+          "text_sha256": "d266e3c9ec642080ce67fb6e09571850ce523466acd5bcdcc7c80e9a6053e30a"
+        },
+        {
+          "id": "jev-025",
+          "text_sha256": "46e44ff2e4aeba53c95af3c6d8c62da48174f15d11a6ddb1482c6f9db3ac6f4f"
+        },
+        {
+          "id": "jev-026",
+          "text_sha256": "6749f58e7b0a427cf8f34545f2b9fa1d28444a239ded3911d3f174b3e25155b4"
+        },
+        {
+          "id": "jev-027",
+          "text_sha256": "7f0b9831a50c29cb568424def32aeadfbb8c45dfdcd06fd3a2a8ff570e9b1f37"
+        },
+        {
+          "id": "jev-028",
+          "text_sha256": "998b2dbd652241e8faa477ed84c4fbaf26efa09c2483812c10f3c8ee07716117"
+        },
+        {
+          "id": "jev-029",
+          "text_sha256": "a1b7bb2afee58bbdbb74048783949b5c8f9d437b1669129e0da947073655a3d7"
+        },
+        {
+          "id": "jev-030",
+          "text_sha256": "146ba3d5ea5439dbb80d369a89c551be4febeec42db0288b6b93a970b5322f3b"
+        },
+        {
+          "id": "jev-031",
+          "text_sha256": "a948e0e595e8f8b1ce995c25c908601cf1452e44293df88a7a0a7bf9692b570a"
+        },
+        {
+          "id": "jev-032",
+          "text_sha256": "025286a1fe5363005227eaaec94a88bed3b3bea8556d29361a57b60ee6a2e422"
+        },
+        {
+          "id": "jev-033",
+          "text_sha256": "09d03c212aa3bf28def6ccb6356bb53bad056cf5532d93c12e621461c1e1a08d"
+        },
+        {
+          "id": "jev-034",
+          "text_sha256": "2bc5795989f8f30a9be097a45e6aac746e50faa9215ca2f94efa3e97c547ddff"
+        },
+        {
+          "id": "jev-035",
+          "text_sha256": "a290ac7ab6999d43cdb83711301ac8944c97978af4713308a6dd8f939475889a"
+        },
+        {
+          "id": "jev-036",
+          "text_sha256": "f4ba5531df5431e81ba6dfde30bf63468dc8f0904b13e38a0c3f5e8a1a05511b"
+        },
+        {
+          "id": "jev-037",
+          "text_sha256": "6409963803504ac3f8bfa3011ba78d1a02816f6225f0585107314c3754019be8"
+        },
+        {
+          "id": "jev-038",
+          "text_sha256": "58b5d5001f4b9db12fa06684ae54347029a7cdc80ec58642f88e76614c2f667f"
+        },
+        {
+          "id": "jev-039",
+          "text_sha256": "578414004410ec9b921db0f63c8bcae5202653598d685497dbe417b8522a8f7f"
+        },
+        {
+          "id": "jev-040",
+          "text_sha256": "0b7021ab797fadd4fab673eb72e832d592af81fa65e4bc474f949a2cf4a73344"
+        },
+        {
+          "id": "jev-041",
+          "text_sha256": "a4c35272e82cfadc40a5b218782cd556a21d99f1a449dcfaa8bb7d5fa18f0210"
+        },
+        {
+          "id": "jev-042",
+          "text_sha256": "fddb2fc489bbe53ee77d604badf64c29acd02932a32c985c33c1aab8eda7f092"
+        },
+        {
+          "id": "jev-043",
+          "text_sha256": "0f64c2a543a1aa1e297c53586c684b6c5de32ce3fcee6b9b06d739fcf20c4983"
+        },
+        {
+          "id": "jev-044",
+          "text_sha256": "f999eca2bf1d492132d7b882e1bba9aa70508cf1fa57144cb3b2b28f252c8172"
+        },
+        {
+          "id": "jev-045",
+          "text_sha256": "eced374a71475ea4c74a1cb4eaa194fc3783d7bbae7dd7f55a6e0991a2f8a133"
+        },
+        {
+          "id": "jev-046",
+          "text_sha256": "d25e5d6a396f8649ca4ba5d4eba81da36f6cf950471c82e77ba1c910b183dc72"
+        },
+        {
+          "id": "jev-047",
+          "text_sha256": "ec4624e3a7ae6adbe1e8d96612d35bd46411af5fa7e67ced1457ce2811bc11b8"
+        },
+        {
+          "id": "jev-048",
+          "text_sha256": "8f3d02cf9cd7421dcb52eab31868accdeb81cbb6246e1f8a87a35389d01fb2be"
+        },
+        {
+          "id": "jev-049",
+          "text_sha256": "3d53cb8564b1a9c8e4399cd352223f28bd29eccbbd0c1318696a68acc6ec0bbd"
+        },
+        {
+          "id": "jev-050",
+          "text_sha256": "4761088cfcfa454d5e25d89c7c2a1f254b1d3b2cfc085800ef91643f5ed9aee5"
+        },
+        {
+          "id": "jev-051",
+          "text_sha256": "5f1c30203a6f666ffb8a3d68cc2355408d63967617783f03be155023da391736"
+        },
+        {
+          "id": "jev-052",
+          "text_sha256": "8c7032c2162b100fc70fbcee99401dbd044fa21c897590cc218164ad5646df00"
+        },
+        {
+          "id": "jev-053",
+          "text_sha256": "f05bf09991194ab3c72449bc6e4ffa9d8bd5c549fcc5be78fd4241f49cc9993b"
+        },
+        {
+          "id": "jev-054",
+          "text_sha256": "70ecd33952ee59c67c89b0d8baee4071528709bfc5dd5dc1a6f71ff7f3c2ca33"
+        },
+        {
+          "id": "jev-055",
+          "text_sha256": "1fba3a1038238cf02faa7b929d30425d11e8b598227ad6494aede2a92e956686"
+        },
+        {
+          "id": "jev-056",
+          "text_sha256": "5d32588e9a93a1408dbf7a878deda36ac04002868bcf527342544853ad358f2a"
+        },
+        {
+          "id": "jev-057",
+          "text_sha256": "5c08fd76117a608b0377bae5ff0100f4f7c25ab15cb22e36b522e7ec45554ab5"
+        },
+        {
+          "id": "jev-058",
+          "text_sha256": "b0acbe6f7a421e8b3954e6a14d6971e608fade0583ee3ea049eb65b294c040c3"
+        },
+        {
+          "id": "jev-059",
+          "text_sha256": "ca3347cff4c1c887cea075ad5b2a0f7e9f5a84e88b8330f48c29aa5b4dd160c4"
+        },
+        {
+          "id": "jev-060",
+          "text_sha256": "736f1c38c80e20c878161125bef975e7f493cccc3811fd6f7d7a20805a8e5375"
+        }
+      ]
+    },
+    "r2_previous": {
+      "commit": "96b9dfa920756236b5e81a08e04df2a3e71a4acf",
+      "path": "docs/planejamento/classificacao-comparativa/r2/final-cases.json",
+      "count": 36,
+      "file_sha256": "4f1d712b87bbee326e3602b3fb74398558f929b08c1709b11407676869a21145",
+      "id_text_projection_sha256": "93ee908d68a99f8b46f070e2b72cfc4a2fc137f26e7cf7f19ace858606a1bb5f",
+      "cases": [
+        {
+          "id": "r2-001",
+          "text_sha256": "42fb6fff9ae041d0e06b4a76419cd6df2858127fd9f665df95d584c471d4409d"
+        },
+        {
+          "id": "r2-002",
+          "text_sha256": "806cafacda4e8d73c59d923cbd2508336d5e55aaa101629dacd3e2d9503a8d58"
+        },
+        {
+          "id": "r2-003",
+          "text_sha256": "f7169b75ae5171611780f33a2a54d23fed01303c548f64b130dff24c44544d54"
+        },
+        {
+          "id": "r2-004",
+          "text_sha256": "8e8c394e270f5ec5adbb1770fc8f16da4f4e7b3b79042471e8d9962ce95b4107"
+        },
+        {
+          "id": "r2-005",
+          "text_sha256": "616a1b75920595d0d9c73f0bf36627c9ab015fabefe9ce2ff215914c0b78b0ec"
+        },
+        {
+          "id": "r2-006",
+          "text_sha256": "6ff16a7aba297fe0a9c4543e2d88f7882e614461e534e89ee8e89e3e7a8d33b3"
+        },
+        {
+          "id": "r2-007",
+          "text_sha256": "949bc6a37ed3f62d0795625814cecc33232acb019c26eb7beb6688f10bb05bb1"
+        },
+        {
+          "id": "r2-008",
+          "text_sha256": "b8348639f5f41028601561a9872c40cef0e7d52c5f172f97da73440223d0d3c3"
+        },
+        {
+          "id": "r2-009",
+          "text_sha256": "17a451bb14564e5f6369d1f9c1577c969a690117f5871489be694da53340e294"
+        },
+        {
+          "id": "r2-010",
+          "text_sha256": "ad03270dc8163c11ab3ff5ec05b4d8b1d12c29698bbdcef867f8f3262cf6aabe"
+        },
+        {
+          "id": "r2-011",
+          "text_sha256": "3cddd3eca592631c6dbbe8c9491f151146559df3518ef71e87943348ce9f2c34"
+        },
+        {
+          "id": "r2-012",
+          "text_sha256": "149166951a53031863f51e051a8a814922da5d9aacee596477fb14b10e61f4f5"
+        },
+        {
+          "id": "r2-013",
+          "text_sha256": "9527699bc3690fd7464e4cd9e7bd1fa41aa3905ec344b68527091ac17a258f1f"
+        },
+        {
+          "id": "r2-014",
+          "text_sha256": "412d1d1f7f90df778bcc64705939ff1adaebb28a92e8bfb29ed441735e29aa76"
+        },
+        {
+          "id": "r2-015",
+          "text_sha256": "808a8908ceed583736ed17ff4ad59ec9cd19e3e1e71ce0f234085a9f6b05a2ec"
+        },
+        {
+          "id": "r2-016",
+          "text_sha256": "3a1e8e404bfc84cd9850f6be8bd3578f9080ae3227c19f1e7b13e961bb094d39"
+        },
+        {
+          "id": "r2-017",
+          "text_sha256": "6f0979ca04879f6a7783c5c5e77e51678ad273ee5fe2081416aa58ae342e190c"
+        },
+        {
+          "id": "r2-018",
+          "text_sha256": "439aa1ee86d2a3838b55bc363d9b888090602810b50c8c3fbc532d98d245c373"
+        },
+        {
+          "id": "r2-019",
+          "text_sha256": "a016fdad2b03c7ad507ebc0c3c443cbd367f1fa46c269111db9371702bd30500"
+        },
+        {
+          "id": "r2-020",
+          "text_sha256": "6db9cdd77300a2cf2f24bf060a505721477fc6bfecccd474e17767e4c8ce31c3"
+        },
+        {
+          "id": "r2-021",
+          "text_sha256": "7d5dda7dfdc64d1d87fc509e871462811a206915effd0fe7724b7f3ee7cc0db3"
+        },
+        {
+          "id": "r2-022",
+          "text_sha256": "f5e8ac5cf017f974d8cbcf58841ccc00681a57fd498dca27caba4c5aef61a389"
+        },
+        {
+          "id": "r2-023",
+          "text_sha256": "c0486632b3dc5b6bb742cabded58385c32ff4009c0001010a4933436d768d54c"
+        },
+        {
+          "id": "r2-024",
+          "text_sha256": "11117c2f7e6587ae7e6ef7083458885ad277cad7ef469021b001b4c584b59a36"
+        },
+        {
+          "id": "r2-025",
+          "text_sha256": "6d89fbfb182d205e9e14073d4c7db9266a26e4d1c4ab66a2032956179a702099"
+        },
+        {
+          "id": "r2-026",
+          "text_sha256": "309ff5314d9ff26c0b0f8cc07dca5ffac5bdefcaafa6526c55a8480cd4d2fcc3"
+        },
+        {
+          "id": "r2-027",
+          "text_sha256": "ebeecda55cc73b9cb670063460d2701249c903ade578ecb284fc4eb8849c7994"
+        },
+        {
+          "id": "r2-028",
+          "text_sha256": "458c9fd996a748511ed6279451303509cfb8669aac359a0b3d0940f38f0d2cef"
+        },
+        {
+          "id": "r2-029",
+          "text_sha256": "923b121890d9cf5609b502284d54ddacfef26dfbca9a5a3ba555d7f54b26db1b"
+        },
+        {
+          "id": "r2-030",
+          "text_sha256": "2e2324f58fa1695d44d13fae372b52e6246a8cbbbd1d1c9f0a89682b806fdff8"
+        },
+        {
+          "id": "r2-031",
+          "text_sha256": "0575858e19d5aed5a9bbc598240c7b8e5b0694ac3b69ccd0f33aec497aa05a49"
+        },
+        {
+          "id": "r2-032",
+          "text_sha256": "38a0e203ff863affaeee38db3ad6e7cdb148c3a26cc576ed24276e628b82b4f9"
+        },
+        {
+          "id": "r2-033",
+          "text_sha256": "25b45e295a86a8abda42738ddbbd90e5a61d22965abc7b1b52b56f3449f1cc8f"
+        },
+        {
+          "id": "r2-034",
+          "text_sha256": "e43084a7011ba122ef7c5a2947b5cef5510b26c32cc359257576b812e69ae1c8"
+        },
+        {
+          "id": "r2-035",
+          "text_sha256": "e970564ab37029091a1a95b5ad190c7fc985d9a73506a78b31233c48565e964d"
+        },
+        {
+          "id": "r2-036",
+          "text_sha256": "90eb8dd0be7f1a27e6358b9f33472bccee79ab28a9980f160c602f153ed6a034"
+        }
+      ]
+    },
+    "r2_final": {
+      "commit": "9648208b47112fa87a8e584bb30e2779f2449ed8",
+      "path": "docs/planejamento/classificacao-comparativa/r2/final-cases.json",
+      "count": 36,
+      "file_sha256": "17f5bae372983f90aa1956d0d583db25483a77a3ff35e4f1041ad4d51b897af9",
+      "id_text_projection_sha256": "88b4122e96080de0cddec9536f26ad6960da720c109b396b8e372311bb1fd420",
+      "cases": [
+        {
+          "id": "r2-001",
+          "text_sha256": "42fb6fff9ae041d0e06b4a76419cd6df2858127fd9f665df95d584c471d4409d"
+        },
+        {
+          "id": "r2-002",
+          "text_sha256": "806cafacda4e8d73c59d923cbd2508336d5e55aaa101629dacd3e2d9503a8d58"
+        },
+        {
+          "id": "r2-003",
+          "text_sha256": "f7169b75ae5171611780f33a2a54d23fed01303c548f64b130dff24c44544d54"
+        },
+        {
+          "id": "r2-004",
+          "text_sha256": "8e8c394e270f5ec5adbb1770fc8f16da4f4e7b3b79042471e8d9962ce95b4107"
+        },
+        {
+          "id": "r2-005",
+          "text_sha256": "616a1b75920595d0d9c73f0bf36627c9ab015fabefe9ce2ff215914c0b78b0ec"
+        },
+        {
+          "id": "r2-006",
+          "text_sha256": "6ff16a7aba297fe0a9c4543e2d88f7882e614461e534e89ee8e89e3e7a8d33b3"
+        },
+        {
+          "id": "r2-007",
+          "text_sha256": "949bc6a37ed3f62d0795625814cecc33232acb019c26eb7beb6688f10bb05bb1"
+        },
+        {
+          "id": "r2-008",
+          "text_sha256": "b8348639f5f41028601561a9872c40cef0e7d52c5f172f97da73440223d0d3c3"
+        },
+        {
+          "id": "r2-009",
+          "text_sha256": "17a451bb14564e5f6369d1f9c1577c969a690117f5871489be694da53340e294"
+        },
+        {
+          "id": "r2-010",
+          "text_sha256": "ad03270dc8163c11ab3ff5ec05b4d8b1d12c29698bbdcef867f8f3262cf6aabe"
+        },
+        {
+          "id": "r2-011",
+          "text_sha256": "3cddd3eca592631c6dbbe8c9491f151146559df3518ef71e87943348ce9f2c34"
+        },
+        {
+          "id": "r2-012",
+          "text_sha256": "149166951a53031863f51e051a8a814922da5d9aacee596477fb14b10e61f4f5"
+        },
+        {
+          "id": "r2-013",
+          "text_sha256": "9527699bc3690fd7464e4cd9e7bd1fa41aa3905ec344b68527091ac17a258f1f"
+        },
+        {
+          "id": "r2-014",
+          "text_sha256": "1810edb8514828e1d855087c39c9d6b2f7de821e91605b3afd2d4bb87c796852"
+        },
+        {
+          "id": "r2-015",
+          "text_sha256": "808a8908ceed583736ed17ff4ad59ec9cd19e3e1e71ce0f234085a9f6b05a2ec"
+        },
+        {
+          "id": "r2-016",
+          "text_sha256": "3a1e8e404bfc84cd9850f6be8bd3578f9080ae3227c19f1e7b13e961bb094d39"
+        },
+        {
+          "id": "r2-017",
+          "text_sha256": "6f0979ca04879f6a7783c5c5e77e51678ad273ee5fe2081416aa58ae342e190c"
+        },
+        {
+          "id": "r2-018",
+          "text_sha256": "439aa1ee86d2a3838b55bc363d9b888090602810b50c8c3fbc532d98d245c373"
+        },
+        {
+          "id": "r2-019",
+          "text_sha256": "a016fdad2b03c7ad507ebc0c3c443cbd367f1fa46c269111db9371702bd30500"
+        },
+        {
+          "id": "r2-020",
+          "text_sha256": "6db9cdd77300a2cf2f24bf060a505721477fc6bfecccd474e17767e4c8ce31c3"
+        },
+        {
+          "id": "r2-021",
+          "text_sha256": "7d5dda7dfdc64d1d87fc509e871462811a206915effd0fe7724b7f3ee7cc0db3"
+        },
+        {
+          "id": "r2-022",
+          "text_sha256": "f5e8ac5cf017f974d8cbcf58841ccc00681a57fd498dca27caba4c5aef61a389"
+        },
+        {
+          "id": "r2-023",
+          "text_sha256": "c0486632b3dc5b6bb742cabded58385c32ff4009c0001010a4933436d768d54c"
+        },
+        {
+          "id": "r2-024",
+          "text_sha256": "11117c2f7e6587ae7e6ef7083458885ad277cad7ef469021b001b4c584b59a36"
+        },
+        {
+          "id": "r2-025",
+          "text_sha256": "6d89fbfb182d205e9e14073d4c7db9266a26e4d1c4ab66a2032956179a702099"
+        },
+        {
+          "id": "r2-026",
+          "text_sha256": "309ff5314d9ff26c0b0f8cc07dca5ffac5bdefcaafa6526c55a8480cd4d2fcc3"
+        },
+        {
+          "id": "r2-027",
+          "text_sha256": "ebeecda55cc73b9cb670063460d2701249c903ade578ecb284fc4eb8849c7994"
+        },
+        {
+          "id": "r2-028",
+          "text_sha256": "458c9fd996a748511ed6279451303509cfb8669aac359a0b3d0940f38f0d2cef"
+        },
+        {
+          "id": "r2-029",
+          "text_sha256": "923b121890d9cf5609b502284d54ddacfef26dfbca9a5a3ba555d7f54b26db1b"
+        },
+        {
+          "id": "r2-030",
+          "text_sha256": "2e2324f58fa1695d44d13fae372b52e6246a8cbbbd1d1c9f0a89682b806fdff8"
+        },
+        {
+          "id": "r2-031",
+          "text_sha256": "0575858e19d5aed5a9bbc598240c7b8e5b0694ac3b69ccd0f33aec497aa05a49"
+        },
+        {
+          "id": "r2-032",
+          "text_sha256": "38a0e203ff863affaeee38db3ad6e7cdb148c3a26cc576ed24276e628b82b4f9"
+        },
+        {
+          "id": "r2-033",
+          "text_sha256": "25b45e295a86a8abda42738ddbbd90e5a61d22965abc7b1b52b56f3449f1cc8f"
+        },
+        {
+          "id": "r2-034",
+          "text_sha256": "e43084a7011ba122ef7c5a2947b5cef5510b26c32cc359257576b812e69ae1c8"
+        },
+        {
+          "id": "r2-035",
+          "text_sha256": "e970564ab37029091a1a95b5ad190c7fc985d9a73506a78b31233c48565e964d"
+        },
+        {
+          "id": "r2-036",
+          "text_sha256": "90eb8dd0be7f1a27e6358b9f33472bccee79ab28a9980f160c602f153ed6a034"
+        }
+      ]
+    }
+  },
+  "method": {
+    "scope": "Extração por git show apenas dos campos id e text. Hash do arquivo inteiro usado para identificar a versão. A conferência dirigida é de texto, sem verificação de outros campos dos casos.",
+    "carry_forward": "O inventário histórico manteve os mesmos hashes. Os 35 textos cujo SHA-256 permanece igual ao da candidata anterior conservam seus vereditos semânticos.",
+    "projection": "Vetor de objetos com id seguido de text, em ordem original, JSON UTF-8 de caracteres literais, separadores compactos e sem quebra final. Cada text_sha256 identifica o campo text decodificado em UTF-8, em sua forma original.",
+    "normalization": "casefold, decomposição NFKD, retirada de marcas combinantes, extração de sequências [a-z0-9]+ e junção por um espaço.",
+    "exact_duplicates": "Igualdade do campo text original e igualdade da forma normalizada, nos 2160 pares cruzados.",
+    "lexical_triage": {
+      "character_trigram_dice": "Dice sobre multiconjuntos de trigramas de caracteres da forma normalizada, incluindo espaços.",
+      "word_tfidf_cosine": "Cosseno dos pesos por palavra normalizada, usando frequência bruta e IDF igual a 1 + ln((96 + 1) / (df + 1)), com df nos 96 relatos.",
+      "common_word_run": "Comprimento da maior sequência contígua compartilhada de palavras normalizadas.",
+      "nearest": "Quatro pares por métrica para cada novo ID, por pontuação decrescente e desempate pelo ID histórico. Pontuações gravadas com até seis casas decimais."
+    },
+    "semantic_review": "Leitura do único texto alterado, r2-014, contra os 60 históricos. A inspeção compara o mecanismo e a sequência factual e usa a triagem lexical para recuperar candidatos. Recálculo lexical dos 2.160 pares e consolidação de 36 vereditos.",
+    "criterion": "Substituir se o pedido específico for equivalente ou se houver coincidência na combinação de elementos que distingue o cenário. Ajustes de marca, entorno, quantidade ou redação não bastam quando essa combinação persiste. Terminologia compartilhada e a presença de um tema geral permitem manter o caso quando o problema específico ou a sequência operacional mudam.",
+    "limits": "A inspeção semântica é qualitativa. As métricas recuperam candidatos e podem deixar paráfrases fora dos primeiros lugares. O resultado caracteriza a proximidade textual e narrativa nesta versão dos inventários e não estabelece a origem da redação nem independência matemática. Rótulos e saídas estão fora do escopo."
+  },
+  "summary": {
+    "cross_pairs": 2160,
+    "new_cross_pairs": 60,
+    "history_unchanged": true,
+    "exact_original_pairs": [],
+    "exact_normalized_pairs": [],
+    "lexical_maxima": {
+      "character_trigram_dice": {
+        "value": 0.437086,
+        "pairs": [
+          [
+            "r2-008",
+            "jev-031"
+          ]
+        ]
+      },
+      "word_tfidf_cosine": {
+        "value": 0.288127,
+        "pairs": [
+          [
+            "r2-008",
+            "jev-031"
+          ]
+        ]
+      },
+      "common_word_run": {
+        "value": 4,
+        "pairs": [
+          [
+            "r2-004",
+            "jev-049"
+          ],
+          [
+            "r2-007",
+            "jev-008"
+          ],
+          [
+            "r2-034",
+            "jev-002"
+          ],
+          [
+            "r2-035",
+            "jev-023"
+          ],
+          [
+            "r2-035",
+            "jev-049"
+          ]
+        ]
+      }
+    },
+    "carried_forward_count": 35,
+    "replaced_text_ids": [
+      "r2-014"
+    ],
+    "verdict_counts": {
+      "manter": 36
+    },
+    "replacement_ids": []
+  },
+  "cases": [
+    {
+      "id": "r2-001",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "42fb6fff9ae041d0e06b4a76419cd6df2858127fd9f665df95d584c471d4409d",
+      "current_text_sha256": "42fb6fff9ae041d0e06b4a76419cd6df2858127fd9f665df95d584c471d4409d",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-055",
+        "jev-006",
+        "jev-024"
+      ],
+      "reason": "A dúvida surge do armazenamento do terminal após encerrar a temporada e diz respeito à conservação da bateria por meses. O momento e a ação pedida são diferentes das configurações ou anomalias comparadas.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-047",
+            "value": 0.343373
+          },
+          {
+            "historical_id": "jev-025",
+            "value": 0.312312
+          },
+          {
+            "historical_id": "jev-002",
+            "value": 0.304478
+          },
+          {
+            "historical_id": "jev-006",
+            "value": 0.287625
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-047",
+            "value": 0.158424
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 0.1498
+          },
+          {
+            "historical_id": "jev-012",
+            "value": 0.123767
+          },
+          {
+            "historical_id": "jev-040",
+            "value": 0.117938
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-007",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-010",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-019",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-002",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "806cafacda4e8d73c59d923cbd2508336d5e55aaa101629dacd3e2d9503a8d58",
+      "current_text_sha256": "806cafacda4e8d73c59d923cbd2508336d5e55aaa101629dacd3e2d9503a8d58",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-035",
+        "jev-009",
+        "jev-058"
+      ],
+      "reason": "Há descontos identificados em múltiplos créditos, com investigação dos ajustes. O problema de conciliação decorre de retenções registradas, distinto de uma diferença de saldo sem ajuste identificado ou de um crédito faltante.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-049",
+            "value": 0.309764
+          },
+          {
+            "historical_id": "jev-014",
+            "value": 0.297872
+          },
+          {
+            "historical_id": "jev-004",
+            "value": 0.29703
+          },
+          {
+            "historical_id": "jev-058",
+            "value": 0.291262
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-058",
+            "value": 0.13802
+          },
+          {
+            "historical_id": "jev-026",
+            "value": 0.130369
+          },
+          {
+            "historical_id": "jev-008",
+            "value": 0.111268
+          },
+          {
+            "historical_id": "jev-039",
+            "value": 0.099269
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-014",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-004",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-008",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-003",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "f7169b75ae5171611780f33a2a54d23fed01303c548f64b130dff24c44544d54",
+      "current_text_sha256": "f7169b75ae5171611780f33a2a54d23fed01303c548f64b130dff24c44544d54",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-005",
+        "jev-042"
+      ],
+      "reason": "O pedido é copiar e divulgar uma chave que já existe, com finalidade específica. As ações históricas comparadas dizem respeito ao cadastro ou à remoção da chave.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-033",
+            "value": 0.30854
+          },
+          {
+            "historical_id": "jev-049",
+            "value": 0.303226
+          },
+          {
+            "historical_id": "jev-005",
+            "value": 0.302405
+          },
+          {
+            "historical_id": "jev-004",
+            "value": 0.291139
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-005",
+            "value": 0.241478
+          },
+          {
+            "historical_id": "jev-042",
+            "value": 0.179595
+          },
+          {
+            "historical_id": "jev-031",
+            "value": 0.141163
+          },
+          {
+            "historical_id": "jev-040",
+            "value": 0.117321
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-005",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-031",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-001",
+            "value": 1
+          },
+          {
+            "historical_id": "jev-002",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-004",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "8e8c394e270f5ec5adbb1770fc8f16da4f4e7b3b79042471e8d9962ce95b4107",
+      "current_text_sha256": "8e8c394e270f5ec5adbb1770fc8f16da4f4e7b3b79042471e8d9962ce95b4107",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-034",
+        "jev-025"
+      ],
+      "reason": "A avaria está na base de recarga e o mesmo equipamento segue operando alimentado diretamente. O efeito e a alternativa de uso distinguem o incidente.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-049",
+            "value": 0.313433
+          },
+          {
+            "historical_id": "jev-025",
+            "value": 0.308725
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 0.301282
+          },
+          {
+            "historical_id": "jev-016",
+            "value": 0.294521
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-049",
+            "value": 0.153876
+          },
+          {
+            "historical_id": "jev-034",
+            "value": 0.130173
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 0.114895
+          },
+          {
+            "historical_id": "jev-047",
+            "value": 0.113702
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-049",
+            "value": 4
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-022",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-031",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-005",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "616a1b75920595d0d9c73f0bf36627c9ab015fabefe9ce2ff215914c0b78b0ec",
+      "current_text_sha256": "616a1b75920595d0d9c73f0bf36627c9ab015fabefe9ce2ff215914c0b78b0ec",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-030",
+        "jev-009"
+      ],
+      "reason": "A conciliação exige separar, por unidade, dinheiro efetivamente agrupado em um único depósito. O critério de separação e a origem da demanda são próprios do relato.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-020",
+            "value": 0.376176
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 0.364198
+          },
+          {
+            "historical_id": "jev-034",
+            "value": 0.33452
+          },
+          {
+            "historical_id": "jev-030",
+            "value": 0.322368
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-034",
+            "value": 0.18979
+          },
+          {
+            "historical_id": "jev-007",
+            "value": 0.179329
+          },
+          {
+            "historical_id": "jev-030",
+            "value": 0.146498
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 0.110625
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-030",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-007",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-011",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-020",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-006",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "6ff16a7aba297fe0a9c4543e2d88f7882e614461e534e89ee8e89e3e7a8d33b3",
+      "current_text_sha256": "6ff16a7aba297fe0a9c4543e2d88f7882e614461e534e89ee8e89e3e7a8d33b3",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-010",
+        "jev-059",
+        "jev-021"
+      ],
+      "reason": "Uma cobrança expira na leitura e o pagamento daquele pedido funciona por chave. A falha é localizada e a troca do identificador no mesmo pagamento cria uma contingência específica.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-010",
+            "value": 0.310127
+          },
+          {
+            "historical_id": "jev-002",
+            "value": 0.301775
+          },
+          {
+            "historical_id": "jev-005",
+            "value": 0.292683
+          },
+          {
+            "historical_id": "jev-036",
+            "value": 0.289773
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-015",
+            "value": 0.136035
+          },
+          {
+            "historical_id": "jev-042",
+            "value": 0.135642
+          },
+          {
+            "historical_id": "jev-005",
+            "value": 0.127148
+          },
+          {
+            "historical_id": "jev-012",
+            "value": 0.116848
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-005",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-015",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-017",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-007",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "949bc6a37ed3f62d0795625814cecc33232acb019c26eb7beb6688f10bb05bb1",
+      "current_text_sha256": "949bc6a37ed3f62d0795625814cecc33232acb019c26eb7beb6688f10bb05bb1",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-006",
+        "jev-038",
+        "jev-026"
+      ],
+      "reason": "O manual explica como repartir o valor da mesma venda entre dois cartões na hora da cobrança. Preparação de treinamento e uso de maquininha são o contexto em comum. A ação comercial é diferente de configuração de visor ou de parcelamento e repasse.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-033",
+            "value": 0.310249
+          },
+          {
+            "historical_id": "jev-008",
+            "value": 0.309677
+          },
+          {
+            "historical_id": "jev-006",
+            "value": 0.302632
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 0.302387
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-040",
+            "value": 0.158643
+          },
+          {
+            "historical_id": "jev-008",
+            "value": 0.142
+          },
+          {
+            "historical_id": "jev-038",
+            "value": 0.140773
+          },
+          {
+            "historical_id": "jev-055",
+            "value": 0.11811
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-008",
+            "value": 4
+          },
+          {
+            "historical_id": "jev-012",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-024",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-038",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-008",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "b8348639f5f41028601561a9872c40cef0e7d52c5f172f97da73440223d0d3c3",
+      "current_text_sha256": "b8348639f5f41028601561a9872c40cef0e7d52c5f172f97da73440223d0d3c3",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-031",
+        "jev-026",
+        "jev-049"
+      ],
+      "reason": "A consulta específica é alterar o dia recorrente do crédito. As coincidências de redação tratam de vendas futuras e recebimentos, vocabulário comum do domínio.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-031",
+            "value": 0.437086
+          },
+          {
+            "historical_id": "jev-017",
+            "value": 0.31405
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 0.313514
+          },
+          {
+            "historical_id": "jev-014",
+            "value": 0.3003
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-031",
+            "value": 0.288127
+          },
+          {
+            "historical_id": "jev-036",
+            "value": 0.200272
+          },
+          {
+            "historical_id": "jev-026",
+            "value": 0.192036
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 0.147005
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-014",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-026",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-030",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-031",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-009",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "17a451bb14564e5f6369d1f9c1577c969a690117f5871489be694da53340e294",
+      "current_text_sha256": "17a451bb14564e5f6369d1f9c1577c969a690117f5871489be694da53340e294",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-033",
+        "jev-051"
+      ],
+      "reason": "O evento envolve valores errados em transferências de auxílio já feitas e rastreio de devoluções. Causa, fase do fluxo e recomposição são distintos.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-033",
+            "value": 0.343915
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 0.335025
+          },
+          {
+            "historical_id": "jev-008",
+            "value": 0.30581
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 0.298103
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-033",
+            "value": 0.188186
+          },
+          {
+            "historical_id": "jev-051",
+            "value": 0.184844
+          },
+          {
+            "historical_id": "jev-006",
+            "value": 0.161024
+          },
+          {
+            "historical_id": "jev-026",
+            "value": 0.135727
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-006",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-008",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-017",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-010",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "ad03270dc8163c11ab3ff5ec05b4d8b1d12c29698bbdcef867f8f3262cf6aabe",
+      "current_text_sha256": "ad03270dc8163c11ab3ff5ec05b4d8b1d12c29698bbdcef867f8f3262cf6aabe",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-012",
+        "jev-020"
+      ],
+      "reason": "A leitura difícil decorre de pouca luminosidade e é contornada no mesmo visor, com pagamentos aprovados. O modo da falha e o efeito no caixa são próprios.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-020",
+            "value": 0.311111
+          },
+          {
+            "historical_id": "jev-016",
+            "value": 0.273333
+          },
+          {
+            "historical_id": "jev-036",
+            "value": 0.273292
+          },
+          {
+            "historical_id": "jev-002",
+            "value": 0.272727
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-020",
+            "value": 0.173617
+          },
+          {
+            "historical_id": "jev-045",
+            "value": 0.125688
+          },
+          {
+            "historical_id": "jev-021",
+            "value": 0.120691
+          },
+          {
+            "historical_id": "jev-034",
+            "value": 0.118071
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-008",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-011",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-012",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-020",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-011",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "3cddd3eca592631c6dbbe8c9491f151146559df3518ef71e87943348ce9f2c34",
+      "current_text_sha256": "3cddd3eca592631c6dbbe8c9491f151146559df3518ef71e87943348ce9f2c34",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-040",
+        "jev-050",
+        "jev-015"
+      ],
+      "reason": "O contato decorre do redirecionamento inesperado de um QR em material de oficina. A pergunta é sobre o destino do código durante uma preparação.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-026",
+            "value": 0.30303
+          },
+          {
+            "historical_id": "jev-036",
+            "value": 0.296736
+          },
+          {
+            "historical_id": "jev-055",
+            "value": 0.289655
+          },
+          {
+            "historical_id": "jev-017",
+            "value": 0.283286
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-055",
+            "value": 0.182922
+          },
+          {
+            "historical_id": "jev-029",
+            "value": 0.141114
+          },
+          {
+            "historical_id": "jev-035",
+            "value": 0.138869
+          },
+          {
+            "historical_id": "jev-049",
+            "value": 0.133782
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-001",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-005",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-017",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-012",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "149166951a53031863f51e051a8a814922da5d9aacee596477fb14b10e61f4f5",
+      "current_text_sha256": "149166951a53031863f51e051a8a814922da5d9aacee596477fb14b10e61f4f5",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-028",
+        "jev-020",
+        "jev-052"
+      ],
+      "reason": "A duplicação de uma linha com detalhe inacessível motiva conferência manual localizada. O evento e o alcance operacional distinguem o caso.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-020",
+            "value": 0.325
+          },
+          {
+            "historical_id": "jev-004",
+            "value": 0.313589
+          },
+          {
+            "historical_id": "jev-036",
+            "value": 0.293578
+          },
+          {
+            "historical_id": "jev-049",
+            "value": 0.291815
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-004",
+            "value": 0.19988
+          },
+          {
+            "historical_id": "jev-058",
+            "value": 0.176296
+          },
+          {
+            "historical_id": "jev-052",
+            "value": 0.167126
+          },
+          {
+            "historical_id": "jev-034",
+            "value": 0.165368
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-017",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-020",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-021",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-023",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-013",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "9527699bc3690fd7464e4cd9e7bd1fa41aa3905ec344b68527091ac17a258f1f",
+      "current_text_sha256": "9527699bc3690fd7464e4cd9e7bd1fa41aa3905ec344b68527091ac17a258f1f",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-057",
+        "jev-038",
+        "jev-055"
+      ],
+      "reason": "Silenciar uma unidade de demonstração é uma configuração de áudio própria. O uso de equipamento separado para treinamento é contexto compartilhado.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-002",
+            "value": 0.356688
+          },
+          {
+            "historical_id": "jev-034",
+            "value": 0.318021
+          },
+          {
+            "historical_id": "jev-027",
+            "value": 0.306709
+          },
+          {
+            "historical_id": "jev-056",
+            "value": 0.300885
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-057",
+            "value": 0.115938
+          },
+          {
+            "historical_id": "jev-038",
+            "value": 0.107657
+          },
+          {
+            "historical_id": "jev-034",
+            "value": 0.089409
+          },
+          {
+            "historical_id": "jev-019",
+            "value": 0.088501
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-034",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-040",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-001",
+            "value": 1
+          },
+          {
+            "historical_id": "jev-002",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-014",
+      "review_scope": "revisado_apos_segunda_substituicao",
+      "previous_text_sha256": "412d1d1f7f90df778bcc64705939ff1adaebb28a92e8bfb29ed441735e29aa76",
+      "current_text_sha256": "1810edb8514828e1d855087c39c9d6b2f7de821e91605b3afd2d4bb87c796852",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-021",
+        "jev-017",
+        "jev-059"
+      ],
+      "reason": "O débito é confirmado, mas o caixa eletrônico não entrega as cédulas de um Pix Saque. A falta do dinheiro físico inviabiliza uma compra com prazo de embarque. O mecanismo de saque e a sequência débito, falha de dispensação e impedimento da compra são distintos dos casos históricos de confirmação de pedido, crédito atrasado ou falha no meio de pagamento do estabelecimento.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-036",
+            "value": 0.294118
+          },
+          {
+            "historical_id": "jev-017",
+            "value": 0.292453
+          },
+          {
+            "historical_id": "jev-021",
+            "value": 0.290909
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 0.29064
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-051",
+            "value": 0.133594
+          },
+          {
+            "historical_id": "jev-034",
+            "value": 0.128514
+          },
+          {
+            "historical_id": "jev-043",
+            "value": 0.128075
+          },
+          {
+            "historical_id": "jev-036",
+            "value": 0.116478
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-051",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-011",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-017",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-020",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-015",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "808a8908ceed583736ed17ff4ad59ec9cd19e3e1e71ce0f234085a9f6b05a2ec",
+      "current_text_sha256": "808a8908ceed583736ed17ff4ad59ec9cd19e3e1e71ce0f234085a9f6b05a2ec",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-054",
+        "jev-028",
+        "jev-030"
+      ],
+      "reason": "A ausência de uma coluna em um arquivo de filial, com repasses efetivos e conciliação manual, define uma falha documental diferente.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-054",
+            "value": 0.310127
+          },
+          {
+            "historical_id": "jev-004",
+            "value": 0.309211
+          },
+          {
+            "historical_id": "jev-002",
+            "value": 0.309091
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 0.304094
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-054",
+            "value": 0.176247
+          },
+          {
+            "historical_id": "jev-058",
+            "value": 0.154251
+          },
+          {
+            "historical_id": "jev-008",
+            "value": 0.145688
+          },
+          {
+            "historical_id": "jev-034",
+            "value": 0.135813
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-008",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-016",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-025",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-016",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "3a1e8e404bfc84cd9850f6be8bd3578f9080ae3227c19f1e7b13e961bb094d39",
+      "current_text_sha256": "3a1e8e404bfc84cd9850f6be8bd3578f9080ae3227c19f1e7b13e961bb094d39",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-046",
+        "jev-056",
+        "jev-048"
+      ],
+      "reason": "A falha atinge um grupo de leitores após configuração. A operação continua redistribuída entre os equipamentos restantes e a recuperação exige reinstalação por posto.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-014",
+            "value": 0.314869
+          },
+          {
+            "historical_id": "jev-020",
+            "value": 0.308571
+          },
+          {
+            "historical_id": "jev-028",
+            "value": 0.293578
+          },
+          {
+            "historical_id": "jev-036",
+            "value": 0.285714
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-045",
+            "value": 0.18812
+          },
+          {
+            "historical_id": "jev-014",
+            "value": 0.147417
+          },
+          {
+            "historical_id": "jev-020",
+            "value": 0.129401
+          },
+          {
+            "historical_id": "jev-028",
+            "value": 0.126268
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-024",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-038",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-008",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-014",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-017",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "6f0979ca04879f6a7783c5c5e77e51678ad273ee5fe2081416aa58ae342e190c",
+      "current_text_sha256": "6f0979ca04879f6a7783c5c5e77e51678ad273ee5fe2081416aa58ae342e190c",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-023",
+        "jev-060",
+        "jev-039"
+      ],
+      "reason": "É uma continuação de conversa com referência a um protocolo. O trecho atual indica Pix e deixa o incidente no atendimento anterior.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-010",
+            "value": 0.293333
+          },
+          {
+            "historical_id": "jev-038",
+            "value": 0.261682
+          },
+          {
+            "historical_id": "jev-021",
+            "value": 0.260504
+          },
+          {
+            "historical_id": "jev-002",
+            "value": 0.251012
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-034",
+            "value": 0.140313
+          },
+          {
+            "historical_id": "jev-001",
+            "value": 0.12438
+          },
+          {
+            "historical_id": "jev-038",
+            "value": 0.119975
+          },
+          {
+            "historical_id": "jev-010",
+            "value": 0.114121
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-002",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-003",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-017",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-021",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-018",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "439aa1ee86d2a3838b55bc363d9b888090602810b50c8c3fbc532d98d245c373",
+      "current_text_sha256": "439aa1ee86d2a3838b55bc363d9b888090602810b50c8c3fbc532d98d245c373",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-026",
+        "jev-054",
+        "jev-038"
+      ],
+      "reason": "O pedido é interpretar títulos de colunas do calendário para quem fará a cobertura. Consulta de previsão, alteração de datas e acesso a manual são objetivos distintos.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-009",
+            "value": 0.332226
+          },
+          {
+            "historical_id": "jev-004",
+            "value": 0.326996
+          },
+          {
+            "historical_id": "jev-050",
+            "value": 0.320896
+          },
+          {
+            "historical_id": "jev-054",
+            "value": 0.290909
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-054",
+            "value": 0.128335
+          },
+          {
+            "historical_id": "jev-014",
+            "value": 0.106342
+          },
+          {
+            "historical_id": "jev-031",
+            "value": 0.101398
+          },
+          {
+            "historical_id": "jev-023",
+            "value": 0.095258
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-023",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-026",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-030",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-037",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-019",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "a016fdad2b03c7ad507ebc0c3c443cbd367f1fa46c269111db9371702bd30500",
+      "current_text_sha256": "a016fdad2b03c7ad507ebc0c3c443cbd367f1fa46c269111db9371702bd30500",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-002",
+        "jev-036",
+        "jev-047"
+      ],
+      "reason": "A ocorrência é fumaça que persiste perto dos clientes mesmo após desconectar o carregador. O risco em torno do aparelho e a solicitação de encaminhamento dão outro motivo ao contato, diferente de perder a possibilidade de cobrar.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-006",
+            "value": 0.315068
+          },
+          {
+            "historical_id": "jev-010",
+            "value": 0.313725
+          },
+          {
+            "historical_id": "jev-047",
+            "value": 0.295385
+          },
+          {
+            "historical_id": "jev-015",
+            "value": 0.294872
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-015",
+            "value": 0.176468
+          },
+          {
+            "historical_id": "jev-034",
+            "value": 0.142778
+          },
+          {
+            "historical_id": "jev-006",
+            "value": 0.130439
+          },
+          {
+            "historical_id": "jev-012",
+            "value": 0.128366
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-006",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-012",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-016",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-017",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-020",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "6db9cdd77300a2cf2f24bf060a505721477fc6bfecccd474e17767e4c8ce31c3",
+      "current_text_sha256": "6db9cdd77300a2cf2f24bf060a505721477fc6bfecccd474e17767e4c8ce31c3",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-021",
+        "jev-041",
+        "jev-001"
+      ],
+      "reason": "A transferência tem comprovante, mas um convênio recusa a despesa por corte do identificador no PDF. O efeito é parar um reembolso administrativo por defeito documental, com resolução pela troca do documento.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-021",
+            "value": 0.311615
+          },
+          {
+            "historical_id": "jev-017",
+            "value": 0.306122
+          },
+          {
+            "historical_id": "jev-002",
+            "value": 0.287293
+          },
+          {
+            "historical_id": "jev-041",
+            "value": 0.278932
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-021",
+            "value": 0.131151
+          },
+          {
+            "historical_id": "jev-001",
+            "value": 0.130051
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 0.106946
+          },
+          {
+            "historical_id": "jev-004",
+            "value": 0.101405
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-021",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-045",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-001",
+            "value": 1
+          },
+          {
+            "historical_id": "jev-002",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-021",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "7d5dda7dfdc64d1d87fc509e871462811a206915effd0fe7724b7f3ee7cc0db3",
+      "current_text_sha256": "7d5dda7dfdc64d1d87fc509e871462811a206915effd0fe7724b7f3ee7cc0db3",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-016",
+        "jev-009",
+        "jev-035"
+      ],
+      "reason": "A conclusão aparente de repasses contrasta com a falta de recebimento por dezenas de destinatários. A estrutura de distribuição e a investigação de retenções por operação dão um recorte próprio à inconsistência.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-009",
+            "value": 0.359375
+          },
+          {
+            "historical_id": "jev-035",
+            "value": 0.299435
+          },
+          {
+            "historical_id": "jev-014",
+            "value": 0.295699
+          },
+          {
+            "historical_id": "jev-017",
+            "value": 0.293532
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-028",
+            "value": 0.178148
+          },
+          {
+            "historical_id": "jev-016",
+            "value": 0.160516
+          },
+          {
+            "historical_id": "jev-037",
+            "value": 0.155302
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 0.155264
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-009",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-016",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-017",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-021",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-022",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "f5e8ac5cf017f974d8cbcf58841ccc00681a57fd498dca27caba4c5aef61a389",
+      "current_text_sha256": "f5e8ac5cf017f974d8cbcf58841ccc00681a57fd498dca27caba4c5aef61a389",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-049",
+        "jev-037",
+        "jev-017"
+      ],
+      "reason": "Uma antecipação integral aparece sem solicitação, com confirmação prestes a ocorrer e tarifa que consumiria a verba da folha. A ação indevida é iminente e há uma função de suspensão indisponível. A folha é uma consequência em comum, mas a causa financeira é diferente.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-018",
+            "value": 0.299559
+          },
+          {
+            "historical_id": "jev-037",
+            "value": 0.280374
+          },
+          {
+            "historical_id": "jev-016",
+            "value": 0.273839
+          },
+          {
+            "historical_id": "jev-059",
+            "value": 0.271845
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-037",
+            "value": 0.201371
+          },
+          {
+            "historical_id": "jev-016",
+            "value": 0.166336
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 0.163263
+          },
+          {
+            "historical_id": "jev-051",
+            "value": 0.148103
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-006",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-016",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-033",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-023",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "c0486632b3dc5b6bb742cabded58385c32ff4009c0001010a4933436d768d54c",
+      "current_text_sha256": "c0486632b3dc5b6bb742cabded58385c32ff4009c0001010a4933436d768d54c",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-054",
+        "jev-044",
+        "jev-020"
+      ],
+      "reason": "O relógio de um terminal desloca a data das vendas embora as autorizações funcionem. Buscar operações por identificador para fechar aquele turno decorre de um problema de fuso no caixa, uma ocorrência diferente de falhas na agenda de créditos ou de impressão.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-009",
+            "value": 0.35
+          },
+          {
+            "historical_id": "jev-010",
+            "value": 0.333333
+          },
+          {
+            "historical_id": "jev-057",
+            "value": 0.332425
+          },
+          {
+            "historical_id": "jev-036",
+            "value": 0.328358
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-010",
+            "value": 0.175491
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 0.172292
+          },
+          {
+            "historical_id": "jev-030",
+            "value": 0.142098
+          },
+          {
+            "historical_id": "jev-034",
+            "value": 0.135792
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-008",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-010",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-012",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-013",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-024",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "11117c2f7e6587ae7e6ef7083458885ad277cad7ef469021b001b4c584b59a36",
+      "current_text_sha256": "11117c2f7e6587ae7e6ef7083458885ad277cad7ef469021b001b4c584b59a36",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-024",
+        "jev-029"
+      ],
+      "reason": "O texto acrescenta somente a posição de um ícone em resposta a uma pergunta anterior. A origem e a alteração observada ficam ausentes desse trecho.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-034",
+            "value": 0.266055
+          },
+          {
+            "historical_id": "jev-038",
+            "value": 0.259259
+          },
+          {
+            "historical_id": "jev-002",
+            "value": 0.248996
+          },
+          {
+            "historical_id": "jev-030",
+            "value": 0.248963
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-019",
+            "value": 0.164671
+          },
+          {
+            "historical_id": "jev-034",
+            "value": 0.160234
+          },
+          {
+            "historical_id": "jev-007",
+            "value": 0.123171
+          },
+          {
+            "historical_id": "jev-047",
+            "value": 0.095148
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-007",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-047",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-019",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-025",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "6d89fbfb182d205e9e14073d4c7db9266a26e4d1c4ab66a2032956179a702099",
+      "current_text_sha256": "6d89fbfb182d205e9e14073d4c7db9266a26e4d1c4ab66a2032956179a702099",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-033",
+        "jev-015",
+        "jev-050"
+      ],
+      "reason": "A finalidade é preparar uma demonstração sobre agendar uma transferência futura. O objetivo da aula e a operação a demonstrar distinguem o pedido.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-015",
+            "value": 0.315789
+          },
+          {
+            "historical_id": "jev-010",
+            "value": 0.3
+          },
+          {
+            "historical_id": "jev-036",
+            "value": 0.290541
+          },
+          {
+            "historical_id": "jev-033",
+            "value": 0.277228
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-015",
+            "value": 0.184095
+          },
+          {
+            "historical_id": "jev-010",
+            "value": 0.124617
+          },
+          {
+            "historical_id": "jev-040",
+            "value": 0.123724
+          },
+          {
+            "historical_id": "jev-031",
+            "value": 0.119868
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-008",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-013",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-015",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-022",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-026",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "309ff5314d9ff26c0b0f8cc07dca5ffac5bdefcaafa6526c55a8480cd4d2fcc3",
+      "current_text_sha256": "309ff5314d9ff26c0b0f8cc07dca5ffac5bdefcaafa6526c55a8480cd4d2fcc3",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-034",
+        "jev-012",
+        "jev-007"
+      ],
+      "reason": "Com uma tela tátil inoperante, o cliente usa teclas físicas do próprio dispositivo. O componente afetado e a forma de concluir a transação são específicos.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-006",
+            "value": 0.332203
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 0.285714
+          },
+          {
+            "historical_id": "jev-048",
+            "value": 0.285714
+          },
+          {
+            "historical_id": "jev-011",
+            "value": 0.282132
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-034",
+            "value": 0.145374
+          },
+          {
+            "historical_id": "jev-007",
+            "value": 0.129274
+          },
+          {
+            "historical_id": "jev-006",
+            "value": 0.128493
+          },
+          {
+            "historical_id": "jev-055",
+            "value": 0.127328
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-012",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-029",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-031",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-034",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-027",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "ebeecda55cc73b9cb670063460d2701249c903ade578ecb284fc4eb8849c7994",
+      "current_text_sha256": "ebeecda55cc73b9cb670063460d2701249c903ade578ecb284fc4eb8849c7994",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-009",
+        "jev-030",
+        "jev-058"
+      ],
+      "reason": "Um depósito recebido agregou diversas unidades e exige reconstruir os créditos por extrato. A agregação inesperada e a dimensão por unidade definem o problema.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-009",
+            "value": 0.317708
+          },
+          {
+            "historical_id": "jev-027",
+            "value": 0.307278
+          },
+          {
+            "historical_id": "jev-014",
+            "value": 0.301075
+          },
+          {
+            "historical_id": "jev-058",
+            "value": 0.289773
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-037",
+            "value": 0.130053
+          },
+          {
+            "historical_id": "jev-027",
+            "value": 0.105716
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 0.105511
+          },
+          {
+            "historical_id": "jev-004",
+            "value": 0.105243
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-014",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-004",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-028",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "458c9fd996a748511ed6279451303509cfb8669aac359a0b3d0940f38f0d2cef",
+      "current_text_sha256": "458c9fd996a748511ed6279451303509cfb8669aac359a0b3d0940f38f0d2cef",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-032",
+        "jev-051",
+        "jev-031"
+      ],
+      "reason": "O destino de repasses automáticos deixou de pertencer à associação. Origem, troca de titularidade e fila de depósitos distinguem esta rota incorreta das cobranças e devoluções comparadas.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-017",
+            "value": 0.365591
+          },
+          {
+            "historical_id": "jev-012",
+            "value": 0.341463
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 0.316623
+          },
+          {
+            "historical_id": "jev-004",
+            "value": 0.316456
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-004",
+            "value": 0.197643
+          },
+          {
+            "historical_id": "jev-031",
+            "value": 0.180838
+          },
+          {
+            "historical_id": "jev-017",
+            "value": 0.156083
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 0.149067
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-017",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-004",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-014",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-029",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "923b121890d9cf5609b502284d54ddacfef26dfbca9a5a3ba555d7f54b26db1b",
+      "current_text_sha256": "923b121890d9cf5609b502284d54ddacfef26dfbca9a5a3ba555d7f54b26db1b",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-011",
+        "jev-055",
+        "jev-006"
+      ],
+      "reason": "A consulta é instalar um terminal sem cabo de rede antes da abertura de um ponto em obra. A dúvida de infraestrutura se distingue das configurações e falhas em operação.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-024",
+            "value": 0.333333
+          },
+          {
+            "historical_id": "jev-012",
+            "value": 0.305556
+          },
+          {
+            "historical_id": "jev-046",
+            "value": 0.301754
+          },
+          {
+            "historical_id": "jev-006",
+            "value": 0.300752
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-040",
+            "value": 0.153033
+          },
+          {
+            "historical_id": "jev-029",
+            "value": 0.121587
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 0.116958
+          },
+          {
+            "historical_id": "jev-031",
+            "value": 0.115091
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-047",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-007",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-010",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-030",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "2e2324f58fa1695d44d13fae372b52e6246a8cbbbd1d1c9f0a89682b806fdff8",
+      "current_text_sha256": "2e2324f58fa1695d44d13fae372b52e6246a8cbbbd1d1c9f0a89682b806fdff8",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-033"
+      ],
+      "reason": "A edição da próxima data de uma única série de pagamentos a prestador deixa a programação antiga visível. O negócio suspende só essa série e assume manualmente o pagamento. Há tema comum de agenda Pix, com outra etapa afetada, outro sentido da transação e outra contingência.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-020",
+            "value": 0.326034
+          },
+          {
+            "historical_id": "jev-058",
+            "value": 0.296875
+          },
+          {
+            "historical_id": "jev-033",
+            "value": 0.296471
+          },
+          {
+            "historical_id": "jev-016",
+            "value": 0.292929
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-053",
+            "value": 0.149102
+          },
+          {
+            "historical_id": "jev-020",
+            "value": 0.128763
+          },
+          {
+            "historical_id": "jev-021",
+            "value": 0.114679
+          },
+          {
+            "historical_id": "jev-033",
+            "value": 0.10942
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-020",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-024",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-059",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-001",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-031",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "0575858e19d5aed5a9bbc598240c7b8e5b0694ac3b69ccd0f33aec497aa05a49",
+      "current_text_sha256": "0575858e19d5aed5a9bbc598240c7b8e5b0694ac3b69ccd0f33aec497aa05a49",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-020",
+        "jev-048",
+        "jev-057"
+      ],
+      "reason": "A impressora sofre contaminação por resíduo de bobina em muitos dispositivos. A via digital preserva a emissão e o trabalho pendente é limpeza física em rodízio. Compartilha o sintoma de impressão com um relato antigo, porém tem causa, operação alternativa e recuperação próprias.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-030",
+            "value": 0.328205
+          },
+          {
+            "historical_id": "jev-040",
+            "value": 0.289773
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 0.285057
+          },
+          {
+            "historical_id": "jev-035",
+            "value": 0.284211
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-030",
+            "value": 0.182428
+          },
+          {
+            "historical_id": "jev-057",
+            "value": 0.1442
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 0.13119
+          },
+          {
+            "historical_id": "jev-035",
+            "value": 0.12396
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-016",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-030",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-007",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-032",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "38a0e203ff863affaeee38db3ad6e7cdb148c3a26cc576ed24276e628b82b4f9",
+      "current_text_sha256": "38a0e203ff863affaeee38db3ad6e7cdb148c3a26cc576ed24276e628b82b4f9",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-059",
+        "jev-010",
+        "jev-018"
+      ],
+      "reason": "A falha ocorre no Pix enviado a um único destinatário, impede o pagamento de caução e ameaça a reserva de horário. A transação, a parte afetada e a perda iminente compõem um cenário próprio.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-002",
+            "value": 0.310734
+          },
+          {
+            "historical_id": "jev-036",
+            "value": 0.309783
+          },
+          {
+            "historical_id": "jev-006",
+            "value": 0.295597
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 0.29156
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-042",
+            "value": 0.166561
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 0.162625
+          },
+          {
+            "historical_id": "jev-005",
+            "value": 0.136829
+          },
+          {
+            "historical_id": "jev-036",
+            "value": 0.130764
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-006",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-036",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-040",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-047",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-033",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "25b45e295a86a8abda42738ddbbd90e5a61d22965abc7b1b52b56f3449f1cc8f",
+      "current_text_sha256": "25b45e295a86a8abda42738ddbbd90e5a61d22965abc7b1b52b56f3449f1cc8f",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-016",
+        "jev-004",
+        "jev-058"
+      ],
+      "reason": "O dinheiro já entrou, mas um estado incorreto bloqueia a conciliação automática. Registrar o valor no fechamento trata uma inconsistência de controle depois do crédito, diferente dos cenários de crédito ausente.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-004",
+            "value": 0.328767
+          },
+          {
+            "historical_id": "jev-051",
+            "value": 0.327177
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 0.28972
+          },
+          {
+            "historical_id": "jev-016",
+            "value": 0.276762
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-004",
+            "value": 0.203577
+          },
+          {
+            "historical_id": "jev-051",
+            "value": 0.18794
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 0.185386
+          },
+          {
+            "historical_id": "jev-019",
+            "value": 0.134413
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-017",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-004",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-009",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-014",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-034",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "e43084a7011ba122ef7c5a2947b5cef5510b26c32cc359257576b812e69ae1c8",
+      "current_text_sha256": "e43084a7011ba122ef7c5a2947b5cef5510b26c32cc359257576b812e69ae1c8",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-027",
+        "jev-002",
+        "jev-047"
+      ],
+      "reason": "O bloqueio de acesso ocorre antes das funções do painel e paralisa a equipe. A causa imediata difere das falhas nas formas de cobrança e dos problemas nos equipamentos.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-018",
+            "value": 0.375
+          },
+          {
+            "historical_id": "jev-047",
+            "value": 0.366279
+          },
+          {
+            "historical_id": "jev-015",
+            "value": 0.332326
+          },
+          {
+            "historical_id": "jev-002",
+            "value": 0.32853
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-002",
+            "value": 0.19132
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 0.163732
+          },
+          {
+            "historical_id": "jev-023",
+            "value": 0.147429
+          },
+          {
+            "historical_id": "jev-036",
+            "value": 0.145991
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-002",
+            "value": 4
+          },
+          {
+            "historical_id": "jev-006",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-018",
+            "value": 2
+          },
+          {
+            "historical_id": "jev-023",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-035",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "e970564ab37029091a1a95b5ad190c7fc985d9a73506a78b31233c48565e964d",
+      "current_text_sha256": "e970564ab37029091a1a95b5ad190c7fc985d9a73506a78b31233c48565e964d",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-015",
+        "jev-038",
+        "jev-057"
+      ],
+      "reason": "A solicitação é localizar um menu visto em uma apresentação para repetir a navegação num curso. Preparação de treinamento e operação normal são o contexto em comum.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-038",
+            "value": 0.29249
+          },
+          {
+            "historical_id": "jev-057",
+            "value": 0.286792
+          },
+          {
+            "historical_id": "jev-030",
+            "value": 0.266187
+          },
+          {
+            "historical_id": "jev-023",
+            "value": 0.254545
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-023",
+            "value": 0.187491
+          },
+          {
+            "historical_id": "jev-049",
+            "value": 0.16858
+          },
+          {
+            "historical_id": "jev-005",
+            "value": 0.136731
+          },
+          {
+            "historical_id": "jev-004",
+            "value": 0.132555
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-023",
+            "value": 4
+          },
+          {
+            "historical_id": "jev-049",
+            "value": 4
+          },
+          {
+            "historical_id": "jev-005",
+            "value": 3
+          },
+          {
+            "historical_id": "jev-001",
+            "value": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2-036",
+      "review_scope": "veredito_anterior_texto_confirmado",
+      "previous_text_sha256": "90eb8dd0be7f1a27e6358b9f33472bccee79ab28a9980f160c602f153ed6a034",
+      "current_text_sha256": "90eb8dd0be7f1a27e6358b9f33472bccee79ab28a9980f160c602f153ed6a034",
+      "verdict": "manter",
+      "finding": "distincao_material",
+      "historical_references": [
+        "jev-028",
+        "jev-024",
+        "jev-039"
+      ],
+      "reason": "O texto parcial de um aviso temporário foi recuperado e o contato é continuação em outro canal. A operação subjacente e as consequências não aparecem no relato.",
+      "lexical_nearest": {
+        "character_trigram_dice": [
+          {
+            "historical_id": "jev-038",
+            "value": 0.269058
+          },
+          {
+            "historical_id": "jev-051",
+            "value": 0.245902
+          },
+          {
+            "historical_id": "jev-044",
+            "value": 0.228311
+          },
+          {
+            "historical_id": "jev-024",
+            "value": 0.226087
+          }
+        ],
+        "word_tfidf_cosine": [
+          {
+            "historical_id": "jev-033",
+            "value": 0.083352
+          },
+          {
+            "historical_id": "jev-048",
+            "value": 0.064028
+          },
+          {
+            "historical_id": "jev-057",
+            "value": 0.063433
+          },
+          {
+            "historical_id": "jev-004",
+            "value": 0.055584
+          }
+        ],
+        "common_word_run": [
+          {
+            "historical_id": "jev-001",
+            "value": 1
+          },
+          {
+            "historical_id": "jev-002",
+            "value": 1
+          },
+          {
+            "historical_id": "jev-004",
+            "value": 1
+          },
+          {
+            "historical_id": "jev-005",
+            "value": 1
+          }
+        ]
+      }
+    }
+  ]
+}
