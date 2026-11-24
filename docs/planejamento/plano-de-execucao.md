@@ -75,7 +75,8 @@ pareada final. A configuração de execução e a escolha operacional continuam
 pendentes. [Plano vigente](classificacao-comparativa/qualificacao-qwen.md).
 O reteste C03-P2 autorizado usou uma chamada adicional no mesmo caso e foi
 confirmado em recibo separado; não avalia o conjunto final. C05-E adiciona
-o executor final e a contabilidade cumulativa com 28 testes offline,
+o executor final e a contabilidade cumulativa, aceitos em `e4ce14c` com 37 testes
+offline e revisão independente aprovada. A primeira conta suportada é a versão 4,
 preservando as regressões anteriores e o teto total de US$ 10. O lote real
 permanece condicionado ao manifesto e à decisão próprios.
 Criar os cards não equivale a autorizar inferência paga nem escolher o fornecedor.

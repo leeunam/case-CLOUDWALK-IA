@@ -81,7 +81,9 @@ O reteste autorizado C03-P2 voltou a completar os dois campos do mesmo caso
 em 1,894 s; o log individual exibiu US$ 0,000518, e o resumo das duas chamadas
 experimentais passou a aproximadamente US$ 0,00104. A C05-E implementa o
 executor final com conta persistente, reservas e conciliação, verificado com
-28 testes C05 offline. Os exemplos reais permanecem desabilitados. [Recibo do
+37 testes C05 offline e revisão independente aprovada. A versão 4 é a primeira
+conta suportada; arquivos de protótipo são recusados sem alteração. Os exemplos
+reais permanecem desabilitados. [Recibo do
 reteste](docs/evidencias/c03/reteste-unitario-real-02.json) e [roteiro C05](docs/c05.md).
 
 A regra aprovada de latência foi integrada em `933836e`: as próximas avaliações

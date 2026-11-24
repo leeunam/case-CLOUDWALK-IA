@@ -12,7 +12,12 @@ Os 36 relatos continuam reservados, sem inferência. Posteriormente, o reteste
 autorizado C03-P2 respondeu em 1,894 s, com US$ 0,000518 exibidos no log,
 apesar do indicador anterior. O resumo confirmou duas chamadas experimentais
 e aproximadamente US$ 0,00104. [Recibo](../../evidencias/c03/reteste-unitario-real-02.json).
-C05-E implementa o executor e a conta persistente, com 28 testes offline;
+C05-E foi aceita em `e4ce14c`: executor e conta persistente, 37 testes offline,
+revisão independente aprovada e lote completo simulado conferido pelo integrador.
+A versão 4 é a primeira conta suportada; protótipos são preservados e recusados.
+O [aceite](../../evidencias/c05/executor-aceite.json) e as
+[decisões de implementação](../../evidencias/c05/executor-decisoes.md) registram
+as evidências e os limites. Nenhuma chamada final foi realizada;
 o lote pago ainda exige manifesto próprio, gastos anteriores consolidados
 e referências financeiras verificadas. [Guia C05](../../c05.md).
 Nenhum modelo foi escolhido nem integrado ao Rails. C06/C07 continuam

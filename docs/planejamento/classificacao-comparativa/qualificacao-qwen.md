@@ -10,8 +10,10 @@ O plano estático foi gerado e conferido na branch
 emenda integrada `99b6230`. Foram confirmados 36 relatos, 13 controles e 44
 possíveis chamadas do candidato, sem iniciar o adaptador nem acessar a chave.
 [Conferência e reprodução](../../c05.md). A adaptação C05-E foi implementada
-offline em `24da473`, com correção `aee264c`, 28 testes C05 e regressões C02/Qwen.
+offline e aceito em `e4ce14c`, com 37 testes C05 e regressões C02/Qwen.
 Usa conta SQLite persistente, reserva por despacho e conciliação verificada.
+A versão 4 é a primeira conta suportada; protótipos são recusados sem alteração.
+[Aceite e revisão independente](../../evidencias/c05/executor-aceite.json).
 O lote final pago ainda exige autorização própria, consolidação dos gastos
 anteriores e confirmação das fontes financeiras. Não há resultado C05.
 
