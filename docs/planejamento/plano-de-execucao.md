@@ -101,8 +101,12 @@ O responsável escolheu a opção A da **C05-R2**: instruções mais conservador
 de uma chamada, com novo final independente e preservação dos limites.
 A [implementação offline](classificacao-comparativa/rodada-2-implementacao.md)
 partiu da base comum `c00ac54`, com frentes de instruções e dados em worktrees
-separadas. A candidata será congelada antes de o integrador abrir os novos
-textos. Não há novo consumo autorizado; o plano futuro prevê até seis
+separadas. A candidata foi congelada antes de o integrador abrir os novos
+textos; os 36 novos finais passaram por revisão de rótulos e semelhança,
+com referência exploratória por IA. O executor `3f66bec` passou no aceite
+offline e no roteiro CLI fixture do integrador. O [guia R2](../c05-r2.md)
+registra verificações, limites e passagem para a revisão ampla final.
+Não há novo consumo autorizado; o plano futuro prevê até seis
 chamadas de desenvolvimento e 44 do final/controles, após revisão e
 autorização específica.
 
