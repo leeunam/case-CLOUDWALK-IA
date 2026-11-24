@@ -105,7 +105,8 @@ separadas. A candidata foi congelada antes de o integrador abrir os novos
 textos; os 36 novos finais passaram por revisão de rótulos e semelhança,
 com referência exploratória por IA. O executor `3f66bec` passou no aceite
 offline e no roteiro CLI fixture do integrador. O [guia R2](../c05-r2.md)
-registra verificações, limites e passagem para a revisão ampla final.
+registra verificações, limites e revisão ampla final aprovada no código `b19a596`,
+sem achados residuais e com nova reprodução CLI fixture.
 Não há novo consumo autorizado; o plano futuro prevê até seis
 chamadas de desenvolvimento e 44 do final/controles, após revisão e
 autorização específica.

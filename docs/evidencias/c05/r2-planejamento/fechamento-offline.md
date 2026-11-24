@@ -1,8 +1,8 @@
 # C05-R2 · Fechamento da preparação offline
 
-Data: 24/11/2026. Fonte de código conferida: `3f66bec2e6ac89c03ffd298fbfb9d5fcc5e428e5`.
+Data: 24/11/2026. Fonte final de código conferida: `b19a59645342cde40c4939f4f21d05959ae7c39a`.
 Tarefa do integrador: Task4, branch `main`, checkout principal.
-Estado deste registro: aceites por tarefa e CLI concluídos; revisão ampla final em andamento.
+Estado deste registro: preparação offline aprovada; aceites por tarefa, CLI e revisão ampla final concluídos, sem achados residuais.
 
 A resposta do responsável escolheu A e autorizou somente implementação offline.
 Não houve chamada ao fornecedor, leitura de `.env` ou uso da conta real nesta
@@ -28,7 +28,7 @@ O primeiro resultado reprovado permanece intacto, C05 aberta e C06 bloqueada.
 
 Fontes: [relatório do executor](task-3-report.md),
 [parecer de aceite](task-3-re-review-round2.md),
-[reprodução CLI](integrator-cli-qa.json),
+[reprodução CLI final](integrator-cli-qa-final.json),
 [ledger com preflight e rulings](execucao-offline.md).
 Os pares base/head desses relatórios permitem regenerar os diffs pelo Git;
 os pacotes temporários de revisão não são fontes novas de autoridade.
@@ -61,3 +61,21 @@ limites faturáveis. O plano concreto é seis chamadas development e, somente
 se todas as condições passarem, até 44 no final/controles. Concorrência um,
 uma tentativa, sem ajuste depois de ver o final, mesma conta e teto global.
 Nenhum modelo foi adotado nem foi alterado o classificador Rails. Sem push.
+
+
+## Encerramento da revisão final
+
+A [revisão ampla](final-review.md) gerou uma única onda de correção, entregue
+em `b19a596` e [conferida em re-revisão dirigida](final-re-review.md), com
+SPEC e QUALITY aprovadas. O relatório [final-fix-report.md](final-fix-report.md)
+registra 23 testes de contrato, os três checkers, os 21 históricos idênticos e
+28 hashes válidos. A referência R2 agora usa oito requisições para 11 perguntas,
+sem pontuação, e identifica a aprovação offline atual. Os exemplos históricos
+permaneceram intactos.
+
+O CLI do integrador foi repetido após essa mudança do checker e dos pins,
+na fonte `b19a596`, e passou com as mesmas dimensões e travas. Não se repetiram
+as suítes do executor inalterado. As evidências anteriores preservam a revisão
+em que foram produzidas. Os pacotes temporários deste plano podem ser removidos
+após a integração: os relatórios, os pares base/head e todos os rulings ficam
+versionados aqui. Conta financeira, selos e worktrees irmãs são preservados.
