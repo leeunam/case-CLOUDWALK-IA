@@ -219,15 +219,14 @@ def main(round_spec=R2):
                 raise BudgetError(f"gate de development reprovado em {args.output / gate.FILENAME}")
             print(args.output)
             return
+        account = Account(args.account, getattr(args, "account_id", None), args.mode)
+        if round_spec.check_account is not None:
+            round_spec.check_account(account)
         if args.command == "init-account":
-            account = Account.initialize(args.account, scope="fixture", cap=args.cap_usd,
+            account = Account.initialize(account.path, scope="fixture", cap=args.cap_usd,
                                          previous_spend=args.previous_spend_usd)
-        else:
-            account = Account(args.account, args.account_id, args.mode)
-            if round_spec.check_account is not None:
-                round_spec.check_account(account)
-            if args.command == "reconcile":
-                account.reconcile(decode(args.receipt.read_bytes()))
+        elif args.command == "reconcile":
+            account.reconcile(decode(args.receipt.read_bytes()))
         print(encode(account.status(), indent=2))
     except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError) as exc:
         parser.exit(2, f"{round_spec.prefix[:-1].upper()} interrompida ({type(exc).__name__}): {exc}\n")

@@ -1,5 +1,7 @@
 """Verifica os dois processos Luna com um ledger temporário e transporte sintético."""
 from argparse import Namespace
+from contextlib import redirect_stderr, redirect_stdout
+from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import subprocess
@@ -7,7 +9,7 @@ import sys
 import unittest
 from unittest.mock import patch
 
-from luna.round_spec import ACCOUNT_ID, HERE, LUNA, LunaSettings, check_account
+from luna.round_spec import ACCOUNT_ID, ACCOUNT_RELATIVE, HERE, LUNA, LunaSettings, check_account
 from r2 import execute, gate, seal
 from r2.plan import Plan, gate_reference
 from budget import Account, BudgetError, cap_usd
@@ -89,6 +91,40 @@ execute.development_fixture = fixture
 execute.main(LUNA)
 """)
         return [sys.executable, "-B", str(script), "_adapter"]
+
+    def test_init_account_guards_reserved_path_before_creation(self):
+        git_dir = self.finance / ".git"
+        git_dir.mkdir()
+        reserved = self.finance / ACCOUNT_RELATIVE
+        reserved.parent.mkdir(parents=True)
+        alias = self.finance / "alias"
+        alias.symlink_to(reserved.parent, target_is_directory=True)
+
+        def initialize(path):
+            argv = ["luna/execute.py", "init-account", "--mode", "fixture", "--account", str(path),
+                    "--cap-usd", "10", "--previous-spend-usd", "0"]
+            stdout = StringIO()
+            with patch.object(sys, "argv", argv), redirect_stdout(stdout):
+                execute.main(LUNA)
+            return decode(stdout.getvalue())
+
+        with patch.object(subprocess, "check_output", return_value=str(git_dir)):
+            for path in (reserved, alias / reserved.name):
+                with self.subTest(path=path):
+                    with redirect_stderr(StringIO()) as err, self.assertRaises(SystemExit) as failure:
+                        initialize(path)
+                    self.assertEqual(failure.exception.code, 2)
+                    self.assertIn("conta sintética separada", err.getvalue())
+                    self.assertFalse(reserved.exists())
+
+            reserved.write_bytes(b"arquivo historico simulado")
+            with redirect_stderr(StringIO()) as err, self.assertRaises(SystemExit):
+                initialize(reserved)
+            self.assertIn("conta sintética separada", err.getvalue())
+            self.assertEqual(reserved.read_bytes(), b"arquivo historico simulado")
+            allowed = self.finance / "permitida.sqlite"
+            result = initialize(allowed)
+            self.assertEqual(Account(allowed, result["account_id"], "fixture").status(), result)
 
     def test_cli_two_stages_and_replay(self):
         path = self.finance / "fixture.sqlite"
