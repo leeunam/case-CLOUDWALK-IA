@@ -1,45 +1,58 @@
 # Interface do help desk
 
-A caixa atende quem acompanha várias filas e precisa ler o histórico, verificar o responsável e responder ao cliente. Na supervisão, o mesmo caso dá acesso à origem da classificação, ao encaminhamento humano e à auditoria. O simulador usa os nomes de marca, canais e categorias entregues pelo repositório selecionado.
+A caixa reúne navegação por perfil, lista de atendimentos, conversa e contexto.
+A supervisão mantém configuração e auditoria. O simulador apresenta histórico,
+classificação e conversa em um fluxo compacto. A adaptação UX02 troca apenas
+estilo visual; os fluxos e estados da UX01 permanecem.
 
-## Superfícies
+## Direção visual
 
-| Superfície | Organização |
-| --- | --- |
-| Operação | Navegação verde à esquerda. O cabeçalho reúne a área selecionada e os controles disponíveis na sessão. A lista mantém filtros e paginação junto aos atendimentos. |
-| Conversa | O histórico ocupa a área central. O compositor do analista responsável fica abaixo das mensagens, com rolagem própria quando o espaço vertical diminui. |
-| Contexto | O resumo do encaminhamento precede as propriedades. As referências levam à mensagem no histórico. O registro do caso reúne identificador e datas. Correção, transferência e auditoria se abrem sob demanda. |
-| Configuração | O supervisor escolhe a marca e uma área de edição. Alterações administrativas podem ser consultadas na auditoria da marca. |
-| Simulador | Histórico e conversa dividem a mesma superfície. No primeiro envio, marca e canal precedem a classificação e a mensagem. O modo fixture aparece como “Dados locais”. |
-| Login | Formulário de coluna única, com rótulos persistentes, preenchimento automático do navegador e mensagem de erro junto ao envio. |
-
-## Cor e tipografia
+O tema escuro é inspirado nas superfícies neutras do site da CloudWalk, sem
+logotipo nem indicação de afiliação. O ícone original de três barras e o nome
+Help desk permanecem. As cores semânticas de espera, falha e sucesso ficam
+restritas aos estados operacionais, sempre acompanhadas de rótulos.
 
 | Token | Valor | Uso |
 | --- | --- | --- |
-| `--ink` | `#192f2a` | Texto principal e navegação |
-| `--accent` | `#155c49` | Ação primária e links |
-| `--tint` | `#e7f2eb` | Seleção, encaminhamento e mensagem de saída |
-| `--paper` e `--canvas` | `#ffffff` e `#f5f7f4` | Área de trabalho e superfície de apoio |
-| `--muted` | `#52665e` | Contexto, datas e texto secundário |
-| `--line` e `--control` | `#d8e2db` e `#748c7f` | Divisórias e contornos de controles |
-| `--warn` e `--warn-bg` | `#6f4b12` e `#fcf1d8` | Espera, bloqueio e perda de conexão |
-| `--error` e `--error-bg` | `#8c322c` e `#fff0ed` | Falhas que exigem atenção |
+| `--canvas` / `--paper` | `#111111` / `#181818` | Fundo da aplicação e superfícies de trabalho |
+| `--surface-raised` / `--navigation` | `#202020` / `#0b0b0b` | Campos, apoio e navegação |
+| `--ink` / `--muted` | `#ecebe9` / `#b9b7b4` | Texto principal e secundário |
+| `--accent` / `--button-ink` | `#f0efed` / `#111111` | Links, ícones e ação primária clara |
+| `--tint` / `--selection-border` | `#292929` / `#797979` | Seleção, destaque e contorno selecionado |
+| `--line` / `--control` | `#363636` / `#737373` | Divisórias e contornos de campos |
+| `--warn` / `--warn-bg` | `#f1c976` / `#332b1b` | Espera e revisão |
+| `--error` / `--error-bg` | `#ffaaa0` / `#351f1d` | Falhas que exigem atenção |
+| `--success` / `--success-bg` | `#a8dbb7` / `#1b2c23` | Atendimento ativo |
 
-A fonte é a sans-serif do sistema. O texto base mede 15 px na configuração padrão do navegador, os controles 14 px, os títulos de painel 18 px e o título do simulador 28 px. Todos usam unidades relativas ao tamanho de fonte do usuário. A navegação e os estados têm rótulos de texto. Os ícones usam traço uniforme e os controles que exibem apenas um ícone têm nome acessível.
+A tipografia usa Gabarito variável, peso 400 no corpo e pesos 500/600 em títulos
+e controles. Gabarito é uma aproximação geométrica gratuita; não é Cera Pro e
+não reproduz com exatidão a fonte computada no site de referência. O arquivo e
+a licença OFL estão em `frontend/public/fonts/`; `docs/ux02.md` registra origem
+e hash. A fonte é servida localmente com `font-display: swap`.
 
-## Largura e interação
+## Superfícies e interação
 
-- Acima de 77 rem, navegação, lista, conversa e contexto dividem a largura. Em 1024 px, “Ver contexto” alterna o conteúdo apresentado ao lado da lista.
-- Até 58 rem, a navegação da operação vira um seletor no cabeçalho. Em 768 px, a lista e a conversa ainda podem ser lidas juntas.
-- Até 44 rem, a operação alterna “Lista” e “Conversa”. O simulador alterna o formulário ou conversa e o histórico. Ocultar um painel mantém o rascunho do caso selecionado.
-- O foco do teclado é visível e os controles usam elementos nativos. Uma referência do encaminhamento revela e foca a mensagem mesmo quando a conversa está oculta. O CSS respeita a preferência por movimento reduzido.
-- As mensagens de carregamento, erro e confirmação acompanham a operação que as gerou. Uma falha de rede mantém disponíveis os mecanismos existentes de confirmação idempotente. Os dados da sessão alimentam a disponibilidade, os casos ativos e a carteira.
+| Superfície | Organização |
+| --- | --- |
+| Operação | Navegação grafite, lista, conversa e contexto em superfícies escuras. |
+| Conversa | Mensagens recebidas em grafite e enviadas em cinza neutro mais claro. |
+| Configuração | Campos nativos escuros; abas e seleção usam cinzas da paleta. |
+| Simulador | Histórico e conversa preservam o layout da UX01 com a paleta compartilhada. |
+| Login | Formulário compacto em painel escuro e ação clara arredondada. |
 
-## Referências de organização
+O foco é claro e visível, campos têm contorno contrastante, checkbox e radio
+seguem o tema escuro nativo do navegador e a seleção textual usa cinza claro.
+As dimensões, a navegação responsiva e os comportamentos documentados em
+[UX01](docs/ux01.md) permanecem.
 
-A separação entre lista, conversa e contexto segue a estrutura de uma caixa compartilhada. [Chatwoot](https://www.chatwoot.com/)
+## Organização responsiva preservada
 
-Os atributos do atendimento e os comandos de supervisão ficam próximos ao ticket. [Zammad](https://zammad.com/en)
-
-A supervisão distingue falha e revisão com rótulos compactos e atalhos para os respectivos filtros. A referência visual foi a captura do painel Web apresentada no projeto. [Sidekiq](https://github.com/sidekiq/sidekiq)
+- Acima de 77 rem, navegação, lista, conversa e contexto dividem a largura.
+  Abaixo desse limite, “Ver contexto” alterna a conversa e o contexto.
+- Até 58 rem, a navegação da operação vira um seletor no cabeçalho.
+- Até 44 rem, a operação alterna “Lista” e “Conversa”; no simulador, a navegação
+  alterna formulário/conversa e histórico.
+- O foco do teclado é visível. Referências ao encaminhamento revelam e focam a
+  mensagem no histórico, inclusive quando a conversa está oculta.
+- As superfícies e estados existentes conservam os rótulos. Os tokens de espera,
+  falha e sucesso mudam apenas sua apresentação cromática.

@@ -1,18 +1,18 @@
 .staff-app { display: grid; grid-template-columns: 12.75rem minmax(0,1fr); height: 100dvh; min-height: 24rem; }
-.rail { color: #eff5f0; background: var(--ink); display: flex; flex-direction: column; min-width: 0; padding: 1.2rem .75rem .65rem; overflow-y: auto; }
+.rail { color: var(--ink); background: var(--navigation); display: flex; flex-direction: column; min-width: 0; padding: 1.2rem .75rem .65rem; overflow-y: auto; }
 .rail .identity { padding: .1rem .4rem 1.5rem; }
 .rail-group { margin-bottom: 1.5rem; }
-.rail-group h2 { margin: .25rem .6rem .45rem; color: #aec5b7; font-size: .75rem; font-weight: 600; letter-spacing: .01em; }
-.rail-group button, .rail-bottom a { display: flex; width: 100%; align-items: center; gap: .55rem; padding: .6rem; min-height: 2.5rem; border: 0; border-radius: var(--radius); color: #e6f1e9; background: transparent; text-decoration: none; font-size: .8125rem; font-weight: 550; text-align: left; }
-.rail-group button:hover, .rail-bottom a:hover, .account button:hover { background: #234238; }
-.rail-group button[aria-current] { background: #34594a; color: white; }
+.rail-group h2 { margin: .25rem .6rem .45rem; color: var(--muted); font-size: .75rem; font-weight: 600; letter-spacing: .01em; }
+.rail-group button, .rail-bottom a { display: flex; width: 100%; align-items: center; gap: .55rem; padding: .6rem; min-height: 2.5rem; border: 0; border-radius: var(--radius); color: var(--ink); background: transparent; text-decoration: none; font-size: .8125rem; font-weight: 550; text-align: left; }
+.rail-group button:hover, .rail-bottom a:hover, .account button:hover { background: var(--surface-raised); }
+.rail-group button[aria-current] { background: var(--navigation-selected); color: #fff; }
 .rail-group svg, .rail-bottom svg { width: 1.1rem; }
 .rail-bottom { margin-top: auto; }
-.account { border-top: 1px solid #446053; margin-top: .65rem; padding: .75rem .4rem 0; display: flex; justify-content: space-between; align-items: center; gap: .4rem; }
+.account { border-top: 1px solid var(--line); margin-top: .65rem; padding: .75rem .4rem 0; display: flex; justify-content: space-between; align-items: center; gap: .4rem; }
 .account strong, .account small { display: block; overflow-wrap: anywhere; }
 .account strong { font-size: .875rem; }
-.account small { color: #c3d4c9; font-size: .75rem; }
-.account button { background: transparent; border: 0; border-radius: var(--radius); color: #e6f1e9; min-width: 2.3rem; min-height: 2.3rem; }
+.account small { color: var(--muted); font-size: .75rem; }
+.account button { background: transparent; border: 0; border-radius: var(--radius); color: var(--ink); min-width: 2.3rem; min-height: 2.3rem; }
 .mobile-nav { display: none; }
 .staff-main, .inbox-shell, .staff-conversation { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .staff-main { background: var(--paper); }
@@ -29,7 +29,7 @@
 .inbox-shell { flex: 1; }
 .inbox { display: grid; flex: 1; min-height: 0; grid-template-columns: minmax(15.5rem, 18.5rem) minmax(0,1fr); }
 .case-list, .case-context { min-width: 0; min-height: 0; overflow-y: auto; }
-.case-list { background: #f9faf8; border-right: 1px solid var(--line); }
+.case-list { background: var(--canvas); border-right: 1px solid var(--line); }
 .case-list .sidebar-header, .case-context .sidebar-header { padding-inline: 1rem; }
 .case-list .history time { grid-column: 1/-1; grid-row: auto; }
 .filter-disclosure { padding: .45rem 1rem; border-bottom: 1px solid var(--line); }
@@ -45,11 +45,11 @@
 .case-desk[data-has-detail="false"] { grid-template-columns: minmax(0,1fr); }
 .staff-conversation > .transcript { flex: 1 1 6rem; min-height: 4rem; overflow: auto; }
 .staff-conversation .workspace-header { flex-wrap: wrap; }
-.staff-conversation .message.customer { align-self: flex-start; background: #f0f3f0; border-radius: .7rem .7rem .7rem .1rem; }
+.staff-conversation .message.customer { align-self: flex-start; background: var(--surface-raised); border-radius: .7rem .7rem .7rem .1rem; }
 .staff-conversation .message.outgoing { align-self: flex-end; background: var(--tint); border-radius: .7rem .7rem .1rem .7rem; }
 .staff-conversation .conversation-footer { max-height: 58%; overflow-y: auto; }
 .staff-actions { justify-content: flex-start; }
-.case-context { border-left: 1px solid var(--line); background: #fafbf9; overflow-wrap: anywhere; }
+.case-context { border-left: 1px solid var(--line); background: var(--paper); overflow-wrap: anywhere; }
 .context-body, .case-supervision { padding: 1rem; }
 .context-body > * + * { margin-top: 1.25rem; }
 .attributes { margin-top: .5rem; }

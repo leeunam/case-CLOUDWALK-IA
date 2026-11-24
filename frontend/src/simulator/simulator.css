@@ -5,7 +5,7 @@
 .mode-link { font-size: .8125rem; font-weight: 600; }
 .simulator-layout { display: grid; grid-template-columns: minmax(14rem, 19rem) minmax(0,1fr); align-items: stretch; border: 1px solid var(--line); background: var(--paper); border-radius: .8rem; overflow: clip; }
 .simulator-layout .panel { border: 0; border-radius: 0; }
-.simulator-layout .sidebar { border-right: 1px solid var(--line); background: #f9faf8; }
+.simulator-layout .sidebar { border-right: 1px solid var(--line); background: var(--canvas); }
 .simulator-layout .history { padding: .4rem; }
 .simulator-layout .history button > strong svg { width: 1rem; color: var(--accent); }
 .simulator-layout .history button > time { grid-column: 1/-1; grid-row: auto; }
@@ -21,7 +21,7 @@
 .channel-picker svg { width: 1rem; height: 1rem; }
 .channel-picker label.selected { color: var(--accent); border-color: var(--accent); background: var(--tint); }
 .channel-picker input { width: .9rem; height: .9rem; flex: none; margin: 0; cursor: pointer; }
-.channel-picker label:has(input:focus-visible) { outline: 3px solid #278265; outline-offset: 2px; }
+.channel-picker label:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
 .channel-picker label:has(input:disabled) { opacity: .6; cursor: default; }
 .metadata { padding: .65rem .8rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--canvas); }
 .classification-preview { display: inline-block; margin-left: .65rem; font-size: .8125rem; font-weight: 400; color: var(--muted); }
