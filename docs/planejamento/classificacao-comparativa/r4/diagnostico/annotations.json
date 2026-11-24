@@ -1,0 +1,231 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "split": "desenvolvimento",
+    "contract_version": "1.1.0",
+    "case_count": 16,
+    "pair_count": 8,
+    "rubric": {
+      "path": "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
+      "version": "1.0.0",
+      "sha256": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac"
+    },
+    "catalog": {
+      "path": "script/f08/jev/catalog.json",
+      "version": "1.0.0",
+      "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271"
+    }
+  },
+  "cases": [
+    {
+      "id": "R4-D-012",
+      "pair_id": "P01",
+      "expected": {
+        "category": "payouts"
+      },
+      "justificativa": "A pergunta identifica os valores das vendas e pede a data de disponibilização na conta.",
+      "fato_distintivo": "A origem do dinheiro é especificada como vendas a crédito em um relato e fica indeterminada no outro.",
+      "relacao_esperada": {
+        "category": "muda_para_abstencao",
+        "priority": "preservada"
+      }
+    },
+    {
+      "id": "R4-D-004",
+      "pair_id": "P01",
+      "expected": {
+        "category": "informacao_insuficiente"
+      },
+      "justificativa": "A origem do dinheiro e a operação a que se refere o lançamento não foram identificadas.",
+      "fato_distintivo": "A origem do dinheiro é especificada como vendas a crédito em um relato e fica indeterminada no outro.",
+      "relacao_esperada": {
+        "category": "muda_para_abstencao",
+        "priority": "preservada"
+      }
+    },
+    {
+      "id": "R4-D-002",
+      "pair_id": "P02",
+      "expected": {
+        "category": "payouts"
+      },
+      "justificativa": "O pedido é de orientação sobre onde consultar o recebimento das vendas no cartão.",
+      "fato_distintivo": "A linguagem muda. Os dois relatos mantêm a ligação entre disponibilização do valor e vendas já realizadas no cartão.",
+      "relacao_esperada": {
+        "category": "mantem",
+        "priority": "preservada"
+      }
+    },
+    {
+      "id": "R4-D-015",
+      "pair_id": "P02",
+      "expected": {
+        "category": "payouts"
+      },
+      "justificativa": "O dinheiro se refere ao lote de vendas com cartão que já aparece fechado.",
+      "fato_distintivo": "A linguagem muda. Os dois relatos mantêm a ligação entre disponibilização do valor e vendas já realizadas no cartão.",
+      "relacao_esperada": {
+        "category": "mantem",
+        "priority": "preservada"
+      }
+    },
+    {
+      "id": "R4-D-006",
+      "pair_id": "P03",
+      "expected": {
+        "category": "payouts"
+      },
+      "justificativa": "O equipamento situa as vendas. A dificuldade é o crédito atrasado dos valores dessas vendas.",
+      "fato_distintivo": "A maquininha aparece nos dois relatos. O objeto da falha muda do crédito das vendas na conta para a impressão de segunda via.",
+      "relacao_esperada": {
+        "category": "muda",
+        "priority": "preservada"
+      }
+    },
+    {
+      "id": "R4-D-013",
+      "pair_id": "P03",
+      "expected": {
+        "category": "terminal"
+      },
+      "justificativa": "A dificuldade é a função de impressão da maquininha.",
+      "fato_distintivo": "A maquininha aparece nos dois relatos. O objeto da falha muda do crédito das vendas na conta para a impressão de segunda via.",
+      "relacao_esperada": {
+        "category": "muda",
+        "priority": "preservada"
+      }
+    },
+    {
+      "id": "R4-D-009",
+      "pair_id": "P04",
+      "expected": {
+        "category": "pix"
+      },
+      "justificativa": "O objeto da consulta é a confirmação de um pagamento explicitamente identificado como Pix.",
+      "fato_distintivo": "O aparelho e a tela com QR são comuns. O cliente pergunta pela confirmação de um pagamento por Pix em um relato e pelo controle da tela no outro.",
+      "relacao_esperada": {
+        "category": "muda",
+        "priority": "preservada"
+      }
+    },
+    {
+      "id": "R4-D-001",
+      "pair_id": "P04",
+      "expected": {
+        "category": "terminal"
+      },
+      "justificativa": "O pedido trata do funcionamento de uma tecla e da navegação no aparelho.",
+      "fato_distintivo": "O aparelho e a tela com QR são comuns. O cliente pergunta pela confirmação de um pagamento por Pix em um relato e pelo controle da tela no outro.",
+      "relacao_esperada": {
+        "category": "muda",
+        "priority": "preservada"
+      }
+    },
+    {
+      "id": "R4-D-016",
+      "pair_id": "P05",
+      "expected": {
+        "category": "pix"
+      },
+      "justificativa": "O pedido se refere ao prazo da transferência identificada como Pix.",
+      "fato_distintivo": "O lançamento em andamento é identificado como Pix em um relato. O outro exclui explicitamente a transferência já concluída do pedido atual.",
+      "relacao_esperada": {
+        "category": "muda_para_abstencao",
+        "priority": "preservada"
+      }
+    },
+    {
+      "id": "R4-D-008",
+      "pair_id": "P05",
+      "expected": {
+        "category": "informacao_insuficiente"
+      },
+      "justificativa": "A menção ao Pix aponta uma operação concluída que está fora do pedido. O lançamento consultado ficou sem identificação.",
+      "fato_distintivo": "O lançamento em andamento é identificado como Pix em um relato. O outro exclui explicitamente a transferência já concluída do pedido atual.",
+      "relacao_esperada": {
+        "category": "muda_para_abstencao",
+        "priority": "preservada"
+      }
+    },
+    {
+      "id": "R4-D-003",
+      "pair_id": "P06",
+      "expected": {
+        "category": "pix"
+      },
+      "justificativa": "A verificação solicitada é sobre a conclusão de um pagamento por Pix, mesmo em treinamento.",
+      "fato_distintivo": "O tipo de operação do pedido de teste é identificado em um relato e tratado como hipótese de terceiros no outro.",
+      "relacao_esperada": {
+        "category": "muda_para_abstencao",
+        "priority": "preservada"
+      }
+    },
+    {
+      "id": "R4-D-011",
+      "pair_id": "P06",
+      "expected": {
+        "category": "informacao_insuficiente"
+      },
+      "justificativa": "A confirmação na tela não identifica por si só a operação. O Pix aparece como hipótese sem confirmação.",
+      "fato_distintivo": "O tipo de operação do pedido de teste é identificado em um relato e tratado como hipótese de terceiros no outro.",
+      "relacao_esperada": {
+        "category": "muda_para_abstencao",
+        "priority": "preservada"
+      }
+    },
+    {
+      "id": "R4-D-014",
+      "pair_id": "P07",
+      "expected": {
+        "category": "terminal"
+      },
+      "justificativa": "O pedido é de configuração de rede da maquininha reserva.",
+      "fato_distintivo": "As duas formulações pedem instruções para adicionar a rede Wi-Fi ao aparelho usado para aceitar cartões.",
+      "relacao_esperada": {
+        "category": "mantem",
+        "priority": "preservada"
+      }
+    },
+    {
+      "id": "R4-D-007",
+      "pair_id": "P07",
+      "expected": {
+        "category": "terminal"
+      },
+      "justificativa": "Mesmo sem usar o termo maquininha, o objeto é um aparelho adicional para cartões e a solicitação é de configuração.",
+      "fato_distintivo": "As duas formulações pedem instruções para adicionar a rede Wi-Fi ao aparelho usado para aceitar cartões.",
+      "relacao_esperada": {
+        "category": "mantem",
+        "priority": "preservada"
+      }
+    },
+    {
+      "id": "R4-D-010",
+      "pair_id": "P08",
+      "expected": {
+        "category": "pix",
+        "priority": "urgent"
+      },
+      "justificativa": "O extrato identifica os pagamentos por Pix. A sequência de saídas em andamento requer intervenção imediata.",
+      "fato_distintivo": "A identificação das saídas como pagamentos por Pix some. O dinheiro continua saindo em sequência e a necessidade de parar agora se mantém.",
+      "relacao_esperada": {
+        "category": "muda_para_abstencao",
+        "priority": "mantem"
+      }
+    },
+    {
+      "id": "R4-D-005",
+      "pair_id": "P08",
+      "expected": {
+        "category": "informacao_insuficiente",
+        "priority": "urgent"
+      },
+      "justificativa": "A sequência de saídas exige intervenção imediata, mas o extrato não permite identificar a categoria. A abstenção leva o caso à revisão sem aplicar a prioridade prevista.",
+      "fato_distintivo": "A identificação das saídas como pagamentos por Pix some. O dinheiro continua saindo em sequência e a necessidade de parar agora se mantém.",
+      "relacao_esperada": {
+        "category": "muda_para_abstencao",
+        "priority": "mantem"
+      }
+    }
+  ]
+}
