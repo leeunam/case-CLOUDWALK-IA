@@ -59,3 +59,36 @@ O responsável quer aprender. Cada passagem mantém explicação curta, arquivos
 de referência e um exercício. O chat central informa resultados e barreiras
 concretas e continua o trabalho independente quando aguarda informação.
 Este plano não declara o projeto concluído: o aceite depende das provas acima.
+
+## Destino gratuito confirmado — F10
+
+O responsável informou não ter servidor e autorizou uma opção gratuita em
+24/11/2026. A demonstração usará Cloudflare Quick Tunnel sobre a instância
+local isolada. Não exige conta/domínio e não cria servidor pago. A URL é
+temporária, muda ao recriar o túnel e depende do computador/processo ligados;
+o serviço não garante disponibilidade e limita a 200 requisições em voo.
+Essas condições estão na [documentação oficial](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/).
+Isso é publicação de demonstração, sem alegação de hospedagem permanente.
+
+Preparar uma composição própria: mesmos serviços do aplicativo, frontend
+compilado servido pelo Caddy, proxy para API e `/cable` na mesma origem e
+Cloudflare terminando HTTPS. Banco, Kafka, ponte e API ficam sem portas
+públicas; apenas o frontend HTTP de origem fica em loopback para teste e
+conexão do túnel. Volumes novos exclusivos preservam dados sintéticos.
+O Caddy suporta o [proxy e fallback SPA](https://caddyserver.com/docs/caddyfile/patterns)
+e o [upgrade WebSocket](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy).
+
+O Rails opera em production, com cookies seguros e origem pública exata para
+WebSocket. A configuração de proxy deve tratar a terminação de SSL sem ciclo
+de redirecionamento, seguindo [assume_ssl](https://guides.rubyonrails.org/configuring.html#config-assume-ssl),
+com acesso direto ao backend limitado à rede interna. O login sintético em
+production exige habilitação explícita e credenciais privadas geradas, sem
+habilitar valores de desenvolvimento por padrão. Não criar outro sistema de
+identidade. Preservar CSRF, isolamento e revogação.
+
+A configuração publicada permanece em fixture, sem chave de fornecedor, até
+uma decisão válida para o classificador. A R2 real de desenvolvimento foi
+interrompida e não liberou o final; publicar a demonstração não libera C06.
+Preparar/testar localmente antes de iniciar o túnel público. O integrador
+verifica HTTPS externo, login, WebSocket, fluxo Kafka/handoff e persistência,
+registrando o período de disponibilidade e como parar/reabrir a URL.
