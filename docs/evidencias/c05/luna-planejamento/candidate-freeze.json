@@ -1,0 +1,56 @@
+{
+  "task": "C05-R3/Task3-A",
+  "status": "candidate_frozen_before_r3_evaluator_or_final_fixture_execution",
+  "candidate_commit": "cda8fc83d82cfc9c8cf4b746732fb11088edf751",
+  "base": "eaca1c6b64f407e628929023145d5cf1479973d2",
+  "candidate": {
+    "path": "script/classification_comparison/adapters/luna/candidate.json",
+    "version": "1.0.0",
+    "sha256": "1daac4749be2e8ac07989780ce5b4aae58f3f7f2bbbf460fdfb904a98295caf5"
+  },
+  "operational": {
+    "path": "script/classification_comparison/adapters/luna/operational.json",
+    "version": "1.0.0",
+    "sha256": "0666cdd1c99f58c52512681563b72ddcaf4f97593071a1797104526d062678da"
+  },
+  "runtime_and_semantic_sources_sha256": {
+    "script/classification_comparison/adapters/luna/candidate.json": "1daac4749be2e8ac07989780ce5b4aae58f3f7f2bbbf460fdfb904a98295caf5",
+    "script/classification_comparison/adapters/luna/operational.json": "0666cdd1c99f58c52512681563b72ddcaf4f97593071a1797104526d062678da",
+    "script/classification_comparison/adapters/luna/adapter.py": "cf221d6d1f39f27bbc3d4388d6c14091fe869e0351ca8564c713284eca4b3845",
+    "script/classification_comparison/adapters/luna/transport.py": "60673dff9db3f3dd8e16db409843ec6d073397053a66e664a5b65e2b98d03ea0",
+    "script/classification_comparison/adapters/qwen/adapter.py": "fefe1b4458d667bf9701e59ce2071d368a92169848ba14e6ccd516ab7d74c90f",
+    "script/classification_comparison/adapters/qwen/transport.py": "a93f322b347efe69096aa4fa1483ae003b2ef06a2e1e1077ed09cbcab4f030f2",
+    "script/classification_comparison/adapters/qwen/pilot.py": "5605c8cfc06af9acea2319aad2c9284c46ab381e3262362fbeda99e5e866c79b",
+    "script/classification_comparison/adapters/qwen/fixture.py": "7d0d2d3a86971481664652488afb4eb83bcd961be693b03dfdc1c1904b1a5dbf",
+    "script/classification_comparison/adapters/qwen/tarifas-publicas.json": "4494fc5d7d0f970521560697ae3facc16773fed8c38d7ef28df9b78686bf27cf",
+    "script/classification_comparison/adapters/qwen/r2/prompt.txt": "c03848e1f9266ae2aadb5d28d8f82265034c0312067a5e3204aea723437cfa75",
+    "script/classification_comparison/adapters/qwen/r2/politica.txt": "6893a119e6dc90aef81e10cc803dba8d66e3cf4c04cc4f3f2d333515c4b2a039",
+    "docs/planejamento/classificacao-comparativa/rubrica-comum.md": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac"
+  },
+  "review": {
+    "spec": "approved",
+    "quality": "approved",
+    "open_findings": 0,
+    "path": "docs/evidencias/c05/luna-planejamento/luna-adaptador-re-review-round1.md",
+    "sha256": "2e20be34465178fc792e2e4fa9c13c72c70caa78fd7033223474aa7eb6bfa3aa"
+  },
+  "boundary": {
+    "adapter_author_accessed_final_texts_or_labels": false,
+    "r3_evaluator_or_final_fixture_executed": false,
+    "new_final_inference_started": false,
+    "semantic_instructions_reused_unchanged": true,
+    "historical_integrator_r2_data_review_not_relabelled": true,
+    "operational_role_separation_not_acl_or_statistical_independence": true
+  },
+  "authorization": {
+    "date": "2026-11-24",
+    "scope": "D Luna one call, offline preparation only",
+    "new_paid_calls_authorized": false
+  },
+  "historical_data_freeze": {
+    "path": "docs/planejamento/classificacao-comparativa/r2/final-freeze.json",
+    "sha256": "3bfe4604614e019ccfb07d63ca1ceceb5130dbcd30dae55f971c83c34952c7a1"
+  },
+  "final_case_sha256": "17f5bae372983f90aa1956d0d583db25483a77a3ff35e4f1041ad4d51b897af9",
+  "new_final_human_case_approvals": 0
+}
