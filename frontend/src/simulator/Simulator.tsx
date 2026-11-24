@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import type { ChannelType, SimulatorRepository } from './contract'
 import { readPages } from '../api/pagination'
 import { brandsFromChannels, createSimulatorApi } from '../api/simulator'
@@ -26,6 +27,7 @@ export function Simulator() {
   const [historyRevision, setHistoryRevision] = useState(0)
   const [caseId, setCaseId] = useOpenCase()
   const [showHistory, setShowHistory] = useState(false)
+  const conversationHeading = useRef<HTMLHeadingElement>(null)
   const [brandId, setBrandId] = useState('')
   const [channelType, setChannelType] = useState<ChannelType>('chat')
   const [pendingNewCase, setPendingNewCase] = useState(false)
@@ -63,6 +65,14 @@ export function Simulator() {
     setShowHistory(false)
     refreshHistory()
     setCaseId(current => current === caseId ? id : current)
+  }
+
+  function openFromHistory(id: string, trigger: HTMLButtonElement) {
+    flushSync(() => {
+      setCaseId(id)
+      setShowHistory(false)
+    })
+    if (trigger.getClientRects().length === 0) conversationHeading.current?.focus()
   }
 
   return (
@@ -116,7 +126,7 @@ export function Simulator() {
                   const itemBrand = brands.find(entry => entry.id === itemChannel?.brand_id)
                   return (
                     <li key={item.id}>
-                      <button onClick={() => { setCaseId(item.id); setShowHistory(false) }} disabled={pendingNewCase}
+                      <button type="button" onClick={event => openFromHistory(item.id, event.currentTarget)} disabled={pendingNewCase}
                         aria-current={caseId === item.id ? 'true' : undefined}>
                         <strong>{itemChannel && <Icon name={itemChannel.type} />}{itemChannel ? channelLabels[itemChannel.type] : 'Atendimento'}</strong>
                         {itemBrand && <span>{itemBrand.name}</span>}
@@ -134,7 +144,7 @@ export function Simulator() {
           </aside>
           {caseId ? (
             <Conversation key={caseId} id={caseId} latestCaseId={latestCaseId} brands={brands} channels={channels} repository={repository} demo={demo}
-              onHistoryChanged={refreshHistory} onOpen={showCase} />
+              headingRef={conversationHeading} onHistoryChanged={refreshHistory} onOpen={showCase} />
           ) : (
             <section className="panel workspace" aria-labelledby="new-heading">
               <div className="workspace-header">

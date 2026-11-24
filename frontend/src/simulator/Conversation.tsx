@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type Ref } from 'react'
 import type { Brand, Channel, SimulatorReceipt, SimulatorRepository } from './contract'
 import { Transcript } from '../Transcript'
 import { useCaseRefresh } from '../useCaseRefresh'
@@ -7,7 +7,7 @@ import { caseLabels, channelLabels } from './presentation'
 import { useResource } from './useResource'
 
 export function Conversation({
-  id, latestCaseId, brands, channels, repository, demo, onHistoryChanged, onOpen,
+  id, latestCaseId, brands, channels, repository, demo, headingRef, onHistoryChanged, onOpen,
 }: {
   id: string
   latestCaseId?: string
@@ -15,6 +15,7 @@ export function Conversation({
   channels: Channel[]
   repository: SimulatorRepository
   demo: boolean
+  headingRef: Ref<HTMLHeadingElement>
   onHistoryChanged: () => void
   onOpen: (id: string) => void
 }) {
@@ -45,7 +46,7 @@ export function Conversation({
       <div className="workspace-header">
         <div>
           {channel && <p className="context">{channelLabels[channel.type]}{brand && ` · ${brand.name}`}</p>}
-          <h2 id="conversation-heading">Conversa</h2>
+          <h2 id="conversation-heading" ref={headingRef} tabIndex={-1}>Conversa</h2>
         </div>
         {detail && <span role="status" className={`case-status ${detail.status}`}>{caseLabels[detail.status]}</span>}
       </div>
@@ -54,7 +55,7 @@ export function Conversation({
           <button className="text-button" onClick={() => onOpen(previousCaseId)}>Ver atendimento anterior</button>
         </div>
       )}
-      <div className="transcript">
+      <div className="transcript" tabIndex={0} role="region" aria-label="Histórico da conversa">
         {!data && loading && <p role="status">Carregando conversa…</p>}
         {error && (
           <div className="notice" role="alert">

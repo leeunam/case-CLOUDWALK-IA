@@ -22,7 +22,7 @@ A caixa atende quem acompanha várias filas e precisa ler o histórico, verifica
 | `--tint` | `#e7f2eb` | Seleção, encaminhamento e mensagem de saída |
 | `--paper` e `--canvas` | `#ffffff` e `#f5f7f4` | Área de trabalho e superfície de apoio |
 | `--muted` | `#52665e` | Contexto, datas e texto secundário |
-| `--line` e `--control` | `#d8e2db` e `#99ada2` | Divisórias e contornos de controles |
+| `--line` e `--control` | `#d8e2db` e `#748c7f` | Divisórias e contornos de controles |
 | `--warn` e `--warn-bg` | `#6f4b12` e `#fcf1d8` | Espera, bloqueio e perda de conexão |
 | `--error` e `--error-bg` | `#8c322c` e `#fff0ed` | Falhas que exigem atenção |
 
