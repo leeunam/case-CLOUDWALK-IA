@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import type { ChannelType, SimulatorRepository } from './contract'
 import { readPages } from '../api/pagination'
 import { brandsFromChannels, createSimulatorApi } from '../api/simulator'
+import { Icon } from '../Icon'
+import { ConnectionNotice } from '../ConnectionNotice'
 import { Topbar } from '../Topbar'
 import { useOpenCase } from '../useOpenCase'
 import { usePagedCases } from '../usePagedCases'
@@ -23,6 +25,7 @@ export function Simulator() {
   const [catalogRevision, setCatalogRevision] = useState(0)
   const [historyRevision, setHistoryRevision] = useState(0)
   const [caseId, setCaseId] = useOpenCase()
+  const [showHistory, setShowHistory] = useState(false)
   const [brandId, setBrandId] = useState('')
   const [channelType, setChannelType] = useState<ChannelType>('chat')
   const [pendingNewCase, setPendingNewCase] = useState(false)
@@ -57,6 +60,7 @@ export function Simulator() {
   }, [refreshCatalog, refreshHistory])
 
   function showCase(id: string) {
+    setShowHistory(false)
     refreshHistory()
     setCaseId(current => current === caseId ? id : current)
   }
@@ -64,16 +68,23 @@ export function Simulator() {
   return (
     <>
       <Topbar demo={demo} />
-      <main className="shell">
-        <div className="page-heading">
-          <h1>Simulador de atendimento</h1>
-          {caseId && (
-            <button className="primary" onClick={() => setCaseId(null)}>
-              <span aria-hidden="true">+</span> Novo atendimento
-            </button>
-          )}
+      <main className="simulator shell">
+        <header className="page-heading">
+          <div><h1>Simulador de atendimento</h1>
+            <p className="muted">Envie uma mensagem à marca ou continue uma conversa pelo histórico.</p>
+          </div>
+          <div className="simulator-actions">
+            <a className="mode-link" href={demo ? '/' : '/?fixture=demo'}>{demo ? 'Usar API real' : 'Abrir demonstração local'}</a>
+            {caseId && <button type="button" className="primary" onClick={() => { setCaseId(null); setShowHistory(false) }}>
+              <Icon name="plus" />Novo atendimento
+            </button>}
+          </div>
+        </header>
+        <div className="pane-nav" role="group" aria-label="Painéis do simulador">
+          <button type="button" aria-pressed={!showHistory} onClick={() => setShowHistory(false)}><Icon name="chat" />{caseId ? 'Conversa' : 'Novo atendimento'}</button>
+          <button type="button" aria-pressed={showHistory} onClick={() => setShowHistory(true)}><Icon name="history" />Histórico</button>
         </div>
-        <p className="mode-link"><a href={demo ? '/' : '/?fixture=demo'}>{demo ? 'Usar API real' : 'Abrir demonstração local'}</a></p>
+        {!demo && <ConnectionNotice />}
         {catalog.error && (
           <div className="notice catalog-notice" role="alert">
             <p>Não foi possível carregar marcas e canais. {catalog.error}</p>
@@ -82,12 +93,12 @@ export function Simulator() {
             </button>
           </div>
         )}
-        <div className="layout">
+        <div className="simulator-layout" data-history={showHistory}>
           <aside className="panel sidebar" aria-labelledby="history-heading">
             <div className="sidebar-header">
-              <h2 id="history-heading">Histórico</h2>
+              <h2 id="history-heading"><Icon name="history" />Histórico</h2>
               <button className="icon-button" onClick={refreshHistory} aria-label="Atualizar histórico" disabled={history.loading}>
-                <span aria-hidden="true">↻</span>
+                <Icon name="refresh" />
               </button>
             </div>
             {!history.data && history.loading && <p className="sidebar-state" role="status">Carregando histórico…</p>}
@@ -105,9 +116,9 @@ export function Simulator() {
                   const itemBrand = brands.find(entry => entry.id === itemChannel?.brand_id)
                   return (
                     <li key={item.id}>
-                      <button onClick={() => setCaseId(item.id)} disabled={pendingNewCase}
+                      <button onClick={() => { setCaseId(item.id); setShowHistory(false) }} disabled={pendingNewCase}
                         aria-current={caseId === item.id ? 'true' : undefined}>
-                        <strong>{itemChannel ? channelLabels[itemChannel.type] : 'Atendimento'}</strong>
+                        <strong>{itemChannel && <Icon name={itemChannel.type} />}{itemChannel ? channelLabels[itemChannel.type] : 'Atendimento'}</strong>
                         {itemBrand && <span>{itemBrand.name}</span>}
                         <time className="muted" dateTime={item.updated_at}>{formatTimestamp(item.updated_at)}</time>
                         <span className={`case-status ${item.status}`}>{caseLabels[item.status]}</span>
@@ -133,6 +144,7 @@ export function Simulator() {
               {catalog.data && !brand && <p className="workspace-state muted">Nenhuma marca está disponível.</p>}
               {brand && (
                 <div className="new-case">
+                  <div className="channel-settings">
                   <label className="brand-field">
                     Marca
                     <select value={brand.id} disabled={pendingNewCase} onChange={event => setBrandId(event.target.value)}>
@@ -146,11 +158,12 @@ export function Simulator() {
                         <label key={item.id} className={channel?.id === item.id ? 'selected' : ''}>
                           <input type="radio" name="channel" value={item.id} checked={channel?.id === item.id}
                             onChange={() => setChannelType(item.type)} />
-                          {channelLabels[item.type]}
+                          <Icon name={item.type} />{channelLabels[item.type]}
                         </label>
                       ))}
                     </div>
                   </fieldset>
+                  </div>
                   {channel ? (
                     <Composer key={channel.id} channel={channel} repository={repository} onAttemptChange={setPendingNewCase}
                       onSent={receipt => showCase(receipt.case_id)} />

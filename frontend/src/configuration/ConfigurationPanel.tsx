@@ -115,7 +115,7 @@ export function ConfigurationPanel({ session, onChange }: { session: Session; on
 
   return <section className="panel configuration-panel" aria-labelledby="configuration-heading">
     <div className="page-heading">
-      <h2 id="configuration-heading">Configuração operacional</h2>
+      <h2 id="configuration-heading">Configuração por marca</h2>
       <button className="secondary" onClick={refresh} disabled={brands.loading}>Atualizar configuração</button>
     </div>
     {brands.error && <p role="alert">{brands.error}</p>}
