@@ -1,8 +1,10 @@
 # C05-R3 · Preparação offline da Luna
 
 O responsável aprovou GPT-5.6 Luna pela Feita, com uma chamada por caso, para
-preparação offline. O modelo ainda não foi qualificado nem adotado. Não houve
-chamada real da Luna. A demonstração pública continua em fixture.
+preparação offline. O modelo não foi qualificado nem adotado. Após a autorização específica, seis
+chamadas reais de desenvolvimento atingiram 7/8 alvos e p95 de 2.635,459 ms;
+o gate reprovou e o lote final ficou bloqueado. Veja o
+[resultado real](c05-luna-resultado.md). A demonstração continua em fixture.
 
 ## O que está preparado
 
@@ -57,8 +59,9 @@ o final.
    permite repetir a etapa com outro nome de saída.
 
 O modelo e o formato são publicados na [rota Feita](https://feita.ai/models/openai/gpt-5.6-luna).
-A compatibilidade efetiva, o modelo retornado, a qualidade, o tempo e o custo
-observado só podem ser comprovados pelo ensaio autorizado.
+O ensaio real comprovou a compatibilidade usada e a identidade retornada, mas
+reprovou a suficiência de classificação no desenvolvimento. As seis chamadas
+não medem o conjunto final nem autorizam adoção.
 
 ## Proteção de custo
 
