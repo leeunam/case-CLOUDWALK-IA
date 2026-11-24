@@ -21,7 +21,6 @@
   "hosted_server_created": false,
   "limitations": [
     "Temporary Quick Tunnel, host computer and process must stay running",
-    "CLI and browser on the same host; independent-network probe unavailable through web tool",
     "Real Luna classifier still requires offline review, paid authorization and qualification"
   ],
   "browser_case": "5f81ffdd-016b-487a-af16-a8d9e258fee0",
@@ -44,5 +43,12 @@
     "same_tunnel_url": true,
     "existing_case_preserved": true,
     "post_restart_public_probe_passed": true
+  },
+  "independent_network_confirmation": {
+    "source": "user_reply",
+    "method": "cellular mobile data, requested explicitly",
+    "reply": "sim",
+    "brands_and_channels_visible": true,
+    "date": "2026-11-24"
   }
 }

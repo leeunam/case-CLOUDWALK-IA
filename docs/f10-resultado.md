@@ -33,8 +33,9 @@ continua separada da qualificação real, da decisão de adoção e da integraç
 A publicação da demonstração não conclui esses marcos.
 
 As sondas e o navegador usaram o endereço público a partir do computador de
-origem. A ferramenta remota de consulta não conseguiu acessar esse endereço;
-uma confirmação por outra rede foi solicitada ao responsável e continua pendente.
+origem. A ferramenta remota de consulta não conseguiu acessar esse endereço.
+O responsável confirmou que as marcas e os canais aparecem no celular usando
+dados móveis, atendendo à verificação por outra rede.
 Não há servidor permanente nem compromisso de disponibilidade. As condições do
 Quick Tunnel e os procedimentos para obter credenciais em terminal privado,
 parar, reabrir e restaurar estão no [roteiro F10](f10.md).
