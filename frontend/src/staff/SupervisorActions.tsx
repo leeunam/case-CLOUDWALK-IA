@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useState, type ReactNode } from 'react'
 import { configuration } from '../api/configuration'
 import type { CaseFilters, StaffCase, StaffCommand } from '../api/contract'
 import { readPages } from '../api/pagination'
@@ -11,6 +11,16 @@ import { usePagedCases } from '../usePagedCases'
 
 type RunCommand = (command: StaffCommand) => Promise<unknown>
 
+function ActionDisclosure({ title, children }: { title: string; children: ReactNode }) {
+  const [visited, setVisited] = useState(false)
+  return <details className="configuration-audit" onToggle={event => {
+    if (event.currentTarget.open) setVisited(true)
+  }}>
+    <summary>{title}</summary>
+    {visited && children}
+  </details>
+}
+
 function Transfer({ detail, expectedVersion, revision, run }: {
   detail: StaffCase; expectedVersion: number; revision: number; run: RunCommand
 }) {
@@ -20,8 +30,7 @@ function Transfer({ detail, expectedVersion, revision, run }: {
   const active = queues.data?.items.filter(queue => queue.active) ?? []
   const queue = active.find(item => item.id === queueId)
 
-  return <details className="configuration-audit">
-    <summary>Transferir atendimento</summary>
+  return <>
     {queues.error && <p role="alert">{queues.error}</p>}
     <label>Fila de destino
       <select value={queueId} onChange={event => setQueueId(event.target.value)} disabled={!active.length}>
@@ -31,7 +40,7 @@ function Transfer({ detail, expectedVersion, revision, run }: {
     </label>
     {queue && <TransferForm key={queue.id} brandId={detail.brand_id} expectedVersion={expectedVersion}
       queue={queue.id} revision={revision} run={run} />}
-  </details>
+  </>
 }
 
 function TransferForm({ brandId, expectedVersion, queue, revision, run }: {
@@ -63,6 +72,7 @@ function CaseAudit({ id, revision }: { id: string; revision: number }) {
   return <>
     {audit.loading && !audit.data && <p role="status">Carregando auditoria…</p>}
     {audit.error && <p role="alert">{audit.error}</p>}
+    {audit.data?.items.length === 0 && <p className="muted">Nenhum evento registrado.</p>}
     <ul>{audit.data?.items.map(item => <li key={item.id}>
       <time dateTime={item.occurred_at}>{formatTimestamp(item.occurred_at)}</time> · {item.type}
       {item.reason && <p>{item.reason}</p>}
@@ -102,8 +112,7 @@ function SupervisorForms({ detail, filters, expectedVersion, revision, run }: {
         {force && <label>Resumo para o analista <textarea name="summary" required /></label>}
       </ConfigurationForm>
     </details>}
-    {detail.status !== 'resolved' && <details className="configuration-audit">
-      <summary>Corrigir classificação</summary>
+    {detail.status !== 'resolved' && <ActionDisclosure title="Corrigir classificação">
       <ConfigurationForm submit="Aplicar correção" onSave={data => run({
           type: 'classification', expected_version: expectedVersion, reason: String(data.get('reason')).trim(),
           category: String(data.get('category')), priority: String(data.get('priority')) as Priority,
@@ -122,8 +131,10 @@ function SupervisorForms({ detail, filters, expectedVersion, revision, run }: {
         </label>
         <label>Motivo da correção <input name="reason" required /></label>
       </ConfigurationForm>
-    </details>}
-    {canTransfer && <Transfer detail={detail} expectedVersion={expectedVersion} revision={revision} run={run} />}
+    </ActionDisclosure>}
+    {canTransfer && <ActionDisclosure title="Transferir atendimento">
+      <Transfer detail={detail} expectedVersion={expectedVersion} revision={revision} run={run} />
+    </ActionDisclosure>}
   </>
 }
 

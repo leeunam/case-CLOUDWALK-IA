@@ -1,0 +1,26 @@
+.configuration-panel { align-self: stretch; margin: 1rem; padding: var(--pad); overflow: auto; min-height: 0; }
+.configuration-panel .page-heading { margin-bottom: 1rem; }
+.configuration-panel > label { display: block; max-width: 25rem; }
+.configuration-panel section > label, .configuration-form label { display: block; margin-block: .5rem; }
+.configuration-panel select, .configuration-form input:not([type="checkbox"]), .configuration-form textarea { margin-top: .25rem; }
+.configuration-panel section > label, .configuration-form { max-width: 40rem; }
+.configuration-tabs, .configuration-row { display: flex; flex-wrap: wrap; align-items: end; gap: .5rem; }
+.configuration-tabs { border-block: 1px solid var(--line); padding: .55rem 0; margin: 1rem 0; }
+.configuration-tabs button { min-height: 2.1rem; border-color: transparent; background: transparent; color: var(--muted); }
+.configuration-tabs button[aria-pressed="true"] { background: var(--tint); color: var(--accent); }
+.configuration-row { margin: .75rem 0; }
+.configuration-form { margin: .55rem 0 1rem; }
+.configuration-form > fieldset, .supervisor-action-fields { padding: 0; min-width: 0; border: 0; margin: 0; }
+.configuration-form > fieldset { margin-bottom: .85rem; }
+.configuration-checks { padding: .45rem .75rem; margin: .8rem 0; border: 1px solid var(--line); border-radius: var(--radius); }
+.configuration-checks legend { padding-inline: .25rem; }
+.configuration-comparison { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,17.5rem),1fr)); gap: 1.25rem; }
+.configuration-comparison > *, .configuration-row > * { min-width: 0; }
+.configuration-audit { border-bottom: 1px solid var(--line); padding: .65rem 0; overflow-wrap: anywhere; }
+.configuration-audit summary { min-height: 1.75rem; align-content: center; }
+.configuration-audit pre { overflow: auto; max-height: 20rem; padding: .7rem; border-radius: var(--radius); background: var(--canvas); }
+.configuration-audit dl { margin-block: .7rem; }
+.configuration-audit dt { font-size: .8rem; color: var(--muted); }
+.configuration-audit ul { padding-left: 1.2rem; }
+.configuration-audit li { margin-bottom: .5rem; font-size: .8125rem; }
+.case-supervision .configuration-form .primary { width: 100%; }

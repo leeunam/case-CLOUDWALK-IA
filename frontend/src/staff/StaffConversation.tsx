@@ -4,23 +4,14 @@ import type { CaseFilters, Session, StaffCommand } from '../api/contract'
 import { ApiError, accessLost } from '../api/http'
 import { canHandle } from '../api/permissions'
 import { staff } from '../api/staff'
-import { categoryLabels, priorityLabels } from '../simulator/presentation'
+import { Icon } from '../Icon'
+import { CaseContext } from './CaseContext'
 import { errorMessage, useResource } from '../simulator/useResource'
 import { Transcript } from '../Transcript'
 import { useCaseRefresh } from '../useCaseRefresh'
 import { SupervisorActions } from './SupervisorActions'
 import type { SessionCommandAttempts } from './commandAttempt'
 import { staffCaseLabels } from './presentation'
-
-const blocks: Record<string, string> = {
-  active_capacity: 'O perfil não comporta mais casos ativos.',
-  portfolio_limit: 'A carteira atingiu o limite.',
-  different_operating_brand: 'O responsável está operando em outra marca.',
-  analyst_unavailable: 'O responsável está indisponível para novas atribuições.',
-  brand_switch_pending: 'O responsável está preparando a troca de marca.',
-  no_eligible_analyst: 'A fila aguarda um analista elegível.',
-  queue_access_revoked: 'O responsável perdeu acesso à fila.',
-}
 
 const retryLabels: Record<StaffCommand['type'], string> = {
   reply: 'Confirmar resposta anterior',
@@ -42,6 +33,7 @@ export function StaffConversation({ id, session, attempts, filters, onOpen, onCh
 }) {
   const [revision, setRevision] = useState(0)
   const [text, setText] = useState('')
+  const [contextOpen, setContextOpen] = useState(false)
   const [commandError, setCommandError] = useState<string | null>(null)
   const [confirmation, setConfirmation] = useState<string | null>(null)
   const refresh = useCallback(() => setRevision(value => value + 1), [])
@@ -117,87 +109,90 @@ export function StaffConversation({ id, session, attempts, filters, onOpen, onCh
     return true
   }
 
-  const category = detail?.classification.category
-  const categoryName = brand?.categories?.find(item => item.key === category)?.name
-  const priority = detail?.classification.priority
+  function showReference(messageId: string) {
+    setContextOpen(false)
+    requestAnimationFrame(() => {
+      const reference = document.getElementById(`message-${messageId}`)
+      reference?.focus()
+      reference?.scrollIntoView({ block: 'nearest' })
+    })
+  }
+
+  const commandFeedback = <>
+    {commandError && <p className="error" role="alert">{commandError}</p>}
+    {confirmation && <p role="status">{confirmation}</p>}
+    {detail && !error && pending && (
+      <div className="composer">
+        <p className="muted">A ação pode ter sido aplicada. Reenvie a tentativa para confirmar.</p>
+        {'text' in pending.command && <p>{pending.command.text}</p>}
+        <div className="composer-actions staff-actions">
+          <button className="primary" type="button" disabled={busy || loading || !canConfirm}
+            onClick={() => void runCommand()}>{retryLabels[pending.command.type]}</button>
+          <button className="secondary" type="button" disabled={busy} onClick={() => {
+            attempts.abandon(id)
+            setCommandError(null)
+          }}>Preparar outra ação</button>
+        </div>
+      </div>
+    )}
+  </>
+
   return (
-    <section className="panel workspace" aria-labelledby="staff-conversation-heading">
-      <div className="workspace-header">
-        <div>
-          {(brand || queue) && <p className="context">{[brand?.name, queue?.name].filter(Boolean).join(' · ')}</p>}
-          <h2 id="staff-conversation-heading">Conversa</h2>
-        </div>
-        {detail && <span role="status" className={`case-status ${detail.status}`}>{staffCaseLabels[detail.status]}</span>}
-      </div>
-      {detail && (
-        <div className="case-context">
-          <p>{category ? categoryName ?? categoryLabels[category as keyof typeof categoryLabels] ?? category : 'Sem categoria'} · {priority ? priorityLabels[priority] : 'Sem prioridade'}</p>
-          <p className="muted">{detail.assignee?.type === 'ai' ? 'Atendente de IA' : detail.assignee ? owned ? 'Responsável: você' : 'Responsável: outro analista' : 'Sem responsável'}</p>
-          {detail.previous_case_id && (
-            <button className="text-button" onClick={() => onOpen(detail.previous_case_id!)}>Ver atendimento anterior</button>
-          )}
-          {detail.blocking_reason && <p>{blocks[detail.blocking_reason] ?? detail.blocking_reason}</p>}
-        </div>
-      )}
-      {handoff && (
-        <section className="handoff" aria-labelledby="handoff-heading">
-          <h3 id="handoff-heading">Resumo do encaminhamento</h3>
-          <p>{handoff.summary}</p>
-          {handoff.message_ids.length > 0 && (
-            <ul className="handoff-references" aria-label="Mensagens referenciadas">
-              {handoff.message_ids.map(messageId => {
-                const message = data?.messages.find(item => item.id === messageId)
-                return message && <li key={messageId}><a href={`#message-${messageId}`}>Mensagem {message.sequence}</a></li>
-              })}
-            </ul>
-          )}
-        </section>
-      )}
-      <div className="transcript">
-        {loading && !data && <p role="status">Carregando conversa…</p>}
-        {error && <div className="notice" role="alert">{error}</div>}
-        {data && <Transcript messages={data.messages} references={handoff?.message_ids} staffView />}
-      </div>
-      <div className="conversation-footer">
-        <div className="conversation-tools">
-          {detail?.status === 'waiting_resumption' && <p className="muted">A retomada é automática quando houver capacidade na marca do atendimento.</p>}
-          {detail?.status === 'waiting_customer' && <p className="muted">Aguardando a resposta do cliente.</p>}
-          {detail?.status === 'human_active' && !canAct && !supervisor && <p className="muted">As ações exigem o analista responsável na marca em operação.</p>}
-          <button className="secondary" onClick={refresh} disabled={loading}>Atualizar conversa</button>
-        </div>
-        {commandError && <p className="error" role="alert">{commandError}</p>}
-        {confirmation && <p role="status">{confirmation}</p>}
-        {detail && !error && pending && (
-          <div className="composer">
-            <p className="muted">A ação pode ter sido aplicada. Reenvie a tentativa para confirmar.</p>
-            {'text' in pending.command && <p>{pending.command.text}</p>}
-            <div className="composer-actions staff-actions">
-              <button className="primary" type="button" disabled={busy || loading || !canConfirm}
-                onClick={() => void runCommand()}>{retryLabels[pending.command.type]}</button>
-              <button className="secondary" type="button" disabled={busy} onClick={() => {
-                attempts.abandon(id)
-                setCommandError(null)
-              }}>Preparar outra ação</button>
-            </div>
+    <div className="case-desk" data-context={contextOpen && !!detail} data-has-detail={!!detail}>
+      <section className="staff-conversation" aria-labelledby="staff-conversation-heading">
+        <header className="workspace-header">
+          <div>
+            <h2 id="staff-conversation-heading" tabIndex={-1}>Conversa</h2>
+            {(brand || queue) && <p className="context">{[brand?.name, queue?.name].filter(Boolean).join(' · ')}</p>}
           </div>
-        )}
-        {detail && supervisor && !error &&
-          <SupervisorActions detail={detail} filters={filters} revision={revision}
+          <div className="header-tools">
+            {detail && <span role="status" className={`case-status ${detail.status}`}>{staffCaseLabels[detail.status]}</span>}
+            {detail && <button type="button" className="secondary context-toggle" aria-pressed={contextOpen}
+              aria-controls="case-context" onClick={() => setContextOpen(open => !open)}>
+              <Icon name={contextOpen ? 'chat' : 'context'} />{contextOpen ? 'Ver conversa' : 'Ver contexto'}
+            </button>}
+          </div>
+        </header>
+        <div className="transcript" tabIndex={0} role="region" aria-label="Histórico da conversa">
+          {loading && !data && <p role="status">Carregando conversa…</p>}
+          {error && <div className="notice" role="alert">{error}</div>}
+          {data && <Transcript messages={data.messages} references={handoff?.message_ids} staffView />}
+        </div>
+        <div className="conversation-footer">
+          <div className="conversation-tools">
+            {detail?.status === 'waiting_resumption' && <p className="muted">A retomada é automática quando houver capacidade na marca do atendimento.</p>}
+            {detail?.status === 'waiting_customer' && <p className="muted">Aguardando a resposta do cliente.</p>}
+            {detail?.status === 'human_active' && !canAct && !supervisor && <p className="muted">As ações exigem o analista responsável na marca em operação.</p>}
+            <button className="secondary" onClick={refresh} disabled={loading}>Atualizar conversa</button>
+          </div>
+          {(!supervisor || !detail) && commandFeedback}
+          {canAct && !pending && (
+            <form className="composer" onSubmit={send}>
+              <label htmlFor="staff-reply">Resposta ao cliente</label>
+              <textarea id="staff-reply" value={text} onChange={event => setText(event.target.value)} rows={3} disabled={busy} />
+              <div className="composer-actions staff-actions">
+                <button className="primary" type="submit" value="reply" disabled={loading || busy || !text.trim()}>Enviar resposta</button>
+                <button className="secondary" type="submit" value="wait_for_customer"
+                  disabled={loading || busy || switchPending || !text.trim()}>Aguardar cliente</button>
+                <button className="secondary" type="submit" value="resolve" disabled={loading || busy}>Resolver atendimento</button>
+              </div>
+              {switchPending && <p className="muted">A espera pelo cliente fica indisponível durante a troca de marca.</p>}
+            </form>
+          )}
+        </div>
+      </section>
+      {detail && <aside id="case-context" className="case-context" aria-labelledby="context-heading">
+        <div className="sidebar-header"><h2 id="context-heading">Contexto do caso</h2></div>
+        {error && <p role="alert" className="notice">{error}</p>}
+        <CaseContext detail={detail} brand={brand} queue={queue?.name} owned={owned}
+          messages={data?.messages ?? []} onOpen={onOpen} onReference={showReference} />
+        {supervisor && <div className="case-supervision">
+          <h3>Supervisão</h3>
+          {commandFeedback}
+          {!error && <SupervisorActions detail={detail} filters={filters} revision={revision}
             disabled={loading || busy || !!pending} run={runCommand} />}
-        {canAct && !pending && (
-          <form className="composer" onSubmit={send}>
-            <label htmlFor="staff-reply">Resposta ao cliente</label>
-            <textarea id="staff-reply" value={text} onChange={event => setText(event.target.value)} rows={3} disabled={busy} />
-            <div className="composer-actions staff-actions">
-              <button className="primary" type="submit" value="reply" disabled={loading || busy || !text.trim()}>Enviar resposta</button>
-              <button className="secondary" type="submit" value="wait_for_customer"
-                disabled={loading || busy || switchPending || !text.trim()}>Aguardar cliente</button>
-              <button className="secondary" type="submit" value="resolve" disabled={loading || busy}>Resolver atendimento</button>
-            </div>
-            {switchPending && <p className="muted">A espera pelo cliente fica indisponível durante a troca de marca.</p>}
-          </form>
-        )}
-      </div>
-    </section>
+        </div>}
+      </aside>}
+    </div>
   )
 }

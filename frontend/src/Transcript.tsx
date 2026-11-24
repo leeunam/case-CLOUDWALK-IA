@@ -10,7 +10,7 @@ export function Transcript({ messages, references, staffView = false }: {
   return (
     <ol className="messages" aria-label="Mensagens" aria-live="polite">
       {messages.map(message => (
-        <li id={`message-${message.id}`} className={`message ${message.author.type === 'customer' ? 'customer' : ''}`}
+        <li id={`message-${message.id}`} className={`message ${message.author.type === 'customer' ? 'customer' : message.author.type === 'human' || message.author.type === 'ai' ? 'outgoing' : ''}`}
           key={message.id} tabIndex={references?.includes(message.id) ? -1 : undefined}>
           <div className="message-meta">
             <strong>{staffView && message.author.type === 'customer' ? 'Cliente' : authorLabels[message.author.type]}</strong>

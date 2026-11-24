@@ -76,7 +76,10 @@ export function Composer({
     <form className="composer" onSubmit={submit}>
       {opensCase && !pending && (
         <details className="metadata">
-          <summary>Classificação da mensagem</summary>
+          <summary>Classificação da mensagem<span className="classification-preview">{[
+            categories.find(item => item.key === activeCategory)?.name,
+            priority && priorityLabels[priority],
+          ].filter(Boolean).join(' · ') || 'Não informada'}</span></summary>
           <div className="fields">
             <label>
               Categoria
