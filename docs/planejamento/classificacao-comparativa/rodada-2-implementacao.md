@@ -162,6 +162,9 @@ execução. Não alterar textos congelados ou gabarito para acomodar testes.
    provenance/reviews/locks. Perfis históricos e fontes ficam preservados.
    Seleção R2 explícita, schema report1.3 com novo $id; IPC permanece1.1.
    Confirmar hashes dos reviews e dataset final antes de planejar ou executar.
+   Bloquear o perfil R2 na CLI genérica C02 e na sua função run antes de
+   qualquer processo; o checker continua aceitando R2. Execução usa só a CLI
+   dedicada com as guardas financeiras, sem abrir caminho sem orçamento.
 2. Fazer verificação/fixtures reproduzíveis do perfil e golden report R2.
    Fontes antigas ou adulteradas, membership/quota e gabarito em projeção de
    requisição devem ser rejeitados. Reusar decide, Journal e relógio C02;
@@ -189,6 +192,12 @@ execução. Não alterar textos congelados ou gabarito para acomodar testes.
    para passar a régua real. Development real exige status `pass` com todas as
    seis durações reais e as demais condições; nenhum `fixture_ready` libera real.
 6. Execução não repete stage/binding/manifesto para completar interrompido.
+   Usar manifest_id determinístico: `r2-` + SHA-256 do JSON canônico de
+   account_id, candidate_sha256, final_cases_sha256 e stage (sort_keys=True,
+   separators compactos). Exigir o ID esperado no authorize. Config, revisão
+   e saída não entram nesse ID; assim UNIQUE manifest_id do ledger existente
+   impede repetir um stage com bindings novos para o mesmo candidato/final/
+   conta, inclusive em corrida. Não criar outra tabela financeira.
    Real permanece bloqueado sem manifesto próprio habilitado e confirmação;
    exemplos/config real falsos. Limites faturáveis/referências verificados só
    no futuro pré-voo real, com a conta existente. Nenhum budget real é aberto.
