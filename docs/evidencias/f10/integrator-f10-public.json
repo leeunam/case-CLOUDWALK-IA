@@ -1,0 +1,48 @@
+{
+  "task": "F10/public-preview",
+  "observed_at": "2026-11-24T19:32:00.526791+00:00",
+  "url": "https://mirrors-labour-crafts-characteristic.trycloudflare.com",
+  "project": "cloudwalk_publish_integrator",
+  "verified": [
+    "HTTPS_default_CA_validation",
+    "health_database",
+    "SPA_API_asset_routes",
+    "authenticated_private_demo_login",
+    "Secure_HttpOnly_SameSite_cookie",
+    "CSRF_invalid_and_wrong_origin_denied",
+    "WSS_101",
+    "WSS_invalid_origin_denied",
+    "pre_restart_case_and_handoff_preserved"
+  ],
+  "existing_case": "51fd7409-e085-4b69-9bfb-acd61486ff13",
+  "classification": "fixture",
+  "attendant": "deterministic_mock",
+  "AI_API_requests": 0,
+  "hosted_server_created": false,
+  "limitations": [
+    "Temporary Quick Tunnel, host computer and process must stay running",
+    "CLI and browser on the same host; independent-network probe unavailable through web tool",
+    "Real Luna classifier still requires offline review, paid authorization and qualification"
+  ],
+  "browser_case": "5f81ffdd-016b-487a-af16-a8d9e258fee0",
+  "browser_check": {
+    "anonymous_simulator": true,
+    "channel": "Chat",
+    "brand": "Aurora Pagamentos",
+    "two_turns": true,
+    "persisted_messages": 4,
+    "status": "resolved",
+    "reload_preserved_case_and_history": true,
+    "fixture_query_parameter": false
+  },
+  "public_restart_check": {
+    "services": [
+      "api",
+      "web",
+      "worker"
+    ],
+    "same_tunnel_url": true,
+    "existing_case_preserved": true,
+    "post_restart_public_probe_passed": true
+  }
+}
