@@ -1,0 +1,53 @@
+{
+  "task": "C05",
+  "checked_on": "2026-11-24",
+  "source": "https://feita.ai/models/qwen/qwen3.8-27b",
+  "method": "read-only authenticated browser, Overview/API/Parameters and all-time Logs; no inference probe",
+  "model": "qwen/qwen3.8-27b",
+  "endpoint": "https://api.feita.ai/gateway/v1/chat/completions",
+  "public_status_display": "Instável",
+  "public_uptime_24h_display": "25%",
+  "public_latency_24h_display": "4,1 s",
+  "published_context_display": "1.02M",
+  "published_max_output_display": "131K",
+  "prior_exact_model_snapshot": "docs/evidencias/c03/preflight-modelo-publico.json",
+  "published_usd_per_million_display": {
+    "input": "0.425",
+    "output": "2.55",
+    "cache_read": "0.085",
+    "cache_write": "0.531"
+  },
+  "published_cache_write_credits_per_million_display": "53.13",
+  "published_credit_unit_usd": "0.01",
+  "documented_response_includes_usage_credits": true,
+  "documented_usage_example": {"prompt_tokens": 9, "completion_tokens": 8, "total_tokens": 17, "cost": "0.00012", "credits": "0.012"},
+  "reservation_bounds": {
+    "input_tokens": 1100000,
+    "output_tokens": 140000,
+    "cache_write_usd_per_million": "0.532",
+    "per_dispatch_usd": "1.5032",
+    "basis": "Rounded upwards beyond current abbreviated limits and both displayed cache-write price units; also above the prior exact 1024000/131072 and 0.53125 snapshot. Full model output capacity reserved; max_tokens=128 is not assumed to bound all billable reasoning."
+  },
+  "billing_before": {
+    "source": "https://feita.ai/logs",
+    "period": "Todo o período",
+    "key_filter": "all",
+    "api_filter": "all",
+    "status_filter": "all",
+    "requests_displayed": 2,
+    "experimental_rows": [
+      {"local_date": "2026-11-23", "local_time": "16:02:34", "cost_usd_display": "0.000518", "conservative_accounted_usd": "0.000519"},
+      {"local_date": "2026-11-23", "local_time": "17:23:44", "cost_usd_display": "0.000518", "conservative_accounted_usd": "0.000519"}
+    ],
+    "previous_spend_usd": "0.001038",
+    "previous_retest_claim_status": "completed_billing_ui_confirmed_rounded",
+    "outstanding_previous_reservations_usd": "0",
+    "scope": "Experimental request costs only; no account balance or key labels stored. The earlier 0.015 margin was not an audited debit; all-time request log shows only these two rows."
+  },
+  "financial_policy": "Use documented usage.credits times USD 0.01; usage.cost unit remains unknown. Unknown monetary cost, timeout or crash holds reservation and stops the run. No retries or resuming inference.",
+  "limitations": [
+    "Displayed provider availability is transient and does not prove the final run will succeed.",
+    "Reservation bounds are conservative preflight assumptions, not a forecast of real cost or an independent certification of provider billing.",
+    "No model-quality or latency observation was produced by this preflight."
+  ]
+}
