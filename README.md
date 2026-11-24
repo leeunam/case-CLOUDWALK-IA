@@ -75,7 +75,13 @@ Após essa investigação, o responsável escolheu focar na avaliação do Qwen 
 encerrar novos ajustes do GLiClass nesta entrega, preservando os resultados.
 A [C05](docs/planejamento/classificacao-comparativa/qualificacao-qwen.md)
 vai qualificá-lo contra os critérios aprovados; não houve comparação pareada
-final. A execução real e a decisão de adoção continuam pendentes.
+final. O primeiro lote real terminou em 24/11/2026: **Qwen não elegível nesta
+configuração**, por 3/7 conclusões onde era obrigatória revisão e 19/22
+categorias aplicadas corretas (86,36%, abaixo de 90%). O p95 passou em 2,494 s
+e os seis urgentes foram reconhecidos. Foram 44 chamadas, com custo informado
+pela API de US$ 0,02197127; a conta cumulativa com os pilotos ficou em
+US$ 0,02300927. C06 continua bloqueada, aguardando decisão sobre o próximo
+escopo. [Resultado e auditorias](docs/c05-resultado.md).
 
 O reteste autorizado C03-P2 voltou a completar os dois campos do mesmo caso
 em 1,894 s; o log individual exibiu US$ 0,000518, e o resumo das duas chamadas

@@ -1,0 +1,837 @@
+{
+  "contract_version": "1.2.0",
+  "run_id": "c05-58e8f0b5c64547b98d6f5ca738bf2c6e",
+  "score_calibration": "not_evaluated",
+  "identity": {
+    "mode": "real",
+    "provider": "feita",
+    "requested_model": "qwen/qwen3.8-27b",
+    "expected_returned_model": "qwen/qwen3.8-27b",
+    "adapter_version": "1.1.0",
+    "policy_version": "1.0.0"
+  },
+  "split": "final_test",
+  "git_revision": "19a56fe3dc4fb80a48122182fcc6bcdf1d9855d7",
+  "environment": {
+    "hardware": "x86_64",
+    "runtime": "3.11.13",
+    "seed": null,
+    "concurrency": 1,
+    "timeout_ms": 5000,
+    "peak_memory_bytes": null,
+    "cold_start_ms": 304.9972480002907,
+    "infrastructure_usd": null
+  },
+  "sources": {
+    "dataset": {
+      "path": "script/f08/jev/dataset.json",
+      "version": "1.1.0",
+      "sha256": "0e7e4c342c2a39cefd89855d8c0513f447d7878303eb4091488ca8af78928880"
+    },
+    "catalog": {
+      "path": "script/f08/jev/catalog.json",
+      "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271",
+      "version": "1.0.0"
+    },
+    "rubric": {
+      "path": "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
+      "version": "1.0.0",
+      "sha256": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac"
+    },
+    "protocol": {
+      "path": "docs/planejamento/classificacao-comparativa/protocolo-comparacao-1.1.json",
+      "version": "1.1.0",
+      "sha256": "061a91a0c9b1b054ca2c9579077453d77ac765f24d725667fb97b5749db1aed7"
+    },
+    "split": {
+      "path": "docs/planejamento/classificacao-comparativa/divisao-dados.json",
+      "sha256": "8f7d0eab0d9431c2906e07bc022dc31a80684464f4b99f75dfc6ed1277fed1a9",
+      "version": "1.0.0"
+    },
+    "policy": {
+      "path": "script/classification_comparison/adapters/qwen/politica.txt",
+      "version": "1.0.0",
+      "sha256": "c1b459d24a874b3e5e44a67297314d322dded0ee6c7413c7d3a0cdd28f70f56b"
+    },
+    "prompt": {
+      "path": "script/classification_comparison/adapters/qwen/prompt.txt",
+      "version": "1.0.0",
+      "sha256": "b38edc9e1db036405b1e3eadb63f11219a01dec4aefe6996e40c6c6c19ec8527"
+    }
+  },
+  "artifacts": {
+    "inputs": {
+      "path": "script/classification_comparison/c05/evidencia-real-01/inputs.jsonl",
+      "sha256": "1786f8cdc239f9a661ba413f7f8ee964a33c5d87be48450a62ea29fd5a4fed09"
+    },
+    "observations": {
+      "path": "script/classification_comparison/c05/evidencia-real-01/observations.jsonl",
+      "sha256": "a5c3a24f75e589606cfd5e36d284b71619b6f1e0cab9ad20851c862b05f7f5dd"
+    },
+    "decisions": {
+      "path": "script/classification_comparison/c05/evidencia-real-01/decisions.jsonl",
+      "sha256": "3bcad19cd7615b593fe0575f56b53af1702c2d0cde5f084be427721a49460d65"
+    }
+  },
+  "planned_ids": [
+    "jev-001",
+    "jev-016",
+    "jev-022",
+    "jev-025",
+    "jev-031",
+    "jev-034",
+    "jev-043",
+    "jev-046",
+    "jev-049",
+    "jev-052",
+    "jev-055",
+    "jev-058",
+    "jev-011",
+    "jev-017",
+    "jev-020",
+    "jev-026",
+    "jev-029",
+    "jev-038",
+    "jev-044",
+    "jev-047",
+    "jev-050",
+    "jev-053",
+    "jev-056",
+    "jev-059",
+    "jev-012",
+    "jev-021",
+    "jev-027",
+    "jev-030",
+    "jev-036",
+    "jev-042",
+    "jev-045",
+    "jev-048",
+    "jev-051",
+    "jev-054",
+    "jev-057",
+    "jev-060"
+  ],
+  "completed_ids": [
+    "jev-001",
+    "jev-016",
+    "jev-022",
+    "jev-025",
+    "jev-031",
+    "jev-034",
+    "jev-043",
+    "jev-046",
+    "jev-049",
+    "jev-052",
+    "jev-055",
+    "jev-058",
+    "jev-011",
+    "jev-017",
+    "jev-020",
+    "jev-026",
+    "jev-029",
+    "jev-038",
+    "jev-044",
+    "jev-047",
+    "jev-050",
+    "jev-053",
+    "jev-056",
+    "jev-059",
+    "jev-012",
+    "jev-021",
+    "jev-027",
+    "jev-030",
+    "jev-036",
+    "jev-042",
+    "jev-045",
+    "jev-048",
+    "jev-051",
+    "jev-054",
+    "jev-057",
+    "jev-060"
+  ],
+  "control_ids": [
+    "ctl-completo",
+    "ctl-simples",
+    "ctl-duplo",
+    "ctl-invalido",
+    "ctl-sem-assunto",
+    "ctl-saida-invalida",
+    "ctl-timeout",
+    "ctl-saida-ausente",
+    "ctl-versao",
+    "ctl-catalogo",
+    "ctl-tipo",
+    "ctl-politica",
+    "ctl-injetado-aplicacao-parcial"
+  ],
+  "injected_controls": {
+    "ids": [
+      "ctl-injetado-aplicacao-parcial"
+    ],
+    "count": 1,
+    "policy": {
+      "path": "docs/planejamento/classificacao-comparativa/contratos/politica-controles.json",
+      "version": "1.0.0",
+      "sha256": "2611786ddde1eb2b064b02f7dda7bb7a0aae06cc8f127a9fc7e8fec14e937fb7"
+    },
+    "identity": {
+      "mode": "fixture",
+      "name": "controle-aplicacao-parcial",
+      "policy_version": "1.0.0"
+    }
+  },
+  "gates": {
+    "channel_field_preservation_ratio": {
+      "state": "measured",
+      "numerator": 33,
+      "denominator": 33,
+      "value": 1.0
+    },
+    "complete_or_invalid_controls_model_calls": {
+      "state": "measured",
+      "numerator": 0,
+      "denominator": 4,
+      "value": 0
+    },
+    "partial_application_after_abstention_or_error": {
+      "state": "measured",
+      "numerator": 0,
+      "denominator": 9,
+      "value": 0
+    },
+    "automatic_completion_on_expected_review_cases": {
+      "state": "measured",
+      "numerator": 3,
+      "denominator": 7,
+      "value": 3
+    },
+    "automatic_non_urgent_applied_when_expected_urgent": {
+      "state": "measured",
+      "numerator": 0,
+      "denominator": 6,
+      "value": 0
+    },
+    "automatic_coverage_on_fully_classifiable_cases_min": {
+      "state": "measured",
+      "numerator": 29,
+      "denominator": 29,
+      "value": 1.0
+    },
+    "raw_urgent_recognition_min": {
+      "state": "measured",
+      "numerator": 6,
+      "denominator": 6,
+      "value": 1.0
+    },
+    "observed_total_latency_p95_ms_max": {
+      "state": "measured",
+      "value": 2493.5096410008555,
+      "numerator": null,
+      "denominator": 36
+    },
+    "applied_category_accuracy": {
+      "state": "measured",
+      "numerator": 19,
+      "denominator": 22,
+      "value": 0.8636363636363636
+    },
+    "applied_priority_accuracy": {
+      "state": "measured",
+      "numerator": 19,
+      "denominator": 20,
+      "value": 0.95
+    }
+  },
+  "by_field": {
+    "category": {
+      "raw_accuracy": {
+        "state": "measured",
+        "numerator": 21,
+        "denominator": 24,
+        "value": 0.875
+      },
+      "applied_accuracy": {
+        "state": "measured",
+        "numerator": 19,
+        "denominator": 22,
+        "value": 0.8636363636363636
+      },
+      "correct_abstention": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 24,
+        "value": 0.0
+      },
+      "undue_abstention": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 24,
+        "value": 0.0
+      },
+      "invalid_output": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 24,
+        "value": 0.0
+      },
+      "operational_error": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 24,
+        "value": 0.0
+      },
+      "unapplied_choices": {
+        "state": "measured",
+        "numerator": 2,
+        "denominator": 24,
+        "value": 0.08333333333333333
+      },
+      "review": {
+        "state": "measured",
+        "numerator": 2,
+        "denominator": 24,
+        "value": 0.08333333333333333
+      },
+      "automatic_coverage": {
+        "state": "measured",
+        "numerator": 19,
+        "denominator": 19,
+        "value": 1.0
+      },
+      "correct_completion_coverage": {
+        "state": "measured",
+        "numerator": 19,
+        "denominator": 19,
+        "value": 1.0
+      }
+    },
+    "priority": {
+      "raw_accuracy": {
+        "state": "measured",
+        "numerator": 23,
+        "denominator": 24,
+        "value": 0.9583333333333334
+      },
+      "applied_accuracy": {
+        "state": "measured",
+        "numerator": 19,
+        "denominator": 20,
+        "value": 0.95
+      },
+      "correct_abstention": {
+        "state": "measured",
+        "numerator": 4,
+        "denominator": 24,
+        "value": 0.16666666666666666
+      },
+      "undue_abstention": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 24,
+        "value": 0.0
+      },
+      "invalid_output": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 24,
+        "value": 0.0
+      },
+      "operational_error": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 24,
+        "value": 0.0
+      },
+      "unapplied_choices": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 24,
+        "value": 0.0
+      },
+      "review": {
+        "state": "measured",
+        "numerator": 4,
+        "denominator": 24,
+        "value": 0.16666666666666666
+      },
+      "automatic_coverage": {
+        "state": "measured",
+        "numerator": 19,
+        "denominator": 19,
+        "value": 1.0
+      },
+      "correct_completion_coverage": {
+        "state": "measured",
+        "numerator": 18,
+        "denominator": 19,
+        "value": 0.9473684210526315
+      }
+    }
+  },
+  "by_mask": {
+    "category": {
+      "raw_accuracy": {
+        "state": "measured",
+        "numerator": 10,
+        "denominator": 12,
+        "value": 0.8333333333333334
+      },
+      "applied_accuracy": {
+        "state": "measured",
+        "numerator": 10,
+        "denominator": 12,
+        "value": 0.8333333333333334
+      },
+      "correct_abstention": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 12,
+        "value": 0.0
+      },
+      "undue_abstention": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 12,
+        "value": 0.0
+      },
+      "invalid_output": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 12,
+        "value": 0.0
+      },
+      "operational_error": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 12,
+        "value": 0.0
+      },
+      "unapplied_choices": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 12,
+        "value": 0.0
+      },
+      "review": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 12,
+        "value": 0.0
+      },
+      "automatic_coverage": {
+        "state": "measured",
+        "numerator": 10,
+        "denominator": 10,
+        "value": 1.0
+      },
+      "correct_completion_coverage": {
+        "state": "measured",
+        "numerator": 10,
+        "denominator": 10,
+        "value": 1.0
+      }
+    },
+    "priority": {
+      "raw_accuracy": {
+        "state": "measured",
+        "numerator": 11,
+        "denominator": 12,
+        "value": 0.9166666666666666
+      },
+      "applied_accuracy": {
+        "state": "measured",
+        "numerator": 9,
+        "denominator": 10,
+        "value": 0.9
+      },
+      "correct_abstention": {
+        "state": "measured",
+        "numerator": 2,
+        "denominator": 12,
+        "value": 0.16666666666666666
+      },
+      "undue_abstention": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 12,
+        "value": 0.0
+      },
+      "invalid_output": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 12,
+        "value": 0.0
+      },
+      "operational_error": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 12,
+        "value": 0.0
+      },
+      "unapplied_choices": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 12,
+        "value": 0.0
+      },
+      "review": {
+        "state": "measured",
+        "numerator": 2,
+        "denominator": 12,
+        "value": 0.16666666666666666
+      },
+      "automatic_coverage": {
+        "state": "measured",
+        "numerator": 10,
+        "denominator": 10,
+        "value": 1.0
+      },
+      "correct_completion_coverage": {
+        "state": "measured",
+        "numerator": 9,
+        "denominator": 10,
+        "value": 0.9
+      }
+    },
+    "category+priority": {
+      "raw_accuracy": {
+        "state": "measured",
+        "numerator": 23,
+        "denominator": 24,
+        "value": 0.9583333333333334
+      },
+      "applied_accuracy": {
+        "state": "measured",
+        "numerator": 19,
+        "denominator": 20,
+        "value": 0.95
+      },
+      "correct_abstention": {
+        "state": "measured",
+        "numerator": 2,
+        "denominator": 24,
+        "value": 0.08333333333333333
+      },
+      "undue_abstention": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 24,
+        "value": 0.0
+      },
+      "invalid_output": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 24,
+        "value": 0.0
+      },
+      "operational_error": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 24,
+        "value": 0.0
+      },
+      "unapplied_choices": {
+        "state": "measured",
+        "numerator": 2,
+        "denominator": 24,
+        "value": 0.08333333333333333
+      },
+      "review": {
+        "state": "measured",
+        "numerator": 2,
+        "denominator": 12,
+        "value": 0.16666666666666666
+      },
+      "automatic_coverage": {
+        "state": "measured",
+        "numerator": 9,
+        "denominator": 9,
+        "value": 1.0
+      },
+      "correct_completion_coverage": {
+        "state": "measured",
+        "numerator": 9,
+        "denominator": 9,
+        "value": 1.0
+      }
+    }
+  },
+  "by_stratum": {
+    "rotina": {
+      "raw_accuracy": {
+        "state": "measured",
+        "numerator": 28,
+        "denominator": 29,
+        "value": 0.9655172413793104
+      },
+      "applied_accuracy": {
+        "state": "measured",
+        "numerator": 28,
+        "denominator": 29,
+        "value": 0.9655172413793104
+      },
+      "correct_abstention": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 29,
+        "value": 0.0
+      },
+      "undue_abstention": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 29,
+        "value": 0.0
+      },
+      "invalid_output": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 29,
+        "value": 0.0
+      },
+      "operational_error": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 29,
+        "value": 0.0
+      },
+      "unapplied_choices": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 29,
+        "value": 0.0
+      },
+      "review": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 22,
+        "value": 0.0
+      },
+      "automatic_coverage": {
+        "state": "measured",
+        "numerator": 22,
+        "denominator": 22,
+        "value": 1.0
+      },
+      "correct_completion_coverage": {
+        "state": "measured",
+        "numerator": 21,
+        "denominator": 22,
+        "value": 0.9545454545454546
+      }
+    },
+    "urgente": {
+      "raw_accuracy": {
+        "state": "measured",
+        "numerator": 9,
+        "denominator": 9,
+        "value": 1.0
+      },
+      "applied_accuracy": {
+        "state": "measured",
+        "numerator": 9,
+        "denominator": 9,
+        "value": 1.0
+      },
+      "correct_abstention": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 9,
+        "value": 0.0
+      },
+      "undue_abstention": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 9,
+        "value": 0.0
+      },
+      "invalid_output": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 9,
+        "value": 0.0
+      },
+      "operational_error": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 9,
+        "value": 0.0
+      },
+      "unapplied_choices": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 9,
+        "value": 0.0
+      },
+      "review": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 7,
+        "value": 0.0
+      },
+      "automatic_coverage": {
+        "state": "measured",
+        "numerator": 7,
+        "denominator": 7,
+        "value": 1.0
+      },
+      "correct_completion_coverage": {
+        "state": "measured",
+        "numerator": 7,
+        "denominator": 7,
+        "value": 1.0
+      }
+    },
+    "ambiguo": {
+      "raw_accuracy": {
+        "state": "measured",
+        "numerator": 7,
+        "denominator": 10,
+        "value": 0.7
+      },
+      "applied_accuracy": {
+        "state": "measured",
+        "numerator": 1,
+        "denominator": 4,
+        "value": 0.25
+      },
+      "correct_abstention": {
+        "state": "measured",
+        "numerator": 4,
+        "denominator": 10,
+        "value": 0.4
+      },
+      "undue_abstention": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 10,
+        "value": 0.0
+      },
+      "invalid_output": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 10,
+        "value": 0.0
+      },
+      "operational_error": {
+        "state": "measured",
+        "numerator": 0,
+        "denominator": 10,
+        "value": 0.0
+      },
+      "unapplied_choices": {
+        "state": "measured",
+        "numerator": 2,
+        "denominator": 10,
+        "value": 0.2
+      },
+      "review": {
+        "state": "measured",
+        "numerator": 4,
+        "denominator": 7,
+        "value": 0.5714285714285714
+      },
+      "automatic_coverage": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "correct_completion_coverage": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      }
+    }
+  },
+  "urgent_outcomes": {
+    "applied_urgent": {
+      "state": "measured",
+      "numerator": 6,
+      "denominator": 6,
+      "value": 1.0
+    },
+    "applied_lower": {
+      "state": "measured",
+      "numerator": 0,
+      "denominator": 6,
+      "value": 0.0
+    },
+    "review": {
+      "state": "measured",
+      "numerator": 0,
+      "denominator": 6,
+      "value": 0.0
+    },
+    "abstained": {
+      "state": "measured",
+      "numerator": 0,
+      "denominator": 6,
+      "value": 0.0
+    },
+    "invalid": {
+      "state": "measured",
+      "numerator": 0,
+      "denominator": 6,
+      "value": 0.0
+    },
+    "operational_error": {
+      "state": "measured",
+      "numerator": 0,
+      "denominator": 6,
+      "value": 0.0
+    }
+  },
+  "latency_p50_ms": {
+    "state": "measured",
+    "value": 1516.8295160001435,
+    "numerator": null,
+    "denominator": 36
+  },
+  "eligibility": "fail",
+  "usage": {
+    "attempts": {
+      "state": "measured",
+      "value": 44,
+      "samples": 44,
+      "expected_samples": 44
+    },
+    "requests": {
+      "state": "measured",
+      "value": 44,
+      "samples": 44,
+      "expected_samples": 44
+    },
+    "questions": {
+      "state": "measured",
+      "value": 59,
+      "samples": 44,
+      "expected_samples": 44
+    },
+    "input_tokens": {
+      "state": "measured",
+      "value": 47557,
+      "samples": 44,
+      "expected_samples": 44
+    },
+    "output_tokens": {
+      "state": "measured",
+      "value": 690,
+      "samples": 44,
+      "expected_samples": 44
+    },
+    "observed_api_usd": {
+      "state": "measured",
+      "value": 0.02197127,
+      "samples": 44,
+      "expected_samples": 44
+    },
+    "estimated_api_usd": {
+      "state": "measured",
+      "value": 0.021971225,
+      "samples": 44,
+      "expected_samples": 44
+    }
+  },
+  "ipc_contract_version": "1.1.0"
+}

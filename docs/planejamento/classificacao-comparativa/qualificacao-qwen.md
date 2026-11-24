@@ -10,12 +10,19 @@ O plano estático foi gerado e conferido na branch
 emenda integrada `99b6230`. Foram confirmados 36 relatos, 13 controles e 44
 possíveis chamadas do candidato, sem iniciar o adaptador nem acessar a chave.
 [Conferência e reprodução](../../c05.md). A adaptação C05-E foi implementada
-offline e aceito em `e4ce14c`, com 37 testes C05 e regressões C02/Qwen.
+offline e aceita em `e4ce14c`, com 37 testes C05 e regressões C02/Qwen.
 Usa conta SQLite persistente, reserva por despacho e conciliação verificada.
 A versão 4 é a primeira conta suportada; protótipos são recusados sem alteração.
 [Aceite e revisão independente](../../evidencias/c05/executor-aceite.json).
-O lote final pago ainda exige autorização própria, consolidação dos gastos
-anteriores e confirmação das fontes financeiras. Não há resultado C05.
+O primeiro lote final teve autorização própria em 24/11/2026 e foi concluído:
+36 relatos, 13 controles e 44 chamadas, custo US$ 0,02197127. Resultado técnico
+**não elegível**: revisão obrigatória violada em 3/7 casos e categoria aplicada
+19/22 correta. O p95 passou em 2.493,510 ms. C06 continua bloqueada e o
+responsável precisa deliberar sobre o próximo escopo.
+[Resultado e auditorias](../../c05-resultado.md) e
+[registro de decisão pendente](decisao-qwen-01.md).
+As condições de preparação abaixo permanecem como referência; esta autorização
+foi consumida e não permite outra inferência ou repetição do teste final.
 
 ## Escopo e evidências
 

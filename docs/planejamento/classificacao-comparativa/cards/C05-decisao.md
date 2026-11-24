@@ -2,6 +2,12 @@
 
 Issue publicada: [#6](https://github.com/leeunam/case-CLOUDWALK-IA/issues/6). Consulte a issue para progresso e comentários atuais.
 
+**Estado de 24/11/2026:** execução e auditorias concluídas. Qwen **não elegível**
+pelos critérios congelados (3/7 conclusões indevidas; categoria aplicada 19/22).
+O lote usou 44 chamadas, US$ 0,02197127. C05 aguarda deliberação humana; C06
+continua bloqueada. [Resultado](../../../c05-resultado.md) e
+[registro de decisão pendente](../decisao-qwen-01.md). Autorização consumida.
+
 ## Parent e especificação
 
 [Quadro CLASS-001](../README.md) · [CLASS-SPEC-001](../especificacao.md).
@@ -21,19 +27,19 @@ disponibilidade e controles de execução verificados; a consulta pública de
 
 ## Critérios de aceite
 
-- [ ] Antes do lote, conferir aprovações de rótulos e orçamento, hashes, versões,
+- [x] Antes do lote, conferir aprovações de rótulos e orçamento, hashes, versões,
   políticas, limites e ambiente. Bloquear preflight divergente sem consumir API.
-- [ ] Executar a qualificação final do Qwen, preservando cada tentativa, erro,
+- [x] Executar a qualificação final do Qwen, preservando cada tentativa, erro,
   abstenção, denominador e modelo efetivo. Não ajustar o candidato ao ver o holdout.
-- [ ] Publicar acerto bruto/aplicado por campo, urgentes rebaixados/abstenções/
+- [x] Publicar acerto bruto/aplicado por campo, urgentes rebaixados/abstenções/
   falhas, cobertura, inválidos, p50/p95 com amostras e custo real/estimado/local.
-- [ ] Usar `observed-total-1.1`: p95 do tempo total da classificação até
+- [x] Usar `observed-total-1.1`: p95 do tempo total da classificação até
   3.000 ms, incluindo falhas/timeouts observados e todos os estados térmicos.
   Registrar inicialização e estado térmico separadamente, além de hardware,
   rede e condições. Modelos no mesmo host não têm benchmarks concorrentes.
-- [ ] Relatório inclui dados brutos, hashes/inventário e instruções de reprodução,
+- [x] Relatório inclui dados brutos, hashes/inventário e instruções de reprodução,
   com checagem independente das contagens. Credenciais e saldo ficam ausentes.
-- [ ] Relacionar os resultados aos limites definidos antes do ensaio. Não premiar
+- [x] Relacionar os resultados aos limites definidos antes do ensaio. Não premiar
   um modelo que se abstém em todos os casos; expor trade-offs e tamanho da amostra.
 - [ ] ADR registra resultado: Qwen elegível e adoção aprovada pelo responsável,
   não elegível ou evidência insuficiente. Falha do piloto/fornecedor permanece

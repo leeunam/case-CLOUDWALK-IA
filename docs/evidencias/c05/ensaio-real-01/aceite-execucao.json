@@ -1,0 +1,52 @@
+{
+  "task": "C05",
+  "status": "final_run_completed_candidate_not_eligible_human_deliberation_pending",
+  "source_revision": "19a56fe3dc4fb80a48122182fcc6bcdf1d9855d7",
+  "implementation_base": "7eb1bf193e8183248293d2a1272a4c7240f4a7ec",
+  "branch": "feat/executor-qwen-final",
+  "worktree": ".worktrees/c05-comparacao",
+  "run_id": "c05-58e8f0b5c64547b98d6f5ca738bf2c6e",
+  "profile": "observed-total-1.1",
+  "eligibility": "fail",
+  "final_cases": 36,
+  "controls": 13,
+  "real_requests": 44,
+  "attempts": 44,
+  "retries": 0,
+  "failed_gates": [
+    "automatic_completion_on_expected_review_cases",
+    "applied_category_accuracy"
+  ],
+  "observed_batch_usd": "0.02197127",
+  "prior_pilot_accounted_usd": "0.001038",
+  "global_accounted_usd": "0.02300927",
+  "global_cap_usd": "10",
+  "outstanding_reservations": 0,
+  "checker": "passed observed-total-1.1",
+  "independent_quality_audit": "completed, negative eligibility confirmed",
+  "independent_financial_audit": "completed, all 44 costs reconciled",
+  "literal_credential_found_in_outputs": false,
+  "frozen_candidate_and_evaluation_sources_changed": false,
+  "original_historical_reports_unchanged": 17,
+  "product_classifier_changed": false,
+  "human_adoption_approved": false,
+  "authorization_consumed": true,
+  "further_inference_authorized": false,
+  "evidence": {
+    "invocation.json": "cfe33e81947717dd60c7bb41954ae0f7dd78633bf76cd9cd2ffccaefc32779ff",
+    "inputs.jsonl": "1786f8cdc239f9a661ba413f7f8ee964a33c5d87be48450a62ea29fd5a4fed09",
+    "decisions.jsonl": "3bcad19cd7615b593fe0575f56b53af1702c2d0cde5f084be427721a49460d65",
+    "report.md": "4679e54ec5a3b7cd1ac2831cafd54ef718acdb483ccf1e5041c8850783db6d50",
+    "plan.json": "490475c6dd16a4bc462d6dd468ca910d68025f1231941b565eaca2ceadda9031",
+    "report.json": "70c77e58032e143492e830616502c2e534c94313b8a815f15b9917302a9e6806",
+    "observations.jsonl": "a5c3a24f75e589606cfd5e36d284b71619b6f1e0cab9ad20851c862b05f7f5dd",
+    "journal.jsonl": "242ff7ce3aff482e5ff7c07440cee4d2196aa098468e3cd77bf646ebfd4a3a2d"
+  },
+  "limitations": [
+    "Synthetic exploratory dataset, 8 direct human label approvals and 52 delegated AI reviews before evaluation.",
+    "No paired final comparison with GLiClass.",
+    "Six urgent cases do not establish production safety.",
+    "Future candidate changes require a new scope and independent final set, not retuning to this holdout.",
+    "Cost reconciled from documented gateway credits, without a later provider invoice."
+  ]
+}

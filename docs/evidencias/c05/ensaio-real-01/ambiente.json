@@ -1,0 +1,23 @@
+{
+  "task": "C05",
+  "source_revision": "19a56fe3dc4fb80a48122182fcc6bcdf1d9855d7",
+  "system": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+  "machine": "x86_64",
+  "python": "3.11.13",
+  "logical_cpu_count": 12,
+  "cpu_model": "13th Gen Intel(R) Core(TM) i5-1345U",
+  "host_mem_total": "16048300 kB",
+  "concurrency": 1,
+  "candidate_benchmarks_started_in_parallel_by_integrator": 0,
+  "network": "Local desktop to Feita HTTPS over Internet; link bandwidth and RTT not separately measured.",
+  "provider_temperature_state": "unknown",
+  "provider_state_verified_by_response": false,
+  "start_epoch": 1795524650.9528868,
+  "finish_epoch": 1795524722.497012,
+  "process_wall_seconds": 71.54412508010864,
+  "notes": [
+    "Host inventory recorded after the batch; no resource configuration was changed.",
+    "No claim of isolated host, measured CPU contention or provider warmup.",
+    "Canonical per-case total latency, including local financial guard, used unchanged."
+  ]
+}

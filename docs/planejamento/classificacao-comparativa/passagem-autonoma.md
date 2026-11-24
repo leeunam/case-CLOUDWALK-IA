@@ -1,5 +1,17 @@
 # Passagem da execução autônoma · 23/11/2026
 
+**Atualização de 24/11/2026 — lote final concluído:** o responsável autorizou a
+C05 e o Qwen completou 36 relatos + 13 controles, em 44 chamadas sem repetição.
+Resultado **não elegível**, por 3/7 conclusões automáticas indevidas e acerto
+de categoria aplicada 19/22 (86,36%). p95 de 2.493,510 ms e urgentes 6/6 passaram.
+Custo conciliado US$ 0,02197127; total com pilotos US$ 0,02300927 do teto US$ 10,
+44 reservas liquidadas e nenhuma pendente. As auditorias independentes de
+qualidade e finanças conferiram os resultados. Fonte `19a56fe`.
+[Relatório](../../c05-resultado.md) e [decisão pendente](decisao-qwen-01.md).
+C05 aguarda deliberação humana; C06 segue bloqueada. A autorização do lote foi
+consumida. Não ajustar o candidato e repetir o mesmo conjunto como teste novo.
+Os registros seguintes preservam a sequência histórica.
+
 **Estado atual:** o responsável configurou a chave, autorizou até US$ 10 com mínimo de requisições, e o piloto real C03 usou uma chamada. Retornou `pix` + `urgent` corretamente em 1,826 s; o painel exibiu cobrança aproximada de US$ 0,000518. [Recibo](../../evidencias/c03/piloto-unitario-real.json). A decisão posterior de usar o tempo total da classificação foi implementada e integrada em `933836e`: selecionar explicitamente `--profile observed-total-1.1`, com p95 até 3.000 ms. Passaram 39 testes do avaliador; os 17 históricos conservaram seus hashes e nenhuma nova inferência foi feita. [Aceite](../../evidencias/latencia-total/avaliador-aceite.json).
 
 **Atualização de escopo aprovada:** o responsável escolheu focar na avaliação

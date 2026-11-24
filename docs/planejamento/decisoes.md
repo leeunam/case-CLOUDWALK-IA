@@ -667,6 +667,21 @@ ou inconclusiva; somente elegibilidade comprovada e aprovação humana liberam
 C06. O teto total continua US$ 10, com mínimo de requisições; não é um novo
 orçamento por lote. [Plano e pré-voo C05](classificacao-comparativa/qualificacao-qwen.md).
 
+### Resultado do primeiro lote final — 24/11/2026
+
+O responsável autorizou a execução sob os critérios congelados. O lote
+concluiu os 36 relatos e 13 controles em 44 chamadas, sem repetição.
+Resultado técnico **não elegível**: 3/7 conclusões em casos que exigiam revisão
+e acerto de categoria aplicada 19/22 (86,36%, abaixo de 90%). O p95 de
+2.493,510 ms e o reconhecimento de 6/6 urgentes passaram. Custo conciliado
+US$ 0,02197127; total conservador com pilotos US$ 0,02300927, sem reservas
+pendentes. [Resultado e evidências](../c05-resultado.md).
+
+Não houve adoção nem ajuste do candidato. C06 continua bloqueada, e o
+responsável precisa deliberar sobre um novo escopo. A autorização deste lote
+foi consumida. O [registro de decisão pendente](classificacao-comparativa/decisao-qwen-01.md)
+separa o resultado automático dos critérios de uma aprovação humana.
+
 ## Relações de domínio já confirmadas
 
 O diagrama representa relações de negócio, sem fixar tabelas ou tecnologias.

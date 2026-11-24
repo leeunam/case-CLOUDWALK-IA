@@ -18,7 +18,12 @@ responsável e 52 pela IA sob delegação, conforme o [registro](revisao-de-rotu
 A separação de dados e os limites de aceitação foram aprovados; contratos
 v1.1.0 passaram na verificação local. O piloto Qwen recebeu teto de US$ 10,
 com orientação de minimizar requisições; consumiu uma chamada. O escopo
-financeiro do teste final ainda precisa ser definido.
+financeiro do teste final foi definido e autorizado posteriormente, sob o mesmo
+teto cumulativo. O lote de 24/11/2026 concluiu 36 relatos + 13 controles em 44
+chamadas, por US$ 0,02197127. Resultado técnico **não elegível**: 3/7 conclusões
+indevidas e 19/22 categorias aplicadas corretas. O p95 de 2.493,510 ms e o
+reconhecimento de 6/6 urgentes passaram. C05 aguarda deliberação humana e C06
+continua bloqueada. [Resultado e auditorias](../../c05-resultado.md).
 A integração operacional só começa depois de C05 registrar
 um vencedor elegível aprovado pelo responsável. O resultado pode ser inconclusivo.
 

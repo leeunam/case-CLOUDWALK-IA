@@ -88,6 +88,15 @@ de aquecimento comprovado. Protocolo de qualidade 1.1, relatório 1.2 e IPC 1.1;
 39 testes do avaliador passaram, sem novas chamadas externas. Os 17 relatórios
 históricos conservaram seus hashes. [Plano e aceite](classificacao-comparativa/plano-latencia-total.md).
 
+Em 24/11/2026, o primeiro lote final autorizado da C05 foi concluído:
+36 relatos + 13 controles, 44 chamadas, custo US$ 0,02197127 e total conservador
+com pilotos US$ 0,02300927. Resultado técnico **não elegível**: 3/7 conclusões
+onde era obrigatória revisão e 19/22 categorias aplicadas corretas (86,36%).
+O p95 de 2.493,510 ms e o reconhecimento de 6/6 urgentes passaram. As auditorias
+independentes conferiram qualidade e finanças. C05 aguarda deliberação humana;
+C06 continua bloqueada, sem modelo adotado. A autorização do lote foi consumida.
+[Resultado e verificações sem API](../c05-resultado.md).
+
 Ordem vigente: C01 → C02 → C03 → C05 → C06 → C07; C04 foi investigada em
 paralelo com C03 e seus ajustes foram encerrados nesta entrega. R01 e R02 podem
 andar independentemente e bloqueiam o fechamento da demonstração C07.
