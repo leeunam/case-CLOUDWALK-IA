@@ -2,8 +2,6 @@
 from collections import Counter
 from math import ceil, fsum, isfinite
 
-from common import c01
-
 
 def metric(num, den, count=False):
     if not den:
@@ -11,12 +9,12 @@ def metric(num, den, count=False):
     return dict(state="measured", numerator=num, denominator=den, value=num if count else num / den)
 
 
-def slice_metrics(rows, field=None):
+def slice_metrics(rows, field=None, *, abstention):
     n = Counter()
     for case, obs, decision in rows:
         expected = case["expected"]
         complete = decision["outcome"] == "complete"
-        classifiable = c01.ABSTENTION not in expected.values()
+        classifiable = abstention not in expected.values()
         n["cases"] += 1
         n["review"] += not complete
         n["classifiable"] += classifiable
@@ -28,7 +26,7 @@ def slice_metrics(rows, field=None):
             choice = obs["choices"][f]
             status = choice["status"]
             applied = decision["fields"][f]["applied"]
-            abstain = code == c01.ABSTENTION
+            abstain = code == abstention
             n["targets"] += 1
             n["applied"] += applied is not None
             n["applied_accuracy"] += applied == code
@@ -68,15 +66,24 @@ def percentile(values, population, p):
                 value=sorted(values)[ceil(p * len(values)) - 1], numerator=None, denominator=len(values))
 
 
-def summarize(cases, inputs, observations, decisions, catalog, completed, fixture=True, *, profile_name=c01.LEGACY):
-    profile = c01.get_profile(profile_name)
+def summarize(cases, inputs, observations, decisions, catalog, completed, fixture=True, *, profile_name=None):
+    from common import c01
+
+    profile = c01.get_profile(c01.LEGACY if profile_name is None else profile_name)
+    return canonical_summary(cases, inputs, observations, decisions, catalog, completed, fixture=fixture,
+                             latency_gate=profile.latency_gate, observed_latency=profile.latency_gate == c01.OBSERVED_GATE,
+                             fields=c01.FIELDS, abstention=c01.ABSTENTION, normalize_input=c01.normalize_input)
+
+
+def canonical_summary(cases, inputs, observations, decisions, catalog, completed, *,
+                      fixture, latency_gate, observed_latency, fields, abstention, normalize_input):
     by_id = {o["id"]: o for o in observations}
     verdicts = {d["id"]: d for d in decisions}
     rows = [(cases[i], by_id[i], verdicts[i]) for i in completed]
-    by_field = {f: slice_metrics([r for r in rows if f in r[0]["missing"]], f) for f in c01.FIELDS}
-    by_mask = {m: slice_metrics([r for r in rows if "+".join(r[0]["missing"]) == m])
+    by_field = {f: slice_metrics([r for r in rows if f in r[0]["missing"]], f, abstention=abstention) for f in fields}
+    by_mask = {m: slice_metrics([r for r in rows if "+".join(r[0]["missing"]) == m], abstention=abstention)
                for m in ("category", "priority", "category+priority")}
-    by_stratum = {s: slice_metrics([r for r in rows if r[0]["stratum"] == s])
+    by_stratum = {s: slice_metrics([r for r in rows if r[0]["stratum"] == s], abstention=abstention)
                   for s in ("rotina", "urgente", "ambiguo")}
     urgent = [r for r in rows if r[0]["expected"].get("priority") == "urgent"]
     counters = Counter()
@@ -94,7 +101,7 @@ def summarize(cases, inputs, observations, decisions, catalog, completed, fixtur
     integrity = Counter()
     for item in inputs:
         i = item["id"]
-        _, invalid, valid = c01.normalize_input(item, catalog)
+        _, invalid, valid = normalize_input(item, catalog)
         d = verdicts[i]
         integrity["provided"] += len(valid)
         integrity["preserved"] += sum(d["fields"][f]["applied"] == v for f, v in valid.items())
@@ -105,14 +112,14 @@ def summarize(cases, inputs, observations, decisions, catalog, completed, fixtur
             integrity["incomplete"] += 1
             integrity["partial"] += any(d["fields"][f]["applied"] is not None for f in item["missing"])
 
-    expected_review = [r for r in rows if c01.ABSTENTION in r[0]["expected"].values()]
+    expected_review = [r for r in rows if abstention in r[0]["expected"].values()]
     durations = []
     if not fixture:
         for _, obs, _ in rows:
             elapsed = obs["elapsed_ms"]
             if elapsed is None:
                 continue
-            if profile.latency_gate == c01.OBSERVED_GATE:
+            if observed_latency:
                 if obs["origin"] == "candidate" and isfinite(elapsed) and elapsed >= 0:
                     durations.append(elapsed)
             elif obs["temperature_state"] == "warm":
@@ -123,17 +130,43 @@ def summarize(cases, inputs, observations, decisions, catalog, completed, fixtur
                  automatic_completion_on_expected_review_cases=metric(sum(d["outcome"] == "complete" for _, _, d in expected_review),
                                                                      len(expected_review), count=True),
                  automatic_non_urgent_applied_when_expected_urgent=metric(counters["applied_lower"], len(urgent), count=True),
-                 automatic_coverage_on_fully_classifiable_cases_min=slice_metrics(rows)["automatic_coverage"],
+                 automatic_coverage_on_fully_classifiable_cases_min=slice_metrics(rows, abstention=abstention)["automatic_coverage"],
                  raw_urgent_recognition_min=metric(counters["raw"], len(urgent)))
-    gates[profile.latency_gate] = percentile(durations, len(rows), .95)
-    for f in c01.FIELDS:
+    gates[latency_gate] = percentile(durations, len(rows), .95)
+    for f in fields:
         gates[f"applied_{f}_accuracy"] = by_field[f]["applied_accuracy"]
     return dict(by_field=by_field, by_mask=by_mask, by_stratum=by_stratum, urgent_outcomes=outcomes,
                 latency_p50_ms=percentile(durations, len(rows), .5), usage=usage(observations), gates=gates)
 
 
+def apply_final_populations(summary, report, protocol, latency_gate):
+    if report["split"] != "final_test" or len(report["completed_ids"]) >= len(report["planned_ids"]):
+        return
+    counts = protocol["exact_test_denominators"]
+    population = len(report["planned_ids"])
+    urgent = counts["urgent_priority_omitted_cases"]
+    gates = {"automatic_completion_on_expected_review_cases": counts["expected_review_cases"],
+             "automatic_non_urgent_applied_when_expected_urgent": urgent,
+             "automatic_coverage_on_fully_classifiable_cases_min": counts["fully_classifiable_cases"],
+             "raw_urgent_recognition_min": urgent, latency_gate: population}
+    for name, denominator in gates.items():
+        partial(summary["gates"][name], denominator)
+    for value in summary["urgent_outcomes"].values():
+        partial(value, urgent)
+    partial(summary["latency_p50_ms"], population)
+
+
+def partial(metric, population):
+    if metric["value"] is None:
+        metric["denominator"] = population
+    elif metric["denominator"] < population:
+        metric["state"] = "partial"
+
+
 def eligibility(report, protocol, observations, decisions):
     """Conclusão exclusiva do teste real com evidência completa e controles."""
+    from common import c01
+
     if (report["identity"]["mode"] != "real" or report["split"] != "final_test" or
             report["completed_ids"] != report["planned_ids"] or
             len(report["completed_ids"]) != protocol["execution"]["full_test_cases_per_candidate"]):

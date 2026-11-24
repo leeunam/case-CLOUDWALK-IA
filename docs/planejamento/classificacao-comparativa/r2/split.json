@@ -1,6 +1,6 @@
 {
-  "source_dataset_version": "1.1.0",
-  "source_dataset_sha256": "0e7e4c342c2a39cefd89855d8c0513f447d7878303eb4091488ca8af78928880",
+  "source_dataset_version": "2.0.0",
+  "source_dataset_sha256": "3f4e69af44f03c89d1767d54ba07264327d616f18b0548656cc00c7bb89e3845",
   "development": {
     "category": [
       "jev-004",
@@ -123,13 +123,15 @@
     }
   },
   "model_visible_fields": [
-    "id",
     "text",
-    "received",
+    "brand",
+    "catalog",
     "missing",
-    "brand_catalog_and_definitions"
+    "received"
   ],
   "model_hidden_fields": [
+    "id",
+    "contract_version",
     "expected",
     "rationale",
     "stratum",
@@ -139,5 +141,14 @@
   ],
   "status": "approved",
   "approved_on": "2026-11-23",
-  "approval_evidence": "Responsável respondeu \"aprovo\" à proposta 24/36 e à régua no chat central."
+  "approval_evidence": "Responsável respondeu \"aprovo\" à proposta 24/36 e à régua no chat central.",
+  "ipc_projection_fields": [
+    "id",
+    "text",
+    "brand",
+    "catalog",
+    "missing",
+    "received",
+    "contract_version"
+  ]
 }

@@ -13,7 +13,7 @@ import uuid
 
 sys.dont_write_bytecode = True
 from common import HERE, c01, decide, decode, encode, injected_inventory, injected_observation, preflight, project
-from metrics import eligibility, summarize
+from metrics import apply_final_populations, eligibility, summarize
 from journal import Journal, inventory, sync_directory
 
 
@@ -300,21 +300,10 @@ def write_report(output, report, inputs, obs, decisions, validation, protocol, s
         raise ValueError("lote completo diverge do plano de relatos e controles")
     report.update(completed_ids=completed, control_ids=controls,
                   injected_controls=injected_inventory(injected, protocol["control_policy"], policy))
-    report.update(summarize(cases, inputs, obs, decisions, catalog, completed,
-                            fixture=report["identity"]["mode"] == "fixture", profile_name=profile.name))
-    if report["split"] == "final_test" and len(completed) < len(report["planned_ids"]):
-        # For a partial final test the contract retains known full-test populations.
-        counts = protocol["exact_test_denominators"]
-        populations = {"automatic_completion_on_expected_review_cases": counts["expected_review_cases"],
-                       "automatic_non_urgent_applied_when_expected_urgent": counts["urgent_priority_omitted_cases"],
-                       "automatic_coverage_on_fully_classifiable_cases_min": counts["fully_classifiable_cases"],
-                       "raw_urgent_recognition_min": counts["urgent_priority_omitted_cases"],
-                       profile.latency_gate: len(report["planned_ids"])}
-        for name, population in populations.items():
-            partial(report["gates"][name], population)
-        for value in report["urgent_outcomes"].values():
-            partial(value, counts["urgent_priority_omitted_cases"])
-        partial(report["latency_p50_ms"], len(report["planned_ids"]))
+    summary = summarize(cases, inputs, obs, decisions, catalog, completed,
+                        fixture=report["identity"]["mode"] == "fixture", profile_name=profile.name)
+    apply_final_populations(summary, report, protocol, profile.latency_gate)
+    report.update(summary)
     report["eligibility"] = eligibility(report, protocol, obs, decisions)
     if profile.name == c01.R2 and prefix:
         report["eligibility"] = "inconclusive"
@@ -327,13 +316,6 @@ def write_report(output, report, inputs, obs, decisions, validation, protocol, s
     # A evidência completa pode exigir um veredito mesmo após interrupção.
     if not prefix or report["eligibility"] == "inconclusive":
         write_json(output / f"{name}.json", report)
-
-
-def partial(m, population):
-    if m["value"] is None:
-        m["denominator"] = population
-    elif m["denominator"] < population:
-        m["state"] = "partial"
 
 
 def main():

@@ -40,12 +40,12 @@
     },
     "protocol": {
       "path": "docs/planejamento/classificacao-comparativa/r2/protocol.json",
-      "sha256": "8b65cd24c08162fea3ba4ed281aa38598d58a16219251c8184d2d6c5cd4d034c",
+      "sha256": "4dac44b9fcd378ec12df5b6e0b3243c9b05300710560fc579368899632954466",
       "version": "1.2.0"
     },
     "split": {
       "path": "docs/planejamento/classificacao-comparativa/r2/split.json",
-      "sha256": "84afa9b03f218e731aeae4e1c5906894103a9886fe76109e9e0ccf15dc0ef7f8",
+      "sha256": "0a1deb39189fc059f3dcf4ea4261f5175afce874eda11ff3dc065e0b6faf6b14",
       "version": "2.0.0"
     },
     "policy": {
@@ -108,16 +108,16 @@
   },
   "gates": {
     "channel_field_preservation_ratio": {
-      "state": "unmeasured",
-      "numerator": null,
-      "denominator": null,
-      "value": null
+      "state": "measured",
+      "numerator": 9,
+      "denominator": 9,
+      "value": 1.0
     },
     "complete_or_invalid_controls_model_calls": {
-      "state": "unmeasured",
-      "numerator": null,
-      "denominator": null,
-      "value": null
+      "state": "measured",
+      "numerator": 0,
+      "denominator": 4,
+      "value": 0
     },
     "partial_application_after_abstention_or_error": {
       "state": "measured",
@@ -128,40 +128,40 @@
     "automatic_completion_on_expected_review_cases": {
       "state": "unmeasured",
       "numerator": null,
-      "denominator": null,
+      "denominator": 0,
       "value": null
     },
     "automatic_non_urgent_applied_when_expected_urgent": {
       "state": "unmeasured",
       "numerator": null,
-      "denominator": null,
+      "denominator": 0,
       "value": null
     },
     "automatic_coverage_on_fully_classifiable_cases_min": {
       "state": "unmeasured",
       "numerator": null,
-      "denominator": null,
+      "denominator": 0,
       "value": null
     },
     "raw_urgent_recognition_min": {
       "state": "unmeasured",
       "numerator": null,
-      "denominator": null,
+      "denominator": 0,
       "value": null
+    },
+    "observed_total_latency_p95_ms_max": {
+      "state": "unmeasured",
+      "value": null,
+      "numerator": null,
+      "denominator": 0
     },
     "applied_category_accuracy": {
       "state": "unmeasured",
       "numerator": null,
-      "denominator": null,
+      "denominator": 0,
       "value": null
     },
     "applied_priority_accuracy": {
-      "state": "unmeasured",
-      "numerator": null,
-      "denominator": null,
-      "value": null
-    },
-    "observed_total_latency_p95_ms_max": {
       "state": "unmeasured",
       "numerator": null,
       "denominator": 0,
@@ -173,61 +173,61 @@
       "raw_accuracy": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "applied_accuracy": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "correct_abstention": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "undue_abstention": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "invalid_output": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "operational_error": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "unapplied_choices": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "review": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "automatic_coverage": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "correct_completion_coverage": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       }
     },
@@ -235,61 +235,61 @@
       "raw_accuracy": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "applied_accuracy": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "correct_abstention": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "undue_abstention": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "invalid_output": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "operational_error": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "unapplied_choices": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "review": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "automatic_coverage": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "correct_completion_coverage": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       }
     }
@@ -299,61 +299,61 @@
       "raw_accuracy": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "applied_accuracy": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "correct_abstention": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "undue_abstention": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "invalid_output": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "operational_error": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "unapplied_choices": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "review": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "automatic_coverage": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "correct_completion_coverage": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       }
     },
@@ -361,61 +361,61 @@
       "raw_accuracy": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "applied_accuracy": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "correct_abstention": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "undue_abstention": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "invalid_output": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "operational_error": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "unapplied_choices": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "review": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "automatic_coverage": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "correct_completion_coverage": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       }
     },
@@ -423,61 +423,61 @@
       "raw_accuracy": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "applied_accuracy": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "correct_abstention": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "undue_abstention": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "invalid_output": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "operational_error": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "unapplied_choices": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "review": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "automatic_coverage": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "correct_completion_coverage": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       }
     }
@@ -487,61 +487,61 @@
       "raw_accuracy": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "applied_accuracy": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "correct_abstention": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "undue_abstention": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "invalid_output": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "operational_error": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "unapplied_choices": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "review": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "automatic_coverage": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "correct_completion_coverage": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       }
     },
@@ -549,61 +549,61 @@
       "raw_accuracy": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "applied_accuracy": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "correct_abstention": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "undue_abstention": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "invalid_output": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "operational_error": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "unapplied_choices": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "review": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "automatic_coverage": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "correct_completion_coverage": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       }
     },
@@ -611,61 +611,61 @@
       "raw_accuracy": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "applied_accuracy": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "correct_abstention": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "undue_abstention": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "invalid_output": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "operational_error": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "unapplied_choices": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "review": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "automatic_coverage": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       },
       "correct_completion_coverage": {
         "state": "unmeasured",
         "numerator": null,
-        "denominator": null,
+        "denominator": 0,
         "value": null
       }
     }
@@ -674,57 +674,57 @@
     "applied_urgent": {
       "state": "unmeasured",
       "numerator": null,
-      "denominator": null,
+      "denominator": 0,
       "value": null
     },
     "applied_lower": {
       "state": "unmeasured",
       "numerator": null,
-      "denominator": null,
+      "denominator": 0,
       "value": null
     },
     "review": {
       "state": "unmeasured",
       "numerator": null,
-      "denominator": null,
+      "denominator": 0,
       "value": null
     },
     "abstained": {
       "state": "unmeasured",
       "numerator": null,
-      "denominator": null,
+      "denominator": 0,
       "value": null
     },
     "invalid": {
       "state": "unmeasured",
       "numerator": null,
-      "denominator": null,
+      "denominator": 0,
       "value": null
     },
     "operational_error": {
       "state": "unmeasured",
       "numerator": null,
-      "denominator": null,
+      "denominator": 0,
       "value": null
     }
   },
   "latency_p50_ms": {
     "state": "unmeasured",
+    "value": null,
     "numerator": null,
-    "denominator": 0,
-    "value": null
+    "denominator": 0
   },
   "eligibility": "inconclusive",
   "usage": {
-    "requests": {
-      "state": "measured",
-      "value": 9,
-      "samples": 8,
-      "expected_samples": 8
-    },
     "attempts": {
       "state": "measured",
       "value": 8,
+      "samples": 8,
+      "expected_samples": 8
+    },
+    "requests": {
+      "state": "measured",
+      "value": 9,
       "samples": 8,
       "expected_samples": 8
     },

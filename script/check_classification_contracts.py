@@ -11,6 +11,7 @@ from urllib.parse import urldefrag, urljoin
 
 from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
+from classification_comparison.metrics import apply_final_populations, canonical_summary
 
 ROOT = Path(__file__).resolve().parents[1]
 PLAN = ROOT / "docs/planejamento/classificacao-comparativa"
@@ -64,9 +65,9 @@ PROFILES = {
                             "relatorio-1.2/report.json", "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.2/sources.lock.json",
                             "8640c343dd182f0e683f82525ed2f48616e4620503c12172e6dc6a70faf0bb22"),
     R2: ReportProfile(R2, "1.2.0", "1.3.0", "1.1.0", OBSERVED_GATE,
-                      "r2/protocol.json", "8b65cd24c08162fea3ba4ed281aa38598d58a16219251c8184d2d6c5cd4d034c",
+                      "r2/protocol.json", "4dac44b9fcd378ec12df5b6e0b3243c9b05300710560fc579368899632954466",
                       "relatorio-1.3/report.json", "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.3/sources.lock.json",
-                      "b2ad29171936ca41c0fa99ac79886563cad041ee8009c9beebc6b21c156d056c"),
+                      "9b83e6c85fcf25a061e93e28ad4c9682cb505e6f830c6dbc5ef08c37fc2159a6"),
 }
 
 
@@ -621,6 +622,14 @@ def verify_run(bundle, validation, protocol, split, catalog, dataset):
         full = False
     verify_partial_application(report, observations, indexed["decisions"])
     verify_usage(report, list(observations.values()))
+    if profile.name == R2:
+        derived = canonical_summary(dataset, bundle["inputs"], bundle["observations"], bundle["decisions"],
+                                    catalog, completed, fixture=report["identity"]["mode"] == "fixture",
+                                    latency_gate=profile.latency_gate, observed_latency=True,
+                                    fields=FIELDS, abstention=ABSTENTION, normalize_input=normalize_input)
+        apply_final_populations(derived, report, protocol, profile.latency_gate)
+        for name, expected in derived.items():
+            require(report[name] == expected, "r2_metrics", name)
     verify_metrics(report, protocol, full, dataset, indexed["decisions"], profile.latency_gate)
     for kind, path in paths.items():
         # Compare JSON types too: Python considers False == 0 and True == 1.
@@ -654,6 +663,14 @@ def mutate(bundle, mutation):
 
 def verify_r2_package(protocol, split, data):
     r2 = protocol["r2"]
+    source = protocol["source_dataset"]
+    require(split["source_dataset_version"] == source["version"] == data["version"]
+            and split["source_dataset_sha256"] == source["sha256"], "r2_split_source", "dataset composto")
+    model_fields = ["text", "brand", "catalog", "missing", "received"]
+    require(split["model_visible_fields"] == model_fields
+            and split["ipc_projection_fields"] == ["id", *model_fields, "contract_version"]
+            and {"id", "contract_version", "expected", "rationale", "stratum"} <= set(split["model_hidden_fields"]),
+            "r2_split_projection", "contexto Qwen e projeção IPC")
     historical_split = read(source_path(r2["historical_split"]))
     historical_data = read(source_path(r2["historical_dataset"]))
     final = read(source_path(r2["final_cases"]))["cases"]

@@ -20,7 +20,7 @@ SCOPE = "c05-qwen-r2"
 STAGES = ("development", "final")
 VERSIONS = {"profile": PROFILE.name, "protocol_version": PROFILE.quality_version,
             "report_version": PROFILE.report_version, "ipc_contract_version": PROFILE.ipc_version}
-EXECUTION_FILES = (*EXECUTOR_FILES, *(HERE / name for name in ("execute.py", "plan.py", "gate.py")))
+EXECUTION_FILES = (*EXECUTOR_FILES, *(HERE / name for name in ("execute.py", "plan.py", "gate.py", "seal.py")))
 
 
 def canonical_digest(value):

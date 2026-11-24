@@ -2,6 +2,7 @@ from argparse import Namespace
 from copy import deepcopy
 import json
 from pathlib import Path
+import stat
 import subprocess
 import sys
 from tempfile import TemporaryDirectory
@@ -9,11 +10,12 @@ from unittest import TestCase, mock
 
 import execute
 import gate
-from adapters.qwen.adapter import request_body
+import seal
+from adapters.qwen.adapter import choice, request_body
 from budget import Account, BudgetError, cap_usd
-from common import c01, decode, encode
+from common import c01, decide, decode, encode, injected_observation
 from plan import C05, HERE, PROFILE, SCOPE, Plan, gate_reference
-from run import run
+from run import run, write_json, write_report
 from settings import Settings
 
 FIXTURE = HERE / "config-fixture.json"
@@ -122,14 +124,14 @@ class R2Test(TestCase):
         self.create_manifest(args)
         execute.run_evaluation(args)
         proof = args.output / gate.FILENAME
-        original = c01.read(proof)
-        forged = dict(original, observed_usd="0.000001")
+        original = proof.read_bytes()
+        forged = dict(decode(original), observed_usd="0.000001")
         proof.write_text(encode(forged), encoding="utf-8")
         final = self.args("forged", account, stage="final", proof=proof)
         self.create_manifest(final)
-        with self.assertRaisesRegex(BudgetError, "adulterado"):
+        with self.assertRaisesRegex(BudgetError, "selo de development divergente"):
             execute.run_evaluation(final)
-        proof.write_text(encode(original), encoding="utf-8")
+        proof.write_bytes(original)
         (args.output / "interruption.json").touch()
         final = self.args("prefix", account, stage="final", proof=proof)
         self.create_manifest(final)
@@ -198,6 +200,63 @@ execute.main()
             execute.run_evaluation(final)
         self.assertEqual([row["state"] for row in account.status()["runs"]], ["finished"])
 
+    def test_regenerated_proof_from_failed_development_cannot_replace_original_outputs(self):
+        account = self.init_account()
+        args = self.args("wrong", account)
+        self.create_manifest(args)
+        self.assertEqual(execute.run_evaluation(args, fixture_command=self.scenario_command("wrong")), "failed")
+        original_ledger = account.status()
+        development = Plan("development", "fixture", "proof-check", FIXTURE)
+        private = seal.path_for(development, account)
+        original_seal = private.read_bytes()
+        self.assertEqual(stat.S_IMODE(private.stat().st_mode), 0o600)
+        self.assertEqual(private.parent, account.path.parent)
+
+        output = args.output
+        bundle = c01.load_bundle(development.validation, output / "report.json")
+        obs = bundle["observations"][0]
+        first = bundle["inputs"][0]
+        self.assertEqual((obs["id"], obs["choices"]["category"]["raw"]), ("jev-004", "pix"))
+        obs["choices"]["category"]["raw"] = "payouts"
+        bundle["decisions"][0] = decide(first, obs, development.catalog, bundle["report"]["run_id"])
+        for name in ("observations", "decisions"):
+            (output / f"{name}.jsonl").write_text("".join(encode(row) + "\n" for row in bundle[name]), encoding="utf-8")
+        write_report(output, bundle["report"], bundle["inputs"], bundle["observations"], bundle["decisions"],
+                     development.validation, development.protocol, development.split, development.catalog,
+                     development.cases, development.control_policy, False)
+        regenerated = gate.collect(output, development, account, CAP)
+        self.assertEqual((regenerated["status"], regenerated["correct_targets"]), ("fixture_ready", 8))
+        proof = output / gate.FILENAME
+        write_json(proof, regenerated)
+        final = self.args("final", account, stage="final", proof=proof)
+        self.create_manifest(final)
+        with self.assertRaisesRegex(BudgetError, "selo de development divergente"):
+            execute.run_evaluation(final)
+        self.assertEqual(private.read_bytes(), original_seal)
+        self.assertEqual(account.status(), original_ledger)
+        self.assertFalse(final.output.exists())
+
+    def test_missing_or_corrupt_seal_is_never_recreated(self):
+        account = self.init_account()
+        args = self.args("dev", account)
+        self.create_manifest(args)
+        self.assertEqual(execute.run_evaluation(args), "fixture_ready")
+        development = Plan("development", "fixture", "proof-check", FIXTURE)
+        private = seal.path_for(development, account)
+        final = self.args("final", account, stage="final", proof=args.output / gate.FILENAME)
+        self.create_manifest(final)
+        private.unlink()
+        with self.assertRaisesRegex(BudgetError, "selo de development ausente ou corrompido"):
+            execute.run_evaluation(final)
+        self.assertFalse(private.exists())
+        private.touch(mode=0o600)
+        private.write_text("{", encoding="utf-8")
+        with self.assertRaisesRegex(BudgetError, "selo de development ausente ou corrompido"):
+            execute.run_evaluation(final)
+        self.assertEqual(private.read_text(encoding="utf-8"), "{")
+        self.assertEqual(len(account.status()["reservations"]), 6)
+        self.assertFalse(final.output.exists())
+
     def test_unknown_or_timeout_interrupts_and_retains_reservation(self):
         for scenario in ("unknown", "timeout"):
             with self.subTest(scenario=scenario):
@@ -248,6 +307,57 @@ execute.main()
         self.assertEqual(payload["response_format"]["json_schema"]["schema"]["required"], item["missing"])
         self.assertEqual(payload["max_tokens"], 128)
         self.assertEqual(payload["reasoning"], {"enabled": False})
+        self.assertEqual(set(plan.split["model_visible_fields"]), set(context))
+        self.assertEqual(set(plan.split["ipc_projection_fields"]), set(item))
+        data = c01.read(c01.source_path(plan.protocol["source_dataset"]))
+        historic = dict(plan.split, source_dataset_version="1.1.0")
+        with self.assertRaisesRegex(c01.ContractError, "r2_split_source"):
+            c01.verify_r2_package(plan.protocol, historic, data)
+        leaked = dict(plan.split, model_visible_fields=["id", *plan.split["model_visible_fields"]])
+        with self.assertRaisesRegex(c01.ContractError, "r2_split_projection"):
+            c01.verify_r2_package(plan.protocol, leaked, data)
+
+    def test_r2_checker_derives_final_gates_and_rejects_forged_pass(self):
+        plan = Plan("final", "fixture", "synthetic-final", FIXTURE)
+        original = c01.load_bundle(plan.validation, PROFILE.golden_path)
+        identity = c01.read(c01.source_path(plan.sources["candidate"]))["identity"]
+        plan.report["identity"] = identity
+        template = next(obs for obs in original["observations"] if obs["origin"] == "candidate")
+        observations, decisions = [], []
+        for item in plan.inputs:
+            case_id = item["id"]
+            obs = None
+            if case_id in plan.injections["ids"]:
+                obs = injected_observation(item, plan.report["run_id"], plan.control_policy)
+            elif case_id in plan.candidates:
+                targeted = case_id in plan.cases
+                # Força conclusão justamente em um caso com revisão obrigatória.
+                if targeted and case_id != "r2-011":
+                    targets = plan.cases[case_id]["expected"]
+                else:
+                    targets = {field: next(iter(item["catalog"][field])) for field in item["missing"]}
+                obs = dict(template, id=case_id, run_id=plan.report["run_id"], identity=identity,
+                           returned_model=identity["expected_returned_model"], questions=len(item["missing"]),
+                           elapsed_ms=100 if targeted else None, choices={
+                               field: (choice("abstained", code, "explicit") if code == c01.ABSTENTION
+                                       else choice("predicted", code)) for field, code in targets.items()})
+            if obs is not None:
+                observations.append(obs)
+            decisions.append(decide(item, obs, plan.catalog, plan.report["run_id"]))
+        for name, rows in (("inputs", plan.inputs), ("observations", observations), ("decisions", decisions)):
+            (self.scratch / f"{name}.jsonl").write_text("".join(encode(row) + "\n" for row in rows), encoding="utf-8")
+        write_report(self.scratch, plan.report, plan.inputs, observations, decisions, plan.validation,
+                     plan.protocol, plan.split, plan.catalog, plan.cases, plan.control_policy, False)
+        path = self.scratch / "report.json"
+        c01.verify_report(path, c01.R2)
+        report = c01.read(path)
+        metric = report["gates"]["automatic_completion_on_expected_review_cases"]
+        self.assertEqual((report["eligibility"], metric["numerator"]), ("fail", 1))
+        metric.update(value=0, numerator=0)
+        report["eligibility"] = "pass"
+        write_json(path, report)
+        with self.assertRaisesRegex(c01.ContractError, "r2_metrics: gates"):
+            c01.verify_report(path, c01.R2)
 
     def test_real_gate_requires_six_measured_durations_inclusive_limit(self):
         account = self.init_account()

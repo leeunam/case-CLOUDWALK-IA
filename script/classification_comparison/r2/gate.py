@@ -2,6 +2,7 @@
 from pathlib import Path
 
 from plan import VERSIONS, Plan, canonical_digest
+import seal
 from adapters.qwen.adapter import numeric_cost
 from budget import BudgetError, total_usd, usd
 from common import c01
@@ -126,9 +127,10 @@ def verify(reference, final_plan, account, cap):
     path = c01.source_path(reference)
     supplied = c01.read(path)
     required = "pass" if final_plan.mode == "real" else "fixture_ready"
-    if supplied.get("mode") != final_plan.mode or supplied.get("status") != required:
+    if not isinstance(supplied, dict) or supplied.get("mode") != final_plan.mode or supplied.get("status") != required:
         raise BudgetError("gate de development falhou ou pertence a outro modo")
     development = Plan("development", final_plan.mode, "r2-verificacao", final_plan.config)
+    seal.verify(development, account, supplied, reference["sha256"])
     expected = collect(Path(path).parent, development, account, cap)
     if expected["status"] != required or canonical_digest(supplied) != canonical_digest(expected):
         raise BudgetError("gate de development falhou, foi adulterado ou pertence a outro modo")

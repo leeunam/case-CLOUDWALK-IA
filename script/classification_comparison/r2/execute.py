@@ -10,6 +10,7 @@ import uuid
 sys.dont_write_bytecode = True
 from plan import HERE, PROFILE, STAGES, VERSIONS, Plan, gate_reference
 import gate
+import seal
 from adapters.qwen.fixture import completion
 from budget import Account, BudgetError, cap_usd
 from common import c01, decode, encode
@@ -123,7 +124,9 @@ def run_evaluation(args, *, fixture_command=None):
         account.close_run(run_id, finished=finished)
     if plan.stage == "development":
         result = gate.collect(output, plan, account, args.cap_usd)
-        write_json(output / gate.FILENAME, result)
+        proof_path = output / gate.FILENAME
+        write_json(proof_path, result)
+        seal.create(plan, account, result, c01.digest(proof_path))
         return result["status"]
 
 
