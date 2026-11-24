@@ -15,7 +15,7 @@ from adapters.qwen.fixture import completion
 from budget import Account, BudgetError, cap_usd
 from common import c01, decode, encode
 from final_adapter import serve_authorized
-from journal import Journal, inventory
+from journal import Journal
 from run import run_batch, write_json, write_report
 from settings import account_from_args, resolve_account
 
@@ -37,17 +37,20 @@ def write_plan(output, plan, args, binding, manifest_id, manifest_sha=None):
         stream.write(plan.input_bytes)
         stream.flush()
         os.fsync(stream.fileno())
-    write_json(output / "plan.json", dict(VERSIONS, run_id=plan.report["run_id"], binding=binding,
-               input=inventory(inputs), injected_controls=plan.injections, settings=plan.settings.data))
+    input_sha = plan.binding["inputs_sha256"]
+    plan_sha = write_json(output / "plan.json", dict(VERSIONS, run_id=plan.report["run_id"], binding=binding,
+        input={"path": str(inputs.relative_to(c01.ROOT)), "sha256": input_sha},
+        injected_controls=plan.injections, settings=plan.settings.data))
     command = ["rtk", "proxy", "python3", "-B", str((HERE / "execute.py").relative_to(c01.ROOT)), "run",
                *options_for(args), "--output", "NOVO_DIRETORIO"]
     command += ["--dry-run"] if args.dry_run else ["--manifest", str(args.manifest.resolve()), "--confirm-execution"]
-    write_json(output / "invocation.json", dict(VERSIONS, stage=plan.stage, git_revision=plan.report["git_revision"],
+    invocation_sha = write_json(output / "invocation.json", dict(VERSIONS, stage=plan.stage, git_revision=plan.report["git_revision"],
                command=shlex.join(command), config_sha256=plan.settings.sha256, manifest_id=manifest_id,
                manifest_sha256=manifest_sha, dry_run=args.dry_run, synthetic_transport=plan.mode == "fixture",
                concurrency=1, attempts=1))
     if args.dry_run and manifest_id is not None:
         write_json(output / "manifest-template.json", dict(enabled=False, manifest_id=manifest_id, binding=binding))
+    return {"inputs.jsonl": input_sha, "plan.json": plan_sha, "invocation.json": invocation_sha}
 
 
 def proof_reference(args):
@@ -86,11 +89,12 @@ def run_evaluation(args, *, fixture_command=None):
 
     manifest_id, manifest_sha, binding_sha, binding = authorize(args, plan, account, proof, args.confirm_execution)
     account.validate(args.cap_usd)
+    original_hashes = {}
 
     def prepare():
         if args.mode == "real" and not os.environ.get("FEITA_API_KEY", "").strip():
             raise BudgetError("credencial local Feita ausente")
-        write_plan(output, plan, args, binding, manifest_id, manifest_sha)
+        original_hashes.update(write_plan(output, plan, args, binding, manifest_id, manifest_sha))
 
     account.claim(run_id, manifest_id, manifest_sha, binding_sha,
                   dict(binding, settings=plan.settings.data), prepare=prepare)
@@ -102,8 +106,8 @@ def run_evaluation(args, *, fixture_command=None):
                               "--manifest-sha256", manifest_sha]}
 
         def publish(inputs, obs, decisions, prefix=False):
-            write_report(output, plan.report.copy(), inputs, obs, decisions, plan.validation, plan.protocol,
-                         plan.split, plan.catalog, plan.cases, plan.control_policy, prefix)
+            return write_report(output, plan.report.copy(), inputs, obs, decisions, plan.validation, plan.protocol,
+                                plan.split, plan.catalog, plan.cases, plan.control_policy, prefix)
 
         def reserve(item):
             account.reserve(run_id, item["id"], plan.settings.reservation)
@@ -113,20 +117,24 @@ def run_evaluation(args, *, fixture_command=None):
             account.complete_case(run_id, item["id"], timed_out=timed_out)
 
         with Journal(output, run_id, plan.inputs, plan.injections, publish,
+                     track_output=plan.stage == "development",
                      profile_metadata=dict(VERSIONS, contract_version=PROFILE.report_version)) as journal:
             observations, decisions = run_batch(
                 plan.inputs, config, plan.report, plan.catalog, plan.validation, journal, plan.control_policy,
                 before_exchange=reserve, after_candidate=settle)
-            publish(plan.inputs, observations, decisions)
+            original_hashes["report.json"] = publish(plan.inputs, observations, decisions)
             journal.event("finished", decisions=len(decisions))
+            original_hashes.update(journal.output_hashes())
             finished = True
     finally:
         account.close_run(run_id, finished=finished)
     if plan.stage == "development":
-        result = gate.collect(output, plan, account, args.cap_usd)
+        result = gate.collect(output, plan, account, args.cap_usd, original_hashes=original_hashes)
         proof_path = output / gate.FILENAME
-        write_json(proof_path, result)
-        seal.create(plan, account, result, c01.digest(proof_path))
+        proof_sha = write_json(proof_path, result)
+        if c01.digest(proof_path) != proof_sha:
+            raise BudgetError("prova publicada diverge dos bytes produzidos pelo desenvolvimento")
+        seal.create(plan, account, result, proof_sha)
         return result["status"]
 
 

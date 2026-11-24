@@ -2,6 +2,7 @@
 import os
 import signal
 from contextlib import ExitStack
+from hashlib import sha256
 
 from common import c01, decode, encode
 from metrics import usage
@@ -11,11 +12,13 @@ def append(stream, record):
     # A CLI POSIX entrega Ctrl+C entre registros duráveis, inclusive durante fsync.
     mask = signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGINT})
     try:
-        stream.write(encode(record) + "\n")
+        line = encode(record) + "\n"
+        stream.write(line)
         stream.flush()
         os.fsync(stream.fileno())
     finally:
         signal.pthread_sigmask(signal.SIG_SETMASK, mask)
+    return line
 
 
 def records(path):
@@ -36,7 +39,8 @@ def sync_directory(path):
 
 
 class Journal:
-    def __init__(self, output, run_id, inputs, planned_injections, publish, *, profile_metadata=None):
+    def __init__(self, output, run_id, inputs, planned_injections, publish, *, profile_metadata=None,
+                 track_output=False):
         self.planned_injections = planned_injections
         self.publish = publish
         self.output = output
@@ -48,6 +52,10 @@ class Journal:
         self.observations = []
         self.decisions = []
         self.streams = ExitStack()
+        self.hashes = {name: sha256() for name in ("observations", "decisions", "journal")} if track_output else {}
+
+    def output_hashes(self):
+        return {f"{name}.jsonl": value.hexdigest() for name, value in self.hashes.items()}
 
     def __enter__(self):
         try:
@@ -63,7 +71,12 @@ class Journal:
             raise
 
     def event(self, event, **details):
-        append(self.journal_file, {"event": event, "run_id": self.run_id, **details})
+        self.record("journal", {"event": event, "run_id": self.run_id, **details})
+
+    def record(self, name, record):
+        line = append(getattr(self, name + "_file"), record)
+        if self.hashes:
+            self.hashes[name].update(line.encode("utf-8"))
 
     def begin_dispatch(self, case_id):
         # Write-ahead: after this boundary a broken write can have reached the reader.
@@ -77,9 +90,9 @@ class Journal:
         self.active = decision["id"]
         self.pending_observation = obs
         if obs is not None:
-            append(self.observations_file, obs)
+            self.record("observations", obs)
             self.observations.append(obs)
-        append(self.decisions_file, decision)
+        self.record("decisions", decision)
         self.decisions.append(decision)
         self.event("completed", id=decision["id"], attempts=decision["attempts"])
         self.active = self.pending_observation = None

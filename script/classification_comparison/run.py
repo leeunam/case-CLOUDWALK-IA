@@ -1,5 +1,6 @@
 """Runner C02. O stdout do adaptador contém uma observação por entrada apta."""
 import argparse
+from hashlib import sha256
 import select
 import os
 from pathlib import Path
@@ -19,12 +20,14 @@ from journal import Journal, inventory, sync_directory
 
 def write_json(path, value):
     temp = path.with_suffix(".tmp")
+    content = encode(value, indent=2) + "\n"
     with temp.open("x", encoding="utf-8") as file:
-        file.write(encode(value, indent=2) + "\n")
+        file.write(content)
         file.flush()
         os.fsync(file.fileno())
     temp.replace(path)
     sync_directory(path.parent)
+    return sha256(content.encode("utf-8")).hexdigest()
 
 
 class ResponseStream:
@@ -315,7 +318,7 @@ def write_report(output, report, inputs, obs, decisions, validation, protocol, s
     (output / f"{name}.md").write_text(describe(report, prefix), encoding="utf-8")
     # A evidência completa pode exigir um veredito mesmo após interrupção.
     if not prefix or report["eligibility"] == "inconclusive":
-        write_json(output / f"{name}.json", report)
+        return write_json(output / f"{name}.json", report)
 
 
 def main():

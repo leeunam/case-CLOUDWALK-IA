@@ -200,6 +200,19 @@ execute.main()
             execute.run_evaluation(final)
         self.assertEqual([row["state"] for row in account.status()["runs"]], ["finished"])
 
+    def rewrite_wrong_outputs(self, output, development):
+        bundle = c01.load_bundle(development.validation, output / "report.json")
+        obs = bundle["observations"][0]
+        first = bundle["inputs"][0]
+        self.assertEqual((obs["id"], obs["choices"]["category"]["raw"]), ("jev-004", "pix"))
+        obs["choices"]["category"]["raw"] = "payouts"
+        bundle["decisions"][0] = decide(first, obs, development.catalog, bundle["report"]["run_id"])
+        for name in ("observations", "decisions"):
+            (output / f"{name}.jsonl").write_text("".join(encode(row) + "\n" for row in bundle[name]), encoding="utf-8")
+        write_report(output, bundle["report"], bundle["inputs"], bundle["observations"], bundle["decisions"],
+                     development.validation, development.protocol, development.split, development.catalog,
+                     development.cases, development.control_policy, False)
+
     def test_regenerated_proof_from_failed_development_cannot_replace_original_outputs(self):
         account = self.init_account()
         args = self.args("wrong", account)
@@ -213,17 +226,7 @@ execute.main()
         self.assertEqual(private.parent, account.path.parent)
 
         output = args.output
-        bundle = c01.load_bundle(development.validation, output / "report.json")
-        obs = bundle["observations"][0]
-        first = bundle["inputs"][0]
-        self.assertEqual((obs["id"], obs["choices"]["category"]["raw"]), ("jev-004", "pix"))
-        obs["choices"]["category"]["raw"] = "payouts"
-        bundle["decisions"][0] = decide(first, obs, development.catalog, bundle["report"]["run_id"])
-        for name in ("observations", "decisions"):
-            (output / f"{name}.jsonl").write_text("".join(encode(row) + "\n" for row in bundle[name]), encoding="utf-8")
-        write_report(output, bundle["report"], bundle["inputs"], bundle["observations"], bundle["decisions"],
-                     development.validation, development.protocol, development.split, development.catalog,
-                     development.cases, development.control_policy, False)
+        self.rewrite_wrong_outputs(output, development)
         regenerated = gate.collect(output, development, account, CAP)
         self.assertEqual((regenerated["status"], regenerated["correct_targets"]), ("fixture_ready", 8))
         proof = output / gate.FILENAME
@@ -235,6 +238,66 @@ execute.main()
         self.assertEqual(private.read_bytes(), original_seal)
         self.assertEqual(account.status(), original_ledger)
         self.assertFalse(final.output.exists())
+
+    def test_rewrite_after_financial_close_cannot_become_the_original_seal(self):
+        account = self.init_account()
+        args = self.args("wrong-before-seal", account)
+        self.create_manifest(args)
+        development = Plan("development", "fixture", "proof-check", FIXTURE)
+        private = seal.path_for(development, account)
+        close = Account.close_run
+        snapshots = []
+
+        def close_then_rewrite(active, run_id, *, finished):
+            close(active, run_id, finished=finished)
+            self.assertTrue(finished)
+            self.assertFalse(private.exists())
+            snapshots.append(active.status())
+            self.rewrite_wrong_outputs(args.output, development)
+
+        with mock.patch.object(Account, "close_run", close_then_rewrite):
+            with self.assertRaisesRegex(BudgetError, "saídas publicadas divergem dos bytes produzidos"):
+                execute.run_evaluation(args, fixture_command=self.scenario_command("wrong"))
+        proof = args.output / gate.FILENAME
+        self.assertFalse(proof.exists())
+        self.assertFalse(private.exists())
+        self.assertEqual(account.status(), snapshots[0])
+        self.assertEqual([row["state"] for row in snapshots[0]["runs"]], ["finished"])
+        self.assertEqual({row["state"] for row in snapshots[0]["reservations"]}, {"settled"})
+        self.assertEqual(len(snapshots[0]["reservations"]), 6)
+
+        regenerated = gate.collect(args.output, development, account, CAP)
+        self.assertEqual(regenerated["status"], "fixture_ready")
+        write_json(proof, regenerated)
+        final = self.args("final", account, stage="final", proof=proof)
+        self.create_manifest(final)
+        with self.assertRaisesRegex(BudgetError, "selo de development ausente"):
+            execute.run_evaluation(final)
+        retry = self.args("retry-original", account)
+        self.create_manifest(retry)
+        with self.assertRaisesRegex(BudgetError, "vinculação já usados"):
+            execute.run_evaluation(retry)
+        self.assertFalse(private.exists())
+        self.assertEqual(account.status(), snapshots[0])
+
+    def test_gate_proof_bytes_are_committed_at_publication(self):
+        account = self.init_account()
+        args = self.args("proof-publication", account)
+        self.create_manifest(args)
+        development = Plan("development", "fixture", "proof-check", FIXTURE)
+        private = seal.path_for(development, account)
+
+        def write_then_alter(path, value):
+            written = write_json(path, value)
+            if path.name == gate.FILENAME:
+                path.write_bytes(path.read_bytes() + b"\n")
+            return written
+
+        with mock.patch.object(execute, "write_json", write_then_alter):
+            with self.assertRaisesRegex(BudgetError, "prova publicada diverge dos bytes produzidos"):
+                execute.run_evaluation(args)
+        self.assertFalse(private.exists())
+        self.assertEqual([row["state"] for row in account.status()["runs"]], ["finished"])
 
     def test_missing_or_corrupt_seal_is_never_recreated(self):
         account = self.init_account()

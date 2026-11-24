@@ -1,12 +1,13 @@
 """Verifica a conclusão e o resultado operacional do desenvolvimento R2."""
+from io import BytesIO
 from pathlib import Path
 
 from plan import VERSIONS, Plan, canonical_digest
 import seal
 from adapters.qwen.adapter import numeric_cost
 from budget import BudgetError, total_usd, usd
-from common import c01
-from journal import inventory, records
+from common import c01, decode
+from settings import digest
 
 FILENAME = "development-gate.json"
 EVIDENCE = ("plan.json", "invocation.json", "journal.jsonl", "report.json",
@@ -71,12 +72,18 @@ def settled_costs(snapshot, observations, run_id, reservation):
     return costs
 
 
-def collect(output, plan, account, cap):
+def collect(output, plan, account, cap, *, original_hashes=None):
     if any((output / name).exists() for name in ("interruption.json", "prefix-report.json", "prefix-report.md")):
         raise BudgetError("prefixo interrompido não comprova development concluído")
     paths = {name: output / name for name in EVIDENCE}
-    artifacts = {name: inventory(path) for name, path in paths.items()}
-    report = c01.read(paths["report.json"])
+    published = {name: path.read_bytes() for name, path in paths.items()}
+    published_hashes = {name: digest(content) for name, content in published.items()}
+    if original_hashes is not None and published_hashes != original_hashes:
+        raise BudgetError("saídas publicadas divergem dos bytes produzidos pelo desenvolvimento")
+    committed_hashes = published_hashes if original_hashes is None else original_hashes
+    artifacts = {name: {"path": str(path.relative_to(c01.ROOT)), "sha256": committed_hashes[name]}
+                 for name, path in paths.items()}
+    report = decode(published["report.json"])
     run_id = report["run_id"]
     ids = plan.binding["selected_ids"]
     if (report["split"] != "development" or report["identity"] != plan.identity
@@ -84,12 +91,13 @@ def collect(output, plan, account, cap):
             or report["planned_ids"] != ids or report["completed_ids"] != ids or report["eligibility"] != "inconclusive"
             or any(report["artifacts"].get(kind) != artifacts[f"{kind}.jsonl"] for kind in c01.KINDS)):
         raise BudgetError("relatório de development não corresponde ao plano completo")
-    bundle = c01.load_bundle(plan.validation, paths["report.json"])
+    bundle = {kind: list(map(decode, BytesIO(published[f"{kind}.jsonl"]))) for kind in c01.KINDS}
+    bundle["report"] = report
     c01.verify_run(bundle, plan.validation, plan.protocol, plan.split, plan.catalog, plan.cases)
     if [obs["id"] for obs in bundle["observations"]] != ids:
         raise BudgetError("observações de development incompletas")
     binding = plan.bound_account(account, cap)
-    persisted_plan = c01.read(paths["plan.json"])
+    persisted_plan = decode(published["plan.json"])
     if (persisted_plan["run_id"] != run_id or canonical_digest(persisted_plan["binding"]) != canonical_digest(binding)
             or persisted_plan["input"] != artifacts["inputs.jsonl"]
             or artifacts["inputs.jsonl"]["sha256"] != binding["inputs_sha256"]):
@@ -101,12 +109,12 @@ def collect(output, plan, account, cap):
         expected_events.extend(dict(event=event, id=case_id, attempt=1) for event in ("dispatch_started", "dispatched"))
         expected_events.append(dict(event="completed", id=case_id, attempts=1))
     expected_events.append(dict(event="finished", decisions=len(ids)))
-    if canonical_digest(records(paths["journal.jsonl"])) != canonical_digest(
+    if canonical_digest(list(map(decode, BytesIO(published["journal.jsonl"])))) != canonical_digest(
             [dict(event, run_id=run_id) for event in expected_events]):
         raise BudgetError("diário de development incompleto ou divergente")
 
     snapshot = account.status()
-    invocation = c01.read(paths["invocation.json"])
+    invocation = decode(published["invocation.json"])
     run = next((row for row in snapshot["runs"] if row["id"] == run_id), None)
     if (run is None or run["state"] != "finished" or run["manifest_id"] != plan.manifest_id(account)
             or run["manifest_sha256"] != invocation["manifest_sha256"]
