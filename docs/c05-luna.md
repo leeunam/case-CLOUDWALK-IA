@@ -35,7 +35,7 @@ Esse teste cria e remove uma conta temporária. Não usa a chave Feita nem abre 
 conta real. Exercício: identifique por que os 49 registros finais produzem apenas
 44 chamadas, e por que `fixture_ready` não significa aprovação do modelo.
 
-## Plano de consumo ainda não autorizado
+## Plano de consumo autorizado em 24/11/2026
 
 O próximo ensaio proposto usa `openai/gpt-5.6-luna`, concorrência um, uma tentativa
 por caso, esforço `none`, resposta JSON estruturada e limite solicitado de 128
@@ -74,10 +74,11 @@ foi consultado sem alteração: acumulado conservador US$ 0,02687405, teto globa
 US$ 10, 50 reservas liquidadas e nenhuma pendência. A diferença para o teto não
 é uma consulta ao saldo da Feita. Não se cria outra conta nem se reinicia o gasto.
 
-A configuração preparada não habilita um manifesto de execução. A autorização
-atual continua sendo somente offline. Depois da revisão final e da autorização
-específica, o integrador gera e confere o manifesto vinculado à mesma conta,
-configuração, fontes e revisão. A chave local fica privada e não é enviada aos
+A preparação offline está aceita. O responsável autorizou até seis chamadas
+reais e até 44 adicionais somente se o gate real passar, conforme o
+[registro de autorização](evidencias/c05/luna-preflight-2026-11-24/autorizacao-real.json).
+O integrador gera e confere o manifesto vinculado à mesma conta, configuração,
+fontes e revisão. Essa autorização não declara o modelo qualificado ou adotado. A chave local fica privada e não é enviada aos
 agentes, ao frontend ou à demonstração pública.
 
 C06 depende de qualificação real e decisão de adoção. O atendente conversacional
