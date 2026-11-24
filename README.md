@@ -33,9 +33,10 @@ python3 script/demo.py down
 
 A primeira subida cria o arquivo privado e ignorado `.env.demo.local`, prepara
 os tópicos Kafka e inicializa o banco com Aurora e Horizonte, quatro filas,
-três analistas e supervisão. A pilha usa o projeto Compose `cloudwalk_demo`.
-O comando `down` preserva os volumes. O classificador usa respostas fixture
-determinísticas, e a interface usa a API real. O
+três analistas e supervisão. O projeto Compose padrão é `cloudwalk_demo`.
+Use um nome de projeto distinto por checkout ou worktree, pois `down`
+preserva os volumes vinculados ao nome. O classificador usa respostas
+fixture determinísticas, e a interface usa a API real. O
 [roteiro completo](docs/f09.md) inclui três canais, duas marcas, revisão,
 atendimento humano, reinício, troca de portas e comandos Docker diretos.
 
