@@ -4,6 +4,21 @@
   "type": "object",
   "required": ["profile_version", "observation", "audit"],
   "additionalProperties": false,
+  "if": {"properties": {"observation": {"properties": {"requests": {"const": 0}}}}},
+  "then": {
+    "properties": {
+      "observation": {"properties": {
+        "returned_model": {"type": "null"},
+        "weights_revision": {"type": "null"},
+        "request_usage": {"maxItems": 0}
+      }},
+      "audit": {"properties": {
+        "raw_content": {"type": "null"},
+        "finish_reason": {"type": "null"},
+        "refusal": {"type": "null"}
+      }}
+    }
+  },
   "properties": {
     "profile_version": {"const": "1.0.0"},
     "observation": {"$ref": "https://class-001.invalid/v1/observation.schema.json"},

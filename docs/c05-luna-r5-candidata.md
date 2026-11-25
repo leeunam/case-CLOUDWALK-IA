@@ -14,20 +14,30 @@ inclusivo e fim exclusivo. O envelope guarda a string original de
 `message.content`, o `finish_reason` e o `message.refusal` quando acessíveis.
 Uma recusa explícita da API pode chegar apenas em `message.refusal`. Esse
 metadado permite reproduzir a abstenção de política com conteúdo nulo.
+O schema exige esses metadados e a procedência do fornecedor nulos quando
+a observação indica zero despachos.
 
 Uma resposta malformada encerra a sessão. Quando o formato privado de algum
 campo falha, a auditoria conserva as partes acessíveis de todos os campos e a
 política deixa de interpretar as relações daquele conjunto. Respostas bem
 formadas com suporte insuficiente seguem como abstenção com motivo de veto.
-Mesmo em revisão, o envelope guarda as propostas e seus motivos por campo.
+A escolha do IPC expressa o resultado após a política, com
+`raw="informacao_insuficiente"` em um veto. A auditoria guarda o que o
+modelo realmente propôs em `fields.value`, junto do trecho e do corpo
+original. Isso permite distinguir a abstenção escolhida pela política da
+resposta recebida.
 
 ## Alcance da política
 
 As relações buscam operações de Pix, recebimento associado a vendas e funções
 de um equipamento de pagamento identificável. A parte citada precisa conter
-uma relação reconhecida em uma oração. A leitura do relato inteiro verifica
+uma relação reconhecida no contexto da própria oração. O sujeito da falha
+e o objeto da ação ajudam a distinguir operação de menção incidental.
+A leitura do relato inteiro verifica
 hipóteses, exclusões de assunto, transições de foco, impactos e alternativas.
-Urgência por prazo exige uma consequência e expressão de tempo reconhecidas.
+Urgência por prazo exige uma consequência pendente vinculada a tempo
+reconhecido. Dano financeiro em curso pode sustentar urgência. Dano detectado
+sem evidência de continuidade já basta para vetar rotina.
 Os prazos numéricos em minutos cobrem de 1 a 60. O catálogo só habilita
 predição para definições reconhecidas textualmente. Novos códigos e
 definições diferentes vão para revisão quando preditos.

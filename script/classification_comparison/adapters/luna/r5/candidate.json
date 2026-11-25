@@ -17,7 +17,7 @@
   "policy": {
     "path": "script/classification_comparison/adapters/luna/r5/evidence.py",
     "version": "2.0.0",
-    "sha256": "dd9ee1e2d32f7b535460986696cfbf214d7913e9d664dadb7a8d7a5ddcf3c210"
+    "sha256": "c101dd712267de46177e2ffbc84ef9cdf57e77b6959904a5d69c1998699b81c9"
   },
   "rubric": {
     "path": "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
@@ -37,6 +37,6 @@
   "evidence_schema": {
     "path": "script/classification_comparison/adapters/luna/r5/evidence-envelope.schema.json",
     "version": "1.0.0",
-    "sha256": "0964bbb9b065e03549ccc7a0f109bd6034f44344846d9b4481eb570a64ace1be"
+    "sha256": "c788f313a1c002f4c6e78b400a91120a2373d744184006b50725f91f7239f579"
   }
 }

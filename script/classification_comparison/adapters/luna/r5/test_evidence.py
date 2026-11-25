@@ -6,7 +6,7 @@ from pathlib import Path
 import unittest
 
 from adapters.luna.r5.adapter import MODEL, R5Adapter, identity_for, replay_envelope, validate_envelope
-from adapters.luna.r5.evidence import POLICY_SHA256
+from adapters.luna.r5.evidence import POLICY_SHA256, build_audit, project_choices
 from adapters.qwen.adapter import Blocked
 from common import c01, decide, decode, encode
 
@@ -151,6 +151,47 @@ class EvidenceTests(unittest.TestCase):
                 self.assert_field(item(text), prediction(code, criterion, text), status="abstained",
                                   reason="insufficient_relation")
 
+    def test_falha_da_operacao_exige_o_sujeito_correto(self):
+        for code, criterion, asserted, incidental in (
+            ("pix", "pix_operation", "O Pix não chegou ao destinatário.",
+             "O adesivo do Pix não chegou pelo correio."),
+            ("terminal", "terminal_operation", "A maquininha não imprime os comprovantes.",
+             "A etiqueta que veio com a maquininha não chegou aos atendentes."),
+            ("payouts", "sales_settlement", "O repasse das vendas não creditou.",
+             "Quando vendi a débito o cupom saiu ilegível."),
+        ):
+            with self.subTest(code=code):
+                self.assert_field(item(asserted), prediction(code, criterion, asserted), status="predicted")
+                text = incidental + " Quero uma segunda via."
+                self.assert_field(item(text), prediction(code, criterion, incidental), status="abstained")
+        # O recorte remove o verdadeiro sujeito de "não chegou".
+        text = "O adesivo do Pix não chegou pelo correio. Quero outra via do adesivo."
+        self.assert_field(item(text), prediction("pix", "pix_operation", "Pix não chegou"), status="abstained")
+        text = "O adesivo do Pix não chegou, fiz um Pix esta manhã."
+        self.assert_field(item(text), prediction("pix", "pix_operation", "Pix não chegou"), status="abstained")
+        text = "O Pix não chegou ao destinatário."
+        self.assert_field(item(text), prediction("pix", "pix_operation", "Pix não chegou"), status="predicted")
+
+    def test_negacao_de_pedido_e_novo_objeto_fora_da_citacao(self):
+        for code, criterion, action in (
+            ("pix", "pix_operation", "fazer um Pix"),
+            ("terminal", "terminal_operation", "configurar a maquininha"),
+            ("payouts", "sales_settlement", "consultar o valor das vendas"),
+        ):
+            with self.subTest(code=code):
+                for opening in ("Não quero ", "Não pretendo "):
+                    text = opening + action + ". Preciso atualizar meu endereço."
+                    self.assert_field(item(text), prediction(code, criterion, action), status="abstained")
+                quote = "Como " + action + "?"
+                self.assert_field(item(quote), prediction(code, criterion, quote), status="predicted")
+                self.assert_field(item(quote + " Preciso atualizar meu endereço."),
+                                  prediction(code, criterion, quote), status="abstained")
+                self.assert_field(item(quote + " Como altero meu endereço?"),
+                                  prediction(code, criterion, quote), status="abstained")
+        quote = "Como substituir a bobina da leitora de cartões?"
+        text = "Não estou perguntando sobre Pix. " + quote
+        self.assert_field(item(text), prediction("terminal", "terminal_operation", quote), status="predicted")
+
     def test_trecho_e_contexto_mudam_veto_e_independem_do_id(self):
         quote = "O valor das vendas não entrou."
         value = prediction("payouts", "sales_settlement", quote)
@@ -199,6 +240,71 @@ class EvidenceTests(unittest.TestCase):
         for code, criterion, text, quote, expected in scenarios:
             with self.subTest(code=code, text=text):
                 self.assert_field(item(text, requested=("priority",)), prediction(code, criterion, quote), status=expected)
+
+    def test_prazo_urgente_exige_consequencia_afirmada_e_pendente(self):
+        total = "Nenhuma venda passa."
+        deadline = "Se o pagamento não sair, receberei uma multa em quinze minutos."
+        alternatives = (
+            total + " Não temos outra forma de receber. Mas agora sigo vendendo pelo celular sem atraso.",
+            total + " Não há outro terminal. Agora continuamos cobrando por transferência.",
+            "Todos os terminais desligaram, mas sigo vendendo pelo celular sem atraso.",
+        )
+        for text, quote, status in (
+            ("Não há multa hoje. Preciso de uma orientação.", "multa hoje", "abstained"),
+            ("Consigo pagar a multa hoje com tranquilidade.", "pagar a multa hoje", "abstained"),
+            ("Vence o prazo de pagamento hoje.", "Vence o prazo de pagamento hoje.", "abstained"),
+            ("Receberei uma multa em quinze minutos.", "Receberei uma multa em quinze minutos.", "predicted"),
+            ("Vou receber uma multa hoje.", "Vou receber uma multa hoje.", "predicted"),
+            ("Receberei uma multa hoje. A multa já foi cancelada.", "Receberei uma multa hoje.", "abstained"),
+            (deadline, "receberei uma multa em quinze minutos", "predicted"),
+            (total + " Não temos outra forma de receber.", total, "predicted"),
+            (alternatives[0], total, "abstained"),
+            (alternatives[1], total, "abstained"),
+            (alternatives[2], "Todos os terminais desligaram", "abstained"),
+        ):
+            with self.subTest(text=text):
+                self.assert_field(item(text, requested=("priority",)), prediction("urgent", "immediate_harm", quote),
+                                  status=status)
+
+    def test_debito_repetido_em_curso_nunca_libera_rotina(self):
+        quote = "Como posso configurar a maquininha?"
+        for damage in (
+            "Todos os clientes são debitados duas vezes a cada tentativa agora.",
+            "O sistema está cobrando em duplicidade neste momento.",
+        ):
+            with self.subTest(damage=damage):
+                entry = item(quote + " " + damage, requested=("priority",))
+                values = {"priority": prediction("basic", "routine", quote)}
+                envelope, _, _ = self.classify(entry, values)
+                decision = decide(entry, envelope["observation"], CATALOG, RUN_ID)
+                self.assertEqual(decision["outcome"], "review")
+                self.assertIsNone(decision["fields"]["priority"]["applied"])
+                self.assert_field(entry, prediction("urgent", "immediate_harm", damage), status="predicted")
+        for denied_damage in ("A operação segue sem prejuízo ou cobranças duplicadas.",
+                              "Não é verdade que nossos clientes são debitados duas vezes agora."):
+            normal = quote + " " + denied_damage
+            self.assert_field(item(normal, requested=("priority",)), prediction("basic", "routine", quote),
+                              status="predicted")
+            self.assert_field(item(normal, requested=("priority",)),
+                              prediction("urgent", "immediate_harm", denied_damage), status="abstained")
+        past = "O sistema cobrou duas vezes. Agora quero apenas entender o recibo."
+        self.assert_field(item(past, requested=("priority",)), prediction("urgent", "immediate_harm", "cobrou duas vezes"),
+                          status="abstained")
+        repeated = "A cada nova tentativa todos os clientes são debitados duas vezes;"
+        text = repeated + " isso continua agora e não temos outra forma de receber."
+        self.assert_field(item(text, requested=("priority",)), prediction("urgent", "immediate_harm", repeated),
+                          status="predicted")
+
+    def test_familias_localizadas_e_retrabalho_abrangente(self):
+        local = "Só uma das três leitoras parou;"
+        broad = "As divergências de todos os caixas exigem refazer o fechamento inteiro há dias;"
+        for code, criterion, quote, consequence in (
+            ("intermediate", "localized_impact", local, " os clientes continuam pagando nas outras duas."),
+            ("advanced", "broad_impact", broad, " ainda consigo vender e o prazo termina na próxima semana."),
+        ):
+            with self.subTest(code=code):
+                self.assert_field(item(quote + consequence, requested=("priority",)),
+                                  prediction(code, criterion, quote), status="predicted")
 
     def test_quote_literal_unicode_repeticao_e_aspas(self):
         quote = 'Como posso "enviar um valor" pela chave do destinatário?'
@@ -290,6 +396,22 @@ class EvidenceTests(unittest.TestCase):
         explicit = adapter.classify(dict(entry, id="sintetico-zeta"))
         self.assertEqual(explicit["observation"]["choices"]["category"]["reason"], "explicit")
         self.assertEqual((gateway.closed, len(gateway.bodies)), (0, 4))
+
+    def test_veto_projeta_abstencao_e_audita_proposta_do_fornecedor(self):
+        text = "Vi o dinheiro no aplicativo do aparelho."
+        entry = item(text)
+        output = {"category": prediction("payouts", "sales_settlement", text)}
+        envelope, _, _ = self.classify(entry, output)
+        evidence = envelope["audit"]["fields"]["category"]
+        observation = envelope["observation"]
+        self.assertEqual(observation["choices"]["category"],
+                         {"status": "abstained", "raw": "informacao_insuficiente", "reason": "policy", "score": None})
+        self.assertEqual((evidence["value"], evidence["quote"], evidence["reason"]),
+                         ("payouts", text, "insufficient_relation"))
+        self.assertEqual(decode(envelope["audit"]["raw_content"]), output)
+        decision = decide(entry, observation, CATALOG, RUN_ID)
+        self.assertEqual(decision["outcome"], "review")
+        self.assertEqual(decision["fields"]["priority"], {"status": "provided", "applied": "basic"})
 
     def test_um_campo_e_dois_em_um_post_sem_aplicacao_parcial(self):
         text = "Como configurar a leitora de cartões?"
@@ -445,6 +567,31 @@ class EvidenceTests(unittest.TestCase):
         off_schema["audit"]["notes"] = "propriedade inesperada"
         with self.assertRaises(ValueError):
             validate_envelope(off_schema)
+
+    def test_replay_rejeita_resposta_de_fornecedor_sem_despacho(self):
+        text = "Como consultar um Pix?"
+        entry = item(text)
+        source, _, _ = self.classify(entry, {"category": prediction("pix", "pix_operation", text)})
+        pre_dispatch, _, _ = self.classify(entry, None, gateway=Gateway({}, failure=TimeoutError(), before_send=True))
+        self.assertEqual(pre_dispatch["observation"]["requests"], 0)
+        self.assertEqual(pre_dispatch["observation"]["choices"]["category"]["reason"], "timeout")
+        self.assertIsNone(pre_dispatch["audit"]["raw_content"])
+        # Uma adulteração pode remontar as escolhas e a auditoria sem mudar o
+        # vínculo impossível entre requests e os metadados do provedor.
+        content = source["audit"]["raw_content"]
+        for raw, finish, refusal in ((content, None, None), (None, "stop", None), (None, None, "recusa")):
+            with self.subTest(raw=raw, finish=finish, refusal=refusal):
+                changed = deepcopy(pre_dispatch)
+                changed["audit"] = build_audit(entry, raw, finish, refusal=refusal, error="timeout")
+                changed["observation"]["choices"] = project_choices(changed["audit"])
+                with self.assertRaises(ValueError):
+                    replay_envelope(entry, changed)
+        for key in ("returned_model", "weights_revision"):
+            with self.subTest(key=key):
+                changed = deepcopy(pre_dispatch)
+                changed["observation"][key] = MODEL
+                with self.assertRaises(ValueError):
+                    replay_envelope(entry, changed)
 
 
 if __name__ == "__main__":

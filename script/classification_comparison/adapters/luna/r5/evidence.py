@@ -42,17 +42,16 @@ def normalized(text):
                    if not unicodedata.combining(char))
 
 
-def relations(left, right, *, gap=5, reverse=True):
+def relations(left, right, *, gap):
     """Constrói relações locais com distância em palavras e escopo de oração."""
     middle = rf"(?:[\s'\"“”/-]+(?!(?:e|ou|enquanto|embora)\b)[a-z0-9]+){{0,{gap}}}[\s'\"“”/-]+"
-    forward = rf"\b(?:{left})\b{middle}\b(?:{right})\b"
-    return rf"(?:{forward}|\b(?:{right})\b{middle}\b(?:{left})\b)" if reverse else forward
+    return rf"(?:\b(?:{left})\b{middle}\b(?:{right})\b|\b(?:{right})\b{middle}\b(?:{left})\b)"
 
 
 PIX_ACTION = (
     r"(?:faz(?:er|ia)|fiz|faco|envi(?:ar|ei|o)|mand(?:ar|ei|o)|transfer(?:ir|i)|pag(?:ar|uei|o)|"
     r"receb(?:er|i|o)|consult(?:ar|ei)|confirm(?:ar|ei)|estorn(?:ar|ei|o)|cancel(?:ar|ei)|"
-    r"rastrear|comprovante|prazo|transferencia|pagamento|cobranca)"
+    r"rastrear)"
 )
 OPERATION_FAILURE = (
     r"(?:nao (?:entrou|caiu|chegou|passou|funciona|funcionou|completou|concluiu|processa)|"
@@ -62,58 +61,85 @@ OPERATION_FAILURE = (
 PIX_KEY = r"chave (?:pix|do (?:destinatario|favorecido|recebedor)|de quem (?:vai )?receber)"
 KEY_TRANSFER = (
     r"(?:envi(?:ar|ei|o)|mand(?:ar|ei|o)|transfer(?:ir|i)|pag(?:ar|uei|o))"
-    r"(?:\s+(?:um|o|esse|este|algum))?\s+(?:valor|dinheiro|quantia|pagamento)"
+    r"(?: (?:um|o|esse|este|algum))? (?:valor|dinheiro|quantia|pagamento)"
 )
-SALES_SOURCE = (
-    r"(?:(?:repasses?|valor(?:es)?|dinheiro|recebiveis?|recebimento|liquidacao)"
-    r"\s+(?:das?|de|pelas?)\s+(?:(?:minhas?|nossas?|suas?)\s+)?vendas|"
+SALES_FUNDS = (
+    r"(?:repasses?|valor(?:es)?|dinheiro|recebiveis?|recebimento|liquidacao|faturamento) "
+    r"(?:das?|de|pelas?) (?:(?:minhas?|nossas?|suas?) )?vendas"
+)
+SALES_MEDIA = (
+    r"(?:"
     r"vendas?\s+(?:a|no?|com)\s+(?:(?:cartao|parcelas?)\s+)?(?:credito|debito|cartao)|"
-    r"(?:vendi|vendemos|vendido|vendida)\s+(?:a|no?|com)\s+(?:credito|debito|cartao)|"
-    r"faturamento\s+(?:das?|de)\s+vendas)"
+    r"(?:vendi|vendemos|vendido|vendida)\s+(?:a|no?|com)\s+(?:credito|debito|cartao))"
 )
-SETTLEMENT_ACTION = (
-    r"(?:receb(?:er|i|emos|imento)|liquid(?:ar|acao|ad[oa])|credit(?:ar|ad[oa]|ou)|"
-    r"(?:cair|cai|caiu|entrar|entra|entrou|depositar|depositado)\s+(?:na|em minha|em nossa)\s+conta|"
-    r"(?:caiu|entrou)\s+no\s+saldo|prazo|data|quando|atras(?:[oa]|ou|ado)|"
-    rf"{OPERATION_FAILURE}|ainda nao (?:recebi|recebemos)|qual (?:o|e o) valor|"
-    r"onde (?:cai|entra|recebo)|consult(?:ar|ei)|acompanhar)"
+SALES_MEDIA_OBJECT = rf"(?:(?:o que|das vendas que) )?{SALES_MEDIA}"
+BANK_RECEIPT = (
+    r"(?:cair|cai|caiu|entrar|entra|entrou|depositar|depositad[oa]) "
+    r"(?:na (?:minha |nossa )?conta|em (?:minha|nossa) conta|no saldo)"
+)
+SETTLEMENT_FAILURE = (
+    r"(?:nao (?:foi (?:creditad[oa]|depositad[oa]|liquidad[oa])|caiu|entrou|creditou|liquidou)|"
+    r"atrasou|esta atrasad[oa]|ficou pendente|continua pendente)"
 )
 TERMINAL = (
     r"(?:maquininhas?|(?:leitor[ae]s?|terminal|terminais|maquina|equipamento)\s+"
     r"(?:de (?:cart(?:ao|oes)|pagamentos?|vendas)|do cartao))"
 )
-TERMINAL_ACTION = (
+TERMINAL_USE = (
     r"(?:instal(?:ar|acao|ei)|ativ(?:ar|acao|ei)|configur(?:ar|acao|ei)|"
     r"pare(?:ar|amento|ei)|conect(?:ar|ei)|vincul(?:ar|ei)|reinici(?:ar|ei)|"
-    r"us(?:ar|o|ei)|(?:troc(?:ar|a|o)|coloc(?:ar|o))\s+(?:a\s+)?bobina|"
-    r"(?:imprim(?:ir|e|iu)|emit(?:ir|e|iu))\s+(?:os?\s+)?comprovantes?|"
-    r"(?:nao\s+(?:liga|ligou|conecta|le|imprime|reconhece|aceita)|"
-    r"deixou de\s+(?:ligar|conectar|ler|imprimir|emitir)|"
-    r"parou de\s+(?:ligar|conectar|ler|imprimir|emitir)|"
-    rf"travou|quebrou|{OPERATION_FAILURE}))"
+    r"us(?:ar|o|ei))"
 )
-CATEGORY_SUBJECTS = {"pix_operation": rf"pix|{PIX_KEY}", "sales_settlement": SALES_SOURCE,
+TERMINAL_FAULT = (
+    r"(?:nao (?:liga|ligou|conecta|funciona|le|imprime|reconhece|aceita)|"
+    r"(?:deixou|parou) de (?:ligar|conectar|ler|imprimir|emitir)|"
+    r"(?:ficou |esta )?sem (?:impressao|imprimir)|travou|quebrou|desligou|deu erro)"
+)
+
+# A ação rege seu objeto ou o nome da operação é o sujeito da falha. Ancorar
+# este sujeito evita ler "Pix não chegou" dentro de "o adesivo do Pix não chegou".
+DETERMINER = r"(?:(?:[oa]s?|um[as]?|meu|minha|nosso|nossa|esse|essa|este|esta|seu|sua) )?"
+SUBJECT_START = rf"(?:^|[,:\u2014])\s*{DETERMINER}"
+ASPECT = r"(?:(?:ainda|ja|hoje|agora) ){0,2}"
+OBJECT_GAP = rf"[\s'\"“”]+{DETERMINER}"
+PIX_OPERATION = r"(?:pix|(?:transferencia|pagamento|cobranca) (?:por|via|em) pix)"
+CATEGORY_SUBJECTS = {"pix_operation": rf"pix|{PIX_KEY}", "sales_settlement": rf"{SALES_FUNDS}|{SALES_MEDIA}",
                      "terminal_operation": TERMINAL}
 CATEGORY_RELATIONS = {
     "pix_operation": re.compile(
-        rf"{relations(PIX_ACTION + '|' + OPERATION_FAILURE, 'pix', gap=4)}|"
-        rf"{relations(KEY_TRANSFER, PIX_KEY, gap=4, reverse=False)}"
+        rf"\b{PIX_ACTION}{OBJECT_GAP}{PIX_OPERATION}\b|"
+        rf"\b{KEY_TRANSFER}[\s'\"“”]+(?:por|via|com|pel[ao]|usando)(?: a)? (?:pix|{PIX_KEY})\b|"
+        rf"\b(?:comprovante|prazo|estorno|falha) (?:do|de|desse|deste|no) pix\b|"
+        rf"{SUBJECT_START}(?P<subject_relation>{PIX_OPERATION} {ASPECT}{OPERATION_FAILURE})\b"
     ),
-    "sales_settlement": re.compile(relations(SALES_SOURCE, SETTLEMENT_ACTION, gap=8)),
-    "terminal_operation": re.compile(relations(TERMINAL, TERMINAL_ACTION, gap=6)),
+    "sales_settlement": re.compile(
+        rf"\b(?:receb(?:er|i|o|imento)|consult(?:ar|ei)|acompanhar|liquidar|creditar)"
+        rf"(?: das?| do| de)?{OBJECT_GAP}{SALES_FUNDS}\b|"
+        rf"\b(?:prazo|data|saldo) (?:do|da|de) {SALES_FUNDS}\b|"
+        rf"\b(?:{BANK_RECEIPT}){OBJECT_GAP}(?:{SALES_FUNDS}|{SALES_MEDIA_OBJECT})\b|"
+        rf"{SUBJECT_START}(?P<subject_relation>(?:{SALES_FUNDS}|{SALES_MEDIA_OBJECT}) {ASPECT}"
+        rf"(?:{BANK_RECEIPT}|{SETTLEMENT_FAILURE}))\b"
+    ),
+    "terminal_operation": re.compile(
+        rf"\b{TERMINAL_USE}(?: (?:do|da|de|na|no))?{OBJECT_GAP}{TERMINAL}\b|"
+        rf"\b(?:troc(?:ar|a|o)|coloc(?:ar|o)|substitu(?:ir|o|i)) (?:a )?bobina "
+        rf"(?:da|do|na|no) {TERMINAL}\b|"
+        rf"\b(?:imprimir|emitir) (?:os? )?comprovantes? (?:na|no|pela|pelo) {TERMINAL}\b|"
+        rf"{SUBJECT_START}(?P<subject_relation>{TERMINAL} {ASPECT}{TERMINAL_FAULT})\b"
+    ),
 }
 
 SENTENCE = re.compile(r"[^.!?;\n]+[.!?;]*")
 TRANSITION = re.compile(r"\b(?:mas|porém|porem|contudo|no entanto|só que|so que)\b", re.I)
-HYPOTHETICAL = re.compile(
-    r"^\s*[,:\s]*(?:se\b|caso\b|supondo\b|na hipotese\b)|"
+HYPOTHETICAL = re.compile(r"^\s*[,:\s]*(?:se\b|caso\b|supondo\b|na hipotese\b)")
+UNCERTAINTY = re.compile(
     r"\b(?:talvez|possivelmente|hipoteticamente|pode ser que|pode ser|"
-    r"acho que|suspeito que|suspeito de|imagino que|acredito que)\b"
+    r"acho que|suspeito que|suspeito de|imagino que|acredito que|nao (?:sei|sabemos) se)\b"
 )
 EXCLUDED_FOCUS = re.compile(
     r"\bnao (?:e|era) (?:sobre|referente a|a respeito de)\b|"
-    r"\b(?:nao (?:pergunto|preciso|quero|estou perguntando|estou falando) (?:sobre|saber|de)|"
-    r"sem (?:relacao com|duvidas? (?:sobre|de)))\b"
+    r"\bnao (?:quero|preciso|pretendo|planejo|desejo|vim para|estou (?:perguntando|falando|pedindo))\b|"
+    r"\b(?:nao pergunto sobre|sem (?:relacao com|duvidas? (?:sobre|de)))\b"
 )
 INCIDENTAL = re.compile(
     r"\b(?:a proposito|por sinal|so mencionei|so citei|somente mencionei|"
@@ -131,12 +157,20 @@ FOCUS = re.compile(
     r"o que (?:preciso|quero) (?:e|saber)\b|(?:preciso|quero|gostaria de) (?:saber|entender|"
     r"resolver|aprender|configurar|consultar|rastrear)\b)"
 )
+DIRECT_REQUEST = re.compile(
+    r"^(?:(?:eu )?(?:preciso|quero|queria|gostaria de|pode[m]?|poderiam) "
+    r"(?!(?:saber|entender|resolver|ter|receber ajuda)\b)"
+    r"(?:[a-z]+(?:ar|er|ir) |(?:de )?(?:uma|um|outra|outro) (?!orientacao\b|ajuda\b))|"
+    r"como (?:eu )?(?:posso |podemos |devo )?"
+    r"(?!(?:resolver|resolvo|continuar|prossigo)\b)[a-z]+ (?!isso\b|isto\b|agora\b)[a-z])"
+)
 INQUIRY = re.compile(
     r"\b(?:como|quando|onde|qual|quanto tempo|quero|queria|gostaria|preciso|podem me "
     r"(?:orientar|explicar|ajudar)|podem dizer|estou (?:preparando|aprendendo))\b|\?"
 )
+DEFERRED_TIME = r"(?:amanha|no futuro|na proxima|no proximo|semana que vem|mes que vem)"
 FUTURE = re.compile(
-    r"\b(?:amanha|no futuro|na proxima|no proximo|semana que vem|mes que vem|"
+    rf"\b(?:{DEFERRED_TIME}|"
     r"(?:vou|vamos|irei|iremos) (?:usar|configurar|instalar|receber|vender|fazer|enviar)|"
     r"quando (?:eu )?(?:usar|configurar|instalar|receber|vender|fizer|enviar))\b"
 )
@@ -146,23 +180,42 @@ CONTRAST_WORDS = re.compile(r"^(?:mas|porem|contudo|no entanto|so que)\b[\s,]*")
 @dataclass(frozen=True)
 class Clause:
     text: str
-    excerpt: str
+    quote_start: int
+    quote_end: int
     contrast: bool
+
+    @property
+    def excerpt(self):
+        return self.text[self.quote_start:self.quote_end]
 
 
 def clauses(text, start, end):
-    """Mantém ordem e extrai a parte realmente citada de cada oração."""
+    """Mapeia o recorte para a mesma oração usada no casamento de padrões."""
     for sentence in SENTENCE.finditer(text):
         left, right = sentence.span()
         cuts = [left, *(m.start() for m in TRANSITION.finditer(text, left, right) if m.start() > left), right]
         for begin, stop in zip(cuts, cuts[1:]):
-            body = normalized(text[begin:stop]).strip(" ,:")
-            excerpt = normalized(text[max(begin, start):min(stop, end)])
-            yield Clause(CONTRAST_WORDS.sub("", body), excerpt, bool(CONTRAST_WORDS.match(body)))
+            original = text[begin:stop]
+            normal = normalized(original)
+            body = normal.strip(" ,:")
+            leading = len(normal) - len(normal.lstrip(" ,:"))
+            contrast = CONTRAST_WORDS.match(body)
+            offset = leading + (contrast.end() if contrast else 0)
+            quote_start = max(0, len(normalized(original[:max(0, start - begin)])) - offset)
+            quote_end = max(0, len(normalized(original[:max(0, end - begin)])) - offset)
+            yield Clause(normal[offset:].rstrip(" ,:"), quote_start, quote_end, bool(contrast))
 
 
 def excluded(clause):
-    return any(pattern.search(clause.text) for pattern in (HYPOTHETICAL, EXCLUDED_FOCUS, INCIDENTAL))
+    return any(pattern.search(clause.text) for pattern in (HYPOTHETICAL, UNCERTAINTY, EXCLUDED_FOCUS, INCIDENTAL))
+
+
+def category_evidence_in_quote(pattern, clause):
+    for match in pattern.finditer(clause.text):
+        span = match.span("subject_relation") if match.group("subject_relation") else match.span()
+        if clause.quote_start <= span[0] and span[1] <= clause.quote_end:
+            return True
+    return False
 
 
 def category_reason(criterion, context):
@@ -185,11 +238,12 @@ def category_reason(criterion, context):
         if ((NORMAL_OR_RECOVERED.search(clause.text) or FUTURE.search(clause.text)) and not asks):
             continue
         matched = {name for name, pattern in CATEGORY_RELATIONS.items() if pattern.search(clause.text)}
-        if FOCUS.search(clause.text) or clause.contrast and (asks or matched):
+        changes_focus = FOCUS.search(clause.text) or DIRECT_REQUEST.search(clause.text)
+        if (changes_focus and matched != active) or clause.contrast and (asks or matched):
             active.clear()
             evidence_seen = False
         active.update(matched)
-        evidence_seen |= criterion in matched and bool(selected.search(clause.excerpt))
+        evidence_seen |= criterion in matched and category_evidence_in_quote(selected, clause)
 
     if not evidence_seen or active != {criterion}:
         return "context_conflict"
@@ -208,11 +262,14 @@ ROUTINE = re.compile(
     r"(?:tudo|o atendimento|a operacao|as vendas) (?:segue[m]?|continua[m]?|funciona[m]?) "
     r"(?:normalmente|sem (?:falhas?|problemas?|impacto)))\b"
 )
+LOCAL_ENTITY = (
+    r"(?:vendas?|lojas?|filiais?|unidades?|caixas?|turnos?|terminais?|maquininhas?|"
+    r"leitor[ae]s?|pagamentos?|transferencias?|clientes?)"
+)
 LOCALIZED = re.compile(
     r"\b(?:(?:so|apenas|somente) (?:uma|um|algumas|parte d[ao]s?) "
-    r"(?:vendas?|lojas?|filiais?|unidades?|caixas?|turnos?|terminais?|maquininhas?|"
-    r"leitor[ae]s?|pagamentos?|transferencias?|clientes?)\b[^,!?;.]{0,68}"
-    r"(?:falh(?:a|aram|ou)|par(?:ou|aram)|atras(?:ou|aram)|(?:esta|ficou) bloquead[oa]|"
+    rf"(?:d[ao]s (?:(?:duas|dois|tres|quatro|cinco|\d+) )?)?{LOCAL_ENTITY} {ASPECT}"
+    r"(?:falh(?:a|aram|ou)|par(?:ou|aram)|atras(?:ou|aram)|desligou|(?:esta|ficou) bloquead[oa]|"
     r"nao (?:funciona|funcionou|passou|passaram|conclui|consegue|conseguem)|"
     r"(?:deu|da|dao) erro)|"
     r"(?:falha|erro|atraso|problema|lentidao) (?:apenas |so |restrit[oa] |isolad[oa] )?"
@@ -221,9 +278,16 @@ LOCALIZED = re.compile(
     r"(?:uma|um) (?:loja|caixa|unidade|filial|turno|terminal|maquininha|leitor[ae]|venda|"
     r"pagamento|transferencia) (?:falhou|parou|atrasou|nao (?:funciona|passou|concluiu)|deu erro))\b"
 )
+CONTINUED_SERVICE = (
+    r"(?<!nao )(?<!nao mais )(?:sigo|seguimos|continuo|continuamos) "
+    r"(?:vendendo|cobrando|atendendo|operando|recebendo|processando|pagando)|"
+    r"(?:clientes|compradores|equipe) (?:ainda )?(?:continua[m]?|segue[m]?) "
+    r"(?:pagando|comprando|vendendo|cobrando|atendendo|recebendo)"
+)
 ALTERNATIVE = re.compile(
-    r"\b(?:(?<!nao )(?:ainda )?(?<!nao )(?<!nao ainda )(?:consigo|conseguimos|podemos) (?:continuar|atender|vender|"
-    r"receber|cobrar|pagar|operar|processar)(?:\s+\w+){0,8}|"
+    rf"\b(?:{CONTINUED_SERVICE}|"
+    r"(?<!nao )(?<!nao ainda )(?:consigo|conseguimos|posso|podemos) "
+    r"(?:atender|vender|receber|cobrar|pagar|operar|processar)|"
     r"(?:o(?:s)? (?:outros?|demais)|a(?:s)? (?:outras?|demais)) "
     r"(?:caixas?|postos?|lojas?|unidades?|filiais?|terminais?|maquininhas?|leitor[ae]s?|"
     r"vendas?|pagamentos?|cobrancas?|transferencias?) "
@@ -243,9 +307,11 @@ BROAD = re.compile(
     r"ficaram (?:sem|parad[oa]s)|falh(?:aram|am)|sofreram|deu erro)|"
     r"(?:impact[oa]|afetou|atingiu|comprometeu) (?:toda a|boa parte da|varias|varios) "
     r"(?:rede|equipe|operacao|unidades|lojas|filiais|clientes|vendas)|"
-    r"(?:precisamos|tenho que|teremos de|temos de|vai exigir) (?:refazer|reprocessar|"
-    r"reconciliar|conferir) (?:todas as|todos os|cada|muitas|varias|varios|todo o) "
+    r"(?:precisamos|tenho que|teremos de|temos de|vai exigir|exige[m]?|obriga[m]? a) "
+    r"(?:refazer|reprocessar|reconciliar|conferir) "
+    r"(?:(?:todas as|todos os|cada|muitas|varias|varios|todo o) "
     r"(?:contas|vendas|lancamentos|registros|transacoes|pagamentos|fechamento|lote)|"
+    r"o (?:fechamento|lote|balanco) (?:inteiro|completo|todo))|"
     r"(?:horas|dias) (?:de|para) (?:retrabalho|refazer|reprocessar))\b"
 )
 TOTAL_STOP = re.compile(
@@ -256,6 +322,8 @@ TOTAL_STOP = re.compile(
     r"leitor[ae]|maquininha) (?:passa|funciona|liga|conclui|esta disponivel)|"
     r"nao (?:consigo|conseguimos|da para) (?:atender|vender|cobrar|pagar|receber|"
     r"processar) (?:nad[ae]|de jeito nenhum|de forma alguma|nenhum[am]?)|"
+    r"(?:todos os|todas as) (?:caixas|terminais|maquininhas|leitoras) "
+    r"(?:pararam|desligaram|sairam do ar|estao inoperantes)|"
     r"(?:so |apenas )?(?:o unico|a unica) (?:caixa|terminal|maquininha|leitor[ae]|"
     r"forma de (?:vender|receber|cobrar)) (?:parou|nao (?:liga|funciona)))\b"
 )
@@ -273,20 +341,60 @@ IMMEDIATE_LOSS = re.compile(
     r"(?:pagamentos|cobrancas|debitos) (?:indevidos|duplicados|nao autorizados) "
     r"(?:continuam|seguem|estao acontecendo|ainda ocorrem))\b"
 )
+PAYMENT_HARM = re.compile(
+    r"\b(?:(?:sao|estao sendo|foram|e|esta sendo|foi) (?:debitad[oa]s?|cobrad[oa]s?)|"
+    r"(?:esta|estao) (?:debitando|cobrando)|(?:debitou|cobrou)|"
+    r"(?:debitos?|cobrancas?) (?:saiu|sairam|apareceu|apareceram)) "
+    r"(?:duas vezes|em duplicidade|em dobro)\b"
+)
+REPEATED_OR_CURRENT = re.compile(
+    r"\b(?:agora|neste momento|a cada (?:nova )?(?:tentativa|venda|transacao)|"
+    r"toda vez que|(?:esta|estao) (?:sendo|debitando|cobrando))\b"
+)
+DAMAGE_CONTINUATION = re.compile(
+    r"^(?:isso|o problema|a falha|(?:os|esses) debitos|(?:as|essas) cobrancas) "
+    r"(?:ainda )?(?:continua[m]?|persiste[m]?|segue[m]?)\b"
+)
+PAYMENT_HARM_DENIED = re.compile(
+    r"\b(?:nao e (?:verdade|o caso) que|"
+    r"nao (?:mais )?(?:(?:sao|e|esta[o]? (?:mais )?sendo|foram|foi) (?:debitad[oa]s?|cobrad[oa]s?)|"
+    r"(?:esta|estao) (?:debitando|cobrando)|debitou|cobrou)|"
+    r"sem (?:debitos?|cobrancas?) (?:indevid[oa]s?|duplicad[oa]s?)|"
+    r"(?:debitos?|cobrancas?) (?:indevid[oa]s?|duplicad[oa]s?) (?:cessaram|pararam))\b"
+)
 CONSEQUENCE = (
-    r"(?:vou perder|vamos perder|perderei|perderemos|cancela(?:m|ra|rao)?|"
-    r"(?:ser(?:a|ao)|fica(?:ra|rao)?) (?:bloquead[oa]s?|cancelad[oa]s?)|"
+    r"(?:(?:vou perder|vamos perder|perderei|perderemos) "
+    r"(?:(?:[oa]s?|um[as]?|meu|minha|nosso|nossa|varios|varias) )?"
+    r"(?:pagamentos?|vendas?|clientes?|dinheiro|receita|estoque|lote|pedido|prazo|contrato)|"
+    r"(?:vai cancelar|vao cancelar|cancelara|cancelarao) (?:o |a )?(?:pedido|lote|contrato|entrega)|"
+    r"(?:pedido|lote|contrato|entrega|conta|acesso|operacao|venda|vendas) "
+    r"(?:sera|serao|ficara|ficarao) (?:bloquead[oa]s?|cancelad[oa]s?)|"
+    r"(?:serei|seremos) multad[oa]s?|"
     r"(?:nao (?:consigo|conseguiremos|poderei|poderemos)) "
     r"(?:abrir|pagar|fechar|entregar|atender)|"
-    r"(?:vence|expira|fecha|termina) o prazo (?:de|para) "
-    r"(?:pagamento|folha|liquidacao|entrega|fechamento)|"
-    r"multa(?: de [a-z]+)?|interrupcao (?:da|do) (?:operacao|atendimento))"
+    r"(?:receberei|receberemos|vou receber|vamos receber|levarei|levaremos|"
+    r"terei|teremos|havera|vai haver) (?:uma )?multa|"
+    r"(?:a multa sera aplicada|a operacao sera interrompida))"
 )
 IMMEDIATE_DEADLINE = (
     r"(?:agora|imediatamente|nos proximos minutos|"
     r"em (?:[1-9]|[1-5]\d|60|dez|quinze|trinta) minutos|ate hoje|ainda hoje|hoje)"
 )
 IMMEDIATE_CONSEQUENCE = re.compile(relations(CONSEQUENCE, IMMEDIATE_DEADLINE, gap=7))
+LATER_DEADLINE = re.compile(rf"\b{DEFERRED_TIME}\b")
+PENDING_CONDITION = re.compile(
+    r"^(?:se|caso) (?:o |a )?(?:pagamento|repasse|transferencia|credito|venda|operacao) "
+    r"nao (?:sair|cair|entrar|chegar|passar|for (?:liberad[oa]|creditad[oa]))\b[^,;]{0,60},"
+)
+HANDLED_DEADLINE = re.compile(
+    r"\b(?:nao (?:ha|havera|vai haver|vou receber|vamos receber|receberei|receberemos) (?:uma )?multa|"
+    r"nao (?:sera|serao|ficara|ficarao) (?:bloquead[oa]s?|cancelad[oa]s?|multad[oa]s?)|"
+    r"a multa (?:ja )?(?:foi paga|foi retirada|foi cancelada)|"
+    r"(?<!nao )(?:consigo|conseguimos|consegui|conseguiremos|podemos|poderei) "
+    r"(?:pagar|quitar) (?:a |uma )?multa|"
+    r"(?<!nao )(?:consegui|conseguimos|poderei|podemos) "
+    r"(?:pagar|entregar|cumprir) (?:em dia|a tempo|no prazo))\b"
+)
 NOW = re.compile(r"\b(?:agora|imediatamente|neste momento|nos proximos minutos)\b")
 CURRENT_PROBLEM = re.compile(
     rf"\b(?:{OPERATION_FAILURE}|(?:nao|mal) (?:consigo|conseguimos)|travou|quebrou|"
@@ -305,7 +413,7 @@ NEGATED_IMPACT = re.compile(
     r"nao (?:estou|estamos|seguimos) perdendo|nao (?:vou|vamos) perder|"
     r"nao ha (?:impacto|risco|pressa|urgencia|prejuizo)|pode esperar)\b"
 )
-URGENT_PATTERNS = (IMMEDIATE_LOSS, IMMEDIATE_CONSEQUENCE, TOTAL_STOP)
+URGENT_PATTERNS = (IMMEDIATE_LOSS, IMMEDIATE_CONSEQUENCE, TOTAL_STOP, PAYMENT_HARM)
 PRIORITY_EVIDENCE = {
     "routine": (ROUTINE, NORMAL_OR_RECOVERED),
     "localized_impact": (LOCALIZED,),
@@ -323,20 +431,33 @@ def priority_reason(criterion, context):
     if not any(any_match(proof, clause.excerpt) for clause in context):
         return "insufficient_relation"
 
-    active = [clause for clause in context if not excluded(clause)]
+    active = [clause for clause in context if not excluded(clause)
+              or (PENDING_CONDITION.match(clause.text) and IMMEDIATE_CONSEQUENCE.search(clause.text)
+                  and not any_match((UNCERTAINTY, EXCLUDED_FOCUS, INCIDENTAL), clause.text))]
     recovery = max((i for i, clause in enumerate(active) if PAST_OR_RESTORED.search(clause.text)), default=-1)
     current = [clause for clause in active[recovery + 1:] if not FUTURE.search(clause.text)]
     # Orientação futura é suporte de rotina. Fatos futuros por si sós não são
     # prova de prejuízo atual. Um prazo futuro explícito pode ser imediato.
-    immediate = [clause for clause in active[recovery + 1:] if IMMEDIATE_CONSEQUENCE.search(clause.text)]
+    pending = active[recovery + 1:]
+    handled = max((i for i, clause in enumerate(pending) if HANDLED_DEADLINE.search(clause.text)), default=-1)
+    immediate = [clause for clause in pending[handled + 1:] if IMMEDIATE_CONSEQUENCE.search(clause.text)
+                 and not LATER_DEADLINE.search(clause.text)]
     no_impact = any(NEGATED_IMPACT.search(clause.text) for clause in current)
     alternative = any(ALTERNATIVE.search(clause.text) and not NO_ALTERNATIVE.search(clause.text)
                       for clause in current)
     no_alternative = any(NO_ALTERNATIVE.search(clause.text) for clause in current)
     total = [clause for clause in current if TOTAL_STOP.search(clause.text)]
     total_without_alternative = total if no_alternative and not alternative else []
+    payment_damage = []
     loss = [clause for clause in current if IMMEDIATE_LOSS.search(clause.text)
             and not NEGATED_IMPACT.search(clause.text)]
+    for index, clause in enumerate(current):
+        if not PAYMENT_HARM.search(clause.text) or PAYMENT_HARM_DENIED.search(clause.text):
+            continue
+        payment_damage.append(clause)
+        if (REPEATED_OR_CURRENT.search(clause.text)
+                or any(DAMAGE_CONTINUATION.search(c.text) for c in current[index + 1:index + 2])):
+            loss.append(clause)
     immediate = [clause for clause in immediate if not NEGATED_IMPACT.search(clause.text)]
     urgent = [] if no_impact else loss + immediate + total_without_alternative
     broad = [clause for clause in current if BROAD.search(clause.text) and not NEGATED_IMPACT.search(clause.text)]
@@ -349,7 +470,8 @@ def priority_reason(criterion, context):
         found, support = "broad_impact", broad
     elif local and alternative and not total and not broad and not no_alternative:
         found, support = "localized_impact", local
-    elif not (local or total or broad or loss or immediate or any(CURRENT_PROBLEM.search(c.text) for c in current)):
+    elif not (local or total or broad or loss or immediate or payment_damage
+              or any(CURRENT_PROBLEM.search(c.text) for c in current)):
         routine = [clause for clause in active[max(0, recovery):]
                    if any_match(PRIORITY_EVIDENCE["routine"], clause.text)]
         found, support = "routine", routine
@@ -462,7 +584,9 @@ def project_choices(audit):
         elif outcome == "explicit":
             choices[field] = choice("abstained", value, "explicit")
         elif outcome == "veto":
-            choices[field] = choice("abstained", value, "policy")
+            # raw é a saída IPC após a política. A proposta do fornecedor
+            # permanece em audit.fields e no conteúdo original.
+            choices[field] = choice("abstained", c01.ABSTENTION, "policy")
         else:
             # O corpo bruto fica na auditoria. Um código válido não pode
             # ocupar raw quando o objeto privado que o carrega está inválido.
