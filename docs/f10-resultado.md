@@ -2,6 +2,15 @@
 
 ## Endereço atual
 
+Em 25/11/2026, às 12h44 de Brasília, o integrador renovou o túnel após a
+expiração da URL da UX02. A verificação da
+[nova URL temporária](https://newbie-aqua-stem-reveal.trycloudflare.com/)
+confirmou a saúde da API em HTTPS. O fluxo completo por outra rede segue
+pendente. O acesso depende do computador e do túnel ativos.
+[Evidência da renovação](evidencias/f10/integrator-f10-renewal-2026-11-25.json).
+
+## Registro da publicação UX02
+
 A demonstração foi reaberta na entrega UX02 em
 [tribal-louisville-container-bind.trycloudflare.com](https://tribal-louisville-container-bind.trycloudflare.com/).
 O tema `8ac8a00` foi publicado e verificado em HTTPS, com conversa de dois turnos
