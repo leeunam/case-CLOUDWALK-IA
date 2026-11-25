@@ -1,0 +1,311 @@
+{
+  "package_sha256": "224c572b0a2c6ce93b1dd1b90317df131cbb47b897b4de38e97659fbc7e57872",
+  "reload_checks": [
+    {
+      "field": "category",
+      "id": "sf2-train-001",
+      "max_abs_score_diff": 0.0,
+      "raw": "pix"
+    },
+    {
+      "field": "category",
+      "id": "sf2-train-002",
+      "max_abs_score_diff": 0.0,
+      "raw": "terminal"
+    },
+    {
+      "field": "category",
+      "id": "sf2-train-003",
+      "max_abs_score_diff": 0.0,
+      "raw": "pix"
+    },
+    {
+      "field": "priority",
+      "id": "sf2-train-001",
+      "max_abs_score_diff": 0.0,
+      "raw": "intermediate"
+    },
+    {
+      "field": "priority",
+      "id": "sf2-train-002",
+      "max_abs_score_diff": 0.0,
+      "raw": "urgent"
+    },
+    {
+      "field": "priority",
+      "id": "sf2-train-003",
+      "max_abs_score_diff": 0.0,
+      "raw": "intermediate"
+    }
+  ],
+  "resources": {
+    "cpu_seconds": 1801.31005207,
+    "elapsed_seconds": 933.7552090820009,
+    "peak_rss_kib": 3775188
+  },
+  "specialists": {
+    "category": {
+      "applied_encoder_arguments": {
+        "batch_size": 8,
+        "body_learning_rate": 2e-05,
+        "num_epochs": 1,
+        "num_iterations": 5,
+        "seed": 42
+      },
+      "classes": [
+        "informacao_insuficiente",
+        "payouts",
+        "pix",
+        "terminal"
+      ],
+      "encoder_parameter_sha256_after": "9a32d9206bac4ccc63b958601e5b055e41ea9e9129a8e50f8ee45b25196c58e3",
+      "encoder_parameter_sha256_before": "78cf2f3362db15912cea1a37deb66237cc6636b9f5a031e260146e54ecaa2ed2",
+      "field": "category",
+      "head_iterations": [
+        23
+      ],
+      "head_parameters": {
+        "C": 1.0,
+        "class_weight": "balanced",
+        "dual": false,
+        "fit_intercept": true,
+        "intercept_scaling": 1,
+        "l1_ratio": 0.0,
+        "max_iter": 1000,
+        "n_jobs": null,
+        "penalty": "deprecated",
+        "random_state": 42,
+        "solver": "lbfgs",
+        "tol": 0.0001,
+        "verbose": 0,
+        "warm_start": false
+      },
+      "loss": "CosineSimilarityLoss",
+      "monitored_parameter": "last_encoder_layer.output.LayerNorm.weight",
+      "optimizer_steps": 188,
+      "pair_rows": 1500,
+      "setfit_arguments": {
+        "batch_size": [
+          8,
+          8
+        ],
+        "body_learning_rate": [
+          2e-05,
+          2e-05
+        ],
+        "distance_metric": "cosine_distance",
+        "end_to_end": false,
+        "eval_delay": 0,
+        "eval_max_steps": -1,
+        "eval_steps": null,
+        "eval_strategy": "no",
+        "evaluation_strategy": null,
+        "greater_is_better": false,
+        "head_learning_rate": 0.01,
+        "l2_weight": 0.01,
+        "load_best_model_at_end": false,
+        "logging_dir": null,
+        "logging_first_step": true,
+        "logging_steps": 50,
+        "logging_strategy": "no",
+        "loss": "CosineSimilarityLoss",
+        "margin": 0.25,
+        "max_length": null,
+        "max_steps": -1,
+        "metric_for_best_model": "embedding_loss",
+        "num_epochs": [
+          1,
+          1
+        ],
+        "num_iterations": 5,
+        "output_dir": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_sf2/.cache/qualificacao-01/training-02/staging/trainer-category",
+        "report_to": [
+          "none"
+        ],
+        "run_name": null,
+        "samples_per_label": 2,
+        "sampling_strategy": "oversampling",
+        "save_steps": 500,
+        "save_strategy": "no",
+        "save_total_limit": 1,
+        "seed": 42,
+        "show_progress_bar": false,
+        "use_amp": false,
+        "warmup_proportion": 0.1
+      },
+      "status": "trained",
+      "training_seconds": 428.4349040549987
+    },
+    "priority": {
+      "applied_encoder_arguments": {
+        "batch_size": 8,
+        "body_learning_rate": 2e-05,
+        "num_epochs": 1,
+        "num_iterations": 5,
+        "seed": 42
+      },
+      "classes": [
+        "advanced",
+        "basic",
+        "informacao_insuficiente",
+        "intermediate",
+        "urgent"
+      ],
+      "encoder_parameter_sha256_after": "d5e1815d451795d1bba8adc688dc13ad6a0fb8f0b9fb4dadb452c2c48abcddca",
+      "encoder_parameter_sha256_before": "78cf2f3362db15912cea1a37deb66237cc6636b9f5a031e260146e54ecaa2ed2",
+      "field": "priority",
+      "head_iterations": [
+        21
+      ],
+      "head_parameters": {
+        "C": 1.0,
+        "class_weight": "balanced",
+        "dual": false,
+        "fit_intercept": true,
+        "intercept_scaling": 1,
+        "l1_ratio": 0.0,
+        "max_iter": 1000,
+        "n_jobs": null,
+        "penalty": "deprecated",
+        "random_state": 42,
+        "solver": "lbfgs",
+        "tol": 0.0001,
+        "verbose": 0,
+        "warm_start": false
+      },
+      "loss": "CosineSimilarityLoss",
+      "monitored_parameter": "last_encoder_layer.output.LayerNorm.weight",
+      "optimizer_steps": 188,
+      "pair_rows": 1500,
+      "setfit_arguments": {
+        "batch_size": [
+          8,
+          8
+        ],
+        "body_learning_rate": [
+          2e-05,
+          2e-05
+        ],
+        "distance_metric": "cosine_distance",
+        "end_to_end": false,
+        "eval_delay": 0,
+        "eval_max_steps": -1,
+        "eval_steps": null,
+        "eval_strategy": "no",
+        "evaluation_strategy": null,
+        "greater_is_better": false,
+        "head_learning_rate": 0.01,
+        "l2_weight": 0.01,
+        "load_best_model_at_end": false,
+        "logging_dir": null,
+        "logging_first_step": true,
+        "logging_steps": 50,
+        "logging_strategy": "no",
+        "loss": "CosineSimilarityLoss",
+        "margin": 0.25,
+        "max_length": null,
+        "max_steps": -1,
+        "metric_for_best_model": "embedding_loss",
+        "num_epochs": [
+          1,
+          1
+        ],
+        "num_iterations": 5,
+        "output_dir": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_sf2/.cache/qualificacao-01/training-02/staging/trainer-priority",
+        "report_to": [
+          "none"
+        ],
+        "run_name": null,
+        "samples_per_label": 2,
+        "sampling_strategy": "oversampling",
+        "save_steps": 500,
+        "save_strategy": "no",
+        "save_total_limit": 1,
+        "seed": 42,
+        "show_progress_bar": false,
+        "use_amp": false,
+        "warmup_proportion": 0.1
+      },
+      "status": "trained",
+      "training_seconds": 485.2481285220001
+    }
+  },
+  "task": "SF2-03",
+  "training_freeze_sha256": "1a3a3baa405cf2cd45a15cc3e4ca3a0a654e6ac978f4d280c8b5cb301113112a",
+  "versions": {
+    "Jinja2": "3.1.6",
+    "MarkupSafe": "3.0.4",
+    "PyYAML": "6.0.4",
+    "Pygments": "2.21.0",
+    "accelerate": "1.16.0",
+    "aiohappyeyeballs": "2.7.1",
+    "aiohttp": "3.14.5",
+    "aiosignal": "1.4.0",
+    "annotated-doc": "0.0.7",
+    "annotated-types": "0.8.0",
+    "anyio": "4.16.0",
+    "attrs": "26.1.0",
+    "certifi": "2026.11.20",
+    "charset-normalizer": "3.5.3",
+    "click": "8.5.1",
+    "cloudpickle": "3.1.3",
+    "datasets": "5.2.0",
+    "dill": "0.4.1",
+    "evaluate": "0.4.6",
+    "filelock": "4.3.1",
+    "frozenlist": "1.8.0",
+    "fsspec": "2026.9.0",
+    "h11": "0.16.0",
+    "hf-xet": "1.8.0",
+    "httpcore": "1.0.9",
+    "httpx": "0.28.1",
+    "huggingface_hub": "1.33.0",
+    "idna": "3.20",
+    "joblib": "1.6.0",
+    "jsonschema": "4.25.1",
+    "jsonschema-specifications": "2025.9.1",
+    "markdown-it-py": "4.3.0",
+    "mdurl": "0.1.2",
+    "mpmath": "1.3.0",
+    "multidict": "7.2.1",
+    "multiprocess": "0.70.19",
+    "networkx": "3.6.1",
+    "numpy": "2.4.6",
+    "packaging": "26.4",
+    "pandas": "3.1.1",
+    "pip": "24.0",
+    "propcache": "0.5.4",
+    "psutil": "7.2.2",
+    "pyarrow": "26.0.1",
+    "pydantic": "2.14.4",
+    "pydantic_core": "2.50.5",
+    "python": "3.11.13",
+    "python-dateutil": "4.0.0",
+    "referencing": "0.36.2",
+    "regex": "2026.11.24",
+    "requests": "2.34.2",
+    "rich": "15.0.0",
+    "rpds-py": "0.27.1",
+    "safetensors": "0.8.0",
+    "scikit-learn": "1.8.0",
+    "scipy": "1.17.1",
+    "sentence-transformers": "6.3.0",
+    "sentencepiece": "0.2.1",
+    "setfit": "1.2.0",
+    "setuptools": "65.5.0",
+    "shellingham": "1.5.4",
+    "sympy": "1.14.0",
+    "threadpoolctl": "3.8.0",
+    "tokenizers": "0.22.2",
+    "torch": "2.12.0+cpu",
+    "tqdm": "4.70.1",
+    "transformers": "5.8.1",
+    "typer": "0.29.2",
+    "typing-inspection": "0.4.5",
+    "typing_extensions": "4.16.0",
+    "tzdata": "2026.6",
+    "urllib3": "2.8.0",
+    "xxhash": "4.1.0",
+    "yarl": "1.25.1"
+  }
+}

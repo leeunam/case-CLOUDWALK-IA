@@ -1,0 +1,286 @@
+{
+  "argmax_baseline": {
+    "applied_accuracy": {
+      "category": {
+        "denominator": 48,
+        "numerator": 46,
+        "wilson95": [
+          0.8602434412954456,
+          0.9884981065106133
+        ]
+      },
+      "priority": {
+        "denominator": 46,
+        "numerator": 40,
+        "wilson95": [
+          0.74334142220927,
+          0.9388215963796489
+        ]
+      }
+    },
+    "applied_urgent": {
+      "denominator": 13,
+      "numerator": 11,
+      "wilson95": [
+        0.5776536898051747,
+        0.9567418216419188
+      ]
+    },
+    "automatic_coverage": {
+      "denominator": 72,
+      "numerator": 69,
+      "wilson95": [
+        0.8845072325868389,
+        0.9857291925330748
+      ]
+    },
+    "correct_coverage": {
+      "denominator": 72,
+      "numerator": 64,
+      "wilson95": [
+        0.7957706176633597,
+        0.9426118036505065
+      ]
+    },
+    "nonurgent_on_urgent": 1,
+    "raw_urgent": {
+      "denominator": 13,
+      "numerator": 12,
+      "wilson95": [
+        0.6668604907890041,
+        0.9862895787574433
+      ]
+    },
+    "review_by_case": {
+      "denominator": 90,
+      "numerator": 18,
+      "wilson95": [
+        0.13042401182717056,
+        0.2941373635114255
+      ]
+    },
+    "wrong_expected_review": {
+      "denominator": 18,
+      "numerator": 3,
+      "wilson95": [
+        0.05836576805861449,
+        0.39222038103915724
+      ]
+    }
+  },
+  "capture_errors": [
+    {
+      "applied": "advanced",
+      "capture_cut": {
+        "delta": 0.0,
+        "tau": 0.5
+      },
+      "field": "priority",
+      "gold": "urgent",
+      "id": "sf2-validation-001",
+      "margin": 0.2905615659282392,
+      "missing_fields": [
+        "priority"
+      ],
+      "raw": "advanced",
+      "reason": "urgent_demotion",
+      "received": {
+        "category": "payouts"
+      },
+      "scores": {
+        "advanced": 0.6313874585281872,
+        "basic": 0.020063382926577302,
+        "informacao_insuficiente": 0.005736024074480468,
+        "intermediate": 0.0019872418708067785,
+        "urgent": 0.340825892599948
+      },
+      "top_score": 0.6313874585281872
+    },
+    {
+      "applied": "basic",
+      "capture_cut": {
+        "delta": 0.0,
+        "tau": 0.5
+      },
+      "field": "priority",
+      "gold": "informacao_insuficiente",
+      "id": "sf2-validation-028",
+      "margin": 0.33551410068324805,
+      "missing_fields": [
+        "priority"
+      ],
+      "raw": "basic",
+      "reason": "expected_review_completed",
+      "received": {
+        "category": "terminal"
+      },
+      "scores": {
+        "advanced": 0.00602870882478984,
+        "basic": 0.6592339495537766,
+        "informacao_insuficiente": 0.32371984887052857,
+        "intermediate": 0.0065746498007712454,
+        "urgent": 0.004442842950133826
+      },
+      "top_score": 0.6592339495537766
+    },
+    {
+      "applied": "pix",
+      "capture_cut": {
+        "delta": 0.0,
+        "tau": 0.5
+      },
+      "field": "category",
+      "gold": "informacao_insuficiente",
+      "id": "sf2-validation-030",
+      "margin": 0.8139407845706619,
+      "missing_fields": [
+        "category"
+      ],
+      "raw": "pix",
+      "reason": "expected_review_completed",
+      "received": {
+        "priority": "intermediate"
+      },
+      "scores": {
+        "informacao_insuficiente": 0.08874459939246157,
+        "payouts": 0.0008815673978795029,
+        "pix": 0.9026853839631234,
+        "terminal": 0.007688449246535638
+      },
+      "top_score": 0.9026853839631234
+    },
+    {
+      "applied": "pix",
+      "capture_cut": {
+        "delta": 0.0,
+        "tau": 0.5
+      },
+      "field": "category",
+      "gold": "informacao_insuficiente",
+      "id": "sf2-validation-061",
+      "margin": 0.8176586114175198,
+      "missing_fields": [
+        "category"
+      ],
+      "raw": "pix",
+      "reason": "expected_review_completed",
+      "received": {
+        "priority": "basic"
+      },
+      "scores": {
+        "informacao_insuficiente": 0.08689004550998665,
+        "payouts": 0.0006526773158628406,
+        "pix": 0.9045486569275065,
+        "terminal": 0.007908620246643908
+      },
+      "top_score": 0.9045486569275065
+    }
+  ],
+  "eligible": 0,
+  "highest_cuts": {
+    "gates": {
+      "automatic_coverage": false,
+      "category_accuracy": true,
+      "control_calls": true,
+      "nonurgent_on_urgent": true,
+      "partial_applications": true,
+      "preservation": true,
+      "priority_accuracy": true,
+      "raw_urgent": true,
+      "wrong_expected_review": false
+    },
+    "metrics": {
+      "applied_accuracy": {
+        "category": {
+          "denominator": 36,
+          "numerator": 34,
+          "wilson95": [
+            0.8185534279135275,
+            0.9846300133358382
+          ]
+        },
+        "priority": {
+          "denominator": 26,
+          "numerator": 26,
+          "wilson95": [
+            0.8712710781407849,
+            1
+          ]
+        }
+      },
+      "applied_urgent": {
+        "denominator": 13,
+        "numerator": 8,
+        "wilson95": [
+          0.355228915126657,
+          0.8229029220223743
+        ]
+      },
+      "automatic_coverage": {
+        "denominator": 72,
+        "numerator": 46,
+        "wilson95": [
+          0.5235248046738358,
+          0.7401832029382592
+        ]
+      },
+      "correct_coverage": {
+        "denominator": 72,
+        "numerator": 46,
+        "wilson95": [
+          0.5235248046738358,
+          0.7401832029382592
+        ]
+      },
+      "nonurgent_on_urgent": 0,
+      "raw_urgent": {
+        "denominator": 13,
+        "numerator": 12,
+        "wilson95": [
+          0.6668604907890041,
+          0.9862895787574433
+        ]
+      },
+      "review_by_case": {
+        "denominator": 90,
+        "numerator": 42,
+        "wilson95": [
+          0.3670842495769753,
+          0.5689781254606465
+        ]
+      },
+      "wrong_expected_review": {
+        "denominator": 18,
+        "numerator": 2,
+        "wilson95": [
+          0.03101952264561239,
+          0.32799765130178793
+        ]
+      }
+    },
+    "policy": {
+      "category": {
+        "delta": 0.2,
+        "tau": 0.9
+      },
+      "contract_version": "sf2-ipc/1.0",
+      "priority": {
+        "delta": 0.2,
+        "tau": 0.9
+      }
+    }
+  },
+  "max_auto_coverage_given_minimum_wrong_review": 62,
+  "max_correct_coverage_given_all_other_gates": 62,
+  "min_auto_coverage_given_minimum_wrong_review": 46,
+  "minimum_wrong_review": 2,
+  "passing_all_other_gates": 90,
+  "policies": 225,
+  "wrong_review_completion_distribution": {
+    "2": 135,
+    "3": 90
+  },
+  "wrong_review_completion_distribution_other_gates": {
+    "2": 90
+  }
+}

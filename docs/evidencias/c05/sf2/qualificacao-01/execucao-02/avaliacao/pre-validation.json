@@ -1,0 +1,43 @@
+{
+  "adapter_member_count": 17,
+  "capture_expected": {
+    "adapter": "60b16a6772f648055f572c9a8f96ca8e654972ae6bddee2ec4050304bc18ae69",
+    "argv": "a52df9bc7cd9db1c90150eb74d92919047ab51145b22179bb51a03d6906beda7",
+    "catalog": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271",
+    "contract_catalog": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271",
+    "contracts/artifacts.py": "f2272db7a11b3f1d129bdd4564ec6cd952d057e02350a6d963ff16f1373b65ec",
+    "contracts/core.py": "3a8d307becdc15f3306ab77396055b9f0a35f4f106f465e2d3628132d235e5ea",
+    "contracts/data.py": "e918a5b5606051d8ded78733d1a95b245a5559cd4c0dc8679556596b20d7cd4b",
+    "contracts/ipc.py": "d272c56cb4dfaf9738a8e1faa704773fda85bf47260b0e5b0b2b0556367d1e0f",
+    "evaluation/__main__.py": "763880ff3e792d6d52c86fd5c9c269b32f38638f1c73ff6c3112fef21c991b1e",
+    "evaluation/audit.py": "a327466751e76f35c490fa5772792278b03fdc4b11379bb86047d9dde86a9df9",
+    "evaluation/metrics.py": "6ec5adc0ed90e8daf58a127a6eaa2381005672c1963fa7427604385e72b62cc4",
+    "evaluation/runner.py": "fcd25a9e817d7e8b87496420751764eaab6a8dd3bfe7e48a0cef47adabf18aa1",
+    "evaluation/selection.py": "634d5d8994fc0c5178cbc7f00dc7c68a7640560a6609c144bc97f54147c95e42",
+    "evaluation/workflow.py": "951feaf647ba124c3559f3b46da9da559bfc4d2cfa8fc139fa60d0d3e35e3f09",
+    "package": "224c572b0a2c6ce93b1dd1b90317df131cbb47b897b4de38e97659fbc7e57872",
+    "policy": "09de8c13fa56bcddb8006982b0016e3452bb15de89a72a6eae6c42847cedc21f",
+    "protocol": "c0efd6d42ee50fd7775ff9db5ffcb9119db5861fd19c9b198b73ca01ce0eecaf",
+    "schema": "114d25188c4ab7ab5522ee9e9c3a22eddac7dc386ec5df40886ac8cedcd5c1d5",
+    "validation": "b7d78a8adca44b1165cbadb804cbd879a3573a5c73d6311a592887d70ef68fc9"
+  },
+  "checked_at_utc": "2026-11-25T21:17:48.438086+00:00",
+  "cwd": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao",
+  "evaluation_argv": [
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-treinamento/script/classification_comparison/setfit_sf2/.cache/verification/.venv/bin/python",
+    "-B",
+    "-m",
+    "script.classification_comparison.setfit_sf2.evaluation",
+    "validate",
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_sf2/.cache/qualificacao-01/evaluation-02/config.json",
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_sf2/.cache/qualificacao-01/evaluation-02/validation"
+  ],
+  "evaluation_config_sha256": "d59c7e18b3ff7d8e4eb6a662568897b1522855aae153feca3dae1f9316460832",
+  "evidence_sha256": "3e34e3d1010f671859f259351430783eef9030c463ef1d55b426c6128852e705",
+  "package_member_count": 36,
+  "package_sha256": "224c572b0a2c6ce93b1dd1b90317df131cbb47b897b4de38e97659fbc7e57872",
+  "preflight_status": "passed",
+  "reload_observations": 6,
+  "startup_seconds": 60,
+  "supervised_status_sha256": "aa6653736151f6cfcf8ba38498d316cff6451f795577df049993bfd22fdc0cbc"
+}

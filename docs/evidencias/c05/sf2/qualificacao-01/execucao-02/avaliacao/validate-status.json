@@ -1,0 +1,8 @@
+{
+  "exit_code": 1,
+  "finished_at_utc": "2026-11-25T21:18:18.558552+00:00",
+  "operator_elapsed_seconds": 18.776249694001308,
+  "started_at_utc": "2026-11-25T21:17:59.782192+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "6da5b18878e110928643ebcc38dbb7552cf3a296eea56493e23edc2b93eecff8"
+}

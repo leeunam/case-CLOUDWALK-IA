@@ -1,0 +1,11 @@
+{
+  "category": {
+    "delta": 0.0,
+    "tau": 0.5
+  },
+  "contract_version": "sf2-ipc/1.0",
+  "priority": {
+    "delta": 0.0,
+    "tau": 0.5
+  }
+}

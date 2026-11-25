@@ -1,0 +1,118 @@
+{
+  "controls": 5,
+  "controls_observed": [
+    {
+      "applied": {},
+      "calls": {
+        "category": 0,
+        "priority": 0
+      },
+      "id": "sf2-control-complete",
+      "outcome": "complete"
+    },
+    {
+      "applied": {},
+      "calls": {
+        "category": 0,
+        "priority": 0
+      },
+      "id": "sf2-control-invalid",
+      "outcome": "review"
+    },
+    {
+      "applied": {},
+      "calls": {
+        "category": 1,
+        "priority": 0
+      },
+      "id": "sf2-control-blank-category",
+      "outcome": "review"
+    },
+    {
+      "applied": {},
+      "calls": {
+        "category": 0,
+        "priority": 1
+      },
+      "id": "sf2-control-null-priority",
+      "outcome": "review"
+    },
+    {
+      "applied": {},
+      "calls": {
+        "category": 1,
+        "priority": 1
+      },
+      "id": "sf2-control-omitted-both",
+      "outcome": "review"
+    }
+  ],
+  "equal_score_objects": true,
+  "errors_by_target": {
+    "category": 0,
+    "priority": 0
+  },
+  "evaluated_at_utc": "2026-11-25T21:18:38.955327+00:00",
+  "gate_results_reported_policy": {
+    "automatic_coverage": true,
+    "category_accuracy": true,
+    "control_calls": true,
+    "nonurgent_on_urgent": false,
+    "partial_applications": true,
+    "preservation": true,
+    "priority_accuracy": false,
+    "raw_urgent": true,
+    "wrong_expected_review": false
+  },
+  "journal_count": 95,
+  "narratives": 90,
+  "observed_latency_ms": {
+    "maximum": 254.00556800013874,
+    "n": 90,
+    "p50": 60.82118199992692,
+    "p95": 177.61452000013378
+  },
+  "original_frames_sha256": "d70ce59a1579a282f238dd37bdb154f1fa6500bc61e92299f49577255a1cbdab",
+  "package_sha256": "224c572b0a2c6ce93b1dd1b90317df131cbb47b897b4de38e97659fbc7e57872",
+  "policies_passed_by_gate": {
+    "automatic_coverage": 180,
+    "category_accuracy": 225,
+    "control_calls": 225,
+    "nonurgent_on_urgent": 135,
+    "partial_applications": 225,
+    "preservation": 225,
+    "priority_accuracy": 210,
+    "raw_urgent": 225,
+    "wrong_expected_review": 0
+  },
+  "reason": "Gates de qualificação reprovados. Latência externa da política de coleta. Métricas da política selecionada quando elegível.",
+  "report_sha256": "3dabedbf31424ea8820d2a5ebd54943b9f8b7e923459ee336483f4f830ab5ac5",
+  "resources": {
+    "classifier_api_calls": 0,
+    "download_ms": 0,
+    "peak_cpu_percent": 218.6020790535296,
+    "peak_ram_bytes": 2065235968,
+    "startup_ms": 9198.356816999876,
+    "training_ms": 913684.5375259982
+  },
+  "run_seal_sha256": "cb5d6bad2f0a7bb58492fc13710fef2102b283e34820cc9cd930c99bc2e8c985",
+  "scores_by_target": {
+    "category": 60,
+    "priority": 60
+  },
+  "selected_policy": null,
+  "selection": {
+    "capture_policy_sha256": "09de8c13fa56bcddb8006982b0016e3452bb15de89a72a6eae6c42847cedc21f",
+    "eligible_count": 0,
+    "grid_sha256": "d5315f425ed9e94e1680b99619a45ae7894c45c358fb819d0bc7bf2a3742c537",
+    "latency_source": "observed_capture_policy_external_total",
+    "policy_count": 225,
+    "predictions_sha256": "d70ce59a1579a282f238dd37bdb154f1fa6500bc61e92299f49577255a1cbdab",
+    "scores_sha256": "59ae17e97256c55603d77a9d1850fdac56708a7fde7a4cf050136c4a3cb78c06",
+    "selected_policy_sha256": null,
+    "timings_sha256": "bfadaaf7b853f54f150d2d406dcac7fc5727f90672573c07350a92448d78a61e"
+  },
+  "sf2_03_scores_sha256": "bccbfeb5e1ad9985a1a35ac05392dd215f91eedaa72e7adcf7309f969587051d",
+  "sf2_04_scores_sha256": "59ae17e97256c55603d77a9d1850fdac56708a7fde7a4cf050136c4a3cb78c06",
+  "status": "failed"
+}

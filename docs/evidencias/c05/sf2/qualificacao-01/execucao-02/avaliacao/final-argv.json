@@ -1,0 +1,12 @@
+[
+  "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-treinamento/script/classification_comparison/setfit_sf2/.cache/verification/.venv/bin/python",
+  "-B",
+  "-m",
+  "script.classification_comparison.setfit_sf2.adapter",
+  "--package",
+  "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_sf2/.cache/qualificacao-01/training-02/package",
+  "--package-sha256",
+  "224c572b0a2c6ce93b1dd1b90317df131cbb47b897b4de38e97659fbc7e57872",
+  "--policy",
+  "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_sf2/.cache/qualificacao-01/evaluation-02/validation/policy.json"
+]

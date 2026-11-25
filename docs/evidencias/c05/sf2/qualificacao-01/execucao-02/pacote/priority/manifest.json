@@ -1,0 +1,7 @@
+{
+  "base_encoder": "de45c80735eff3553ec9245ecd42a78c9a042cdecf9ca013bda1416b859f2caf",
+  "encoder": "359218fe6efcc010868d7caf13e2e4f62211c58df279285efd3cd765d6fbd78f",
+  "head": "ab8cd4586e2316ed8bd65dcf72e70f7cb69e5adb6e665522e40d5832dca8a89a",
+  "tokenizer": "277db9a471d7a1e96fbcbed918c953adc14c9a7c122f1be4ed24424fb942792f",
+  "training_evidence": "5d154dd60df7bd41ae10dc812a008df09e518c60a2493ed06ebb24d7b28b70b2"
+}

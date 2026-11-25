@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-treinamento/script/classification_comparison/setfit_sf2/.cache/verification/.venv/bin/python",
+    "-B",
+    "-m",
+    "script.classification_comparison.setfit_sf2.evaluation",
+    "validate",
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_sf2/.cache/qualificacao-01/evaluation-02/config.json",
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_sf2/.cache/qualificacao-01/evaluation-02/validation"
+  ],
+  "cwd": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao",
+  "started_at_utc": "2026-11-25T21:17:59.782192+00:00"
+}
