@@ -5,11 +5,14 @@ Primeira onda autorizada pelo responsável em 25/11/2026. Base comum:
 [Aprovação](aprovacao.json) · [Especificação](especificacao.md) ·
 [Cards e aceites](tarefas.md).
 
+**Primeira onda concluída:** 00, 01 e 02 aceitas após revisões independentes.
+Contratos, dados públicos e selo do final foram integrados localmente.
+
 | Frente | Responsável | Estado | Próxima evidência |
 | --- | --- | --- | --- |
 | 00 · contratos e validadores | Agente Astra, alto, com revisão independente | Aceita e integrada em `c4fe01f`; 16 testes passaram após corrigir cinco achados da revisão | Consumidores usam o contrato integrado; não há modelo treinado nesta entrega |
 | 01 · dados públicos | Agente Sol, alto, anotadores B e revisores independentes | Aceita e integrada em `4e006a3`; pacote completo com 150 + 90 relatos, duas anotações por relato e recibos reais | Preservar os bytes aprovados; não treinar antes do aceite de 02–04 |
-| 02 · teste final reservado | Agente Sol, alto, distinto do autor da candidata, com anotadores B e auditor independente | 120 rascunhos privados anotados; auditoria independente indicou 45 substituições, em preparação | Nova anotação cega dos textos alterados, reauditoria escopada e selo; final permanece reservado |
+| 02 · teste final reservado | Agente Sol, alto, distinto do autor da candidata, com anotadores B e auditor independente | Aceita e integrada em `88df18a`; 120 relatos selados, com 96 classificáveis, 24 revisões e 17 urgentes-alvo | Preservar o pacote privado; somente o executor de 05 abre o final após validação elegível e congelamento da candidata |
 
 O chat dispõe de dois agentes de trabalho além do integrador. As três frentes
 já foram iniciadas e são escalonadas conforme as vagas; revisores
@@ -20,6 +23,12 @@ A trilha reproduzível da SF2-01 está em
 [dados-publicos-01](../../../evidencias/c05/sf2/dados-publicos-01/README.md).
 O validador completo confirmou `accepted: true` para 150/90 na base integrada,
 com anotações, revisão independente e comprimentos ligados aos bytes reais.
+O [selo de 02](dados/final-seal.json) e o
+[resumo da revisão](dados/final-review-summary.md) registram o aceite dos 120
+finais. A CLI foi executada pelo custodiante nos arquivos canônicos reais;
+o integrador conferiu os hashes e as permissões, sem expor textos ou IDs do
+conjunto reservado. Os 16 testes de contrato de 00 passaram. Os dados públicos
+e finais têm duas anotações por relato e zero divergências pendentes.
 
 ## O que acompanharemos aqui
 
@@ -46,3 +55,11 @@ modelo. Nesta revisão, o filtro lexical não encontrou duplicatas, mas a leitur
 semântica detectou cenários reaproveitados. Os rascunhos e as primeiras
 anotações permanecem registrados; textos novos exigem anotações novas. O
 teste final continua reservado e não é mostrado aos autores dos modelos.
+
+## Próxima onda
+
+03 prepara o código de treino e o adaptador; 04 prepara o avaliador e a
+seleção da regra de revisão. Essas implementações podem trabalhar com fixtures
+em paralelo, consumindo a nova base integrada. O treino real continua em 05,
+depois do aceite de 03 e 04. Esta primeira onda não produziu pesos, métricas
+de classificação SF2 ou chamadas à API de classificador.
