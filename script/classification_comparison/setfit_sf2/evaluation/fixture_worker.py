@@ -13,7 +13,17 @@ def main(args):
     policy = json.loads(policy_bytes)
     import hashlib
     ids["policy_sha256"] = hashlib.sha256(policy_bytes).hexdigest()
-    print(json.dumps({"type": "ready", **({"extra": True} if mode == "bad-ready" else {})}), flush=True)
+    frames = [json.dumps({**d, **ids}) + "\n" for d in templates.values()]
+    def premature(stage, index):
+        if mode == stage + "-frame":
+            return frames[index]
+        if mode == stage + "-prefix":
+            return frames[index][:19]
+        return ""
+
+    ready = {"type": "ready", **({"extra": True} if mode == "bad-ready" else {})}
+    sys.stdout.write(json.dumps(ready) + "\n" + premature("after-ready", 0))
+    sys.stdout.flush()
     print("Fixture SF2", file=sys.stderr)
     for line in sys.stdin:
         item = json.loads(line)
@@ -40,13 +50,14 @@ def main(args):
             answer["outcome"] = "review"
         answer["applied"] = accepted if answer["outcome"] == "complete" else {}
         answer.update(ids)
-        if mode == "partial":
-            answer["applied"]["category"] = "terminal"
+        if mode == "partial" and answer["outcome"] == "review" and len(item["missing_fields"]) == 2:
+            answer["applied"].update(accepted)
         if mode == "invalid-score":
             answer["fields"]["category"]["vector"]["scores"][0] = -1
         if mode == "other-package":
             answer["package_sha256"] = "0"*64
-        print(json.dumps(answer), flush=True)
+        sys.stdout.write(json.dumps(answer) + "\n" + premature("after-decision", 1))
+        sys.stdout.flush()
     if mode == "extra":
         print("{}", flush=True)
     return 0

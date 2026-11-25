@@ -31,7 +31,7 @@ def rank_key(candidate):
             *(cuts[f][k] for f in FIELDS for k in ("tau", "delta")))
 
 
-def select(records, bundle, control_calls):
+def select(records, bundle, control_calls, *, catalog=CATALOG):
     require(bundle["partition"] == "validation", "a grade aceita somente validação")
     # validate_scores e a auditoria das decisões de origem antecedem esta função.
     indexed = {r["id"]: r for r in bundle["rows"]}
@@ -49,7 +49,7 @@ def select(records, bundle, control_calls):
                     fields[f] = {"decision": "error", "raw": None}
                     continue
                 raw, top, margin = heads[f]
-                accept = raw != REVIEW and raw in CATALOG[f]
+                accept = raw != REVIEW and raw in catalog[f]
                 if policy:
                     cut = policy[f]
                     accept = accept and top >= decimal(cut["tau"]) and margin > decimal(cut["delta"])

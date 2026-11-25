@@ -24,6 +24,16 @@ def append(stream, value):
     stream.flush()
 
 
+def finish_append(stream, offset, payload):
+    """Só acrescenta bytes faltantes de uma observação já medida, mesmo após SIGINT."""
+    stream.seek(offset)
+    prefix = stream.read()
+    require(payload.startswith(prefix), "bytes inesperados na tentativa interrompida")
+    remaining = memoryview(payload)[len(prefix):]
+    while remaining:
+        remaining = remaining[stream.write(remaining):]
+
+
 def save(path, value):
     with Path(path).open("xb") as stream:
         append(stream, value)
@@ -95,6 +105,10 @@ class WorkerUsage:
         self.thread.join()
 
 
+class PrematureOutput(ValueError):
+    """O worker já escreveu bytes antes de receber uma entrada completa."""
+
+
 class Frames:
     def __init__(self, process):
         self.process = process
@@ -104,13 +118,20 @@ class Frames:
 
     def _ready(self, read, write, deadline):
         remaining = deadline - time.monotonic()
-        if remaining <= 0 or not any(select.select(read, write, [], remaining)[:2]):
+        ready = select.select(read, write, [], max(0, remaining))[:2]
+        if remaining <= 0 or not any(ready):
             raise TimeoutError("prazo de transporte excedido")
+        return ready
 
     def send(self, item, deadline):
         data = memoryview(encoded(item))
         while data:
-            self._ready([], [self.process.stdin], deadline)
+            if self.buffer:
+                raise PrematureOutput("stdout disponível antes do envio da entrada completa")
+            readable, _ = self._ready([self.process.stdout], [self.process.stdin], deadline)
+            if readable:
+                prefix = os.read(self.process.stdout.fileno(), 1)
+                raise PrematureOutput("stdout antecipado" if prefix else "EOF antes de enviar a próxima entrada")
             data = data[os.write(self.process.stdin.fileno(), data):]
 
     def line(self, deadline):
@@ -132,7 +153,7 @@ class Frames:
         require(self.process.wait(timeout=max(0, deadline-time.monotonic())) == 0, "worker saiu com falha")
 
 
-def supervise(records, argv, policy, model, identities, destination, startup_seconds, *, timeout_ms=TIMEOUT_MS):
+def supervise(records, argv, policy, model, identities, destination, startup_seconds, *, catalog=CATALOG, timeout_ms=TIMEOUT_MS):
     check_command(argv)
     require(startup_seconds > 0, "prazo de startup inválido")
     root = Path(destination)
@@ -142,8 +163,8 @@ def supervise(records, argv, policy, model, identities, destination, startup_sec
     process, usage, failure, current = None, None, None, None
     startup_ms = None
     files = ("predictions.jsonl", "controls.jsonl", "timings.jsonl", "stderr.log")
-    with (root/files[0]).open("xb") as predictions, (root/files[1]).open("xb") as control_log, \
-         (root/files[2]).open("xb") as timings, (root/files[3]).open("xb") as stderr:
+    with (root/files[0]).open("x+b", buffering=0) as predictions, (root/files[1]).open("x+b", buffering=0) as control_log, \
+         (root/files[2]).open("x+b", buffering=0) as timings, (root/files[3]).open("xb") as stderr:
         started = time.monotonic()
         try:
             process = subprocess.Popen(argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=stderr,
@@ -156,9 +177,10 @@ def supervise(records, argv, policy, model, identities, destination, startup_sec
                 for row in batch:
                     start = time.monotonic()
                     deadline = start + timeout_ms/1000
+                    pending = None
                     current = {"kind": kind, "id": row["id"]}
                     with case_deadline(deadline-time.monotonic()):
-                        item = project(row, CATALOG)
+                        item = project(row, catalog)
                         transport.send(item, deadline)
                         line = transport.line(deadline)
                         # Conservar o frame reprovado para inspeção, sem corrigi-lo.
@@ -168,16 +190,23 @@ def supervise(records, argv, policy, model, identities, destination, startup_sec
                     elapsed = (time.monotonic()-start)*1000
                     if elapsed > timeout_ms:
                         raise TimeoutError("validação ultrapassou o prazo do caso")
-                    sink.write((line + "\n").encode())
-                    sink.flush()
-                    append(timings, dict(kind=kind, id=row["id"], elapsed_ms=elapsed, valid=True))
+                    timing = dict(kind=kind, id=row["id"], elapsed_ms=elapsed, valid=True)
+                    pending = ((sink, sink.tell(), (line + "\n").encode()), (timings, timings.tell(), encoded(timing)))
+                    for write in pending:
+                        finish_append(*write)
                     current = None
             transport.finish(time.monotonic() + timeout_ms/1000)
         except (OSError, EOFError, ValueError, RecursionError, KeyboardInterrupt, subprocess.TimeoutExpired) as exc:
+            if isinstance(exc, PrematureOutput):
+                current = None
             failure = dict(type=type(exc).__name__, message=str(exc), attempt=current)
             if current is not None:
-                append(timings, dict(kind=current["kind"], id=current["id"],
-                                     elapsed_ms=(time.monotonic()-start)*1000, valid=False))
+                if pending is not None:
+                    for write in pending:
+                        finish_append(*write)
+                else:
+                    append(timings, dict(kind=current["kind"], id=current["id"],
+                                         elapsed_ms=(time.monotonic()-start)*1000, valid=False))
         finally:
             if usage:
                 usage.stop()

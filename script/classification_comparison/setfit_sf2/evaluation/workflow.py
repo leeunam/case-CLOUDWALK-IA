@@ -4,13 +4,23 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from ..contracts.artifacts import validate_manifest, validate_report
-from ..contracts.core import FIELDS, PLAN, PROTOCOL, SCHEMA_PATH, VERSION, read, read_lines, require, sha256, structure, verify_files
+from ..contracts.core import CATALOG, FIELDS, PLAN, PROTOCOL, ROOT, SCHEMA_PATH, VERSION, decode, read, read_lines, require, sha256, structure, verify_files
 from .audit import derive
 from .runner import check_command, encoded, save, supervise
 
 
 def digest(value):
     return hashlib.sha256(encoded(value)).hexdigest()
+
+
+def approved_catalog(cfg):
+    source = PROTOCOL["sources"]["catalog"]
+    raw = Path(cfg["training_files"]["catalog"]).read_bytes()
+    require(hashlib.sha256(raw).hexdigest() == source["sha256"] == sha256(ROOT/source["path"]),
+            "catálogo ativo diverge dos bytes aprovados")
+    catalog = decode(raw)
+    require(catalog == CATALOG, "catálogo dos contratos em memória diverge do aprovado")
+    return catalog
 
 
 def public_setup(config):
@@ -40,7 +50,8 @@ def load_policy(cfg, model, path):
 
 def products(cfg, model, data, dest, policy_path):
     policy, ids = load_policy(cfg, model, policy_path)
-    scores, grid, report = derive(read_lines(data), sha256(data), dest/"run", policy, model, ids, read(cfg["costs"]))
+    scores, grid, report = derive(read_lines(data), sha256(data), dest/"run", policy, model, ids, read(cfg["costs"]),
+                                  catalog=approved_catalog(cfg))
     complete = len(scores["rows"]) == PROTOCOL["data"][report["partition"]]["total"]
     results = {"scores.json" if complete else "partial-scores.json": scores}
     if grid is not None:
@@ -72,7 +83,8 @@ def validate(config, dest):
     data = cfg["training_files"]["validation"]
     dest.mkdir()
     save(dest/"capture.json", capture_receipt(cfg, spec))
-    supervise(read_lines(data), read(cfg["capture_command"]), policy, model, ids, dest/"run", cfg["startup_seconds"])
+    supervise(read_lines(data), read(cfg["capture_command"]), policy, model, ids, dest/"run", cfg["startup_seconds"],
+              catalog=approved_catalog(cfg))
     docs = products(cfg, model, data, dest, spec)
     store_products(dest, docs)
     return docs["report.json"]["status"]
@@ -86,10 +98,12 @@ def sources():
 
 
 def capture_receipt(cfg, spec):
+    approved_catalog(cfg)
     policy = read(spec)
     minimum = {k: min(PROTOCOL["review_policy"][k+"_grid"]) for k in ("tau", "delta")}
     require(all(policy[f] == minimum for f in FIELDS), "política de coleta não predeterminada")
     files = dict(policy=spec, argv=cfg["capture_command"], adapter=cfg["adapter"], package=cfg["model_manifest"],
+                 catalog=cfg["training_files"]["catalog"], contract_catalog=ROOT/PROTOCOL["sources"]["catalog"]["path"],
                  validation=cfg["training_files"]["validation"], **sources())
     return {k: sha256(p) for k,p in files.items()}
 
@@ -173,7 +187,8 @@ def execute(config, validation, release, expected, private_inventory, dest):
     dest.mkdir()
     try:
         private = final_files(paths, private_inventory)
-        seal = supervise(read_lines(private["final"]), argv, policy, model, ids, dest/"run", cfg["startup_seconds"])
+        seal = supervise(read_lines(private["final"]), argv, policy, model, ids, dest/"run", cfg["startup_seconds"],
+                         catalog=approved_catalog(cfg))
     except (ValueError, OSError, KeyError) as exc:
         save(dest/"interruption.json", dict(reason=str(exc), exposure=exposure))
         raise

@@ -1,14 +1,14 @@
 """Relê exclusivamente resultados selados; nenhuma operação deste módulo invoca o worker."""
 from math import isfinite
 
-from ..contracts.core import PROTOCOL, VERSION, read, read_lines, require, sha256, verify_files
+from ..contracts.core import CATALOG, PROTOCOL, VERSION, read, read_lines, require, sha256, verify_files
 from ..contracts.ipc import project, validate_decision, validate_scores
 from .metrics import metrics, percentiles, quality_gates
 from .runner import controls
 from .selection import scored_rows, select
 
 
-def originals(directory, records, policy, model, identities):
+def originals(directory, records, policy, model, identities, *, catalog=CATALOG):
     seal = read(directory/"seal.json")
     names = ("predictions.jsonl", "controls.jsonl", "timings.jsonl", "stderr.log")
     verify_files(seal["files"], {name: directory/name for name in names})
@@ -34,7 +34,7 @@ def originals(directory, records, policy, model, identities):
         require(ms <= PROTOCOL["execution"]["timeout_ms_per_case"], "decisão aceita após o prazo")
         decision = next(valid[kind], None)
         require(decision is not None, "previsão original ausente")
-        validate_decision(project(row), decision, policy, model["class_order"], identities)
+        validate_decision(project(row, catalog), decision, policy, model["class_order"], identities)
         if kind == "case":
             audited.append(decision)
         elif row["id"] in ("sf2-control-complete", "sf2-control-invalid"):
@@ -44,8 +44,8 @@ def originals(directory, records, policy, model, identities):
     return seal, audited, durations, control_calls
 
 
-def derive(records, dataset_hash, directory, policy, model, identities, costs):
-    seal, decisions, durations, control_calls = originals(directory, records, policy, model, identities)
+def derive(records, dataset_hash, directory, policy, model, identities, costs, *, catalog=CATALOG):
+    seal, decisions, durations, control_calls = originals(directory, records, policy, model, identities, catalog=catalog)
     part = records[0]["partition"]
     q = PROTOCOL["data"][part]
     require(len(records) == q["total"] and all(r["partition"] == part for r in records), "partição incompleta")
@@ -71,7 +71,7 @@ def derive(records, dataset_hash, directory, policy, model, identities, costs):
     if seal["failure"] is None:
         totals = metrics(records, decisions, control_calls)
         if part == "validation":
-            grid = select(records, scores, control_calls)
+            grid = select(records, scores, control_calls, catalog=catalog)
             if grid["selected"]:
                 totals = next(p["metrics"] for p in grid["policies"] if p["policy"] == grid["selected"])
         gates = quality_gates(totals, part)

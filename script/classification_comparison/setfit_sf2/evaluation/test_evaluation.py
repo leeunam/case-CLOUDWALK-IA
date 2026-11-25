@@ -1,8 +1,12 @@
 import sys
 import tempfile
+import os
+from types import SimpleNamespace
+from time import monotonic
 import unittest
 from copy import deepcopy
 from pathlib import Path
+from unittest.mock import patch
 
 from ..contracts.core import FIELDS, REVIEW, VERSION, ContractError, read_lines, sha256
 from ..contracts.test_contracts import fixture, quota_rows
@@ -11,6 +15,7 @@ from .workflow import digest
 from ..contracts.artifacts import validate_report
 from ..contracts.test_artifacts import write_rows
 from .metrics import metrics, percentiles, quality_gates, ratio
+from . import runner
 from .runner import controls, save, supervise
 from .selection import rank_key, scored_rows, select
 
@@ -133,6 +138,60 @@ class MathTest(unittest.TestCase):
 
 
 class TransportTest(unittest.TestCase):
+    def test_partial_prefix_already_waiting_in_pipe(self):
+        request_read, request_write = os.pipe()
+        response_read, response_write = os.pipe()
+        with os.fdopen(request_read, "rb") as request, os.fdopen(request_write, "wb") as send, \
+             os.fdopen(response_read,"rb") as receive, os.fdopen(response_write, "wb", buffering=0) as output:
+            frames = runner.Frames(SimpleNamespace(stdin=send, stdout=receive))
+            output.write(b'{"type":"ready"}\n')
+            self.assertEqual(frames.line(monotonic()+2), '{"type":"ready"}')
+            output.write(b"{")
+            with self.assertRaises(runner.PrematureOutput):
+                frames.send({"id":"next"}, monotonic()+2)
+            os.set_blocking(request.fileno(), False)
+            self.assertIsNone(request.read(1))
+
+    def test_interrupt_after_each_valid_write_preserves_original_measurement(self):
+        rows = records("final")
+        model = {"class_order": fixture("both")["class_order"], "model_sha256": fixture("both")["identities"]["model_sha256"]}
+        ids = fixture("both")["identities"]
+        costs = dict(download_ms=0, training_ms=1, classifier_api_calls=0)
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            for n, value in (("choices", templates(rows)), ("identity", ids), ("policy", POLICY)):
+                save(root/n, value)
+            ids["policy_sha256"] = sha256(root/"policy")
+            cmd = [sys.executable, str(WORKER), *(str(root/n) for n in ("choices","identity","policy")), "ok"]
+            for boundary in ("predictions.jsonl", "timings.jsonl"):
+                with self.subTest(boundary=boundary):
+                    dest = root/boundary
+                    write_original, encode_original = runner.finish_append, runner.encoded
+                    measured, interrupted = [], []
+                    def encode(value):
+                        if value.get("valid") is True:
+                            measured.append(value.copy())
+                        return encode_original(value)
+                    def interrupt(stream, offset, data):
+                        write_original(stream, offset, data)
+                        if not interrupted and Path(stream.name).name == boundary:
+                            interrupted.append(True)
+                            raise KeyboardInterrupt
+                    with patch.object(runner, "finish_append", interrupt), patch.object(runner, "encoded", encode):
+                        seal = supervise(rows, cmd, POLICY, model, ids, dest, 5)
+                    self.assertEqual(seal["failure"]["type"], "KeyboardInterrupt")
+                    frame = seal["failure"]["attempt"]["response"] + "\n"
+                    self.assertEqual((dest/"predictions.jsonl").read_bytes(), frame.encode())
+                    self.assertEqual(len(measured), 1)
+                    self.assertEqual(read_lines(dest/"timings.jsonl"), measured)
+                    scores, grid, report = derive(rows, "b"*64, dest, POLICY, model, ids, costs)
+                    self.assertEqual([r["id"] for r in scores["rows"]], [rows[0]["id"]])
+                    self.assertEqual(report["unexecuted_ids"], [r["id"] for r in rows[1:]])
+                    self.assertEqual(report["status"], "inconclusive")
+                    self.assertEqual(report["latency_ms"]["p95"], measured[0]["elapsed_ms"])
+                    self.assertIsNone(grid)
+                    validate_report(dict(**report, score_package_sha256=digest(scores)))
+
     def test_observed_external_latency_including_timeout_and_no_filled_predictions(self):
         rows = records("final")
         model = {"class_order": fixture("both")["class_order"], "model_sha256": fixture("both")["identities"]["model_sha256"]}
@@ -173,18 +232,23 @@ class TransportTest(unittest.TestCase):
                 validate_report(dict(**report,score_package_sha256=digest(scores)))
 
     def test_original_decisions_timeout_and_protocol_failures(self):
-        rows = records("validation")[:2]
+        dataset = records("validation")
+        veto = next(r for r in dataset if r["missing_fields"] == list(FIELDS) and r["gold"] == dict(category=REVIEW, priority="urgent"))
+        rows = [veto, dataset[0]]
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            ids, model = fixture("both")["identities"], {"class_order": fixture("both")["class_order"]}
+            ids = fixture("both")["identities"]
+            model = {"class_order": fixture("both")["class_order"], "model_sha256": ids["model_sha256"]}
             for n,v in (("choices", templates(rows)), ("identity", ids), ("policy", POLICY)):
                 save(root/n,v)
             ids["policy_sha256"] = sha256(root/"policy")
-            for mode in ("ok", "bad-ready", "partial", "invalid-score", "other-package", "die", "hang", "extra"):
+            for mode in ("ok", "bad-ready", "partial", "invalid-score", "other-package", "die", "hang", "extra",
+                         "after-ready-frame", "after-ready-prefix", "after-decision-frame", "after-decision-prefix"):
                 with self.subTest(mode=mode):
                     cmd = [sys.executable, str(WORKER), *(str(root/n) for n in ("choices","identity","policy")), mode]
-                    seal = supervise(rows, cmd, POLICY, model, ids, root/mode, 5, timeout_ms=150 if mode=="hang" else 5000)
-                    checked, decisions, elapsed, calls = originals(root/mode, rows, POLICY, model, ids)
+                    batch = [veto, *(r for r in dataset if r != veto)] if mode == "partial" else rows
+                    seal = supervise(batch, cmd, POLICY, model, ids, root/mode, 5, timeout_ms=150 if mode=="hang" else 5000)
+                    checked, decisions, elapsed, calls = originals(root/mode, batch, POLICY, model, ids)
                     self.assertEqual(checked, seal)
                     self.assertEqual(calls, 0)
                     if mode == "ok":
@@ -201,6 +265,22 @@ class TransportTest(unittest.TestCase):
                         self.assertGreaterEqual(elapsed[0], 150)
                     if mode == "bad-ready":
                         self.assertEqual(elapsed, [])
+                    if mode.startswith(("after-ready", "after-decision")):
+                        self.assertEqual(seal["failure"]["type"], "PrematureOutput")
+                        self.assertEqual(len(elapsed), int(mode.startswith("after-decision")))
+                        self.assertEqual(len(decisions), len(elapsed))
+                    if mode == "partial":
+                        d = runner.decode(seal["failure"]["attempt"]["response"])
+                        self.assertEqual(d["fields"]["category"]["decision"], "review")
+                        self.assertEqual(d["fields"]["priority"]["decision"], "accept")
+                        self.assertEqual(d["outcome"], "review")
+                        self.assertEqual(d["applied"], {"priority": "urgent"})
+                        self.assertIn("parcial", seal["failure"]["message"])
+                        costs = dict(training_ms=1, download_ms=0, classifier_api_calls=0)
+                        scores, grid, report = derive(batch, "b"*64, root/mode, POLICY, model, ids, costs)
+                        self.assertEqual(scores["rows"], [])
+                        self.assertIsNone(grid)
+                        self.assertEqual(report["status"], "inconclusive")
             with (root/"ok/predictions.jsonl").open("ab") as f:
                 f.write(b" ")
             with self.assertRaises(ContractError):

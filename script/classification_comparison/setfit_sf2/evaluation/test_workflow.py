@@ -68,6 +68,43 @@ def numeric_package(root, validation):
 
 
 class WorkflowTest(unittest.TestCase):
+    def test_catalog_bytes_and_loaded_contract_catalog_block_drift(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            validation, release = root/"validation-out", root/"release"
+            config, _ = numeric_package(root, validation)
+            cfg = read(config)
+            copy = root/"frozen-catalog.json"
+            raw = Path(cfg["training_files"]["catalog"]).read_bytes()
+            copy.write_bytes(raw)
+            cfg["training_files"]["catalog"] = str(copy)
+            helpers.write(config, cfg)
+            local_root = root/"contract-source"
+            local = local_root/workflow.PROTOCOL["sources"]["catalog"]["path"]
+            local.parent.mkdir(parents=True)
+            local.write_bytes(raw)
+            with patch.object(workflow, "ROOT", local_root):
+                with patch.dict(workflow.CATALOG["category"], {"pix": "Descrição divergente."}), \
+                     patch.object(workflow, "supervise", side_effect=AssertionError("worker iniciou")):
+                    with self.assertRaisesRegex(ContractError, "catálogo"):
+                        workflow.validate(config, root/"blocked")
+                self.assertEqual(workflow.validate(config, validation), "eligible")
+                capture = read(validation/"capture.json")
+                self.assertEqual(capture["catalog"], capture["contract_catalog"])
+                self.assertEqual(capture["catalog"], sha256(copy))
+                # Mesma semântica JSON e outra sequência de bytes: digest da cópia selada continua idêntico.
+                local.write_bytes(raw + b" ")
+                with self.assertRaisesRegex(ContractError, "catálogo"):
+                    workflow.freeze(config, validation, release)
+                self.assertFalse(release.exists())
+                local.write_bytes(raw)
+                expected = workflow.freeze(config, validation, release)
+                with patch.dict(workflow.CATALOG["category"], {"pix": "Outra descrição."}), \
+                     patch.object(workflow, "final_files", side_effect=AssertionError("final aberto")):
+                    with self.assertRaisesRegex(ContractError, "catálogo"):
+                        workflow.execute(config, validation, release, expected, root/"private-inventory.json", root/"dest")
+                self.assertFalse((release/"exposure.json").exists())
+
     def test_numeric_release_exposure_and_audit(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
