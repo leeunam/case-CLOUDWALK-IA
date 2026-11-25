@@ -1,12 +1,14 @@
 """Ordem operacional: coleta -> seleção -> freeze público -> exposição -> auditoria."""
 import hashlib
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from ..contracts.artifacts import validate_manifest, validate_report
 from ..contracts.core import CATALOG, FIELDS, PLAN, PROTOCOL, ROOT, SCHEMA_PATH, VERSION, decode, read, read_lines, require, sha256, structure, verify_files
 from .audit import derive
 from .runner import check_command, encoded, save, supervise
+
+WORKER_ENTRY = "script/classification_comparison/setfit_sf2/adapter/__main__.py"
 
 
 def digest(value):
@@ -21,6 +23,32 @@ def approved_catalog(cfg):
     catalog = decode(raw)
     require(catalog == CATALOG, "catálogo dos contratos em memória diverge do aprovado")
     return catalog
+
+
+def adapter_digest(path, training_code):
+    """Confere o índice com o inventário efetivo de 03 e os bytes do entrypoint."""
+    raw = Path(path).read_bytes()
+    index = decode(raw)
+    structure("componentIndex", index)
+    frozen = read(training_code)
+    structure("componentIndex", frozen)
+    for name in index["files"]:
+        member = PurePosixPath(name)
+        require(member.parts and not member.is_absolute() and ".." not in member.parts
+                and member.as_posix() == name and "\\" not in name
+                and (ROOT / name).resolve().is_relative_to(ROOT), "caminho inválido no índice do adaptador")
+    require(index["files"].keys() == (frozen["files"].keys() | {WORKER_ENTRY}),
+            "inventário incompleto ou divergente do adaptador")
+    for name, expected in index["files"].items():
+        require(sha256(ROOT/name) == expected, "SHA-256 divergente no membro do adaptador: " + name)
+    # Importar o helper de inventário somente após conferir os módulos que ele carrega.
+    from ..training.fit import code_manifest
+
+    # code_manifest recalcula os digests, inclusive de requisitos e módulos de contrato.
+    actual = code_manifest()["files"]
+    require(actual == {name: digest for name, digest in index["files"].items() if name != WORKER_ENTRY},
+            "inventário incompleto ou divergente do adaptador")
+    return hashlib.sha256(raw).hexdigest()
 
 
 def public_setup(config):
@@ -102,10 +130,11 @@ def capture_receipt(cfg, spec):
     policy = read(spec)
     minimum = {k: min(PROTOCOL["review_policy"][k+"_grid"]) for k in ("tau", "delta")}
     require(all(policy[f] == minimum for f in FIELDS), "política de coleta não predeterminada")
-    files = dict(policy=spec, argv=cfg["capture_command"], adapter=cfg["adapter"], package=cfg["model_manifest"],
+    files = dict(policy=spec, argv=cfg["capture_command"], package=cfg["model_manifest"],
                  catalog=cfg["training_files"]["catalog"], contract_catalog=ROOT/PROTOCOL["sources"]["catalog"]["path"],
                  validation=cfg["training_files"]["validation"], **sources())
-    return {k: sha256(p) for k,p in files.items()}
+    return {**{k: sha256(p) for k,p in files.items()},
+            "adapter": adapter_digest(cfg["adapter"], cfg["training_files"]["training_code"])}
 
 
 def freeze_files(cfg, validation, release):

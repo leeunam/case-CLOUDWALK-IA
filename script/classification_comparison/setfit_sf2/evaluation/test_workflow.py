@@ -3,12 +3,14 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from shutil import copyfile
 from pathlib import Path
 from unittest.mock import patch
 
 from ..contracts import test_artifacts as helpers
 from ..contracts.core import FIELDS, VERSION, ContractError, read, read_lines, sha256, text_hash
 from ..contracts.test_contracts import fixture
+from ..training.fit import code_manifest
 from . import workflow
 from .runner import save
 from .test_evaluation import POLICY, WORKER, records, templates
@@ -45,6 +47,9 @@ def numeric_package(root, validation):
     save(private_inventory, {k: str(v) for k,v in private.items()})
     helpers.write(public["final_seal"], seal)
     training["final_seal_sha256"] = sha256(public["final_seal"])
+    adapter_index = code_manifest()
+    helpers.write(public["training_code"], adapter_index)
+    training["files"]["training_code"] = sha256(public["training_code"])
     model, model_files = helper._model_case(root, training, public)
     manifest = root/"model.json"
     save(manifest,model)
@@ -59,15 +64,109 @@ def numeric_package(root, validation):
         save(choices, templates(rows, weak=True))
         save(root/(part+"-cmd.json"), [sys.executable, str(WORKER), str(choices), str(root/"identity.json"), str(policy), "ok"])
     config = root/"config.json"
+    adapter_index["files"][workflow.WORKER_ENTRY] = sha256(workflow.ROOT/workflow.WORKER_ENTRY)
+    save(root/"adapter-index.json", adapter_index)
     save(config, dict(training_files={k: str(v) for k,v in public.items()},
                       model_files={k: str(v) for k,v in model_files.items()}, model_manifest=str(manifest),
-                      adapter=str(WORKER), versions=str(root/"versions.json"), capture_policy=str(root/"capture-policy.json"),
+                      adapter=str(root/"adapter-index.json"), versions=str(root/"versions.json"), capture_policy=str(root/"capture-policy.json"),
                       capture_command=str(root/"capture-cmd.json"), final_command=str(root/"final-cmd.json"),
                       costs=str(root/"costs.json"), startup_seconds=5))
     return config, private_inventory
 
 
+def mirror_sources(root, cfg):
+    paths = {workflow.ROOT/name for name in read(cfg["adapter"])["files"]}
+    paths.update(workflow.sources().values())
+    paths.add(Path(workflow.__file__).with_name("__init__.py"))
+    paths.update(workflow.ROOT/src["path"] for src in workflow.PROTOCOL["sources"].values())
+    for path in paths:
+        target = root/path.relative_to(workflow.ROOT)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        copyfile(path, target)
+
+
 class WorkflowTest(unittest.TestCase):
+    def test_adapter_members_in_effective_checkout_before_capture_freeze_and_exposure(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            validation, release, mirror = root/"validation-out", root/"release", root/"mirror"
+            cfg, _ = numeric_package(root, validation)
+            config = read(cfg)
+            index = Path(config["adapter"])
+            original_index = index.read_bytes()
+            mirror_sources(mirror, config)
+
+            def call(*args):
+                return subprocess.run([sys.executable, "-B", "-m", workflow.__package__, *map(str,args)],
+                                      cwd=mirror, capture_output=True, text=True, timeout=30)
+
+            omitted = read(index)
+            del omitted["files"][workflow.WORKER_ENTRY]
+            helpers.write(index, omitted)
+            result = call("validate", cfg, root/"omitted")
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("inventário incompleto", result.stderr)
+            self.assertFalse((root/"omitted/run").exists())
+            omitted["files"]["../escape"] = "0"*64
+            helpers.write(index, omitted)
+            result = call("validate", cfg, root/"unsafe")
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("caminho inválido", result.stderr)
+            index.write_bytes(original_index)
+
+            # Um glob do checkout sozinho encolheria junto com o índice incompleto.
+            rel = "script/classification_comparison/setfit_sf2/contracts/__init__.py"
+            reduced = read(index)
+            del reduced["files"][rel]
+            helpers.write(index, reduced)
+            init = mirror/rel
+            backup = root/"init-original"
+            init.rename(backup)
+            result = call("validate", cfg, root/"omitted-both")
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("inventário incompleto", result.stderr)
+            backup.rename(init)
+            index.write_bytes(original_index)
+
+            entry = mirror/workflow.WORKER_ENTRY
+            backup = root/"worker-original"
+            entry.rename(backup)
+            entry.symlink_to(backup)
+            result = call("validate", cfg, root/"outside-root")
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("caminho inválido", result.stderr)
+            backup.replace(entry)
+
+            # O processo novo resolve todos os imports no espelho; argv, configuração e índice ficam fixos.
+            result = call("validate", cfg, validation)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(read(validation/"capture.json")["adapter"], sha256(index))
+            result = call("freeze", cfg, validation, release)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            release_hash = result.stdout.strip()
+            self.assertEqual(read(release/"freeze.json")["files"]["adapter"], sha256(index))
+            sf2 = mirror/Path(workflow.WORKER_ENTRY).parents[1]
+            for n, member in enumerate(("adapter/decide.py", "adapter/__main__.py", "contracts/__init__.py")):
+                with self.subTest(member=member):
+                    path = sf2/member
+                    original = path.read_bytes()
+                    path.write_bytes(original + b"\n# fixture de custodia\n")
+                    try:
+                        pre, frozen = root/f"capture-{n}", root/f"freeze-{n}"
+                        dest = root/f"execution-{n}"
+                        for args in (("validate",cfg,pre), ("freeze",cfg,validation,frozen),
+                                     ("execute",cfg,validation,release,release_hash,root/"sentinela-inexistente",dest)):
+                            result = call(*args)
+                            self.assertEqual(result.returncode, 1, result.stderr)
+                            self.assertIn("SHA-256 divergente no membro do adaptador", result.stderr)
+                            self.assertIn(member, result.stderr)
+                        self.assertFalse((pre/"run").exists())
+                        self.assertFalse(frozen.exists())
+                        self.assertFalse(dest.exists())
+                        self.assertFalse((validation/"final-exposure.json").exists())
+                        self.assertFalse((release/"exposure.json").exists())
+                    finally:
+                        path.write_bytes(original)
     def test_catalog_bytes_and_loaded_contract_catalog_block_drift(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -80,8 +179,8 @@ class WorkflowTest(unittest.TestCase):
             cfg["training_files"]["catalog"] = str(copy)
             helpers.write(config, cfg)
             local_root = root/"contract-source"
+            mirror_sources(local_root, cfg)
             local = local_root/workflow.PROTOCOL["sources"]["catalog"]["path"]
-            local.parent.mkdir(parents=True)
             local.write_bytes(raw)
             with patch.object(workflow, "ROOT", local_root):
                 with patch.dict(workflow.CATALOG["category"], {"pix": "Descrição divergente."}), \

@@ -83,6 +83,21 @@ O ensaio final inicia outro worker com a política vencedora. Suas 120 decisões
 e durações são observadas nessa execução, uma tentativa por caso, sem forward
 artificial de aquecimento. A latência final usa o total externo observado.
 
+## Inventário do código do adaptador
+
+`cfg.adapter` é um `componentIndex`: um objeto com `files` associando caminhos
+POSIX relativos à raiz do código aos SHA-256 dos seus bytes. O inventário
+combina as fontes efetivas produzidas por `training.fit.code_manifest` de 03
+com o ponto de entrada `script/classification_comparison/setfit_sf2/adapter/__main__.py`.
+Sua cobertura precisa corresponder a essa árvore de fontes; omitir um módulo
+obrigatório não produz um inventário válido.
+
+04 verifica a forma, a segurança dos caminhos, a cobertura e os bytes de cada
+membro no pré-voo e na reauditoria antes de liberar a exposição ao final. O
+hash do índice permanece no congelamento, mas não substitui a conferência
+dos arquivos que ele descreve. O operador mantém sob custódia a invocação e o
+ambiente de execução correspondentes ao diretório de fontes verificado.
+
 ## Limites desta onda
 
 03 e 04 implementam e verificam código. Não treinam os especialistas, não
