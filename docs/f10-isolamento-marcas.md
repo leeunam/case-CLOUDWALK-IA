@@ -1,5 +1,9 @@
 # F10-B · Acesso aos atendimentos por marca
 
+> **Registro histórico de 25/11/2026.** Os bloqueios nas tabelas abaixo
+> descrevem a tentativa original da F10-B. A matriz autenticada posterior e
+> a pendência em outra rede estão no [aceite integrado F10](f10-aceite-integrado.md).
+
 Base `81d5bf11bcd54e3ef4d1a96413a701976ece6aa8`, branch `feat/aceite-isolamento-marcas`, worktree `.worktrees/f10-isolamento-marcas`. A publicação usa o projeto `cloudwalk_publish_integrator`. Para as consultas atuais, use a origem do [registro de restabelecimento](evidencias/f10/aceite-integrado/restabelecimento.json).
 
 ## Casos do manifesto

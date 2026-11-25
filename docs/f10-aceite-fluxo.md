@@ -1,5 +1,9 @@
 # F10-A · Aceite do fluxo público
 
+> **Registro histórico de 25/11/2026.** As tabelas e pendências abaixo
+> descrevem a execução original da F10-A. O atendimento posterior de Alex e
+> as pendências externas atuais estão no [aceite integrado F10](f10-aceite-integrado.md).
+
 A execução de 25/11/2026 usou o projeto `cloudwalk_publish_integrator` e o
 [simulador publicado em HTTPS](https://newbie-aqua-stem-reveal.trycloudflare.com/).
 O formulário estava conectado à API, com classificador fixture e atendente
