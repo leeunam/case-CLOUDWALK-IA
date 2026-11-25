@@ -1,0 +1,22 @@
+{
+  "contract_version": "sf2-ipc/1.0",
+  "stage": "accepted",
+  "files": {
+    "final": {
+      "path": "final.jsonl",
+      "sha256": "6eeb6fa76aa8e2a648ccad2e1ec89afc8c91ba1ec41b1578c4281041a08c0b51"
+    },
+    "annotations": {
+      "path": "annotations-final.jsonl",
+      "sha256": "027c175a0a22cbefcf237467be1c0b3dd036544b33159e265f6be555e80dc924"
+    }
+  },
+  "counts": {
+    "total": 120,
+    "classifiable": 96,
+    "expected_review": 24,
+    "urgent_targets": 17
+  },
+  "review_receipt_sha256": "58dcf3c81dce0ba28b539121d541209bf353a29878821e9c80940e035007f369",
+  "token_lengths_sha256": "cb953d63fdcc4c540e7058d4cadd294ef4907435ef334d6343194eca19ba55f1"
+}
