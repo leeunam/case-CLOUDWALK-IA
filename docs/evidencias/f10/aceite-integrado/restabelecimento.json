@@ -1,0 +1,22 @@
+{
+  "task": "F10-I",
+  "started_at_utc": "2026-11-25T17:16:01.320124+00:00",
+  "previous_origin": "https://newbie-aqua-stem-reveal.trycloudflare.com",
+  "reason": "Existing cloudflared container stopped; application and persisted cases remained healthy.",
+  "volumes_removed": false,
+  "database_reset": false,
+  "paid_model_calls": 0,
+  "images_before": [
+    "sha256:557e91921e7aaf59aa9606312f560b833387c90164400c7a8f44be342ffe5c80",
+    "sha256:8bfffb04f7eed17214e8c2e894bdde222d011e97b43e0d54542b561a53b67d0b"
+  ],
+  "origin": "https://jason-dollar-lcd-bought.trycloudflare.com",
+  "images_after": [
+    "sha256:557e91921e7aaf59aa9606312f560b833387c90164400c7a8f44be342ffe5c80",
+    "sha256:8bfffb04f7eed17214e8c2e894bdde222d011e97b43e0d54542b561a53b67d0b"
+  ],
+  "images_unchanged": true,
+  "public_https_health": "passed",
+  "state": "restored",
+  "recorded_at_utc": "2026-11-25T17:16:23.352947+00:00"
+}
