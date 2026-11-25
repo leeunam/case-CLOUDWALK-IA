@@ -70,3 +70,22 @@ rtk proxy git diff --cached --check
 ```
 
 Foram aprovados 4 testes de transporte em 1,652 s, 2 de fluxo em 7,073 s e 5 matemáticos em 0,234 s. Após explicitar a asserção de que a aplicação parcial bloqueava o replay, esse teste específico passou em 0,604 s. Total de 11 testes distintos do avaliador. O diff passou na verificação de whitespace. Os 16 testes do contrato, inalterado, foram verificados na entrega anterior. Estas verificações usaram somente processos e dados de fixture. A supervisão atesta a ordem dos bytes que pôde observar no transporte. Uma perda definitiva do disco ou encerramento forçado de todo o executor excede a recuperação de interrupções capturáveis verificada aqui.
+
+## Correção 2 após o QA combinado
+
+SF2-04, branch `feat/sf2-avaliador` na worktree `.worktrees/sf2-avaliador`. A branch avançou por fast-forward para a base integrada `237df80b4d27229fe79456f943cc11dc2b31f066`. A concretização de interface foi consultada no commit `c910ba83fa8b03f979329da3931fe727e488ce98`. Correção em `2a24f0d0ed6b29d2263450ddeb416af19a49111c`, com três arquivos de 04 e worktree limpa. A re-revisão desse diff e a repetição focal do QA são os próximos marcos do integrador.
+
+O pré-voo e a reauditoria verificam o contrato `componentIndex`, a segurança dos caminhos relativos à raiz e os SHA-256 atuais de cada membro. Conferem a cobertura dos nomes contra o inventário de treino congelado de 03 acrescido de `adapter/__main__.py`, e contra o inventário produzido pelo helper de 03 no checkout efetivo. A verificação direta dos membros precede o import desse helper. O digest dos bytes do índice permanece em `capture.json` e `freeze.files.adapter`. O README descreve a geração do índice e a custódia da invocação. Os metadados das fixtures passaram a conter os índices completos.
+
+O teste focal recria as fontes num espelho temporário. Cada comando usa um processo Python novo, com imports a partir do espelho e o mesmo índice, argv e configuração. A árvore íntegra admitiu a coleta e o freeze de fixture. Acrescentar um comentário em `adapter/decide.py`, `adapter/__main__.py` ou `contracts/__init__.py`, um por vez, produziu nove recusas verificadas, correspondentes a três arquivos por três fases. A coleta não iniciou o worker, o freeze recusou emitir liberação e a execução recusou criar saída ou recibos de exposição. Um caminho sentinela inexistente ocupou o argumento de inventário reservado. Também foram recusados ponto de entrada omitido, módulo removido simultaneamente do índice e da árvore, caminho com travessia e link simbólico para fora da raiz.
+
+```sh
+ev=script.classification_comparison.setfit_sf2.evaluation
+rtk proxy python3 -B -m unittest -v "$ev.test_workflow.WorkflowTest.test_adapter_members_in_effective_checkout_before_capture_freeze_and_exposure"
+rtk proxy python3 -B -m unittest -v "$ev.test_workflow"
+rtk proxy git diff --check 237df80 HEAD
+```
+
+O teste focal inicial passou em 5,390 s. Na versão final, os três testes do módulo de fluxo passaram em 14,103 s, incluindo cobertura de fontes, catálogo e execução/auditoria numérica. O diff-check passou. Em uma checagem separada por Python 3.11, `adapter_digest` aceitou os 17 membros sem carregar Torch, SetFit ou Transformers. Esse índice temporário usou a serialização compacta da fixture e seu digest foi `f95802a920774335ee239ff7c2853a8b6470adb0893ec211f6c3a1847efcbae8`. Os hashes de índices dependem dos bytes da serialização. As suítes inalteradas de 00 e 03 ficaram fora desta rodada. Não houve mudanças nesses módulos nem execução sobre narrativas da pesquisa.
+
+**Exercício.** No teste focal, observe que os bytes e o digest do índice não mudam durante as três mutações de código. Compare cada membro do índice com o arquivo no espelho e identifique a primeira fase que recusa iniciar o worker. A invocação e o ambiente que resolvem imports na árvore conferida continuam sob custódia do operador.

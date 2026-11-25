@@ -6,8 +6,9 @@ Versão aprovada: **1.0.0**, 25/11/2026. Base de aplicação `38e56e0013fcf2ce4f
 validação, 120 finais), quotas, treinamento, política e execução descritos abaixo.
 O responsável liberou a primeira onda 00/01/02 no
 [registro de aprovação](aprovacao.json) e pediu continuidade para a implementação
-de 03/04 após seu aceite. Não há adoção aprovada, novo treino
-executado, resultado SF2 ou autorização para API paga.
+de 03/04 após seu aceite. Com 00–04 e a integração aceitas, a continuidade
+libera a qualificação local de 05 pelo fluxo abaixo. Adoção e API paga não
+estão aprovadas; o estado e os resultados ficam no acompanhamento.
 
 [Protocolo declarativo](protocolo.json) · [Tarefas e passagens](tarefas.md) ·
 [Prompts dos agentes](prompts.md) · [Piloto SF1](../../../c05-setfit-piloto.md).

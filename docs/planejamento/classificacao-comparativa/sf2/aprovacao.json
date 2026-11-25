@@ -12,7 +12,8 @@
       "SF2-01",
       "SF2-02",
       "SF2-03",
-      "SF2-04"
+      "SF2-04",
+      "SF2-05"
     ],
     "later_tasks": "dependem dos aceites e bases integradas previstos no plano",
     "model_adoption": false,
@@ -29,6 +30,15 @@
         "SF2-04"
       ],
       "scope": "Implementação e verificação com fixtures; treino real permanece em SF2-05 após os aceites. Sem adoção, API paga ou publicação."
+    },
+    {
+      "on": "2026-11-25",
+      "exact_user_instruction": "continue",
+      "context": "Continuação do fluxo SF2 já aprovado: 00–04 e o aceite combinado foram concluídos, com evidência 9507887152b86a76901621fc38838e088ae2af82. O plano condiciona as tarefas posteriores a esses aceites.",
+      "released_tasks": [
+        "SF2-05"
+      ],
+      "scope": "Qualificação local com a receita aprovada, uma execução dos dois treinos e validação. Final somente após validação elegível, auditoria e congelamento. Adoção, API paga e publicação continuam sem liberação."
     }
   ]
 }

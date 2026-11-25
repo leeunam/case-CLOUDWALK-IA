@@ -56,7 +56,7 @@ semântica detectou cenários reaproveitados. Os rascunhos e as primeiras
 anotações permanecem registrados; textos novos exigem anotações novas. O
 teste final continua reservado e não é mostrado aos autores dos modelos.
 
-## Segunda onda — implementação em andamento
+## Segunda onda — concluída
 
 Continuação autorizada após a conclusão de 00/01/02. Base comum dos agentes:
 `1f55d316f29afe7a749317ce136ebde28c2991be`.
@@ -66,11 +66,12 @@ Continuação autorizada após a conclusão de 00/01/02. Base comum dos agentes:
 | 03 · treino e adaptador | Sol, alto | `feat/sf2-treinamento` · `.worktrees/sf2-treinamento` | Pins/imports, export/reload e comportamento do worker com fixtures identificadas |
 | 04 · avaliador | Astra, alto | `feat/sf2-avaliador` · `.worktrees/sf2-avaliador` | Métricas, grade, auditoria/congelamento e execução com fixtures matemáticas e de processo |
 
-Os dois códigos passaram pelas revisões individuais e foram integrados em
-`237df80`. O aceite combinado conferiu transporte, extração idêntica dos
-scores e bloqueio do final com fixture inelegível. Identificou, porém, um
-vínculo incompleto entre o índice do adaptador e os arquivos executados;
-a correção 2 de 04 está em andamento. A integração ainda não libera 05.
+Os dois códigos passaram pelas revisões individuais. O aceite combinado
+conferiu transporte, ausência de aquecimento, extração idêntica de 120 vetores
+dos mesmos 90 frames e bloqueio do final com fixture inelegível. A lacuna
+do inventário foi corrigida e reavaliada: as quatro alterações de fonte foram
+recusadas. O roteiro de reprodução também passou por revisão e correção de
+autenticação e caminhos. A evidência final foi integrada em `9507887`.
 
 03 prepara o código de treino e o adaptador; 04 prepara o avaliador e a
 seleção da regra de revisão. Essas implementações podem trabalhar com fixtures
@@ -81,3 +82,14 @@ de classificação SF2 ou chamadas à API de classificador.
 A [interface local](interface-onda2.md) registra o transporte e a coleta única
 de validação. Neste chat, o integrador acompanha interfaces, revisões
 independentes e o aceite combinado antes de liberar o treino.
+
+## SF2-05 — qualificação local liberada
+
+O pedido de continuidade retoma o fluxo aprovado, agora com 00–04 e a
+integração aceitas. 05 executa a receita fixa, sem busca de hiperparâmetros:
+um treino por campo, coleta única de validação e comparação das 225 políticas.
+O limite acumulado de treino é 30 minutos em CPU. O executor é separado do
+autor da candidata. Textos e anotações finais continuam privados até a
+validação cumprir os gates, a auditoria aprovar a seleção e o pacote ser
+congelado. Nenhum resultado SF2 real foi produzido no fechamento desta etapa
+de preparação. Adoção e chamadas pagas continuam sem liberação.
