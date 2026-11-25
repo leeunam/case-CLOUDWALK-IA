@@ -5,7 +5,8 @@ Versão aprovada: **1.0.0**, 25/11/2026. Base de aplicação `38e56e0013fcf2ce4f
 **Aprovado:** retomada com SetFit, 360 relatos novos (150 de treino, 90 de
 validação, 120 finais), quotas, treinamento, política e execução descritos abaixo.
 O responsável liberou a primeira onda 00/01/02 no
-[registro de aprovação](aprovacao.json). Não há adoção aprovada, novo treino
+[registro de aprovação](aprovacao.json) e pediu continuidade para a implementação
+de 03/04 após seu aceite. Não há adoção aprovada, novo treino
 executado, resultado SF2 ou autorização para API paga.
 
 [Protocolo declarativo](protocolo.json) · [Tarefas e passagens](tarefas.md) ·

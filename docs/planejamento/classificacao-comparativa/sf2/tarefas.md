@@ -3,6 +3,9 @@
 Este plano executa a [especificação aprovada](especificacao.md). O responsável
 aprovou a SF2 e liberou a primeira onda 00/01/02 em 25/11/2026:
 [registro](aprovacao.json). Treino real continua bloqueado pelos aceites previstos.
+Após a conclusão da primeira onda, a continuação autorizou implementar 03/04.
+A [interface da segunda onda](interface-onda2.md) fixa o transporte local e a
+separação entre supervisão do treino e execução do ensaio.
 O integrador prepara branches/worktrees antes de cada passagem.
 
 ## Contrato de trabalho de todos os agentes

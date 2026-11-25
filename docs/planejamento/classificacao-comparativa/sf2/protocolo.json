@@ -7,7 +7,7 @@
     "resume_setfit": true,
     "dataset_totals": "approved_by_user_2026-11-25",
     "internal_quotas_training_policy_execution": "approved_by_user_2026-11-25",
-    "execution_release": ["SF2-00", "SF2-01", "SF2-02"],
+    "execution_release": ["SF2-00", "SF2-01", "SF2-02", "SF2-03", "SF2-04"],
     "approval_record": "docs/planejamento/classificacao-comparativa/sf2/aprovacao.json",
     "model_adoption": false,
     "project_provider_api_calls_authorized": false
