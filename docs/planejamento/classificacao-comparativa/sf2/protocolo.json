@@ -58,6 +58,7 @@
       "classifiable_cases": 72,
       "expected_review_cases": 18,
       "target_fields": {"category": 60, "priority": 60},
+      "classifiable_category_support_per_mask": {"pix": 8, "payouts": 8, "terminal": 8},
       "clear_priority_support_per_priority_mask": 6,
       "clear_priority_support_per_both_mask": 6,
       "urgent_target_cases": 13,
@@ -74,6 +75,7 @@
       "classifiable_cases": 96,
       "expected_review_cases": 24,
       "target_fields": {"category": 80, "priority": 80},
+      "classifiable_category_support_per_mask": {"pix": 11, "payouts": 11, "terminal": 10},
       "clear_priority_support_per_priority_mask": 8,
       "clear_priority_support_per_both_mask": 8,
       "urgent_target_cases": 17,
@@ -163,6 +165,10 @@
     "final_p95_rank": 114,
     "gold_sent_to_adapter": false,
     "runtime_failure": "record_interruption_and_inconclusive_without_case_retry",
+    "archive_policy": {
+      "final_not_opened": "publish_only_seal_validation_outputs_and_block_reason_keep_final_private",
+      "final_opened": "archive_final_package_annotations_and_exposure_record_identify_unexecuted_ids_without_invented_predictions"
+    },
     "paid_classifier_api_calls": 0,
     "freeze_required_before_final_access": true,
     "predictions_sealed_before_metric_computation": true,

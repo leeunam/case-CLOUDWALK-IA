@@ -115,13 +115,17 @@ No chat central, respeitar o número de agentes simultâneos disponível.
 - **Possui:** `script/classification_comparison/setfit_sf2/training/`,
   `adapter/`, instalação/supervisão e respectivos testes; não altera contratos,
   dados, avaliador ou tabelas de corte.
-- **Entrega:** instalação limpa com pins SF1; dois treinos fixados e modelos
-  recarregáveis; manifesto; adaptador que recebe só campos necessários,
-  valida catálogo e preserva atomicidade; extração única de scores de validação.
+- **Entrega de implementação:** instalação com pins SF1 e código para os dois
+  treinos fixados, export/reload e manifesto; adaptador que recebe só campos
+  necessários, valida catálogo e preserva atomicidade; código de extração única
+  de scores de validação. Os modelos reais e scores só serão gerados em 05.
   A interface de saída da política vem de 00 e a escolha dos cortes vem de 04.
-- **Aceite:** encoder efetivamente ajustado, classes/convergência verificadas,
-  limites/interrupção funcionam, reload idêntico dentro da tolerância, fixtures
-  de preservação/revisão/erro passam. Nenhum texto/gold final é acessado.
+- **Aceite de implementação:** instalação/imports e checagem de pins; fixtures
+  de preservação/revisão/erro, projeção sem gold e supervisão/interrupção passam.
+  O teste de contrato de export/reload usa fixture identificada. Evidência do
+  ajuste real do encoder, classes/convergência, reload dos pesos treinados e
+  scores reais é aceite de **05**, não pré-requisito para aceitar este código.
+  Nenhum texto/gold final é acessado.
 - **Exercício:** retirar prioridade da mesma entrada pública e verificar que
   somente seu especialista foi invocado.
 
@@ -146,13 +150,16 @@ No chat central, respeitar o número de agentes simultâneos disponível.
 - **Agente:** integrador neste chat; executor separado do autor da candidata;
   revisão fresca GPT-6.2 Astra, alto. **Base:** SHA com 00–04 aceitas e integradas.
 - **Branch/worktree:** `feat/sf2-qualificacao` · `.worktrees/sf2-qualificacao`.
-- **Possui:** `docs/evidencias/c05/sf2/qualificacao-01/` e relatório do resultado;
-  após execução, arquiva também o pacote final/anotações antes reservados.
+- **Possui:** `docs/evidencias/c05/sf2/qualificacao-01/` e relatório do resultado.
+  Se abrir o final, arquiva pacote/anotações e trilha de exposição. Se bloquear
+  na validação, publica só selo, desenvolvimento e motivo; final permanece privado.
 - **Entrega:** pré-voo e hashes, treino de categoria e prioridade uma vez,
   seleção dos cortes na validação, congelamento e final condicional de 120,
   tempos/recursos, scores, decisões, métricas e parecer de elegibilidade.
 - **Aceite:** nenhuma exposição antecipada, zero mudança de corte/peso/gold
   pelo final, 120 resultados/durações reais selados para aprovação e todos os gates.
+  O único treino real deve demonstrar ajuste dos encoders, classes/convergência,
+  export/reload dos pesos e extração única dos scores que 03 apenas implementou.
   Resultado negativo/inconclusivo também é entrega válida da tarefa, **sem**
   liberar C06. Adoção é decisão registrada do responsável.
 - **Exercício:** seguir um caso final, depois da avaliação, do score bruto até

@@ -64,9 +64,9 @@ Nos classificáveis das máscaras `priority` e `both`, distribuir os níveis
 igualmente: 6 de cada na validação e 8 de cada no final. Acrescentar exatamente
 um `urgent` entre os casos `both` com categoria insuficiente e prioridade
 clara, em cada partição. Assim há **13 urgentes-alvo na validação e 17 no final**.
-As outras revisões com prioridade clara usam níveis não urgentes. As categorias
-claras dessas máscaras devem cobrir as três categorias, com diferenças de
-contagem no máximo um, dentro de cada subgrupo classificável.
+As outras revisões com prioridade clara usam níveis não urgentes. Nos casos
+classificáveis de **cada uma das três máscaras**, as categorias são distribuídas
+em 8 Pix / 8 Repasses / 8 Maquininha na validação e 11 / 11 / 10 no final.
 
 Cobrir erros de digitação, negação, operação preservada, alternativa disponível,
 uso futuro, prejuízo atual, prazo imediato, falta de impacto/prazo, assunto
@@ -284,9 +284,13 @@ sem converter CPU/RAM em “custo zero” de operação ou em preço fictício e
    sela previsões dos 120 antes de computar métricas com os rótulos.
 7. Auditar evidências e registrar elegível/reprovado/inconclusivo. Um resultado
    incompleto ou uma métrica ausente não é aprovação. Responsável decide adoção.
-8. Após o resultado, arquivar pacote final, anotações e trilha de exposição em
-   evidências versionadas, sem pesos grandes/ambiente. Repetição idêntica pode
-   ser reprodução técnica identificada; nunca novo teste independente.
+8. Se o final não foi aberto, arquivar publicamente somente selo, resultados
+   de desenvolvimento e motivo do bloqueio; manter textos/gold/anotações sob
+   custódia. Se foi aberto, arquivar o pacote final, anotações e trilha de
+   exposição em evidências versionadas, sem pesos grandes/ambiente. Em execução
+   parcial, distinguir IDs executados e não executados, sem fabricar previsões.
+   Repetição idêntica pode ser reprodução técnica identificada; nunca novo
+   teste independente.
 
 Exposição prematura do final ao autor do modelo invalida sua independência e
 impede qualificá-lo com aquele conjunto. Se o final reprovar, preservá-lo como
