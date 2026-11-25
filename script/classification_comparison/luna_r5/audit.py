@@ -42,6 +42,23 @@ def completed_timings(path, report, candidates):
     return measured
 
 
+def valid_interruption_tail(tail, pending_id, delivery, completed_count, remaining, candidate_ids):
+    if pending_id is None:
+        if delivery is not None:
+            return False
+        allowed = [[]]
+        if not remaining:
+            allowed.append([dict(event="finished", decisions=completed_count)])
+    else:
+        if tail and pending_id not in candidate_ids:
+            return False
+        start = dict(event="dispatch_started", id=pending_id, attempt=1)
+        allowed = {"not_sent": [[], [start, dict(event="not_sent", id=pending_id)]],
+                   "unknown": [[start]],
+                   "stdin_flushed": [[start, dict(event="dispatched", id=pending_id, attempt=1)]]}.get(delivery, [])
+    return any(same_json(tail, option) for option in allowed)
+
+
 def verify_interruption(path, bundle, interruption):
     from r2.gate import completed_events
 
@@ -91,18 +108,8 @@ def verify_interruption(path, bundle, interruption):
             or [r["id"] for r in events if r["event"] == "dispatched"] != interruption["dispatched_ids"]):
         raise ValueError("eventos do diário divergem da fase ou da observação da interrupção")
 
-    tail = events[len(expected):-1]
-    start = dict(event="dispatch_started", id=pending_id, attempt=1)
-    if pending_id is None:
-        valid_tails = [[]]
-        if not rest:
-            valid_tails.append([dict(event="finished", decisions=len(committed))])
-        valid = tail in valid_tails and interruption["delivery"] is None
-    else:
-        by_delivery = {"not_sent": [[], [start, dict(event="not_sent", id=pending_id)]],
-                       "unknown": [[start]], "stdin_flushed": [[start, dict(event="dispatched", id=pending_id, attempt=1)]]}
-        valid = tail in by_delivery.get(interruption["delivery"], []) and (not tail or pending_id in binding["candidate_ids"])
-    if not valid:
+    if not valid_interruption_tail(events[len(expected):-1], pending_id, interruption["delivery"],
+                                   len(committed), rest, binding["candidate_ids"]):
         raise ValueError("despacho pendente diverge da ordem ou da entrega registrada")
     for kind in ("observations", "decisions"):
         originals = list(rows(path.with_name(f"{kind}.jsonl")))
@@ -118,8 +125,9 @@ def verify_interruption(path, bundle, interruption):
             if not same_json(extra[0], decide(item, pending, catalog, report["run_id"])):
                 raise ValueError("decisão pendente diverge da observação e do insumo")
     samples, consumed = interrupted_usage(pending_id, interruption["delivery"], pending)
-    if (interruption["interrupted_usage_samples"] != samples or interruption["interrupted_usage"] != consumed
-            or interruption["verified_prefix_usage"] != usage(bundle["observations"])):
+    if (not same_json(interruption["interrupted_usage_samples"], samples)
+            or not same_json(interruption["interrupted_usage"], consumed)
+            or not same_json(interruption["verified_prefix_usage"], usage(bundle["observations"]))):
         raise ValueError("uso interrompido diverge das observações")
     return {row["id"]: row for row in full_inputs}, binding["candidate_ids"]
 
@@ -131,8 +139,8 @@ def verify_prefix(path, bundle, entry, envelopes):
     original_path = path.with_name(FILENAME)
     originals = list(rows(original_path))
     if (interruption["run_id"] != report["run_id"]
-            or interruption["verified_luna_evidence"] != entry
-            or interruption["luna_evidence"] != reference(original_path, len(originals))
+            or not same_json(interruption["verified_luna_evidence"], entry)
+            or not same_json(interruption["luna_evidence"], reference(original_path, len(originals)))
             or len(originals) not in (len(envelopes), len(envelopes) + 1)
             or not same_json(originals[:len(envelopes)], envelopes)):
         raise ValueError("inventário do prefixo diverge da interrupção")
@@ -170,7 +178,7 @@ def verify(bundle):
     if path != observations_path.with_name(name):
         raise ValueError("evidência fora da rodada ou do prefixo")
     candidates = [obs for obs in bundle["observations"] if obs["origin"] == "candidate"]
-    if entry["count"] != len(candidates):
+    if not same_json(entry["count"], len(candidates)):
         raise ValueError("contagem de envelopes divergente")
     inputs = {i["id"]: i for i in bundle["inputs"]}
     measured = completed_timings(path, report, candidates)
@@ -206,7 +214,7 @@ def verify_public_receipt(path, bundle, *, protocol, catalog, cases):
     if (path.name != "report.json" or (output / "interruption.json").exists()
             or receipt["run_id"] != report["run_id"] or receipt["mode"] != report["identity"]["mode"]
             or receipt["profile"] != c01.LUNA_R5 or receipt["stage"] != stage
-            or receipt["luna_evidence"] != report["luna_evidence"]
+            or not same_json(receipt["luna_evidence"], report["luna_evidence"])
             or receipt["report_version"] != report["contract_version"]
             or (stage == "final" and receipt.get("status") != report["eligibility"])):
         raise ValueError("recibo incompatível com relatório R5")

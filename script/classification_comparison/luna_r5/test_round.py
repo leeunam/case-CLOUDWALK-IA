@@ -15,7 +15,7 @@ import unittest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from luna_r5.round_spec import LUNA_R5
 from luna import test_round as historic
-from luna_r5.audit import FILENAME, completed_timings
+from luna_r5.audit import FILENAME, completed_timings, valid_interruption_tail
 from r2 import execute, gate, seal
 from r2.plan import Plan, gate_reference
 from budget import Account, BudgetError
@@ -190,17 +190,38 @@ class R5Test(unittest.TestCase):
             manifest.write_text(encode(forged))
             with self.assertRaisesRegex(ValueError, "luna_evidence"):
                 c01.verify_report(prefix)
+            events = list(map(decode, journal_bytes.splitlines()))
+            self.assertEqual(events[-2]["event"], "dispatched")
+            events[-2]["attempt"] = True
+            journal.write_text("".join(encode(r) + "\n" for r in events))
+            forged["artifacts"]["journal.jsonl"]["sha256"] = c01.digest(journal)
+            manifest.write_text(encode(forged))
+            with self.assertRaisesRegex(ValueError, "despacho pendente"):
+                c01.verify_report(prefix)
             journal.write_bytes(journal_bytes)
             wrong = [("completed_ids", []), ("dispatched_ids", []), ("not_started_ids", []),
                      ("delivery", "not_sent"), ("artifacts", {})]
+            wrong.append(("verified_luna_evidence", dict(doc["verified_luna_evidence"], count=True)))
             if validated:
-                wrong.append(("interrupted_observation", None))
+                self.assertEqual(doc["interrupted_usage"]["requests"], 1)
+                wrong.extend([("interrupted_observation", None),
+                              ("interrupted_usage", dict(doc["interrupted_usage"], requests=True))])
             for name, value in wrong:
                 manifest.write_text(encode(dict(doc, **{name: value})))
                 with self.subTest(name=name, validated=validated), self.assertRaisesRegex(ValueError, "luna_evidence"):
                     c01.verify_report(prefix)
             manifest.write_bytes(original_manifest)
             c01.verify_report(prefix)
+
+    def test_interruption_tail_preserves_json_number_types(self):
+        for key, event, args in (
+            ("decisions", {"event": "finished", "decisions": 1}, (None, None, 1, [], [])),
+            ("attempt", {"event": "dispatch_started", "id": "pendente", "attempt": 1},
+             ("pendente", "unknown", 1, ["pendente"], ["pendente"])),
+        ):
+            with self.subTest(field=key):
+                self.assertTrue(valid_interruption_tail([event], *args))
+                self.assertFalse(valid_interruption_tail([dict(event, **{key: True})], *args))
 
     def check_tamper(self, output, report):
         path = output / FILENAME
