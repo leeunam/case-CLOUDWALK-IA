@@ -8,6 +8,10 @@
 .configuration-tabs { border-block: 1px solid var(--line); padding: .55rem 0; margin: 1rem 0; }
 .configuration-tabs button { min-height: 2.1rem; border-color: transparent; background: transparent; color: var(--muted); }
 .configuration-tabs button[aria-pressed="true"] { background: var(--tint); color: var(--accent); box-shadow: inset 0 -3px var(--focus); }
+.configuration-tabs button[aria-pressed="true"]:hover:enabled { background: var(--tint); color: var(--accent); }
+@media (forced-colors: active) {
+  .configuration-tabs button[aria-pressed="true"] { box-shadow: none; outline: 2px solid Highlight; outline-offset: -3px; }
+}
 .configuration-row { margin: .75rem 0; }
 .configuration-form { margin: .55rem 0 1rem; }
 .configuration-form > fieldset, .supervisor-action-fields { padding: 0; min-width: 0; border: 0; margin: 0; }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-24T20:51:40Z",
+  "generatedAt": "2026-11-25T01:05:40Z",
   "title": "Design System: Help desk",
   "extensions": {
     "breakpoints": [
@@ -41,15 +41,15 @@
       "refersTo": "navigation-active",
       "description": "Área selecionada com faixa interna clara e fundo grafite.",
       "html": "<button class=\"ds-nav-active\" aria-current=\"page\">Analista</button>",
-      "css": ".ds-nav-active { width: 100%; min-height: 2.5rem; padding: .6rem; border: 0; border-radius: .45rem; background: var(--navigation-selected); color: var(--ink); box-shadow: inset 3px 0 var(--focus); font: 600 .8125rem/1.35 Gabarito, sans-serif; text-align: left; cursor: pointer; } .ds-nav-active:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }"
+      "css": ".ds-nav-active { width: 100%; min-height: 2.5rem; padding: .6rem; border: 0; border-radius: .45rem; background: var(--navigation-selected); color: #fff; box-shadow: inset 3px 0 var(--focus); font: 550 .8125rem/1.48 Gabarito, sans-serif; text-align: left; cursor: pointer; } .ds-nav-active:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; } @media (forced-colors: active) { .ds-nav-active { box-shadow: none; outline: 2px solid Highlight; outline-offset: -3px; } }"
     },
     {
       "name": "Item de lista selecionável",
       "kind": "custom",
       "refersTo": "list-item-selected",
       "description": "Linha de atendimento com hover distinguível e seleção persistente.",
-      "html": "<button class=\"ds-list-item\">Atendimento 1024</button>",
-      "css": ".ds-list-item { display: block; width: 100%; padding: .8rem .7rem; border: 1px solid transparent; border-radius: .45rem; background: transparent; color: var(--ink); font: 400 .9375rem/1.48 Gabarito, sans-serif; text-align: left; cursor: pointer; } .ds-list-item:hover:not([aria-current]) { background: var(--surface-raised); } .ds-list-item[aria-current] { background: var(--tint); border-color: var(--selection-border); } .ds-list-item:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }"
+      "html": "<button class=\"ds-list-item\" aria-current=\"true\"><span>Atendimento 1024</span></button>",
+      "css": ".ds-list-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; width: 100%; padding: .8rem .7rem; border: 1px solid transparent; border-radius: .45rem; background: transparent; color: var(--ink); font: 400 .9375rem/1.48 Gabarito, sans-serif; text-align: left; cursor: pointer; } .ds-list-item:hover:not([aria-current]) { background: var(--surface-raised); } .ds-list-item[aria-current] { background: var(--tint); border-color: var(--selection-border); } .ds-list-item[aria-current]::after { content: ''; grid-area: 1 / 2; justify-self: end; align-self: center; width: .65rem; height: .35rem; border: solid var(--accent); border-width: 0 0 .16rem .16rem; transform: rotate(-45deg); } .ds-list-item:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }"
     },
     {
       "name": "Etiqueta de estado",
@@ -57,7 +57,7 @@
       "refersTo": "status-neutral",
       "description": "Rótulo compacto neutro para o estado do atendimento.",
       "html": "<span class=\"ds-status\">Aguardando cliente</span>",
-      "css": ".ds-status { display: inline-block; width: fit-content; padding: .16rem .44rem; border-radius: .3rem; background: var(--neutral-bg); color: var(--neutral-text); font: 600 .75rem/1.4 Gabarito, sans-serif; }"
+      "css": ".ds-status { display: inline-block; width: fit-content; padding: .16rem .44rem; border-radius: .3rem; background: var(--neutral-bg); color: var(--neutral-text); font: 650 .75rem/1.4 Gabarito, sans-serif; }"
     },
     {
       "name": "Painel",
@@ -78,6 +78,7 @@
     ],
     "rules": [
       { "name": "Regra do marcador ativo", "body": "Não dependa apenas da mudança sutil de fundo para indicar a área selecionada; mantenha faixa ou contorno contrastante.", "section": "colors" },
+      { "name": "Regra da aba ativa", "body": "A aba de configuração selecionada conserva seu fundo grafite e texto claro enquanto recebe hover.", "section": "colors" },
       { "name": "Regra dos estados", "body": "Use cores de espera, falha e sucesso junto de rótulos textuais.", "section": "colors" },
       { "name": "Regra das superfícies do navegador", "body": "Mantenha foco e barra de rolagem legíveis contra a superfície escura.", "section": "colors" }
     ],

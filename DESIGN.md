@@ -7,6 +7,7 @@ colors:
   surface-raised: "#202020"
   navigation: "#0b0b0b"
   navigation-selected: "#303030"
+  navigation-active-text: "#ffffff"
   ink: "#ecebe9"
   muted: "#b9b7b4"
   accent: "#f0efed"
@@ -45,10 +46,23 @@ typography:
     fontWeight: 600
     lineHeight: 1.35
     letterSpacing: "normal"
+  navigation:
+    fontFamily: "Gabarito, sans-serif"
+    fontSize: "0.8125rem"
+    fontWeight: 550
+    lineHeight: 1.48
+    letterSpacing: "normal"
+  status:
+    fontFamily: "Gabarito, sans-serif"
+    fontSize: "0.75rem"
+    fontWeight: 650
+    lineHeight: 1.4
+    letterSpacing: "normal"
 rounded:
   sm: "0.45rem"
   xs: "0.3rem"
   panel: "0.75rem"
+  secondary: "0.65rem"
   pill: "999px"
 spacing:
   sm: "0.5rem"
@@ -66,7 +80,7 @@ components:
     backgroundColor: "{colors.surface-raised}"
     textColor: "{colors.ink}"
     typography: "{typography.control}"
-    rounded: "{rounded.sm}"
+    rounded: "{rounded.secondary}"
     padding: "0.45rem 0.8rem"
     height: "2.3rem"
   field:
@@ -78,8 +92,8 @@ components:
     height: "2.5rem"
   navigation-active:
     backgroundColor: "{colors.navigation-selected}"
-    textColor: "{colors.ink}"
-    typography: "{typography.control}"
+    textColor: "{colors.navigation-active-text}"
+    typography: "{typography.navigation}"
     rounded: "{rounded.sm}"
   list-item-selected:
     backgroundColor: "{colors.tint}"
@@ -89,6 +103,7 @@ components:
   status-neutral:
     backgroundColor: "{colors.neutral-bg}"
     textColor: "{colors.neutral-text}"
+    typography: "{typography.status}"
     rounded: "{rounded.xs}"
     padding: "0.16rem 0.44rem"
   panel:
@@ -152,15 +167,20 @@ mantêm cantos menores.
 
 - **Ação primária.** Fundo claro, texto escuro e forma de pílula; hover aumenta
   levemente o brilho.
-- **Ação secundária.** Campo grafite com contorno de controle e texto claro.
+- **Ação secundária.** Campo grafite com contorno de controle e cantos de
+  0,65 rem.
 - **Campo.** Fundo grafite levantado, texto claro e contorno visível; radio e
   checkbox usam a cor de ação.
-- **Navegação ativa.** Fundo grafite selecionado e faixa clara interna na borda
-  esquerda, sem alterar a largura do item.
+- **Navegação ativa.** Fundo grafite selecionado, texto branco e faixa clara
+  interna na borda esquerda, sem alterar a largura do item.
+- **Aba de configuração ativa.** Preserva o fundo grafite, o texto legível e a
+  faixa inferior durante hover, mesmo com a classe de ação primária.
 - **Item de lista.** Hover usa a superfície elevada; seleção preserva fundo,
   contorno e visto próprio.
 - **Estado.** Espera, falha, sucesso e estado neutro mantêm rótulos textuais.
 - **Painel.** Fundo de superfície, divisória discreta e cantos arredondados.
+- **Cores forçadas.** A navegação e a aba ativas usam contorno com cor do
+  sistema, preservando o indicador quando sombras são removidas.
 
 ## Do's and Don'ts
 
