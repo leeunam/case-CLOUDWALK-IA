@@ -47,19 +47,24 @@ class Journal:
         self.run_id = run_id
         self.inputs = inputs
         self.profile_metadata = profile_metadata or {}
+        self.audited = self.profile_metadata.get("profile") == c01.LUNA_R5
+        self.pending_envelope = None
         self.active = None
         self.pending_observation = None
         self.observations = []
         self.decisions = []
         self.streams = ExitStack()
-        self.hashes = {name: sha256() for name in ("observations", "decisions", "journal")} if track_output else {}
+        self.stream_names = ("observations", "decisions", "journal")
+        if self.audited:
+            self.stream_names += ("luna-evidence",)
+        self.hashes = {name: sha256() for name in self.stream_names} if track_output or self.audited else {}
 
     def output_hashes(self):
         return {f"{name}.jsonl": value.hexdigest() for name, value in self.hashes.items()}
 
     def __enter__(self):
         try:
-            for name in ("observations", "decisions", "journal"):
+            for name in self.stream_names:
                 stream = self.streams.enter_context((self.output / f"{name}.jsonl").open("x", encoding="utf-8"))
                 setattr(self, name + "_file", stream)
             self.event("planned", plan=inventory(self.output / "plan.json"), **self.profile_metadata)
@@ -89,13 +94,20 @@ class Journal:
     def complete(self, decision, obs):
         self.active = decision["id"]
         self.pending_observation = obs
+        timing = {}
+        if self.audited and obs is not None and obs["origin"] == "candidate":
+            if self.pending_envelope is None or self.pending_envelope["observation"]["id"] != obs["id"]:
+                raise ValueError("envelope ausente para a observação")
+            self.record("luna-evidence", self.pending_envelope)
+            if obs["identity"]["mode"] == "real":
+                timing["elapsed_ms"] = obs["elapsed_ms"]
         if obs is not None:
             self.record("observations", obs)
             self.observations.append(obs)
         self.record("decisions", decision)
         self.decisions.append(decision)
-        self.event("completed", id=decision["id"], attempts=decision["attempts"])
-        self.active = self.pending_observation = None
+        self.event("completed", id=decision["id"], attempts=decision["attempts"], **timing)
+        self.active = self.pending_observation = self.pending_envelope = None
 
     def interrupted(self, error):
         # A publicação final pode ter falhado depois de escrever parte do relatório.
@@ -125,7 +137,17 @@ class Journal:
         prefix_decisions = [d for d in records(self.output / "decisions.jsonl") if d["id"] in finished]
         prefix_inputs = [i for i in self.inputs if i["id"] in finished]
         files = ["plan.json", "journal.jsonl", "observations.jsonl", "decisions.jsonl"]
-        for name, rows in (("inputs", prefix_inputs), ("decisions", prefix_decisions), ("observations", prefix_obs)):
+        streams = [("inputs", prefix_inputs), ("decisions", prefix_decisions), ("observations", prefix_obs)]
+        if self.audited:
+            from luna_r5.audit import FILENAME, rows as evidence_rows
+            originals = list(evidence_rows(self.output / FILENAME))
+            if self.pending_envelope is not None and self.pending_envelope not in originals:
+                self.record("luna-evidence", self.pending_envelope)
+                originals.append(self.pending_envelope)
+            evidence = [e for e in originals if e["observation"]["id"] in finished]
+            streams.append(("luna-evidence", evidence))
+            files.append(FILENAME)
+        for name, rows in streams:
             filename = f"verified_{name}.jsonl"
             with (self.output / filename).open("x", encoding="utf-8") as stream:
                 stream.writelines(encode(row) + "\n" for row in rows)
@@ -159,6 +181,10 @@ class Journal:
                         not_started_ids=[i["id"] for i in self.inputs if i["id"] not in finished and i["id"] != active],
                         verified_prefix_usage=usage(prefix_obs),
                         artifacts={name: inventory(self.output / name) for name in files})
+        if self.audited:
+            from luna_r5.audit import reference
+            manifest["luna_evidence"] = reference(self.output / FILENAME, len(originals))
+            manifest["verified_luna_evidence"] = reference(self.output / ("verified_" + FILENAME), len(evidence))
         temp = self.output / "interruption.tmp"
         with temp.open("x", encoding="utf-8") as stream:
             append(stream, manifest)

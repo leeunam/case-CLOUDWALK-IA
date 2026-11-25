@@ -70,7 +70,7 @@ def check_deadline(obs, deadline, now):
     raise TimeoutError(f"resposta fora do prazo para {obs['id']}")
 
 
-def exchange(proc, item, responses, journal, deadline):
+def exchange(proc, item, responses, journal, deadline, *, evidence_policy=None):
     if responses.pending or select.select([proc.stdout], [], [], 0)[0]:
         raise ValueError("stdout inesperado ou fechado antes do próximo despacho")
     payload = (encode(item) + "\n").encode("utf-8")
@@ -82,6 +82,11 @@ def exchange(proc, item, responses, journal, deadline):
     proc.stdin.flush()
     journal.sent()
     obs = responses.record(deadline + TIMEOUT_DELIVERY_SECONDS)
+    if evidence_policy is not None:
+        from adapters.luna.r5.adapter import replay_envelope
+        replay_envelope(item, obs, policy_sha256=evidence_policy)
+        journal.pending_envelope = obs
+        obs = obs["observation"]
     if not isinstance(obs, dict) or obs.get("id") != item["id"]:
         raise ValueError(f"ID de resposta divergente para {item['id']}")
     return obs
@@ -114,6 +119,8 @@ def run_batch(inputs, config, report, catalog, validation, journal, policy, *,
                                          cold_start_ms=(time.monotonic() - started) * 1000)
             c01.structure(validation, "report", dict(report, environment=environment))
             report["environment"] = environment
+            evidence_policy = (report["sources"]["policy"]["sha256"]
+                               if report.get("contract_version") == c01.get_profile(c01.LUNA_R5).report_version else None)
             responses = ResponseStream(proc.stdout)
             for item in inputs:
                 start = time.monotonic()
@@ -130,7 +137,10 @@ def run_batch(inputs, config, report, catalog, validation, journal, policy, *,
                     if config.get("share_case_deadline"):
                         # Mesmo relógio monotônico nos dois processos locais. O IPC de entrada é imutável.
                         (ready.parent / "case-deadline.json").write_text(encode([item["id"], deadline]))
-                    obs = exchange(proc, item, responses, journal, deadline)
+                    if evidence_policy is None:
+                        obs = exchange(proc, item, responses, journal, deadline)
+                    else:
+                        obs = exchange(proc, item, responses, journal, deadline, evidence_policy=evidence_policy)
                 if obs is not None:
                     c01.structure(validation, "observation", obs)
                     c01.verify_observation(obs, missing, report, catalog)
@@ -220,7 +230,7 @@ def run(args):
     profile = c01.get_profile(c01.LEGACY if selected_profile is None else selected_profile)
     if profile.name in c01.DEDICATED:
         label, entry = {c01.R2: ("R2", "r2"), c01.LUNA: ("Luna", "luna"),
-                        c01.LUNA_R4: ("Luna R4", "luna_r4")}[profile.name]
+                        c01.LUNA_R4: ("Luna R4", "luna_r4"), c01.LUNA_R5: ("Luna R5", "luna_r5")}[profile.name]
         raise ValueError(f"perfil {label} exige script/classification_comparison/{entry}/execute.py")
     validation, protocol, split, catalog, cases, example = preflight(profile.name)
     config = c01.read(args.config)
@@ -317,6 +327,10 @@ def write_report(output, report, inputs, obs, decisions, validation, protocol, s
         report["eligibility"] = "inconclusive"
     stream_prefix = "verified_" if prefix else ""
     report["artifacts"] = {k: inventory(output / f"{stream_prefix}{k}.jsonl") for k in c01.KINDS}
+    if profile.name == c01.LUNA_R5:
+        from luna_r5.audit import FILENAME, reference
+        report["luna_evidence"] = reference(output / (stream_prefix + FILENAME),
+                                            sum(o["origin"] == "candidate" for o in obs))
     bundle = dict(inputs=inputs, observations=obs, decisions=decisions, report=report)
     c01.verify_run(bundle, validation, protocol, split, catalog, cases)
     name = "prefix-report" if prefix else "report"

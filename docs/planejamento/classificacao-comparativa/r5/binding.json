@@ -1,0 +1,42 @@
+{
+  "task": "C05-R5",
+  "historical_protocol": {
+    "path": "docs/planejamento/classificacao-comparativa/r2/protocol.json",
+    "sha256": "4e89f10dcb15b4a9593532aa52d05917b68df4771972d570dd646a7ce11163d1"
+  },
+  "historical_data_freeze": {
+    "path": "docs/planejamento/classificacao-comparativa/r2/final-freeze.json",
+    "sha256": "3bfe4604614e019ccfb07d63ca1ceceb5130dbcd30dae55f971c83c34952c7a1"
+  },
+  "candidate_freeze": {
+    "path": "docs/evidencias/c05/r5-candidata-v2/candidate-freeze.json",
+    "sha256": "4a9776c632664a104bdf7b7f9350b6bde0d9334a52f8c25155840358a3b1f9d5"
+  },
+  "candidate": {
+    "path": "script/classification_comparison/adapters/luna/r5/candidate.json",
+    "sha256": "d95c4691cbd4babeb000be285b4bdbca632bf4d8ea4ffe3b83d818579ac9df99"
+  },
+  "operational": {
+    "path": "script/classification_comparison/adapters/luna/r5/operational.json",
+    "version": "2.0.0",
+    "sha256": "745fbc7eeef9abf17c7fb2e3a8a28619a40941362ea4a8e8c01e75b20b28f1f3"
+  },
+  "final_cases": {
+    "path": "docs/planejamento/classificacao-comparativa/r2/final-cases.json",
+    "sha256": "17f5bae372983f90aa1956d0d583db25483a77a3ff35e4f1041ad4d51b897af9"
+  },
+  "offline_approval": {
+    "path": "docs/planejamento/classificacao-comparativa/rodada-5-implementacao.md",
+    "sha256": "1dff1462e19145eb9f43d1eaebdea1630fb2981b1de072dd9a18884a81b08a87"
+  },
+  "new_final_human_case_approvals": 0,
+  "paid_execution_authorized": false,
+  "previous_luna_protocol": {
+    "path": "docs/planejamento/classificacao-comparativa/r4/protocol.json",
+    "sha256": "85590d95926acc76c05e50bae420180f869ff1084856f4c1fcf11542175df8fd"
+  },
+  "original_r5_candidate_freeze": {
+    "path": "docs/evidencias/c05/r5-candidata/candidate-freeze.json",
+    "sha256": "9c2c0d221453192bca1add99a0a35d7b73088a6d42dd79b1b74fe4860af137d3"
+  }
+}

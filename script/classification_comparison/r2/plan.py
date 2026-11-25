@@ -37,6 +37,7 @@ class Round:
     adapter: type = None
     live_gateway: object = None
     stop_on_error: bool = False
+    fixture_for: object = None
 
     @property
     def versions(self):
@@ -117,6 +118,10 @@ class Plan:
                             reservation_usd=None if self.settings.reservation is None else str(self.settings.reservation),
                             executor_sha256={file.relative_to(c01.ROOT).as_posix(): c01.digest(file)
                                              for file in round_spec.execution_files})
+        if profile.name == c01.LUNA_R5:
+            freeze = c01.read(c01.source_path(c01.read(c01.source_path(self.sources["freeze"]))["candidate_freeze"]))
+            self.binding["executor_sha256"].update(freeze["runtime_and_semantic_sources_sha256"])
+            self.binding["evidence_schema"] = candidate["evidence_schema"]
         if "operational" in self.sources:
             self.binding.update(operational=self.sources["operational"],
                                 source_lock={"path": profile.lock_file, "sha256": profile.lock_sha256})

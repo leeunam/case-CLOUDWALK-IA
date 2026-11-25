@@ -190,6 +190,9 @@ def serve_authorized(args, plan, account, manifest_sha, transport=None, *, candi
         budget = RequestBudget(account, plan)
         if getattr(round_spec, "adapter", None):
             budget.reasoning = None
+        audited = round_spec is not None and round_spec.profile.name == c01.LUNA_R5
+        if audited:
+            budget.max_tokens = budget.settings["max_completion_tokens"]
         factory = getattr(round_spec, "adapter", None) or Adapter
         adapter = factory(plan.identity, run_id, instructions, capture, budget,
                           timeout_ms=int(os.environ["CLASSIFICATION_TIMEOUT_MS"]))
@@ -203,13 +206,14 @@ def serve_authorized(args, plan, account, manifest_sha, transport=None, *, candi
                 raise BudgetError("caso ou conteúdo fora da projeção final autorizada")
             usage = None
             financial_deadline = None
-            observation = adapter.classify(item)
+            result = adapter.classify(item)
+            observation = result["observation"] if audited else result
             # O motivo canônico pode priorizar divergência de versão sobre o prazo.
             if financial_deadline is not None and time.monotonic() >= financial_deadline:
                 account.mark_expired(run_id, case_id)
             if usage is not None:
                 observation["request_usage"][0]["observed_api_usd"] = numeric_cost(usage.amount)
-            print(encode(observation), flush=True)
+            print(encode(result), flush=True)
         final = os.environ.get("CLASSIFICATION_FINAL_FILE")
         if final:
             atomic(final, {"peak_memory_bytes": None})

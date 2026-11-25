@@ -137,14 +137,16 @@ def run_evaluation(args, *, fixture_command=None, round_spec=R2):
             finished = True
     finally:
         account.close_run(run_id, finished=finished)
-    if plan.stage == "development":
-        result = gate.collect(output, plan, account, args.cap_usd, original_hashes=original_hashes)
-        proof_path = output / gate.FILENAME
+    if plan.stage == "development" or plan.round.profile.name == c01.LUNA_R5:
+        result = gate.collect(output, plan, account, args.cap_usd, original_hashes=original_hashes,
+                              development_gate=proof)
+        proof_path = output / (gate.FILENAME if plan.stage == "development" else gate.FINAL_RECEIPT)
         proof_sha = write_json(proof_path, result)
         if c01.digest(proof_path) != proof_sha:
-            raise BudgetError("prova publicada diverge dos bytes produzidos pelo desenvolvimento")
+            raise BudgetError("prova publicada diverge dos bytes produzidos pela etapa")
         seal.create(plan, account, result, proof_sha)
-        return result["status"]
+        if plan.stage == "development":
+            return result["status"]
 
 
 def development_fixture(plan):
@@ -175,7 +177,11 @@ def serve(args, round_spec=R2):
     plan = Plan(args.stage, args.mode, os.environ["CLASSIFICATION_RUN_ID"], args.config, round_spec=round_spec)
     account = resolve_account(args, args.mode)
     _, manifest_sha, _, _ = authorize(args, plan, account, proof_reference(args), confirmed=True)
-    transport = development_fixture(plan) if args.mode == "fixture" and plan.stage == "development" else None
+    transport = None
+    if args.mode == "fixture" and round_spec.fixture_for is not None:
+        transport = round_spec.fixture_for(plan)
+    elif args.mode == "fixture" and plan.stage == "development":
+        transport = development_fixture(plan)
     serve_authorized(args, plan, account, manifest_sha, transport, candidate_order=iter(plan.candidates))
 
 
@@ -203,6 +209,10 @@ def main(round_spec=R2):
         execute.add_argument("--output", type=Path, required=True)
         execute.add_argument("--confirm-execution", action="store_true")
         execute.add_argument("--dry-run", action="store_true")
+        if round_spec.profile.name == c01.LUNA_R5:
+            check = commands.add_parser("verify-final", help="reproduz recibo final e selo da mesma conta")
+            plan_arguments(check)
+            check.add_argument("--output", type=Path, required=True)
         for name in ("init-account", "status", "reconcile"):
             command = commands.add_parser(name)
             modes = ("fixture",) if name == "init-account" else ("real", "fixture")
@@ -216,6 +226,16 @@ def main(round_spec=R2):
             if name == "reconcile":
                 command.add_argument("--receipt", type=Path, required=True)
         args = parser.parse_args()
+        if args.command == "verify-final":
+            if args.stage != "final" or args.development_gate is None:
+                raise BudgetError("informe etapa final e prova de development")
+            plan = Plan(args.stage, args.mode, "verificacao", args.config, round_spec=round_spec)
+            account = resolve_account(args, args.mode)
+            proof = proof_reference(args)
+            plan.bound_account(account, args.cap_usd, proof)
+            gate.verify_final(args.output, plan, account, args.cap_usd, proof)
+            print(args.output / gate.FINAL_RECEIPT)
+            return
         if args.command == "run":
             status = run_evaluation(args, round_spec=round_spec)
             if status == "failed":
