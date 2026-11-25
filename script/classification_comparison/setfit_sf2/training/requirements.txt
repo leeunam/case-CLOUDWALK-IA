@@ -1,0 +1,4 @@
+-r ../../setfit_pilot/requirements.txt
+-r ../../requirements.txt
+jsonschema-specifications==2025.9.1
+rpds-py==0.27.1
