@@ -207,3 +207,23 @@ C06 depende de resultado elegível e decisão de adoção; C07/F09 final fecha o
 fluxos e a reprodução. E01 permanece posterior/opcional. O pedido não autoriza
 inferências ilimitadas na demonstração pública nem uso do teto experimental
 como orçamento recorrente do aplicativo.
+
+### Resultado R4 e estratégia seguinte
+
+A R4 real fez seis chamadas, sem sondagem ou repetição. Conexão, formato e
+tempo passaram: zero erros técnicos e p95 de 1.762,223 ms. O gate reprovou
+com 7/8 alvos e 2/3 revisões integrais: no caso de desenvolvimento `jev-013`,
+a categoria foi escolhida apesar da insuficiência de informação. As 44
+finais não foram enviadas. O custo foi US$ 0,00224280 e o acumulado conservador
+é US$ 0,03093512, com 62 reservas liquidadas e zero pendências na mesma conta.
+[Resultado e evidências R4](../c05-luna-r4-resultado.md).
+
+O responsável escolheu «Luna com evidência verificável: manter o modelo e
+acrescentar validação conservadora; exige mudar o contrato e mais código».
+Preparar essa estratégia em ambiente isolado, preservando históricos,
+gabaritos, critérios, modelo e uma chamada por caso. Validar a origem dos
+trechos e definir um veto conservador para suporte insuficiente; não
+confundir citação literal com prova semântica. A nova candidata deve ser
+congelada antes de usar o conjunto final. A preparação não faz chamadas
+pagas nem altera a publicação fixture. C06/C07 continuam condicionadas à
+qualificação real e à decisão de adoção.

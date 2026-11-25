@@ -1,5 +1,14 @@
 # C05-R4 · Instrução de revisão da Luna
 
+**Atualização após o ensaio real:** as seis chamadas de desenvolvimento
+responderam sem erro técnico, mas o gate reprovou com 7/8 campos corretos
+e uma conclusão indevida. O p95 foi 1.762,223 ms; as 44 finais ficaram
+bloqueadas. O [resultado R4](c05-luna-r4-resultado.md) registra as evidências
+e o acumulado conservador de US$ 0,03093512. A preparação descrita abaixo
+é o histórico offline e não equivale à aprovação da classificação.
+
+## Preparação offline preservada
+
 A R4 está preparada para execução offline. O teste da CLI percorreu seis
 chamadas sintéticas de desenvolvimento e 44 finais, com 50 reservas liquidadas
 em uma conta temporária. O desenvolvimento retornou `fixture_ready`. O relatório
