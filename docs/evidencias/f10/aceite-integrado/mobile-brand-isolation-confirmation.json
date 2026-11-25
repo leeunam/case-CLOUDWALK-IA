@@ -1,0 +1,50 @@
+{
+  "task": "F10-B/mobile-brand-isolation-acceptance",
+  "recorded_at_utc": "2026-11-25T18:00:28.333261+00:00",
+  "origin": "https://jason-dollar-lcd-bought.trycloudflare.com",
+  "source": "explicit user answer to central chat verification request",
+  "point_of_observation": "phone, Wi-Fi disabled, reported by user",
+  "requested_procedure": "anonymous tab; Bia opens Aurora then Horizonte; logout via Sair da operação; Cris opens same Horizonte case",
+  "exact_user_reply": "Bia abriu Aurora, recebeu “Atendimento não encontrado” em Horizonte; Cris abriu o histórico de Horizonte",
+  "observations": [
+    {
+      "actor": "Bia",
+      "brand": "Aurora",
+      "case_id": "ad4a4699-5d96-4cce-a248-96b3568447fc",
+      "interface_result": "conversation_opened",
+      "state": "passed_by_user_confirmation"
+    },
+    {
+      "actor": "Bia",
+      "brand": "Horizonte",
+      "case_id": "32ab943b-2bea-428f-adb7-a802fe53bfaf",
+      "interface_result": "Atendimento não encontrado",
+      "state": "passed_by_user_confirmation"
+    },
+    {
+      "actor": "Cris",
+      "brand": "Horizonte",
+      "case_id": "32ab943b-2bea-428f-adb7-a802fe53bfaf",
+      "interface_result": "conversation_history_opened",
+      "state": "passed_by_user_confirmation"
+    }
+  ],
+  "complementary_origin_matrix": {
+    "record": "matrix-origin-01.jsonl",
+    "record_sha256": "0e6d282586fa871bcdec942aca2a6e1ad343574239709d684f64b39cb48ed1c9",
+    "point_of_observation": "original_computer via public HTTPS and WSS",
+    "passed_checks": 36
+  },
+  "limits": [
+    "Mobile observations are user-reported interface results",
+    "Mobile REST status codes and WebSocket frames were not independently captured; those belong to the original-computer matrix",
+    "Temporary URL depends on computer and tunnel remaining active",
+    "Real classification C05/C06/C07 remains in standby; no adoption implied"
+  ],
+  "acceptance": {
+    "F10_B_external_brand_isolation": "passed_with_user_confirmation",
+    "F10_external_acceptance_fixture": "passed",
+    "real_classifier": "standby"
+  },
+  "paid_model_requests": 0
+}
