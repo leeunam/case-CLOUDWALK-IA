@@ -187,3 +187,23 @@ Entrega `1adc941..8ac8a00`, branch `feat/estilo-cloudwalk`, aceita nas revisões
 por tarefa e ampla, com 34 testes, build e inspeção desktop/móvel. A publicação
 foi reaberta em novo endereço temporário; [UX02](../ux02.md) contém URL vigente,
 provas, limites e roteiro. C05 real/C06/C07 continuam pendentes e independentes.
+
+## Retomada da conclusão — 24/11/2026
+
+Após a UX02, o responsável pediu «termine o que falta do projeto». O integrador
+retoma a sequência pendente e interpreta a continuidade dentro do teto de
+US$ 10 já autorizado, com minimização de requisições. Não é uma nova fala
+numérica do responsável nem autorização para hospedar com custo, mudar os
+critérios ou repetir um candidato reprovado.
+
+Executar a candidata R4 já congelada após revalidar preços, limites, conta e
+executor. Até seis requisições de desenvolvimento; até 44 finais somente se
+o gate real e seu selo passarem. Sem sondagem, retry, dados novos no final ou
+consumo dos 16 diagnósticos adicionais. A aprovação anterior apenas offline
+permanece como registro histórico; este pedido de conclusão é a nova base de
+continuidade. O resultado pode reprovar, o que impede adoção e integração.
+
+C06 depende de resultado elegível e decisão de adoção; C07/F09 final fecha os
+fluxos e a reprodução. E01 permanece posterior/opcional. O pedido não autoriza
+inferências ilimitadas na demonstração pública nem uso do teto experimental
+como orçamento recorrente do aplicativo.
