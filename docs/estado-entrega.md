@@ -20,8 +20,9 @@ rede com os perfis sintéticos de cliente e analista. Verificar atualização
 do chat, resposta do atendente simulado, handoff com histórico e isolamento
 por marca. A [última URL verificada](https://newbie-aqua-stem-reveal.trycloudflare.com/)
 é do túnel reaberto em 25/11/2026, com verificação da saúde da API em HTTPS.
-O acesso depende do computador e do túnel ativos e o endereço muda ao
-recriar o túnel. [Resultado F10](f10-resultado.md) · [Roteiro F10](f10.md).
+O responsável confirmou a abertura da página nesse endereço. O acesso
+depende do computador e do túnel ativos e o endereço muda ao recriar o túnel.
+[Resultado F10](f10-resultado.md) · [Roteiro F10](f10.md).
 
 Repetir a matriz F08 nas mesmas condições reforçaria a evidência sob carga
 após as correções. Aumento progressivo de taxa, carga de atendimento humano
@@ -30,15 +31,19 @@ e até dez mil conexões de chat são cenários exploratórios ainda sem mediç�
 
 ## Classificação real
 
-O C05-SF1 está em execução exploratória em CPU, fora da aplicação publicada.
-O piloto usa os casos de desenvolvimento para medir categoria. A avaliação
-de prioridade fica fora do escopo do piloto. A demonstração continua com
-fixture. A R5 segue como último resultado real registrado da qualificação,
-com a candidata descartada para adoção e a reserva da tentativa interrompida
-ainda pendente. [Piloto SetFit](planejamento/classificacao-comparativa/setfit-piloto.md) ·
-[Resultado R5](c05-luna-r5-resultado.md).
+O piloto C05-SF1 de categoria foi concluído em CPU, fora da aplicação
+publicada. Nos 16 casos sintéticos de desenvolvimento, acertou 15 decisões,
+com 12/12 acertos nos casos classificáveis e 3/4 revisões reconhecidas. No
+caso `jev-013`, o piloto previu `terminal` quando se esperava revisão. O p95
+de inferência por texto foi de 21,078 ms (n=16). Prioridade, calibração e
+qualificação final ficam para uma eventual retomada.
+[Plano do piloto SetFit](planejamento/classificacao-comparativa/setfit-piloto.md).
 
-Após o piloto, escolha e calibração (C05), integração (C06) e reprodução do
+A demonstração continua com fixture. A R5 é o último ensaio registrado do
+protocolo de qualificação. A candidata foi descartada para adoção e a reserva
+da tentativa interrompida segue pendente. [Resultado R5](c05-luna-r5-resultado.md).
+
+A escolha e a calibração (C05), a integração (C06) e a reprodução do
 complemento real em instalação limpa (C07/F09 final) ficam em espera até
 retomada explícita. O fechamento completo ainda requer qualificação conforme
 os critérios vigentes, adoção aprovada e o aceite do complemento real com

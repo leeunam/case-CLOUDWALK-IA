@@ -5,9 +5,14 @@
 Em 25/11/2026, às 12h44 de Brasília, o integrador renovou o túnel após a
 expiração da URL da UX02. A verificação da
 [nova URL temporária](https://newbie-aqua-stem-reveal.trycloudflare.com/)
-confirmou a saúde da API em HTTPS. O fluxo completo por outra rede segue
-pendente. O acesso depende do computador e do túnel ativos.
+confirmou a saúde da API em HTTPS. O acesso depende do computador e do túnel
+ativos.
 [Evidência da renovação](evidencias/f10/integrator-f10-renewal-2026-11-25.json).
+
+O responsável confirmou que abriu a página no novo endereço. Conversa,
+histórico após recarregar, handoff, acesso do analista e isolamento por marca
+seguem pendentes de verificação por outra rede.
+[Confirmação da abertura da página](evidencias/f10/integrator-f10-mobile-2026-11-25.json).
 
 ## Registro da publicação UX02
 
