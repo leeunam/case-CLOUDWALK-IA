@@ -1,5 +1,7 @@
 # C05-R5 · Candidata Luna com evidência
 
+**Estado em 25/11/2026:** política 2.1.0 revisada e [congelada](evidencias/c05/r5-candidata-v2/candidate-freeze.json), com 33 testes offline e os quatro alvos positivos de desenvolvimento aceitos. A versão 2.0.0 e seu bloqueio ficam preservados no histórico. Executor, revisão ampla e qualidade real continuam pendentes; zero novas chamadas ao fornecedor nesta preparação.
+
 A candidata mantém o modelo Luna e faz uma chamada por caso elegível. O
 catálogo, o relato e os campos válidos do canal compõem a entrada. O modelo
 propõe código, critério e citação por campo ausente. O IPC 1.1.0 vai dentro de
@@ -29,9 +31,27 @@ resposta recebida.
 
 ## Alcance da política
 
+A política 2.1.0 reconhece uma venda ausente de um lote quando a oração
+identifica crédito ou depósito em conta. A impossibilidade atual de todos
+pagarem sustenta urgência quando o relato também declara a ausência de outro
+meio e a citação contém a paralisação. Se o cliente acrescentar que os
+compradores pagam em dinheiro ou estão pagando por Pix, a política veta a
+paralisação total. Uma dúvida explícita sobre esse pagamento também deixa
+essa justificativa em revisão. Pagamentos anteriores e possibilidades futuras
+não demonstram disponibilidade atual. Uma perda em curso pode sustentar
+urgência com sua própria citação.
+
+Para o ajuste de exibição de um terminal em preparação, a categoria exige
+uma citação contínua que cubra o nome do equipamento na declaração de
+aquisição e o ajuste da letra ou do brilho na pergunta imediatamente seguinte.
+Para rotina, a pergunta pode ser citada sozinha quando o contexto identifica
+esse preparo e a operação está livre de prejuízo conhecido. Por exemplo,
+uma perda de vendas em andamento veta rotina mesmo que o ajuste da tela
+esteja bem documentado. O adaptador e o corpo da requisição seguem em 2.0.0.
+
 As relações buscam operações de Pix, recebimento associado a vendas e funções
 de um equipamento de pagamento identificável. A parte citada precisa conter
-uma relação reconhecida no contexto da própria oração. O sujeito da falha
+uma relação reconhecida na oração ou no par de orações de preparo. O sujeito da falha
 e o objeto da ação ajudam a distinguir operação de menção incidental.
 A leitura do relato inteiro verifica
 hipóteses, exclusões de assunto, transições de foco, impactos e alternativas.

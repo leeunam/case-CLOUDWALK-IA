@@ -151,6 +151,131 @@ class EvidenceTests(unittest.TestCase):
                 self.assert_field(item(text), prediction(code, criterion, text), status="abstained",
                                   reason="insufficient_relation")
 
+    def test_venda_ausente_do_lote_creditado(self):
+        sale = "A venda no débito de ontem não apareceu no depósito já creditado na nossa conta."
+        other = "Uma venda no cartão não foi incluída no lote que entrou no saldo."
+        cases = [
+            (sale, sale, True),
+            (other, other, True),
+            (sale, "depósito já creditado na nossa conta", False),
+            ("Por exemplo, " + sale, sale, False),
+            ("Se isso ocorrer, " + sale, sale, False),
+            ("Não é verdade: " + sale, sale, False),
+            ("O cupom d" + sale.lower(), sale[2:], False),
+            (sale + " Mas minha dúvida é como configurar a maquininha.", sale, False),
+            ("Uma venda no cartão não entrou no lote de notas fiscais.", "venda no cartão não entrou", False),
+            ("Uma venda no débito não entrou no lote que cair na minha conta.", "venda no débito não entrou", False),
+        ]
+        for text, quote, supported in cases:
+            with self.subTest(text=text, quote=quote):
+                self.assert_field(item(text), prediction("payouts", "sales_settlement", quote),
+                                  status="predicted" if supported else "abstained")
+
+    def test_paralisacao_de_pagadores_exige_ausencia_de_alternativa(self):
+        stop = "Nenhum dos clientes pode fazer o pagamento"
+        lack = "não temos outro meio de pagamento"
+        cases = [
+            (stop + " e " + lack + ".", stop, True),
+            ("Ninguém consegue pagar agora. Não temos outra forma de receber.", "Ninguém consegue pagar agora", True),
+            (stop + " e " + lack + ".", lack, False),
+            (stop + " e " + lack + "?", stop, False),
+            ("Não é verdade que " + stop.lower() + " e " + lack + ".", stop.lower(), False),
+            ("Se " + stop.lower() + " e " + lack + ", peço ajuda.", stop.lower(), False),
+            (stop + " e " + lack + ". Mas temos outro meio de cobrança.", stop, False),
+            (stop + " e " + lack + ". Mas os clientes já conseguem pagar por Pix.", stop, False),
+            (stop + " e " + lack + ", e seguimos vendendo pelo celular.", stop, False),
+            (stop + ". Não temos outro meio e já recebemos por Pix.", stop, False),
+            (stop + " e " + lack + ", e os clientes agora conseguem pagar por Pix.", stop, False),
+            (stop + " e não temos outro meio de transporte.", stop, False),
+            (stop + " da mensalidade. Não temos outra forma de receber.", stop, False),
+            (stop + " por cartão. Não temos outra forma de receber.", stop, False),
+        ]
+        for text, quote, supported in cases:
+            with self.subTest(text=text, quote=quote):
+                self.assert_field(item(text, requested=("priority",)), prediction("urgent", "immediate_harm", quote),
+                                  status="predicted" if supported else "abstained")
+
+    def test_pagamento_por_outro_meio_contradiz_paralisacao_total(self):
+        quote = "Ninguém consegue pagar"
+        stopped = quote + " e não temos outro meio de cobrança"
+        cases = (
+            (". Mas os compradores pagam em dinheiro normalmente.", "review"),
+            (". Mas todos os clientes pagam por Pix normalmente.", "review"),
+            (". Mas os compradores conseguem pagar em dinheiro.", "review"),
+            (", e todos os compradores estão pagando com cartão.", "review"),
+            (". Os clientes continuam pagando pelo celular.", "review"),
+            (". O pagamento por Pix continua funcionando.", "review"),
+            (". Não sei se os compradores estão pagando em dinheiro.", "review"),
+            (". Talvez os clientes paguem em espécie.", "review"),
+            (". Os clientes pagam por Pix?", "review"),
+            (".", "complete"),
+            (". Os compradores já não pagam em dinheiro.", "complete"),
+            (". Não é verdade que os clientes pagam por Pix.", "complete"),
+            (". Até ontem os clientes estavam pagando pelo celular.", "complete"),
+            (". Os clientes pagavam em dinheiro antes da falha.", "complete"),
+            (". Os clientes vão pagar com cartão amanhã.", "complete"),
+            (". Se a rede voltar, os clientes pagam por Pix.", "complete"),
+            (". Pedi que os clientes paguem em espécie amanhã.", "complete"),
+        )
+        for suffix, outcome in cases:
+            with self.subTest(suffix=suffix):
+                entry = item(stopped + suffix, requested=("priority",))
+                envelope, _, gateway = self.classify(entry, {"priority": prediction("urgent", "immediate_harm", quote)})
+                audit = envelope["audit"]["fields"]["priority"]
+                self.assertEqual((audit["quote"], audit["start"], audit["end"]), (quote, 0, len(quote)))
+                self.assertEqual(audit["reason"], "context_conflict" if outcome == "review" else "supported_relation")
+                decision = decide(entry, envelope["observation"], CATALOG, RUN_ID)
+                self.assertEqual(decision["outcome"], outcome)
+                self.assertEqual(decision["fields"]["priority"]["applied"], None if outcome == "review" else "urgent")
+                self.assertEqual(len(gateway.bodies), 1)
+
+        loss = "Estamos perdendo vendas agora"
+        text = stopped + ". Mas os compradores pagam em dinheiro. " + loss + "."
+        entry = item(text, requested=("priority",))
+        self.assert_field(entry, prediction("urgent", "immediate_harm", loss), status="predicted")
+        routine = "Como configurar a maquininha?"
+        entry = item(stopped + ". Os clientes pagam em dinheiro. " + routine, requested=("priority",))
+        self.assert_field(entry, prediction("basic", "routine", routine), status="abstained")
+
+    def test_ajuste_antes_do_uso_vincula_pedido_e_terminal_e_conserva_impacto(self):
+        device = "Compramos uma leitora de cartões. "
+        setup = "Onde posso ajustar o brilho da tela antes de abrir a loja?"
+        cases = [
+            (device + setup, True, True),
+            ("Recebi um novo terminal de pagamento. Como diminuir a fonte da tela antes de começar a atender?", True, True),
+            ("Recebi um tablet. " + setup, False, False),
+            ("Talvez eu tenha recebido uma maquininha. " + setup, False, False),
+            ("Não comprei uma leitora de cartões. " + setup, False, False),
+            ("Comprei uma etiqueta para a maquininha. " + setup, False, False),
+            (device + setup.replace("da tela", "da tela do celular"), False, False),
+            (device + "Não quero saber disso. " + setup, False, False),
+            (device + setup + " Ninguém consegue pagar por cartão.", True, False),
+            (device + setup + " Não é verdade que ninguém consegue pagar.", True, True),
+            (device + setup + " Estamos perdendo clientes a cada minuto.", True, False),
+        ]
+        for text, terminal, routine in cases:
+            with self.subTest(text=text):
+                for field, code, criterion, accepted in (
+                    ("category", "terminal", "terminal_operation", terminal),
+                    ("priority", "basic", "routine", routine),
+                ):
+                    quote = text.split("?")[0] + "?"
+                    self.assert_field(item(text, requested=(field,)), prediction(code, criterion, quote),
+                                      status="predicted" if accepted else "abstained")
+        for cid in ("preparo-sintetico", "outra-chave-sintetica"):
+            entry = item(device + setup, case_id=cid, requested=("category", "priority"))
+            predictions = {"category": prediction("terminal", "terminal_operation", device + setup),
+                           "priority": prediction("basic", "routine", setup)}
+            envelope, _, gateway = self.classify(entry, predictions)
+            decision = decide(entry, envelope["observation"], CATALOG, RUN_ID)
+            self.assertEqual(decision["outcome"], "complete")
+            self.assertEqual(len(gateway.bodies), 1)
+            self.assertEqual({f: outcome["applied"] for f, outcome in decision["fields"].items()},
+                             {"category": "terminal", "priority": "basic"})
+        self.assert_field(item(device + setup), prediction("terminal", "terminal_operation", setup), status="abstained")
+        excerpt = "leitora de cartões. Onde posso ajustar o brilho da tela"
+        self.assert_field(item(device + setup), prediction("terminal", "terminal_operation", excerpt), status="predicted")
+
     def test_falha_da_operacao_exige_o_sujeito_correto(self):
         for code, criterion, asserted, incidental in (
             ("pix", "pix_operation", "O Pix não chegou ao destinatário.",

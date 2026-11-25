@@ -7,7 +7,7 @@
     "requested_model": "openai/gpt-5.6-luna",
     "expected_returned_model": "openai/gpt-5.6-luna",
     "adapter_version": "2.0.0",
-    "policy_version": "2.0.0"
+    "policy_version": "2.1.0"
   },
   "prompt": {
     "path": "script/classification_comparison/adapters/luna/r5/prompt.txt",
@@ -16,8 +16,8 @@
   },
   "policy": {
     "path": "script/classification_comparison/adapters/luna/r5/evidence.py",
-    "version": "2.0.0",
-    "sha256": "0a2c09f7d5429c2f0a5d140330f70e75257a14b264cb02482bccca9789d1c4eb"
+    "version": "2.1.0",
+    "sha256": "42dcd4fd4806a485606d359eb64b86bcb59e4e299892288ce4e3624cde971557"
   },
   "rubric": {
     "path": "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
@@ -32,7 +32,7 @@
   "operational": {
     "path": "script/classification_comparison/adapters/luna/r5/operational.json",
     "version": "2.0.0",
-    "sha256": "e1272d763e140633ed7bc9670d4b31c3dd181d1cdf7d58deeda77409424a3d21"
+    "sha256": "745fbc7eeef9abf17c7fb2e3a8a28619a40941362ea4a8e8c01e75b20b28f1f3"
   },
   "evidence_schema": {
     "path": "script/classification_comparison/adapters/luna/r5/evidence-envelope.schema.json",
