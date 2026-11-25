@@ -195,6 +195,48 @@ class EvidenceTests(unittest.TestCase):
                 self.assert_field(item(text, requested=("priority",)), prediction("urgent", "immediate_harm", quote),
                                   status="predicted" if supported else "abstained")
 
+    def test_pagamento_por_outro_meio_contradiz_paralisacao_total(self):
+        quote = "Ninguém consegue pagar"
+        stopped = quote + " e não temos outro meio de cobrança"
+        cases = (
+            (". Mas os compradores pagam em dinheiro normalmente.", "review"),
+            (". Mas todos os clientes pagam por Pix normalmente.", "review"),
+            (". Mas os compradores conseguem pagar em dinheiro.", "review"),
+            (", e todos os compradores estão pagando com cartão.", "review"),
+            (". Os clientes continuam pagando pelo celular.", "review"),
+            (". O pagamento por Pix continua funcionando.", "review"),
+            (". Não sei se os compradores estão pagando em dinheiro.", "review"),
+            (". Talvez os clientes paguem em espécie.", "review"),
+            (". Os clientes pagam por Pix?", "review"),
+            (".", "complete"),
+            (". Os compradores já não pagam em dinheiro.", "complete"),
+            (". Não é verdade que os clientes pagam por Pix.", "complete"),
+            (". Até ontem os clientes estavam pagando pelo celular.", "complete"),
+            (". Os clientes pagavam em dinheiro antes da falha.", "complete"),
+            (". Os clientes vão pagar com cartão amanhã.", "complete"),
+            (". Se a rede voltar, os clientes pagam por Pix.", "complete"),
+            (". Pedi que os clientes paguem em espécie amanhã.", "complete"),
+        )
+        for suffix, outcome in cases:
+            with self.subTest(suffix=suffix):
+                entry = item(stopped + suffix, requested=("priority",))
+                envelope, _, gateway = self.classify(entry, {"priority": prediction("urgent", "immediate_harm", quote)})
+                audit = envelope["audit"]["fields"]["priority"]
+                self.assertEqual((audit["quote"], audit["start"], audit["end"]), (quote, 0, len(quote)))
+                self.assertEqual(audit["reason"], "context_conflict" if outcome == "review" else "supported_relation")
+                decision = decide(entry, envelope["observation"], CATALOG, RUN_ID)
+                self.assertEqual(decision["outcome"], outcome)
+                self.assertEqual(decision["fields"]["priority"]["applied"], None if outcome == "review" else "urgent")
+                self.assertEqual(len(gateway.bodies), 1)
+
+        loss = "Estamos perdendo vendas agora"
+        text = stopped + ". Mas os compradores pagam em dinheiro. " + loss + "."
+        entry = item(text, requested=("priority",))
+        self.assert_field(entry, prediction("urgent", "immediate_harm", loss), status="predicted")
+        routine = "Como configurar a maquininha?"
+        entry = item(stopped + ". Os clientes pagam em dinheiro. " + routine, requested=("priority",))
+        self.assert_field(entry, prediction("basic", "routine", routine), status="abstained")
+
     def test_ajuste_antes_do_uso_vincula_pedido_e_terminal_e_conserva_impacto(self):
         device = "Compramos uma leitora de cartões. "
         setup = "Onde posso ajustar o brilho da tela antes de abrir a loja?"

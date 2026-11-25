@@ -32,8 +32,12 @@ resposta recebida.
 A política 2.1.0 reconhece uma venda ausente de um lote quando a oração
 identifica crédito ou depósito em conta. A impossibilidade atual de todos
 pagarem sustenta urgência quando o relato também declara a ausência de outro
-meio e a citação contém a paralisação. Uma via de cobrança em funcionamento
-impede essa aceitação.
+meio e a citação contém a paralisação. Se o cliente acrescentar que os
+compradores pagam em dinheiro ou estão pagando por Pix, a política veta a
+paralisação total. Uma dúvida explícita sobre esse pagamento também deixa
+essa justificativa em revisão. Pagamentos anteriores e possibilidades futuras
+não demonstram disponibilidade atual. Uma perda em curso pode sustentar
+urgência com sua própria citação.
 
 Para o ajuste de exibição de um terminal em preparação, a categoria exige
 uma citação contínua que cubra o nome do equipamento na declaração de

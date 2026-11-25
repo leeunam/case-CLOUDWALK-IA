@@ -407,7 +407,19 @@ NO_ALTERNATIVE = re.compile(
 AVAILABILITY_CLAUSE = re.compile(
     r"(?:,\s*(?:e )?|\s+e )(?=(?:(?:agora|ja|ainda) )?(?:nao|sem|temos|tenho|existe|ha|"
     r"consigo|conseguimos|podemos|posso|sigo|seguimos|continuo|continuamos|"
-    r"aceitamos|recebemos|cobramos|os clientes|os compradores)\b)"
+    r"aceitamos|recebemos|cobramos|(?:(?:todos |alguns )?os? )?(?:clientes?|comprador(?:es)?|compradoras?)|"
+    r"(?:os? )?(?:pagamentos?|pix|cartao))\b)"
+)
+PAYMENT_METHOD = r"(?:(?:em|com) dinheiro|em especie|(?:por|via|no|pelo|com(?: o)?) (?:pix|cartao)|pelo celular)"
+PAYER = r"(?:clientes?|comprador(?:es)?|compradoras?)"
+CURRENT_PAYMENT = re.compile(
+    rf"\b(?:{PAYER} {ASPECT}(?:pagam?|(?:estao?|continuam?|seguem?) pagando) "
+    rf"(?:normalmente )?{PAYMENT_METHOD}|"
+    rf"(?:pagamentos? {PAYMENT_METHOD}|pix|cartao) {ASPECT}"
+    r"(?:(?:seguem?|continuam?|estao?) funcionando|funcionam?(?: normalmente)?))\b"
+)
+POSSIBLE_PAYMENT = re.compile(
+    rf"\b{PAYER} {ASPECT}(?:paguem?|(?:estejam?|continuem?|sigam?) pagando) (?:normalmente )?{PAYMENT_METHOD}\b"
 )
 IMMEDIATE_LOSS = re.compile(
     r"\b(?:(?:estou|estamos|seguimos|continuo|continuamos) perdendo "
@@ -540,6 +552,22 @@ def ambiguous_impact(text):
     return False
 
 
+def payment_conflicts_with_stop(context, last_recovery):
+    """Pagamento atual ou em dúvida impede confirmar a falta total de meios."""
+    for clause in reversed(context):
+        if clause is last_recovery:
+            break
+        if any_match((FUTURE, HYPOTHETICAL, EXCLUDED_FOCUS, INCIDENTAL), clause.text):
+            continue
+        for statement in AVAILABILITY_CLAUSE.split(clause.text):
+            if asserted_matches(CURRENT_PAYMENT, statement):
+                return True
+            uncertain = "?" in statement or UNCERTAINTY.search(statement)
+            if uncertain and any_match((CURRENT_PAYMENT, POSSIBLE_PAYMENT), statement):
+                return True
+    return False
+
+
 def priority_reason(criterion, context):
     proof = PRIORITY_EVIDENCE[criterion]
     setup_requests = quoted_setup_requests(context, require_device=False) if criterion == "routine" else {}
@@ -550,10 +578,10 @@ def priority_reason(criterion, context):
               or (PENDING_CONDITION.match(clause.text) and pending_consequences(clause)
                   and not any_match((EXCLUDED_FOCUS, INCIDENTAL), clause.text))]
     recovery = max((i for i, clause in enumerate(active) if PAST_OR_RESTORED.search(clause.text)), default=-1)
-    current = [clause for clause in active[recovery + 1:] if not FUTURE.search(clause.text)]
+    pending = active[recovery + 1:]
+    current = [clause for clause in pending if not FUTURE.search(clause.text)]
     # Orientação futura é suporte de rotina. Fatos futuros por si sós não são
     # prova de prejuízo atual. Um prazo futuro explícito pode ser imediato.
-    pending = active[recovery + 1:]
     handled = max((i for i, clause in enumerate(pending) if asserted_matches(HANDLED_DEADLINE, clause.text)), default=-1)
     immediate = [(clause, match) for clause in pending[handled + 1:] for match in pending_consequences(clause)]
     no_impact = any(asserted_matches(NEGATED_IMPACT, clause.text) for clause in current)
@@ -572,6 +600,8 @@ def priority_reason(criterion, context):
                       for part in statements)
     no_alternative = any(asserted_matches(NO_ALTERNATIVE, part) for part in statements)
     total_without_alternative = total if no_alternative and not alternative else []
+    if total_without_alternative and payment_conflicts_with_stop(context, active[recovery] if recovery >= 0 else None):
+        total_without_alternative = []
     payment_damage = False
     loss = [(clause, match) for clause in current for match in asserted_matches(IMMEDIATE_LOSS, clause.text)]
     for index, clause in enumerate(current):
@@ -589,7 +619,7 @@ def priority_reason(criterion, context):
         cited = any(clause.quote_start <= match.start() and match.end() <= clause.quote_end
                     for clause, match in urgent)
         return "supported_relation" if criterion == "immediate_harm" and cited else "context_conflict"
-    if (no_alternative and alternative and total) or (no_impact and (loss or immediate or total)):
+    if (total and no_alternative and not total_without_alternative) or (no_impact and (loss or immediate or total)):
         return "context_conflict"
     elif broad and not any(NOW.search(clause.text) for clause in broad):
         found, support = "broad_impact", broad
