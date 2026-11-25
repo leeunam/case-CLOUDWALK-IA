@@ -1,0 +1,56 @@
+{
+  "task": "F10-A",
+  "url": "https://newbie-aqua-stem-reveal.trycloudflare.com/",
+  "project": "cloudwalk_publish_integrator",
+  "timezone": "America/Sao_Paulo",
+  "aurora_chat": {
+    "case_id": "ad4a4699-5d96-4cce-a248-96b3568447fc",
+    "origin": "Brave no computador de origem via HTTPS público",
+    "marker": "F10-CLIENTE",
+    "classification": "pix/basic",
+    "status": "resolved",
+    "api_updated_at": "2026-11-25T16:30:33.903965Z",
+    "pending": []
+  },
+  "aurora_handoff": {
+    "case_id": "fdb5f11f-2401-41bf-b26d-8cecb76f03bc",
+    "origin": "Brave no computador de origem via HTTPS público",
+    "marker": "F10-HUMANO",
+    "classification": "terminal/advanced",
+    "status": "human_active",
+    "api_updated_at": "2026-11-25T16:31:01.951344Z",
+    "pending": [
+      "Resumo e referência na operação",
+      "Resposta humana e resolução"
+    ]
+  },
+  "horizonte_control": {
+    "case_id": "32ab943b-2bea-428f-adb7-a802fe53bfaf",
+    "origin": "Brave no computador de origem via HTTPS público",
+    "marker": "F10-HORIZONTE",
+    "classification": "pix/basic",
+    "status": "ai_active",
+    "api_updated_at": "2026-11-25T16:29:53.847098Z",
+    "pending": []
+  },
+  "mobile": {
+    "origin": "Celular do responsável por dados móveis, relato no chat",
+    "aurora_chat": {
+      "case_id": "d5e8b8b6-e825-45f6-bd33-fb735001ba88",
+      "status": "Dois retornos e quatro mensagens em ordem após recarregar, confirmados pelo responsável",
+      "pending": [],
+      "observed_at": "2026-11-25T13:34:00-03:00",
+      "time_precision": "minute, confirmação no chat"
+    },
+    "aurora_handoff": {
+      "case_id": null,
+      "status": "Pendente",
+      "pending": [
+        "Encaminhamento",
+        "Resposta humana",
+        "Histórico após recarga",
+        "ID"
+      ]
+    }
+  }
+}
