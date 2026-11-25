@@ -61,12 +61,14 @@ O serviço limita a 200 requisições simultâneas em voo e a disponibilidade po
 variar. [Roteiro e limites da publicação](docs/f10.md).
 
 Na URL anterior, o responsável confirmou por dados móveis dois retornos
-automáticos e quatro mensagens após recarregar. No endereço atual, o
-computador de origem verificou a resposta e a resolução pelo analista e
-passou nas 36 verificações de acesso por marca. O aceite externo ainda
-depende de concluir o handoff no celular e comparar o acesso de Bia e Cris
-ao mesmo caso Horizonte por outra rede.
-[Aceite integrado e roteiro das pendências](docs/f10-aceite-integrado.md).
+automáticos e quatro mensagens após recarregar. No endereço atual, Alex
+conferiu o contexto do handoff, respondeu e resolveu o atendimento móvel da
+Aurora. Com o Wi-Fi desligado, o responsável confirmou que a resposta apareceu
+automaticamente, persistiu após recarregar e o caso ficou como “Resolvido”.
+O fluxo externo da F10-A foi aprovado. A matriz pública de acesso por marca
+passou em 36 de 36 verificações no computador de origem. Na F10-B, falta comparar
+o acesso de Bia e Cris ao mesmo caso Horizonte por outra rede.
+[Aceite integrado e roteiro da verificação externa](docs/f10-aceite-integrado.md).
 
 O [roteiro de publicação](docs/f10.md) orienta a escolher um projeto exclusivo
 e executar `init`, `up` e `check` com `script/publish.py` antes de `prepare` e

@@ -277,12 +277,14 @@ de aceite continuam no plano de conclusão. C06 ainda requer qualificação
 e decisão de adoção. C07/F09 final requer a integração e a reprodução do
 trecho real em instalação limpa.
 
-A demonstração com fixture já tem prova de instalação limpa e de conversa
-simulada persistida por dados móveis. A conclusão de um caso pelo analista e
-a matriz de acesso por marca passaram na URL pública a partir do computador
-de origem. Durante a pausa, resta concluir o handoff no celular e comparar
-Bia e Cris no mesmo caso Horizonte por outra rede. O fechamento completo
-ainda depende do complemento real.
+A demonstração com fixture já tem prova de instalação limpa. O fluxo externo
+da F10-A foi aprovado com conversa simulada e histórico por dados móveis na
+URL anterior e com handoff, resposta e resolução na URL atual. O responsável
+confirmou no celular a chegada automática da resposta, a persistência após
+recarga e o estado “Resolvido”. A matriz pública de acesso por marca passou em
+36 de 36 verificações no computador de origem. Falta comparar Bia e Cris no
+mesmo caso Horizonte por outra rede (F10-B). O fechamento completo ainda
+depende do complemento real.
 [Aceite integrado F10](../f10-aceite-integrado.md) ·
 [Piloto SetFit](classificacao-comparativa/setfit-piloto.md) ·
 [Estado da entrega](../estado-entrega.md).

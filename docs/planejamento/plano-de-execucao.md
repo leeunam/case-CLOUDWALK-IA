@@ -258,11 +258,13 @@ A preparação F09-A comprovou a reprodução local com fixture. A F10 publicou
 a demonstração com login e dados sintéticos sobre um túnel HTTPS temporário
 do computador local. O reinício e a restauração foram verificados. Na URL
 anterior, o responsável confirmou dois retornos automáticos e quatro mensagens
-após recarga por dados móveis. Após a reabertura do túnel em 25/11/2026, o
-computador de origem verificou o handoff até a resolução pelo analista e
-passou nas 36 verificações de acesso por marca. O aceite externo ainda depende
-da conclusão do handoff no celular e da comparação de Bia e Cris para o mesmo
-caso Horizonte por outra rede.
+após recarga por dados móveis. Após a reabertura do túnel em 25/11/2026, Alex
+conferiu o contexto do handoff, respondeu e resolveu o atendimento móvel da
+Aurora. Por dados móveis, o responsável confirmou a chegada automática da
+resposta, a persistência após recarga e o estado “Resolvido”. O fluxo externo
+da F10-A foi aprovado. A matriz pública de acesso por marca passou em 36 de 36
+verificações no computador de origem. A F10-B ainda exige a comparação de Bia
+e Cris no mesmo caso Horizonte por outra rede.
 [F09-A](../f09.md) · [Aceite integrado F10](../f10-aceite-integrado.md) ·
 [Histórico da publicação](../f10-resultado.md) · [UX02](../ux02.md).
 
