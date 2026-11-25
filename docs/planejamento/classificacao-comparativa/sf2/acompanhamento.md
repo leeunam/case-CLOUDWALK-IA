@@ -66,6 +66,12 @@ Continuação autorizada após a conclusão de 00/01/02. Base comum dos agentes:
 | 03 · treino e adaptador | Sol, alto | `feat/sf2-treinamento` · `.worktrees/sf2-treinamento` | Pins/imports, export/reload e comportamento do worker com fixtures identificadas |
 | 04 · avaliador | Astra, alto | `feat/sf2-avaliador` · `.worktrees/sf2-avaliador` | Métricas, grade, auditoria/congelamento e execução com fixtures matemáticas e de processo |
 
+Os dois códigos passaram pelas revisões individuais e foram integrados em
+`237df80`. O aceite combinado conferiu transporte, extração idêntica dos
+scores e bloqueio do final com fixture inelegível. Identificou, porém, um
+vínculo incompleto entre o índice do adaptador e os arquivos executados;
+a correção 2 de 04 está em andamento. A integração ainda não libera 05.
+
 03 prepara o código de treino e o adaptador; 04 prepara o avaliador e a
 seleção da regra de revisão. Essas implementações podem trabalhar com fixtures
 em paralelo, consumindo a nova base integrada. O treino real continua em 05,
