@@ -55,8 +55,9 @@ A publicação da demonstração não conclui esses marcos.
 
 As sondas e o navegador usaram o endereço público a partir do computador de
 origem. A ferramenta remota de consulta não conseguiu acessar esse endereço.
-O responsável confirmou que as marcas e os canais aparecem no celular usando
-dados móveis, atendendo à verificação por outra rede.
+Na primeira URL da F10, o responsável abriu a página pelo celular usando
+dados móveis e confirmou a exibição de marcas e canais. A conversa, o handoff
+e o isolamento por marca ainda precisam ser verificados a partir de outra rede.
 Não há servidor permanente nem compromisso de disponibilidade. As condições do
 Quick Tunnel e os procedimentos para obter credenciais em terminal privado,
 parar, reabrir e restaurar estão no [roteiro F10](f10.md).
