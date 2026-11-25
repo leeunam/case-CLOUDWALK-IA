@@ -7,9 +7,9 @@ Primeira onda autorizada pelo responsável em 25/11/2026. Base comum:
 
 | Frente | Responsável | Estado | Próxima evidência |
 | --- | --- | --- | --- |
-| 00 · contratos e validadores | Agente Astra, alto | Implementação `16133fb` entregue; correção dos achados da revisão em curso | Fechar cinco falhas de vínculo/aceite com regressões; nova revisão antes de integrar |
-| 01 · dados públicos | Agente Sol, alto | Autoria A registrada em `50ee50a`: 150 textos de treino + 90 de validação; manifesto ainda em rascunho | Anotação B independente, conciliação, aceite pelo validador integrado e auditoria de novidade |
-| 02 · teste final reservado | Agente Sol, alto, distinto do autor da candidata | Autoria privada iniciada na worktree `sf2-dados-finais` | 120 textos privados, duas anotações e auditoria; somente contagens/hash ficam públicos |
+| 00 · contratos e validadores | Agente Astra, alto, com revisão independente | Aceita e integrada em `c4fe01f`; 16 testes passaram após corrigir cinco achados da revisão | Consumidores usam o contrato integrado; não há modelo treinado nesta entrega |
+| 01 · dados públicos | Agente Sol, alto, anotador B e auditor independentes | Rascunho `50ee50a` com 150 + 90 textos e duas anotações concordantes; auditoria semântica reprovou a novidade | Substituir os 70 relatos apontados, adjudicar 45 pares incertos e repetir a anotação cega dos textos alterados antes do aceite |
+| 02 · teste final reservado | Agente Sol, alto, distinto do autor da candidata, com anotador B independente | 120 rascunhos privados anotados; revisão preliminar apontou 18 substituições prospectivas | Segunda anotação das substituições e auditoria independente contra o público aceito; nenhum selo final aceito ainda |
 
 O chat dispõe de dois agentes de trabalho além do integrador. As três frentes
 já foram iniciadas e são escalonadas conforme as vagas; revisores
@@ -35,3 +35,9 @@ Esta onda prepara contratos e dados. Não treina os especialistas nem mede
 acerto, confiança ou latência de classificação SF2. A demonstração continua
 fixture e não há chamadas à API de classificador. Treino real espera os
 aceites e selos previstos nos cards 00–04; adoção depende da qualificação.
+
+A concordância dos anotadores não prova novidade nem qualidade do futuro
+modelo. Nesta revisão, o filtro lexical não encontrou duplicatas, mas a leitura
+semântica detectou cenários reaproveitados. Os rascunhos e as primeiras
+anotações permanecem registrados; textos novos exigem anotações novas. O
+teste final continua reservado e não é mostrado aos autores dos modelos.
