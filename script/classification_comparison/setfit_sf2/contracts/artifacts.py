@@ -1,6 +1,8 @@
 """Integridade das referências e condições mínimas para publicar um resultado."""
 from collections import Counter
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+
+from jsonschema import Draft202012Validator
 
 from .data import validate_dataset
 from .ipc import validate_scores, validate_vector
@@ -50,9 +52,12 @@ def _training_freeze(manifest, paths):
     structure("finalSeal", read(paths["final_seal"]))
     public = read(paths["public_manifest"])
     structure("publicManifest", public)
-    require(public["stage"] == "accepted" and public["review_receipt_sha256"] and public["token_lengths_sha256"] and
-            all(public["files"][k]["sha256"] == expected[k] for k in ("train", "validation", "annotations")),
-            "dados públicos não vinculados a manifesto aceito")
+    require(public["stage"] == "accepted", "pré-treino exige manifesto público aceito")
+    public_paths = {role: paths[role] for role in (*public["files"], "review_receipt", "token_lengths")}
+    _data_manifest(public, public_paths)
+    recipe = read(paths["arguments"])
+    require(Draft202012Validator({"const": PROTOCOL["training"]}).is_valid(recipe),
+            "receita de treino diverge dos parâmetros aprovados")
 
 
 def _model_manifest(manifest, paths):
@@ -66,7 +71,19 @@ def _model_manifest(manifest, paths):
             "manifesto de pesos não vincula arquivos obrigatórios")
     verify_files(expected, paths)
     for field in FIELDS:
-        require(read(paths[field + ".manifest"]) == manifest["models"][field], "descritor de modelo divergente")
+        components = manifest["models"][field]
+        require(read(paths[field + ".manifest"]) == components, "descritor de modelo divergente")
+        for component in components:
+            role = field + "." + component
+            index = read(paths[role])
+            structure("componentIndex", index)
+            prefix = role + "/"
+            members = {k.removeprefix(prefix): digest for k, digest in expected.items() if k.startswith(prefix)}
+            require(members == index["files"], "membro do componente ausente ou divergente")
+            for name in members:
+                member = PurePosixPath(name)
+                require(member.parts and not member.is_absolute() and ".." not in member.parts and
+                        str(member) == name and "\\" not in name, "nome de membro inválido")
     training = read(paths["training_freeze"])
     structure("trainingFreeze", training)
     require(training["files"]["arguments"] == expected["arguments"], "argumentos não congelados")
@@ -84,6 +101,8 @@ def _freeze(manifest, paths):
     validate_report(report)
     require(report["partition"] == "validation" and report["status"] == "eligible", "validação inelegível")
     files = manifest["files"]
+    require(report["predictions_sha256"] == files["validation_predictions"],
+            "previsões de validação divergem do relatório")
     require(model["training_freeze_sha256"] == files["training_freeze"] and
             training["final_seal_sha256"] == files["final_seal"] and seal["files"]["final"]["sha256"] == files["final"] and
             all(files[k] == training["files"][k] for k in ("train", "validation")), "dados ou pacote divergentes")
@@ -92,6 +111,11 @@ def _freeze(manifest, paths):
             manifest["class_order"] == model["class_order"] == scores["class_order"] and
             manifest["model_sha256"] == model["model_sha256"] == scores["model_sha256"], "classes/pesos/scores incompatíveis")
     records = read_lines(paths["validation"])
+    predictions = read_lines(paths["validation_predictions"])
+    for decision in predictions:
+        structure("decision", decision)
+    require(len(predictions) == len(records) and {d["id"] for d in predictions} == {r["id"] for r in records},
+            "inventário das decisões de validação divergente")
     validate_scores(scores, records, dataset_sha256=files["validation"],
                     package_sha256=files["model_manifest"], model_sha256=model["model_sha256"],
                     class_order=model["class_order"])
@@ -158,7 +182,9 @@ def validate_report(report):
             require(interval[0] <= interval[1], "limites de Wilson invertidos")
     if report["status"] == "inconclusive":
         return
-    for name, denominator in (("wrong_expected_review", quota["expected_review_cases"]),
+    provided_fields = total * len(FIELDS) - sum(quota["target_fields"].values())
+    for name, denominator in (("preservation", provided_fields),
+                              ("wrong_expected_review", quota["expected_review_cases"]),
                               ("raw_urgent", quota["urgent_target_cases"]), ("applied_urgent", quota["urgent_target_cases"]),
                               ("automatic_coverage", quota["classifiable_cases"]),
                               ("correct_coverage", quota["classifiable_cases"]), ("review_by_case", total)):

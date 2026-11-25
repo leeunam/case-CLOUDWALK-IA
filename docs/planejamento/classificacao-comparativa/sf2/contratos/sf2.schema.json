@@ -451,7 +451,9 @@
             "annotations": {"$ref": "#/$defs/hash"},
             "arguments": {"$ref": "#/$defs/hash"},
             "training_code": {"$ref": "#/$defs/hash"},
-            "public_manifest": {"$ref": "#/$defs/hash"}
+            "public_manifest": {"$ref": "#/$defs/hash"},
+            "review_receipt": {"$ref": "#/$defs/hash"},
+            "token_lengths": {"$ref": "#/$defs/hash"}
           },
           "required": [
             "rubric",
@@ -465,7 +467,9 @@
             "annotations",
             "arguments",
             "training_code",
-            "public_manifest"
+            "public_manifest",
+            "review_receipt",
+            "token_lengths"
           ],
           "additionalProperties": false
         },
@@ -479,6 +483,12 @@
       "minProperties": 1,
       "propertyNames": {"type": "string", "minLength": 1, "pattern": "\\S"},
       "additionalProperties": {"$ref": "#/$defs/hash"}
+    },
+    "componentIndex": {
+      "type": "object",
+      "properties": {"files": {"$ref": "#/$defs/fileHashes"}},
+      "required": ["files"],
+      "additionalProperties": false
     },
     "modelManifest": {
       "type": "object",
@@ -556,6 +566,7 @@
             "policy": {"$ref": "#/$defs/hash"},
             "validation_scores": {"$ref": "#/$defs/hash"},
             "validation_report": {"$ref": "#/$defs/hash"},
+            "validation_predictions": {"$ref": "#/$defs/hash"},
             "final_seal": {"$ref": "#/$defs/hash"},
             "command": {"$ref": "#/$defs/hash"},
             "versions": {"$ref": "#/$defs/hash"},
@@ -570,6 +581,7 @@
             "policy",
             "validation_scores",
             "validation_report",
+            "validation_predictions",
             "final_seal",
             "command",
             "versions",

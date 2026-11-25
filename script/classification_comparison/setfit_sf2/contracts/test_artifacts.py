@@ -21,6 +21,10 @@ def write_rows(path, rows):
     path.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
 
 
+def hashes(paths):
+    return {k: sha256(v) for k, v in paths.items()}
+
+
 def prop(n, d):
     interval = None
     if d:
@@ -144,42 +148,123 @@ class ArtifactTest(unittest.TestCase):
             with self.assertRaisesRegex(ContractError, "SHA-256"):
                 validate_manifest("publicManifest", manifest, paths)
 
+    def _file(self, folder, role, obj):
+        path = folder / (role + ".json")
+        write(path, obj)
+        return path
+
+    def _training_case(self, folder):
+        public, data_paths = self._public_files(folder, "accepted")
+        paths = dict(data_paths)
+        paths.update({k: ROOT / v["path"] for k,v in PROTOCOL["sources"].items()})
+        paths.update(protocol=PLAN/"protocolo.json", contracts=SCHEMA_PATH, training_code=self._file(folder, "code","fixture"),
+                     arguments=self._file(folder, "arguments",PROTOCOL["training"]), public_manifest=self._file(folder, "public",public))
+        seal = dict(contract_version=VERSION, stage="accepted",
+                    files={k:dict(path=name,sha256="c"*64) for k,name in
+                           (("final","final.jsonl"),("annotations","annotations-final.jsonl"))},
+                    counts=dict(total=120,classifiable=96,expected_review=24,urgent_targets=17),
+                    review_receipt_sha256="d"*64,token_lengths_sha256="e"*64)
+        training = dict(contract_version=VERSION,files=hashes(paths))
+        paths["final_seal"] = self._file(folder, "seal",seal)
+        training["final_seal_sha256"] = sha256(paths["final_seal"])
+        return training, paths, seal
+
+    def test_training_freeze_requires_accepted_annotations_and_receipts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            training, paths, _ = self._training_case(folder)
+            validate_manifest("trainingFreeze", training, paths)
+            for role in ("token_lengths", "review_receipt"):
+                with self.subTest(role=role), self.assertRaises(ContractError):
+                    validate_manifest("trainingFreeze", training, {k: v for k, v in paths.items() if k != role})
+            # Recalcula os hashes, inclusive o do recibo, para uma versão só com A.
+            rows = read_lines(paths["annotations"])
+            for entry in rows:
+                entry["annotations"] = entry["annotations"][:1]
+                entry["reconciliation"] = None
+            write_rows(paths["annotations"], rows)
+            digest = sha256(paths["annotations"])
+            public = read(paths["public_manifest"])
+            receipt = read(paths["review_receipt"])
+            public["files"]["annotations"]["sha256"] = receipt["files"]["annotations"] = digest
+            write(paths["review_receipt"], receipt)
+            public["review_receipt_sha256"] = sha256(paths["review_receipt"])
+            write(paths["public_manifest"], public)
+            for role in ("public_manifest", "review_receipt", "annotations"):
+                training["files"][role] = sha256(paths[role])
+            with self.assertRaisesRegex(ContractError, "anotação autoral"):
+                validate_manifest("trainingFreeze", training, paths)
+
+    def test_training_freeze_rejects_changed_seed_with_correct_digest(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            training, paths, _ = self._training_case(Path(tmp))
+            write(paths["arguments"], {**PROTOCOL["training"], "seed": 7})
+            training["files"]["arguments"] = sha256(paths["arguments"])
+            with self.assertRaisesRegex(ContractError, "receita"):
+                validate_manifest("trainingFreeze", training, paths)
+
+    def test_report_preservation_counts_all_provided_fields(self):
+        for partition in ("validation", "final"):
+            for status in ("eligible", "failed"):
+                report = sample_report(partition)
+                report.update(status=status)
+                report["metrics"]["preservation"] = prop(1, 1)
+                if status == "failed":
+                    report["metrics"]["partial_applications"] = 1
+                with self.subTest(partition=partition, status=status), self.assertRaisesRegex(ContractError, "preservation"):
+                    validate_report(report)
+
+    def _model_case(self, folder, training, paths):
+        model_paths = dict(training_freeze=self._file(folder, "training", training), arguments=paths["arguments"])
+        models, orders = {}, fixture("both")["class_order"]
+        for field in FIELDS:
+            components = {}
+            for component in ("base_encoder", "encoder", "head", "tokenizer", "training_evidence"):
+                role = field + "." + component
+                members = ["tokenizer.json", "vocab.txt"] if component == "tokenizer" else ["single.bin"]
+                index = {}
+                for name in members:
+                    payload = self._file(folder, role + "-" + name, "controle de bytes")
+                    model_paths[role + "/" + name] = payload
+                    index[name] = sha256(payload)
+                model_paths[role] = self._file(folder, role, {"files": index})
+                components[component] = sha256(model_paths[role])
+            model_paths[field + ".manifest"] = self._file(folder, field + ".manifest", components)
+            models[field] = components
+        model = dict(contract_version=VERSION, training_freeze_sha256=sha256(model_paths["training_freeze"]),
+                     model_sha256={f: sha256(model_paths[f + ".manifest"]) for f in FIELDS}, class_order=orders,
+                     versions={"python": "fixture"}, arguments_sha256=sha256(paths["arguments"]),
+                     models=models, files=hashes(model_paths))
+        return model, model_paths
+
+    def test_model_requires_component_members_and_exact_bytes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            training, paths, _ = self._training_case(folder)
+            model, model_paths = self._model_case(folder, training, paths)
+            validate_manifest("modelManifest", model, model_paths)
+            role = "category.tokenizer/tokenizer.json"
+            without_member = deepcopy(model)
+            del without_member["files"][role]
+            with self.assertRaisesRegex(ContractError, "membro"):
+                validate_manifest("modelManifest", without_member, {k:v for k,v in model_paths.items() if k != role})
+            write(model_paths[role], "bytes divergentes")
+            with self.assertRaisesRegex(ContractError, "SHA-256"):
+                validate_manifest("modelManifest", model, model_paths)
+            model["files"][role] = sha256(model_paths[role])
+            with self.assertRaisesRegex(ContractError, "membro"):
+                validate_manifest("modelManifest", model, model_paths)
+
     def test_freezes_and_model_with_fixture_bytes_only(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)
             def file(role, obj):
-                path = folder / (role + ".json")
-                write(path, obj)
-                return path
-            def hashes(paths):
-                return {k: sha256(v) for k,v in paths.items()}
-            public, data_paths = self._public_files(folder, "accepted")
-            paths = {k: data_paths[k] for k in public["files"]}
-            paths.update({k: ROOT / v["path"] for k,v in PROTOCOL["sources"].items()})
-            paths.update(protocol=PLAN/"protocolo.json", contracts=SCHEMA_PATH, training_code=file("code","fixture"),
-                         arguments=file("arguments",PROTOCOL["training"]), public_manifest=file("public",public))
-            seal = dict(contract_version=VERSION, stage="accepted",
-                        files={k:dict(path=name,sha256="c"*64) for k,name in
-                               (("final","final.jsonl"),("annotations","annotations-final.jsonl"))},
-                        counts=dict(total=120,classifiable=96,expected_review=24,urgent_targets=17),
-                        review_receipt_sha256="d"*64,token_lengths_sha256="e"*64)
-            training = dict(contract_version=VERSION,files=hashes(paths))
-            paths["final_seal"] = file("seal",seal)
-            training["final_seal_sha256"] = sha256(paths["final_seal"])
-            validate_manifest("trainingFreeze",training,paths)
-            model_paths = dict(training_freeze=file("training",training), arguments=paths["arguments"])
-            models, orders = {}, fixture("both")["class_order"]
-            for f in FIELDS:
-                entries = {role:file(f+"."+role, f+" "+role) for role in
-                           ("base_encoder","encoder","head","tokenizer","training_evidence")}
-                models[f] = hashes(entries)
-                model_paths.update({f+"."+k:v for k,v in entries.items()})
-                model_paths[f+".manifest"] = file(f+".manifest",models[f])
-            model_hashes = {f:sha256(model_paths[f+".manifest"]) for f in FIELDS}
-            model = dict(contract_version=VERSION,training_freeze_sha256=sha256(model_paths["training_freeze"]),
-                         model_sha256=model_hashes,class_order=orders,versions={"python":"fixture"},
-                         arguments_sha256=sha256(paths["arguments"]),models=models,files=hashes(model_paths))
-            validate_manifest("modelManifest",model,model_paths)
+                return self._file(folder, role, obj)
+            training, paths, seal = self._training_case(folder)
+            validate_manifest("trainingFreeze", training, paths)
+            model, model_paths = self._model_case(folder, training, paths)
+            validate_manifest("modelManifest", model, model_paths)
+            orders, model_hashes = model["class_order"], model["model_sha256"]
             records = read_lines(paths["validation"])
             fx = {k:paths[k] for k in ("train","validation","final_seal")}
             fx.update(training_freeze=model_paths["training_freeze"],model_manifest=file("model",model),
@@ -191,12 +276,52 @@ class ArtifactTest(unittest.TestCase):
                               f:dict(classes=orders[f],scores=[int(x == r["gold"][f]) for x in orders[f]])
                               for f in r["missing_fields"]}) for r in records])
             fx["validation_scores"] = file("scores",scores)
+            fx["validation_predictions"] = folder / "decisions.jsonl"
+            decisions = []
+            templates = {name: fixture(name)["decision"] for name in ("category-only", "priority-only", "both")}
+            for record, scored in zip(records, scores["rows"], strict=True):
+                missing = record["missing_fields"]
+                decision = deepcopy(templates["both" if len(missing) == 2 else missing[0] + "-only"])
+                decision.update(id=record["id"], received=record["received"], package_sha256=scores["package_sha256"],
+                                policy_sha256=sha256(fx["policy"]), model_sha256=model_hashes)
+                applied = {}
+                for field, vector in scored["heads"].items():
+                    raw = record["gold"][field]
+                    result = decision["fields"][field]
+                    result.update(raw=raw, vector=vector)
+                    if raw == "informacao_insuficiente":
+                        result.update(decision="review", reason="raw_review")
+                    else:
+                        applied[field] = raw
+                complete = set(applied) == set(missing)
+                decision.update(outcome="complete" if complete else "review", applied=applied if complete else {})
+                decisions.append(decision)
+            write_rows(fx["validation_predictions"], decisions)
             report = sample_report("validation")
-            report.update(policy_sha256=sha256(fx["policy"]), score_package_sha256=sha256(fx["validation_scores"]))
+            report.update(predictions_sha256=sha256(fx["validation_predictions"]), policy_sha256=sha256(fx["policy"]),
+                          score_package_sha256=sha256(fx["validation_scores"]))
             fx["validation_report"] = file("report",report)
             freeze = dict(contract_version=VERSION, files={**hashes(fx), "final":seal["files"]["final"]["sha256"]},
                           model_sha256=model_hashes,class_order=orders,validation_eligible=True)
             validate_manifest("freeze",freeze,fx)  # sem caminho do final reservado
+            missing = {k: v for k, v in fx.items() if k != "validation_predictions"}
+            with self.assertRaisesRegex(ContractError, "inventário"):
+                validate_manifest("freeze", freeze, missing)
+            data = fx["validation_predictions"].read_bytes()
+            fx["validation_predictions"].write_bytes(data + b" ")
+            with self.assertRaisesRegex(ContractError, "SHA-256"):
+                validate_manifest("freeze", freeze, fx)
+            wrong_predictions = deepcopy(freeze)
+            wrong_predictions["files"]["validation_predictions"] = sha256(fx["validation_predictions"])
+            with self.assertRaisesRegex(ContractError, "previsões"):
+                validate_manifest("freeze", wrong_predictions, fx)
+            fx["validation_predictions"].write_bytes(b"")
+            absent_report = {**report, "predictions_sha256": sha256(fx["validation_predictions"])}
+            absent_paths = {**fx, "validation_report": file("empty-report", absent_report)}
+            absent_freeze = {**freeze, "files": {**freeze["files"], **hashes(absent_paths)}}
+            with self.assertRaisesRegex(ContractError, "inventário das decisões"):
+                validate_manifest("freeze", absent_freeze, absent_paths)
+            fx["validation_predictions"].write_bytes(data)
             bad_scores = deepcopy(scores)
             first = bad_scores["rows"][0]
             first["heads"].pop("category")
