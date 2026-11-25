@@ -5,14 +5,14 @@ Primeira onda autorizada pelo responsável em 25/11/2026. Base comum:
 [Aprovação](aprovacao.json) · [Especificação](especificacao.md) ·
 [Cards e aceites](tarefas.md).
 
-| Frente | Responsável | Estado inicial | Próxima evidência |
+| Frente | Responsável | Estado | Próxima evidência |
 | --- | --- | --- | --- |
-| 00 · contratos e validadores | Agente Astra, alto | Implementação em execução, na worktree `sf2-contratos` | Schemas, fixtures válidas/inválidas e testes reais; revisão independente antes de integrar |
-| 01 · dados públicos | Agente Sol, alto | Autoria em execução, na worktree `sf2-dados-publicos` | 150 textos de treino + 90 de validação com anotação A; depois anotação B independente e conciliação |
-| 02 · teste final reservado | Agente Sol, alto, distinto do autor da candidata | Worktree `sf2-dados-finais` preparada; aguarda vaga de agente | 120 textos privados, duas anotações e auditoria; somente contagens/hash ficam públicos |
+| 00 · contratos e validadores | Agente Astra, alto | Implementação `16133fb` entregue; correção dos achados da revisão em curso | Fechar cinco falhas de vínculo/aceite com regressões; nova revisão antes de integrar |
+| 01 · dados públicos | Agente Sol, alto | Autoria A registrada em `50ee50a`: 150 textos de treino + 90 de validação; manifesto ainda em rascunho | Anotação B independente, conciliação, aceite pelo validador integrado e auditoria de novidade |
+| 02 · teste final reservado | Agente Sol, alto, distinto do autor da candidata | Autoria privada iniciada na worktree `sf2-dados-finais` | 120 textos privados, duas anotações e auditoria; somente contagens/hash ficam públicos |
 
 O chat dispõe de dois agentes de trabalho além do integrador. As três frentes
-são independentes na autoria e serão escalonadas conforme as vagas; revisores
+já foram iniciadas e são escalonadas conforme as vagas; revisores
 também usam essas vagas. Código de contratos e dados aceitos chegam aos demais
 apenas por commits integrados, sem consumir arquivos em edição de outra frente.
 
