@@ -17,13 +17,16 @@ O JSON público de configuração contém exatamente as seguintes propriedades.
 | --- | --- |
 | `training_files` | Objeto de caminhos explícitos por papel para o validador `trainingFreeze` de 00, incluindo `final_seal` público, recibo de revisão e tokenização |
 | `model_files` | Objeto de caminhos explícitos por papel para `modelManifest`, incluindo `training_freeze`, descritores, índices e membros |
-| `model_manifest`, `adapter`, `versions` | Caminhos do manifesto geral, do artefato de código do adaptador e do JSON de versões que contém as versões do manifesto |
+| `model_manifest`, `versions` | Caminhos do manifesto geral e do JSON de versões que contém as versões do manifesto |
+| `adapter` | Caminho de um JSON `componentIndex`. O mapa `files` associa cada caminho POSIX relativo à raiz da worktree ao SHA-256 dos bytes do membro |
 | `capture_policy` | Caminho de um documento `policy` com `tau=0.5` e `delta=0` nos dois campos |
 | `capture_command`, `final_command` | Caminhos de arquivos JSON, cada um contendo o argv completo de um worker local de confiança. O segundo aponta para a política que será gravada em `VALIDACAO/policy.json`. Não se usa shell para executar esses argumentos |
 | `costs` | Caminho do recibo JSON com `download_ms`, `training_ms` e `classifier_api_calls`. O operador fornece as medições das etapas anteriores e atesta zero chamadas externas do classificador. Valores ausentes de tempo podem ser nulos e impedem conclusão |
 | `startup_seconds` | Prazo operacional explícito para receber READY do novo processo. O prazo fixo de cada caso é 5.000 ms |
 
-Os inventários de arquivos e o recibo de exposição dependem da custódia pelo operador. A igualdade de hashes verifica bytes e permite reprodução. O executor lê somente caminhos explícitos. Reserve um diretório de saída novo por etapa e mantenha o recibo de freeze aprovado sob custódia independente.
+Para montar o índice do adaptador, comece pelo `files` de `training.fit.code_manifest()` de 03 e acrescente `script/classification_comparison/setfit_sf2/adapter/__main__.py` com seu SHA-256. Nesta base são 17 membros. A captura e o congelamento vinculam o digest do índice. O avaliador confere a cobertura contra o inventário congelado do treino e o código local de 03, relendo os membros e o ponto de entrada antes da coleta e da liberação do final. Os caminhos devem resolver dentro da worktree. O operador deve usar um argv e um intérprete confiáveis que importem o worker dessa worktree.
+
+Os inventários de arquivos e o recibo de exposição dependem da custódia pelo operador. A igualdade de hashes verifica bytes e permite reprodução. Reserve um diretório de saída novo por etapa e mantenha o recibo de freeze aprovado sob custódia independente.
 
 ## Sequência de execução
 
