@@ -1,0 +1,49 @@
+{
+  "model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+  "revision": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
+  "files": {
+    "1_Pooling/config.json": {
+      "size": 190,
+      "git_blob_sha1": "d1514c3162bbe87b343f565fadc62e6c06f04f03"
+    },
+    "config.json": {
+      "size": 645,
+      "git_blob_sha1": "c06d5b49495f044e6380e68a60538be17a6bd5d1"
+    },
+    "config_sentence_transformers.json": {
+      "size": 122,
+      "git_blob_sha1": "b974b349cb2d419ada11181750a733ff82f291ad"
+    },
+    "model.safetensors": {
+      "size": 470641600,
+      "git_blob_sha1": "295bf8c5f879ae1c9b51986a824e4c0f70d9eb42",
+      "sha256": "eaa086f0ffee582aeb45b36e34cdd1fe2d6de2bef61f8a559a1bbc9bd955917b"
+    },
+    "modules.json": {
+      "size": 229,
+      "git_blob_sha1": "f7640f94e81bb7f4f04daf1668850b38763a13d9"
+    },
+    "sentence_bert_config.json": {
+      "size": 53,
+      "git_blob_sha1": "5fd10429389515d3e5cccdeda08cae5fea1ae82e"
+    },
+    "sentencepiece.bpe.model": {
+      "size": 5069051,
+      "git_blob_sha1": "7a3f40a75f870bc1f21700cd414dc2acc431583c",
+      "sha256": "cfc8146abe2a0488e9e2a0c56de7952f7c11ab059eca145a0a727afce0db2865"
+    },
+    "special_tokens_map.json": {
+      "size": 239,
+      "git_blob_sha1": "2ea7ad0e45a9d1d1591782ba7e29a703d0758831"
+    },
+    "tokenizer.json": {
+      "size": 9081518,
+      "git_blob_sha1": "c8feb62b21a4f391c3e71d1e37218c14f19e88d2",
+      "sha256": "2c3387be76557bd40970cec13153b3bbf80407865484b209e655e5e4729076b8"
+    },
+    "tokenizer_config.json": {
+      "size": 526,
+      "git_blob_sha1": "3c1b565ae10a15a1d0c31096f834af2fd9359e91"
+    }
+  }
+}
