@@ -185,8 +185,9 @@ dos painéis, as funções e os contratos foram preservados.
 
 Entrega `1adc941..8ac8a00`, branch `feat/estilo-cloudwalk`, aceita nas revisões
 por tarefa e ampla, com 34 testes, build e inspeção desktop/móvel. A publicação
-foi reaberta em novo endereço temporário; [UX02](../ux02.md) contém URL vigente,
-provas, limites e roteiro. C05 real/C06/C07 continuam pendentes e independentes.
+foi reaberta em novo endereço temporário. O endereço daquela publicação, as
+provas, os limites e o roteiro constam no [registro UX02](../ux02.md).
+C05 real/C06/C07 continuam pendentes e independentes.
 
 ## Retomada da conclusão — 24/11/2026
 
@@ -264,3 +265,21 @@ estratégia exige desenho e avaliação independente: não ajustar usando o
 final consumido e reapresentá-lo como teste cego. Conciliar a tentativa
 interrompida exige evidência real de cobrança, sem repetir a inferência.
 A demonstração pública segue em fixture, e E01 permanece posterior/opcional.
+
+### Piloto SetFit e pausa da classificação — 25/11/2026
+
+O responsável autorizou testar SetFit em CPU e propôs adiar a categorização
+para avançar nas frentes independentes. O C05-SF1 está em execução
+exploratória, restrita à categoria. Após o piloto, escolha e calibração do
+classificador, integração e validação do complemento real ficam em espera
+até retomada explícita. O requisito de classificação real e seus critérios
+de aceite continuam no plano de conclusão. C06 ainda requer qualificação
+e decisão de adoção. C07/F09 final requer a integração e a reprodução do
+trecho real em instalação limpa.
+
+A demonstração local com fixture já tem prova de instalação limpa. Na F10,
+falta verificar por outra rede a conversa, o handoff e o isolamento por marca
+com a configuração publicada em fixture. Essa verificação pode avançar
+durante a pausa. O fechamento completo ainda depende do complemento real.
+[Piloto SetFit](classificacao-comparativa/setfit-piloto.md) ·
+[Estado da entrega](../estado-entrega.md).

@@ -8,6 +8,8 @@ histórico e referências da conversa. O frontend usa a API Rails real e os
 atendimentos ficam no PostgreSQL. A supervisão pode revisar a classificação,
 auditar decisões e configurar a operação.
 
+[Estado da entrega e próximos passos](docs/estado-entrega.md).
+
 ## Demonstração local
 
 Pré-requisitos de host: Git, Python 3.10+ em Linux ou macOS, Docker com
@@ -52,10 +54,11 @@ interface e o tema inspirado na CloudWalk foram aceitos e publicados.
 [Resultado F10](docs/f10-resultado.md) ·
 [Aceite UX01](docs/ux01.md) · [Aceite UX02](docs/ux02.md).
 
-A [última URL verificada](https://tribal-louisville-container-bind.trycloudflare.com/)
-é a da UX02. O endereço depende do computador e do túnel ligados e muda ao
-recriar o túnel. O serviço limita a 200 requisições simultâneas em voo e não
-garante disponibilidade. Na URL anterior, o acesso por dados móveis confirmou
+A [última URL verificada](https://newbie-aqua-stem-reveal.trycloudflare.com/)
+é do túnel reaberto em 25/11/2026, com verificação da saúde da API em HTTPS.
+O endereço depende do computador e do túnel ligados e muda ao recriar o
+túnel. O serviço limita a 200 requisições simultâneas em voo e não garante
+disponibilidade. Na primeira URL da F10, o acesso por dados móveis confirmou
 a abertura da página com marcas e canais visíveis. A verificação de todo o
 fluxo a partir de outra rede continua pendente.
 [Evidências da publicação](docs/f10-resultado.md).
@@ -164,12 +167,15 @@ transporte sem custo conciliável. No prefixo, o filtro permitiu apenas 1/26
 conclusões em casos classificáveis: a candidata não está apta para adoção.
 O custo confirmado da R5 foi US$ 0,00992557; uma reserva de US$ 1,239 permanece
 pendente e não representa cobrança confirmada. Não houve repetição. Novas
-chamadas estão suspensas. A integração do classificador (C06) e a validação
-final (C07/F09) continuam pendentes. O atendente conversacional real (E01)
-fica como evolução posterior e opcional.
+chamadas pagas estão suspensas. O piloto local SetFit (C05-SF1) está em
+execução exploratória e cobre categoria. Após o piloto, a qualificação
+(C05), a integração (C06) e a validação do complemento real (C07/F09 final)
+ficam em espera até retomada explícita. A demonstração segue com fixture.
+O atendente conversacional real (E01) fica como evolução posterior e opcional.
 [Resultado real R5](docs/c05-luna-r5-resultado.md) ·
 [Candidata R5](docs/c05-luna-r5-candidata.md) ·
 [Preparação R5](docs/planejamento/classificacao-comparativa/rodada-5-implementacao.md) ·
+[Piloto SetFit](docs/planejamento/classificacao-comparativa/setfit-piloto.md) ·
 [Plano de conclusão](docs/planejamento/conclusao-projeto.md).
 
 [Contrato HTTP e eventos](docs/contratos/openapi.yaml) ·

@@ -39,7 +39,7 @@ A [passagem da F08](passagem-f08.md) separa o gerador/observador de carga
 do dataset/avaliador Jev, com arquivos próprios e a mesma base Git. A execução
 comparável e a coordenação da revisão dos rótulos ficam no chat central.
 
-### Frente ativa de classificação — CLASS-001
+### Frente de classificação — CLASS-001
 
 Em 2026-11-23, o responsável escolheu comparar Qwen pela Feita com GLiClass
 local antes de selecionar o classificador. O [quadro SDD](classificacao-comparativa/README.md)
@@ -134,9 +134,15 @@ para a última tentativa. Novas chamadas estão suspensas.
 
 A sequência da qualificação é C01 → C02 → C03 → C05 → C06 → C07. Os ajustes
 da C04 foram encerrados nesta entrega, e R01 e R02 tiveram aceite independente.
-C06 aguarda qualificação e decisão de adoção. C07/F09 final aguarda integração
-e verificação em instalação limpa. A preparação F09-A já foi verificada, e a
-demonstração F10 foi publicada em modo fixture. [Plano de conclusão](conclusao-projeto.md).
+O responsável autorizou o piloto local SetFit (C05-SF1) e propôs adiar a
+categorização para avançar nas outras frentes. O piloto é exploratório e mede
+categoria. Após essa etapa, a escolha e a calibração do classificador (C05),
+a integração (C06) e o complemento real em instalação limpa (C07/F09 final)
+ficam em espera até retomada explícita. O requisito de classificação real
+continua no plano. A preparação F09-A já foi verificada com fixture, e o
+aceite externo da demonstração F10 pode avançar nesse modo.
+[Piloto SetFit](classificacao-comparativa/setfit-piloto.md) ·
+[Estado da entrega](../estado-entrega.md) · [Plano de conclusão](conclusao-projeto.md).
 O [guia dos chats](classificacao-comparativa/guia-dos-chats.md) explica base Git,
 isolamento, propriedade, modelos sugeridos, revisão e exercícios de aprendizagem.
 
@@ -250,11 +256,12 @@ real seguiu para CLASS-001. [Resultados de carga](../f08.md) · [Plano de conclu
 
 A preparação F09-A comprovou a reprodução local com fixture. A F10 publicou
 a demonstração com login e dados sintéticos sobre um túnel HTTPS temporário
-do computador local. O reinício e a restauração foram verificados. A última
-URL verificada é a da UX02, com conversa de dois turnos pelo integrador. No
-endereço anterior, o responsável abriu a página por dados móveis e confirmou
-que marcas e canais estavam visíveis. O fluxo completo por outra rede segue
-pendente.
+do computador local. O reinício e a restauração foram verificados. O
+integrador comprovou uma conversa de dois turnos na publicação da UX02. Na
+primeira URL da F10, o responsável abriu a página por dados móveis e confirmou
+que marcas e canais estavam visíveis. A renovação de 25/11/2026 verificou a
+saúde da API em HTTPS no novo endereço. O fluxo completo por outra rede
+segue pendente.
 [F09-A](../f09.md) · [Resultado F10](../f10-resultado.md) · [UX02](../ux02.md).
 
 O plano de aceite da publicação prevê os seguintes passos.
