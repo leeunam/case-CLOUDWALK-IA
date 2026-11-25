@@ -1,0 +1,25 @@
+{
+  "contract_version": "sf2-ipc/1.0",
+  "stage": "accepted",
+  "files": {
+    "train": {
+      "path": "train.jsonl",
+      "sha256": "d10ebb37c4a00bbbe466d01558ff67eef0ed6002db65793f0bc97d50eed91e83"
+    },
+    "validation": {
+      "path": "validation.jsonl",
+      "sha256": "b7d78a8adca44b1165cbadb804cbd879a3573a5c73d6311a592887d70ef68fc9"
+    },
+    "annotations": {
+      "path": "annotations-public.jsonl",
+      "sha256": "2cde06b88e8993aad3d7a2e761cf0933896e7db2d20e63ff9b2c2858436b3005"
+    }
+  },
+  "counts": {
+    "train": 150,
+    "validation": 90
+  },
+  "review_receipt_sha256": "11b65d96576176808d7262a2ed917f52a1bb4f8b55e453a48dc42ec778005ef4",
+  "token_lengths_sha256": "98ef16ed8f9f8428302cc2bd5a20a7d4fbd4b72b729fef7ca2c3ea7b6b3d197c",
+  "limitations": "Dados sintéticos em português com quotas planejadas. As leituras cegas, a conciliação e a revisão semântica foram realizadas por IA. A auditoria de novidade cobre os pares documentados. As distribuições e a concordância neste conjunto não medem a qualidade em tráfego real."
+}
