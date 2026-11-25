@@ -38,6 +38,10 @@ hipóteses, exclusões de assunto, transições de foco, impactos e alternativas
 Urgência por prazo exige uma consequência pendente vinculada a tempo
 reconhecido. Dano financeiro em curso pode sustentar urgência. Dano detectado
 sem evidência de continuidade já basta para vetar rotina.
+As regras de urgência verificam se o efeito foi afirmado. Uma pergunta
+sobre a ocorrência, uma hipótese genérica e uma negação do efeito levam a
+veto. Uma falha declarada como “nenhuma venda passa” pode sustentar
+paralisação. O trecho precisa conter a ocorrência usada pela regra.
 Os prazos numéricos em minutos cobrem de 1 a 60. O catálogo só habilita
 predição para definições reconhecidas textualmente. Novos códigos e
 definições diferentes vão para revisão quando preditos.

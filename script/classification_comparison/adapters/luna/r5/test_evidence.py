@@ -295,6 +295,64 @@ class EvidenceTests(unittest.TestCase):
         self.assert_field(item(text, requested=("priority",)), prediction("urgent", "immediate_harm", repeated),
                           status="predicted")
 
+    def test_urgencia_exige_afirmacao_do_efeito_em_cada_ramo(self):
+        cases = (
+            ("Serei multado hoje.", True),
+            ("Não serei multado hoje.", False),
+            ("Hoje não serei multado.", False),
+            ("Jamais receberemos uma multa hoje.", False),
+            ("Não terei multa hoje.", False),
+            ("Quero saber se serei multado hoje.", False),
+            ("Serei multado hoje se o envio falhar.", False),
+            ("Caso o envio falhe, receberemos uma multa hoje.", False),
+            ("Estamos perdendo vendas a cada minuto.", True),
+            ("Nunca estamos perdendo vendas a cada minuto.", False),
+            ("Estamos perdendo vendas a cada minuto?", False),
+            ("Débitos não autorizados continuam.", True),
+            ("Nenhuma venda passa. Não temos alternativa.", True),
+            ("Não conseguimos vender nada. Não temos alternativa.", True),
+            ("Não é verdade que nenhuma venda passa. Não temos alternativa.", False),
+            ("Nenhuma venda passa. Será que não temos alternativa?", False),
+            ("Hoje não poderemos pagar.", True),
+            ("Vou confirmar se hoje não poderemos pagar.", False),
+        )
+        for text, expected in cases:
+            with self.subTest(text=text):
+                status = "predicted" if expected else "abstained"
+                self.assert_field(item(text, requested=("priority",)),
+                                  prediction("urgent", "immediate_harm", text), status=status)
+
+    def test_duvida_ou_negacao_de_debito_nao_afirma_dano(self):
+        routine = "Como posso configurar a maquininha?"
+        cases = (
+            ("Os clientes estão sendo debitados duas vezes agora.", True),
+            ("Nenhum cliente está sendo cobrado duas vezes agora.", False),
+            ("Nenhuma das vendas foi cobrada em dobro agora.", False),
+            ("Como posso confirmar se os clientes estão sendo debitados duas vezes agora?", False),
+            ("Quero verificar se os compradores estão sendo cobrados em duplicidade neste momento.", False),
+            ("Os clientes estão sendo debitados duas vezes agora?", False),
+            ("Se der erro, os clientes são debitados duas vezes a cada tentativa.", False),
+            ("Nunca estamos perdendo vendas a cada minuto.", False),
+        )
+        for text, expected in cases:
+            with self.subTest(text=text):
+                entry = item(routine + " " + text, requested=("priority",))
+                self.assert_field(entry, prediction("urgent", "immediate_harm", text),
+                                  status="predicted" if expected else "abstained")
+                self.assert_field(entry, prediction("basic", "routine", routine),
+                                  status="abstained" if expected else "predicted")
+        fault = "Como consultar o Pix que não chegou ao comerciante?"
+        self.assert_field(item(fault, requested=("priority",)), prediction("basic", "routine", fault),
+                          status="abstained")
+
+    def test_citacao_de_consequencia_negada_nao_herda_outra_perda_afirmada(self):
+        loss = "Estamos perdendo vendas a cada minuto"
+        denied = "não serei multado hoje"
+        text = loss + " e " + denied + "."
+        entry = item(text, requested=("priority",))
+        self.assert_field(entry, prediction("urgent", "immediate_harm", loss), status="predicted")
+        self.assert_field(entry, prediction("urgent", "immediate_harm", denied), status="abstained")
+
     def test_familias_localizadas_e_retrabalho_abrangente(self):
         local = "Só uma das três leitoras parou;"
         broad = "As divergências de todos os caixas exigem refazer o fechamento inteiro há dias;"

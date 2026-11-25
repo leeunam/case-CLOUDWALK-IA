@@ -17,7 +17,7 @@
   "policy": {
     "path": "script/classification_comparison/adapters/luna/r5/evidence.py",
     "version": "2.0.0",
-    "sha256": "c101dd712267de46177e2ffbc84ef9cdf57e77b6959904a5d69c1998699b81c9"
+    "sha256": "87f48d87976e7d380dd9d55dabb89a601ce48c1a1dc19530e9fecce07835728d"
   },
   "rubric": {
     "path": "docs/planejamento/classificacao-comparativa/rubrica-comum.md",

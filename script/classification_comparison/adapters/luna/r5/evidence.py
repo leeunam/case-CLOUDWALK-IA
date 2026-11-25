@@ -43,9 +43,10 @@ def normalized(text):
 
 
 def relations(left, right, *, gap):
-    """Constrói relações locais com distância em palavras e escopo de oração."""
+    """Liga a consequência ao prazo e marca onde começa a consequência."""
     middle = rf"(?:[\s'\"“”/-]+(?!(?:e|ou|enquanto|embora)\b)[a-z0-9]+){{0,{gap}}}[\s'\"“”/-]+"
-    return rf"(?:\b(?:{left})\b{middle}\b(?:{right})\b|\b(?:{right})\b{middle}\b(?:{left})\b)"
+    return (rf"(?:\b(?P<effect_first>{left})\b{middle}\b(?:{right})\b|"
+            rf"\b(?:{right})\b{middle}\b(?P<effect_last>{left})\b)")
 
 
 PIX_ACTION = (
@@ -355,11 +356,8 @@ DAMAGE_CONTINUATION = re.compile(
     r"^(?:isso|o problema|a falha|(?:os|esses) debitos|(?:as|essas) cobrancas) "
     r"(?:ainda )?(?:continua[m]?|persiste[m]?|segue[m]?)\b"
 )
-PAYMENT_HARM_DENIED = re.compile(
-    r"\b(?:nao e (?:verdade|o caso) que|"
-    r"nao (?:mais )?(?:(?:sao|e|esta[o]? (?:mais )?sendo|foram|foi) (?:debitad[oa]s?|cobrad[oa]s?)|"
-    r"(?:esta|estao) (?:debitando|cobrando)|debitou|cobrou)|"
-    r"sem (?:debitos?|cobrancas?) (?:indevid[oa]s?|duplicad[oa]s?)|"
+PAYMENT_HARM_RESOLVED = re.compile(
+    r"\b(?:sem (?:debitos?|cobrancas?) (?:indevid[oa]s?|duplicad[oa]s?)|"
     r"(?:debitos?|cobrancas?) (?:indevid[oa]s?|duplicad[oa]s?) (?:cessaram|pararam))\b"
 )
 CONSEQUENCE = (
@@ -398,9 +396,10 @@ HANDLED_DEADLINE = re.compile(
 NOW = re.compile(r"\b(?:agora|imediatamente|neste momento|nos proximos minutos)\b")
 CURRENT_PROBLEM = re.compile(
     rf"\b(?:{OPERATION_FAILURE}|(?:nao|mal) (?:consigo|conseguimos)|travou|quebrou|"
-    r"lentidao|bloquead[oa]s?|parad[oa]s?|perdendo|deixou de|parou de|"
-    r"(?:nao (?:liga|conecta|le|imprime|reconhece|aceita))|vou perder)\b"
+    r"lentidao|bloquead[oa]s?|parad[oa]s?|deixou de|parou de|"
+    r"(?:nao (?:liga|conecta|le|imprime|reconhece|aceita)))\b"
 )
+CURRENT_LOSS = re.compile(r"\b(?:perdendo|vou perder)\b")
 PAST_OR_RESTORED = re.compile(
     r"\b(?:ja (?:voltou|retomamos|retomei|resolveram|resolvemos|resolveu|normalizou)|"
     r"(?:tudo|a operacao|o atendimento|as vendas|os pagamentos) "
@@ -412,6 +411,14 @@ NEGATED_IMPACT = re.compile(
     r"\b(?:sem (?:urgencia|pressa|prejuizo|impacto|risco|perdas?)|"
     r"nao (?:estou|estamos|seguimos) perdendo|nao (?:vou|vamos) perder|"
     r"nao ha (?:impacto|risco|pressa|urgencia|prejuizo)|pode esperar)\b"
+)
+NEGATING_SCOPE = re.compile(
+    r"\b(?:nao(?! (?:so|apenas|somente)\b)|nunca|jamais|nem|ninguem|nenhu(?:m|ma|ns|mas)|"
+    r"sem(?! duvida\b))\b"
+)
+UNASSERTED_SCOPE = re.compile(
+    r"\b(?:se|caso|supondo|na hipotese|em tese|"
+    r"(?:confirmar|verificar|checar|conferir|averiguar|descobrir|saber) (?:que|como|quando|por que))\b"
 )
 URGENT_PATTERNS = (IMMEDIATE_LOSS, IMMEDIATE_CONSEQUENCE, TOTAL_STOP, PAYMENT_HARM)
 PRIORITY_EVIDENCE = {
@@ -426,52 +433,72 @@ def any_match(patterns, text):
     return any(pattern.search(text) for pattern in patterns)
 
 
+def asserted_matches(pattern, clause, *, offset=0):
+    """Só usa efeitos declarados. Negações internas podem afirmar uma falha."""
+    text = clause.text
+    if "?" in text or any(marker.search(text, offset) for marker in (UNCERTAINTY, UNASSERTED_SCOPE)):
+        return ()
+    # Para prazos em ordem inversa, o prazo pode vir antes de um negador.
+    # A captura nomeada marca o início do efeito, e não o início do prazo.
+    return tuple(match for match in pattern.finditer(text, offset)
+                 if not NEGATING_SCOPE.search(text, offset, match.start(match.lastgroup or 0)))
+
+
+def pending_consequences(clause):
+    condition = PENDING_CONDITION.match(clause.text)
+    # Só uma condição operacional reconhecida abre escopo para o consequente.
+    offset = condition.end() if condition else 0
+    if LATER_DEADLINE.search(clause.text, offset):
+        return ()
+    return asserted_matches(IMMEDIATE_CONSEQUENCE, clause, offset=offset)
+
+
 def priority_reason(criterion, context):
     proof = PRIORITY_EVIDENCE[criterion]
     if not any(any_match(proof, clause.excerpt) for clause in context):
         return "insufficient_relation"
 
     active = [clause for clause in context if not excluded(clause)
-              or (PENDING_CONDITION.match(clause.text) and IMMEDIATE_CONSEQUENCE.search(clause.text)
-                  and not any_match((UNCERTAINTY, EXCLUDED_FOCUS, INCIDENTAL), clause.text))]
+              or (PENDING_CONDITION.match(clause.text) and pending_consequences(clause)
+                  and not any_match((EXCLUDED_FOCUS, INCIDENTAL), clause.text))]
     recovery = max((i for i, clause in enumerate(active) if PAST_OR_RESTORED.search(clause.text)), default=-1)
     current = [clause for clause in active[recovery + 1:] if not FUTURE.search(clause.text)]
     # Orientação futura é suporte de rotina. Fatos futuros por si sós não são
     # prova de prejuízo atual. Um prazo futuro explícito pode ser imediato.
     pending = active[recovery + 1:]
-    handled = max((i for i, clause in enumerate(pending) if HANDLED_DEADLINE.search(clause.text)), default=-1)
-    immediate = [clause for clause in pending[handled + 1:] if IMMEDIATE_CONSEQUENCE.search(clause.text)
-                 and not LATER_DEADLINE.search(clause.text)]
-    no_impact = any(NEGATED_IMPACT.search(clause.text) for clause in current)
-    alternative = any(ALTERNATIVE.search(clause.text) and not NO_ALTERNATIVE.search(clause.text)
+    handled = max((i for i, clause in enumerate(pending) if asserted_matches(HANDLED_DEADLINE, clause)), default=-1)
+    immediate = [(clause, match) for clause in pending[handled + 1:] for match in pending_consequences(clause)]
+    no_impact = any(asserted_matches(NEGATED_IMPACT, clause) for clause in current)
+    alternative = any(asserted_matches(ALTERNATIVE, clause) and not asserted_matches(NO_ALTERNATIVE, clause)
                       for clause in current)
-    no_alternative = any(NO_ALTERNATIVE.search(clause.text) for clause in current)
-    total = [clause for clause in current if TOTAL_STOP.search(clause.text)]
+    no_alternative = any(asserted_matches(NO_ALTERNATIVE, clause) for clause in current)
+    total = [(clause, match) for clause in current for match in asserted_matches(TOTAL_STOP, clause)]
     total_without_alternative = total if no_alternative and not alternative else []
-    payment_damage = []
-    loss = [clause for clause in current if IMMEDIATE_LOSS.search(clause.text)
-            and not NEGATED_IMPACT.search(clause.text)]
+    payment_damage = False
+    loss = [(clause, match) for clause in current for match in asserted_matches(IMMEDIATE_LOSS, clause)]
     for index, clause in enumerate(current):
-        if not PAYMENT_HARM.search(clause.text) or PAYMENT_HARM_DENIED.search(clause.text):
+        damage = asserted_matches(PAYMENT_HARM, clause)
+        if not damage or asserted_matches(PAYMENT_HARM_RESOLVED, clause):
             continue
-        payment_damage.append(clause)
+        payment_damage = True
         if (REPEATED_OR_CURRENT.search(clause.text)
-                or any(DAMAGE_CONTINUATION.search(c.text) for c in current[index + 1:index + 2])):
-            loss.append(clause)
-    immediate = [clause for clause in immediate if not NEGATED_IMPACT.search(clause.text)]
+                or any(asserted_matches(DAMAGE_CONTINUATION, c) for c in current[index + 1:index + 2])):
+            loss.extend((clause, match) for match in damage)
     urgent = [] if no_impact else loss + immediate + total_without_alternative
     broad = [clause for clause in current if BROAD.search(clause.text) and not NEGATED_IMPACT.search(clause.text)]
     local = [clause for clause in current if LOCALIZED.search(clause.text) and not NEGATED_IMPACT.search(clause.text)]
     if urgent:
-        found, support = "immediate_harm", urgent
-    elif (no_alternative and alternative and total) or (no_impact and (loss or immediate or total)):
+        cited = any(clause.quote_start <= match.start() and match.end() <= clause.quote_end
+                    for clause, match in urgent)
+        return "supported_relation" if criterion == "immediate_harm" and cited else "context_conflict"
+    if (no_alternative and alternative and total) or (no_impact and (loss or immediate or total)):
         return "context_conflict"
     elif broad and not any(NOW.search(clause.text) for clause in broad):
         found, support = "broad_impact", broad
     elif local and alternative and not total and not broad and not no_alternative:
         found, support = "localized_impact", local
     elif not (local or total or broad or loss or immediate or payment_damage
-              or any(CURRENT_PROBLEM.search(c.text) for c in current)):
+              or any(CURRENT_PROBLEM.search(c.text) or asserted_matches(CURRENT_LOSS, c) for c in current)):
         routine = [clause for clause in active[max(0, recovery):]
                    if any_match(PRIORITY_EVIDENCE["routine"], clause.text)]
         found, support = "routine", routine
