@@ -1,0 +1,72 @@
+{
+  "provider": "feita",
+  "model": "openai/gpt-5.6-luna",
+  "date": "2026-11-25",
+  "unit": "USD/Mtoken",
+  "limits": [
+    1050000,
+    140000
+  ],
+  "tiers": {
+    "standard": {
+      "input": "0.2",
+      "output": "1.2",
+      "cache_read": "0.02",
+      "cache_write": "0.25"
+    },
+    "long_context": {
+      "input": "0.4",
+      "output": "1.8",
+      "cache_read": "0.04",
+      "cache_write": "0.5"
+    }
+  },
+  "usage_cost_unit": null,
+  "usage_credits": {
+    "confirmed": true,
+    "reference": "https://feita.ai/models/openai/gpt-5.6-luna",
+    "usd_per_credit": "0.01"
+  },
+  "sources": {
+    "route": {
+      "url": "https://feita.ai/models/openai/gpt-5.6-luna",
+      "snapshot": {
+        "path": "docs/evidencias/c05/luna-r4-preflight-2026-11-24/route.json",
+        "sha256": "5cc5b2dc70a9a89a889ff57f975d6fe45d9048a0005c4ba79744faac897a7a32"
+      }
+    },
+    "limits": {
+      "url": "https://developers.openai.com/api/docs/models/gpt-5.6-luna",
+      "snapshot": {
+        "path": "docs/evidencias/c05/luna-r4-preflight-2026-11-24/limits.json",
+        "sha256": "c718644d071e4b3f487354c3852799eb20d2802daee6ac68829ba85155740958"
+      }
+    },
+    "tariff": {
+      "url": "https://feita.ai/models/openai/gpt-5.6-luna",
+      "snapshot": {
+        "path": "docs/evidencias/c05/luna-r5-preflight-2026-11-25/feita-public-check.json",
+        "sha256": "ac0e4d42f30c4c260beb13c2e29b8d6eae02cbb1aa99ef065c94bde9c306c060"
+      }
+    },
+    "usage": {
+      "url": "https://feita.ai/models/openai/gpt-5.6-luna",
+      "snapshot": {
+        "path": "docs/evidencias/c05/luna-r4-preflight-2026-11-24/usage.json",
+        "sha256": "52c089e47f3cb1326466fb3470cabae140e89cd974382a969108fca2ad101732"
+      }
+    }
+  },
+  "historical_tariff_snapshot": {
+    "path": "docs/evidencias/c05/luna-r4-preflight-2026-11-24/tariff.json",
+    "sha256": "14503add0eeb272a1679eebbd9b68321ccf2423109317ce18a2d0cf9ba1a0197"
+  },
+  "historical_sources_checked_utc": "2026-11-25T02:39:14.826821+00:00",
+  "feita_rechecked_client_date": "2026-11-25",
+  "basis": "A Feita exibe as tarifas de entrada, saída, leitura de cache e conversão de crédito. Aplicamos os multiplicadores históricos da documentação oficial do modelo para cobrir escrita de cache e contexto longo, inclusive na leitura de cache. Os máximos por faixa são inferências conservadoras para a reserva.",
+  "reservation_usd": "1.239",
+  "reservation_calculation": "(1050000 * (0.4 + 0.04 + 0.5) + 140000 * 1.8) / 1000000",
+  "actual_r5_cost_usd": null,
+  "paid_execution_authorized_by_this_evidence": false,
+  "provider_calls_in_this_preflight": 0
+}
