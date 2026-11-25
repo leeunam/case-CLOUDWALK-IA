@@ -1,9 +1,9 @@
 # Estado da entrega em 25/11/2026
 
-A plataforma de atendimento já foi demonstrada com classificador fixture e
-atendente simulado. Falta completar o aceite externo da publicação temporária.
-O complemento real da classificação continua pendente. O responsável autorizou
-o piloto SetFit e propôs adiar a categorização para avançar nas demais frentes.
+A publicação temporária da plataforma passou no aceite externo da F10 com
+classificação fixture e atendente simulado. O complemento real da classificação
+segue em espera até retomada explícita. O responsável autorizou o piloto SetFit
+e propôs adiar a categorização para avançar nas demais frentes.
 [Plano de execução e critérios de aceite](planejamento/plano-de-execucao.md).
 
 ## Plataforma e demonstração
@@ -13,16 +13,17 @@ o piloto SetFit e propôs adiar a categorização para avançar nas demais frent
 | F01–F07 | Implementadas e aceitas localmente. A operação percorre três canais e duas marcas, com classificação fixture, revisão humana, atendente simulado via Kafka, handoff, isolamento e reentrega. A qualificação real do classificador passou ao CLASS-001. [Plano de execução](planejamento/plano-de-execucao.md) · [F04/F05](integracao-f04-f05.md) · [F06/F07](integracao-f06-f07.md). |
 | F08, R01 e R02 | O experimento de referência teve cinco rodadas aprovadas e uma reprovada por falha de recuperação após a parada do Kafka. A R01 foi aceita com recuperação em ensaio controlado posterior. A R02 foi aceita com a correção do analisador e a conferência dos dados arquivados. A matriz de referência preserva a reprovação e segue sem nova execução após as correções. [F08](f08.md) · [R01](r01.md) · [R02](r02.md). |
 | F09-A | A instalação limpa com fixture comprovou dois turnos, reentrega, três canais, duas marcas, handoff, revisão humana e persistência. O trecho com complemento real pertence à C07/F09 final. [Roteiro e evidências F09](f09.md). |
-| F10 e UX02 | A publicação temporária em HTTPS usa fixture e atendente simulado. Reinício com persistência e restauração em instalação isolada foram verificados. O fluxo externo da F10-A foi aprovado com conversa simulada e histórico por dados móveis na URL anterior, e com handoff, resposta e resolução confirmados por dados móveis na URL atual. A matriz pública passou em 36 de 36 verificações de acesso por marca no computador de origem. [Aceite integrado](f10-aceite-integrado.md) · [Histórico da publicação](f10-resultado.md) · [Aceite UX02](ux02.md). |
+| F10 e UX02 | A publicação temporária em HTTPS usa fixture e atendente simulado. Reinício com persistência e restauração em instalação isolada foram verificados. A F10-A passou com conversa simulada e histórico por dados móveis na URL anterior e com handoff, resposta e resolução na URL atual. A F10-B passou com o contraste entre Bia e Cris por dados móveis. A matriz pública passou em 36 de 36 verificações de acesso por marca no computador de origem. [Aceite integrado](f10-aceite-integrado.md) · [Histórico da publicação](f10-resultado.md) · [Aceite UX02](ux02.md). |
 
 A [URL temporária](https://jason-dollar-lcd-bought.trycloudflare.com/) foi
 verificada em HTTPS quando o túnel reabriu em 25/11/2026. O acesso depende do
 computador e do túnel ativos. Alex conferiu o resumo e a referência do caso
 `51cdd26f-f9f1-47df-84b4-5c03de2f8033`, respondeu e resolveu. Com o Wi-Fi
 desligado, o responsável confirmou a chegada automática da resposta, a
-persistência após recarregar e o estado “Resolvido”. A verificação externa
-pendente da F10-B é comparar Bia e Cris no mesmo caso Horizonte por outra rede.
-[Roteiro do aceite externo](f10-aceite-integrado.md#pendências-externas).
+persistência após recarregar e o estado “Resolvido”. Também confirmou que Bia
+abriu Aurora, teve acesso negado ao caso Horizonte e que Cris abriu o histórico
+do mesmo caso Horizonte.
+[Provas do aceite externo](f10-aceite-integrado.md#provas-do-aceite).
 
 Repetir a matriz F08 nas mesmas condições reforçaria a evidência sob carga
 após as correções. Aumento progressivo de taxa, carga de atendimento humano

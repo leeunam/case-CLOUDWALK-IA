@@ -67,11 +67,15 @@ O aceite da publicação fez zero novas chamadas pagas. A qualificação (C05), 
 integração (C06) e a validação do complemento real (C07/F09 final) ficam em
 espera até retomada explícita.
 
-A F10-A foi aprovada com conversa simulada e histórico por dados móveis na
-URL anterior. Na URL atual, Alex conferiu o contexto, respondeu e resolveu o
-caso móvel `51cdd26f-f9f1-47df-84b4-5c03de2f8033`. Com o Wi-Fi desligado, o
-responsável confirmou que a resposta apareceu automaticamente, permaneceu
-após recarregar e o caso ficou “Resolvido”. A matriz pública de acesso por
-marca passou em 36 de 36 verificações no computador de origem. Na F10-B,
-falta comparar Bia e Cris no mesmo caso Horizonte por outra rede.
-[Aceite integrado](f10-aceite-integrado.md) · [Roteiro de publicação](f10.md).
+O aceite externo da F10 foi concluído com fixture e atendente simulado. A
+F10-A passou com conversa simulada e histórico por dados móveis na URL anterior.
+Na URL atual, Alex conferiu o contexto, respondeu e resolveu o caso móvel
+`51cdd26f-f9f1-47df-84b4-5c03de2f8033`. Com o Wi-Fi desligado, o responsável
+confirmou que a resposta apareceu automaticamente, permaneceu após recarregar
+e o caso ficou “Resolvido”. A F10-B passou quando o responsável confirmou, por
+dados móveis, que Bia abriu Aurora, recebeu “Atendimento não encontrado” em
+Horizonte e que Cris abriu o histórico do mesmo caso Horizonte. A matriz
+pública passou em 36 de 36 verificações no computador de origem.
+[Aceite integrado](f10-aceite-integrado.md) ·
+[Confirmação móvel da F10-B](evidencias/f10/aceite-integrado/mobile-brand-isolation-confirmation.json) ·
+[Roteiro de publicação](f10.md).

@@ -261,10 +261,12 @@ anterior, o responsável confirmou dois retornos automáticos e quatro mensagens
 após recarga por dados móveis. Após a reabertura do túnel em 25/11/2026, Alex
 conferiu o contexto do handoff, respondeu e resolveu o atendimento móvel da
 Aurora. Por dados móveis, o responsável confirmou a chegada automática da
-resposta, a persistência após recarga e o estado “Resolvido”. O fluxo externo
-da F10-A foi aprovado. A matriz pública de acesso por marca passou em 36 de 36
-verificações no computador de origem. A F10-B ainda exige a comparação de Bia
-e Cris no mesmo caso Horizonte por outra rede.
+resposta, a persistência após recarga e o estado “Resolvido”. Na F10-B, o
+responsável confirmou por dados móveis que Bia abriu Aurora e teve acesso
+negado a Horizonte, enquanto Cris abriu o histórico do mesmo caso Horizonte.
+A matriz pública de acesso por marca passou em 36 de 36 verificações no
+computador de origem. O aceite externo da F10 foi concluído com fixture e
+atendente simulado.
 [F09-A](../f09.md) · [Aceite integrado F10](../f10-aceite-integrado.md) ·
 [Histórico da publicação](../f10-resultado.md) · [UX02](../ux02.md).
 
