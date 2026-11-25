@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "state": "reprovado",
+  "meaning": "Seis rodadas de referência medidas, cinco aprovadas e uma reprovada na recuperação; uma tentativa adicional de coleta bloqueada publicada separadamente.",
+  "conditions": {
+    "disponivel": 3,
+    "interrompido": 3
+  },
+  "runs": [
+    {
+      "run_id": "f08-reference-1795207088594-f6c560-01",
+      "report": "referencia-inicial/f08-reference-1795207088594-f6c560-01/report.json",
+      "revision": "10125a57a8d72abd69a646dea0970cca59cf3ce2",
+      "condition": "disponivel",
+      "state": "aprovado",
+      "planned": 1500,
+      "initial_202": 1500,
+      "initial_replies": 1500,
+      "accept_p95_ms": 123,
+      "reply_p95_ms": 398.1201171875,
+      "followups_planned": 300,
+      "followups_202": 300,
+      "followups_completed": 300,
+      "initial_states": {
+        "concluído": 1500
+      },
+      "followup_states": {
+        "concluído": 300
+      },
+      "integrity": {
+        "confirmed_losses": 0,
+        "duplicated_effect_identities": 0,
+        "persisted_without_http_202": 0,
+        "not_reconciled_http_202": 0
+      },
+      "max_outbox": 3,
+      "max_waiting": 3,
+      "max_lag": 2,
+      "kafka_records": 3600,
+      "capture_cost_ms": 152,
+      "down_ms": null,
+      "ready_ms": null,
+      "drain_after_ready_ms": null,
+      "goals": {
+        "p95_aceite_ate_500_ms": true,
+        "aceite_inicial_minimo_99_pct_do_plano": true,
+        "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+        "escoamento_na_janela": true,
+        "todos_segundos_turnos_enviados_e_concluidos": true,
+        "jev_sem_solicitacoes_ou_tentativas": true
+      }
+    },
+    {
+      "run_id": "f08-reference-1795207088594-f6c560-02",
+      "report": "referencia-inicial/f08-reference-1795207088594-f6c560-02/report.json",
+      "revision": "10125a57a8d72abd69a646dea0970cca59cf3ce2",
+      "condition": "interrompido",
+      "state": "aprovado",
+      "planned": 1500,
+      "initial_202": 1500,
+      "initial_replies": 1500,
+      "accept_p95_ms": 112,
+      "reply_p95_ms": 28090.736083984375,
+      "followups_planned": 300,
+      "followups_202": 300,
+      "followups_completed": 300,
+      "initial_states": {
+        "concluído": 1500
+      },
+      "followup_states": {
+        "concluído": 300
+      },
+      "integrity": {
+        "confirmed_losses": 0,
+        "duplicated_effect_identities": 0,
+        "persisted_without_http_202": 0,
+        "not_reconciled_http_202": 0
+      },
+      "max_outbox": 177,
+      "max_waiting": 197,
+      "max_lag": 140,
+      "kafka_records": 3600,
+      "capture_cost_ms": 194,
+      "down_ms": 30321.069091796875,
+      "ready_ms": 34358.7861328125,
+      "drain_after_ready_ms": 33737,
+      "goals": {
+        "p95_aceite_ate_500_ms": true,
+        "aceite_inicial_minimo_99_pct_do_plano": true,
+        "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+        "escoamento_na_janela": true,
+        "todos_segundos_turnos_enviados_e_concluidos": true,
+        "jev_sem_solicitacoes_ou_tentativas": true
+      }
+    },
+    {
+      "run_id": "f08-reference-1795208792430-8b61b6-01",
+      "report": "referencia-complemento/f08-reference-1795208792430-8b61b6-01/report.json",
+      "revision": "dfbcc79f4ced07e5460eb73d06e956d94799d453",
+      "condition": "disponivel",
+      "state": "aprovado",
+      "planned": 1500,
+      "initial_202": 1500,
+      "initial_replies": 1500,
+      "accept_p95_ms": 142,
+      "reply_p95_ms": 433.05908203125,
+      "followups_planned": 300,
+      "followups_202": 300,
+      "followups_completed": 300,
+      "initial_states": {
+        "concluído": 1500
+      },
+      "followup_states": {
+        "concluído": 300
+      },
+      "integrity": {
+        "confirmed_losses": 0,
+        "duplicated_effect_identities": 0,
+        "persisted_without_http_202": 0,
+        "not_reconciled_http_202": 0
+      },
+      "max_outbox": 3,
+      "max_waiting": 4,
+      "max_lag": 2,
+      "kafka_records": 3600,
+      "capture_cost_ms": 309,
+      "down_ms": null,
+      "ready_ms": null,
+      "drain_after_ready_ms": null,
+      "goals": {
+        "p95_aceite_ate_500_ms": true,
+        "aceite_inicial_minimo_99_pct_do_plano": true,
+        "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+        "escoamento_na_janela": true,
+        "todos_segundos_turnos_enviados_e_concluidos": true,
+        "jev_sem_solicitacoes_ou_tentativas": true
+      }
+    },
+    {
+      "run_id": "f08-reference-1795208792430-8b61b6-02",
+      "report": "referencia-complemento/f08-reference-1795208792430-8b61b6-02/report.json",
+      "revision": "dfbcc79f4ced07e5460eb73d06e956d94799d453",
+      "condition": "interrompido",
+      "state": "aprovado",
+      "planned": 1500,
+      "initial_202": 1500,
+      "initial_replies": 1500,
+      "accept_p95_ms": 121,
+      "reply_p95_ms": 31753.946044921875,
+      "followups_planned": 300,
+      "followups_202": 300,
+      "followups_completed": 300,
+      "initial_states": {
+        "concluído": 1500
+      },
+      "followup_states": {
+        "concluído": 300
+      },
+      "integrity": {
+        "confirmed_losses": 0,
+        "duplicated_effect_identities": 0,
+        "persisted_without_http_202": 0,
+        "not_reconciled_http_202": 0
+      },
+      "max_outbox": 218,
+      "max_waiting": 218,
+      "max_lag": 47,
+      "kafka_records": 3600,
+      "capture_cost_ms": 184,
+      "down_ms": 30410.748046875,
+      "ready_ms": 33793.410888671875,
+      "drain_after_ready_ms": 36122,
+      "goals": {
+        "p95_aceite_ate_500_ms": true,
+        "aceite_inicial_minimo_99_pct_do_plano": true,
+        "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+        "escoamento_na_janela": true,
+        "todos_segundos_turnos_enviados_e_concluidos": true,
+        "jev_sem_solicitacoes_ou_tentativas": true
+      }
+    },
+    {
+      "run_id": "f08-reference-1795208792430-8b61b6-03",
+      "report": "referencia-complemento/f08-reference-1795208792430-8b61b6-03/report.json",
+      "revision": "dfbcc79f4ced07e5460eb73d06e956d94799d453",
+      "condition": "disponivel",
+      "state": "aprovado",
+      "planned": 1500,
+      "initial_202": 1500,
+      "initial_replies": 1500,
+      "accept_p95_ms": 145,
+      "reply_p95_ms": 487.615966796875,
+      "followups_planned": 300,
+      "followups_202": 300,
+      "followups_completed": 300,
+      "initial_states": {
+        "concluído": 1500
+      },
+      "followup_states": {
+        "concluído": 300
+      },
+      "integrity": {
+        "confirmed_losses": 0,
+        "duplicated_effect_identities": 0,
+        "persisted_without_http_202": 0,
+        "not_reconciled_http_202": 0
+      },
+      "max_outbox": 3,
+      "max_waiting": 4,
+      "max_lag": 1,
+      "kafka_records": 3600,
+      "capture_cost_ms": 308,
+      "down_ms": null,
+      "ready_ms": null,
+      "drain_after_ready_ms": null,
+      "goals": {
+        "p95_aceite_ate_500_ms": true,
+        "aceite_inicial_minimo_99_pct_do_plano": true,
+        "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+        "escoamento_na_janela": true,
+        "todos_segundos_turnos_enviados_e_concluidos": true,
+        "jev_sem_solicitacoes_ou_tentativas": true
+      }
+    },
+    {
+      "run_id": "f08-reference-1795208792430-8b61b6-04",
+      "report": "referencia-complemento/f08-reference-1795208792430-8b61b6-04/report.json",
+      "revision": "dfbcc79f4ced07e5460eb73d06e956d94799d453",
+      "condition": "interrompido",
+      "state": "reprovado",
+      "planned": 1500,
+      "initial_202": 1500,
+      "initial_replies": 301,
+      "accept_p95_ms": 126,
+      "reply_p95_ms": 492.76904296875,
+      "followups_planned": 300,
+      "followups_202": 60,
+      "followups_completed": 55,
+      "initial_states": {
+        "concluído": 301,
+        "falho": 1199
+      },
+      "followup_states": {
+        "concluído": 55,
+        "falho": 5,
+        "não enviado": 240
+      },
+      "integrity": {
+        "confirmed_losses": 0,
+        "duplicated_effect_identities": 0,
+        "persisted_without_http_202": 0,
+        "not_reconciled_http_202": 1204
+      },
+      "max_outbox": 209,
+      "max_waiting": 503,
+      "max_lag": 1206,
+      "kafka_records": 1916,
+      "capture_cost_ms": 227,
+      "down_ms": 30523.156982421875,
+      "ready_ms": 34843.3759765625,
+      "drain_after_ready_ms": null,
+      "goals": {
+        "p95_aceite_ate_500_ms": true,
+        "aceite_inicial_minimo_99_pct_do_plano": true,
+        "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+        "escoamento_na_janela": false,
+        "todos_segundos_turnos_enviados_e_concluidos": false,
+        "jev_sem_solicitacoes_ou_tentativas": true
+      }
+    }
+  ],
+  "excluded_measurement_attempt": "referencia-inicial/f08-reference-1795207088594-f6c560-03/report.json",
+  "totals": {
+    "initial_planned": 9000,
+    "initial_http_202": 9000,
+    "initial_replies": 7801,
+    "followups_planned": 1800,
+    "followups_http_202": 1560,
+    "followups_completed": 1555,
+    "kafka_records": 19916
+  }
+}

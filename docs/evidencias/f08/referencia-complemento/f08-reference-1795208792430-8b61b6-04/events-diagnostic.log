@@ -1,0 +1,300 @@
+2026-11-20T21:30:15.360751452Z 2026-11-20 21:30:15,359 INFO retorno case_id=20658303-5bac-43dd-bcc8-fd88eb868459 event_id=3c4fcb5b-98ca-5e91-a04b-8854707cbc82 disposition=applied
+2026-11-20T21:30:15.456382163Z 2026-11-20 21:30:15,456 INFO retorno case_id=c0e1712d-b1c4-489a-a147-dffc3620105e event_id=802dc6d2-88f1-5c79-b351-5c21b64bce14 disposition=applied
+2026-11-20T21:30:15.740877354Z 2026-11-20 21:30:15,740 INFO retorno case_id=87199acd-3871-4af5-b844-3bef459a690c event_id=5d00036f-71a9-5b91-aa4a-5436c441d3b2 disposition=applied
+2026-11-20T21:30:15.788571573Z 2026-11-20 21:30:15,788 INFO retorno case_id=db119295-f3ea-4fff-b536-cf606df2e85f event_id=8bcca82d-aaf4-5da9-8cd3-bf07c0b3cbcc disposition=applied
+2026-11-20T21:30:16.127187017Z 2026-11-20 21:30:16,126 INFO retorno case_id=3595c8a7-33e0-46ae-a4dc-311e34931c12 event_id=27ea18b0-078b-5098-9fcd-41e9d3549d0e disposition=applied
+2026-11-20T21:30:16.193237355Z 2026-11-20 21:30:16,193 INFO retorno case_id=f7cd6d75-860b-480d-b4a9-93fcc909d852 event_id=9d2f36da-a3fb-5344-a482-21322c1640ef disposition=applied
+2026-11-20T21:30:16.319987655Z 2026-11-20 21:30:16,319 INFO retorno case_id=fc1b7a8d-93e4-4341-b1b3-cd69c3092c65 event_id=4e9b5db1-5e90-5f8c-b395-05e9ba187864 disposition=applied
+2026-11-20T21:30:16.589191692Z 2026-11-20 21:30:16,588 INFO retorno case_id=89392970-5a55-4e83-8c09-384cc53f00cd event_id=f8768747-5e5b-5ddb-9284-37997ccf92aa disposition=applied
+2026-11-20T21:30:16.686641928Z 2026-11-20 21:30:16,684 INFO retorno case_id=ca5cf649-6d4e-4edb-a869-7083bd9d3775 event_id=038740e9-fdf8-5eae-9907-c447229f8505 disposition=applied
+2026-11-20T21:30:16.997572266Z 2026-11-20 21:30:16,997 INFO retorno case_id=8363bfbf-40aa-4c37-8b5d-2f948621ae2f event_id=27d73c69-ddcb-5b9a-b3cf-e4be7829aa88 disposition=applied
+2026-11-20T21:30:17.103718267Z 2026-11-20 21:30:17,103 INFO retorno case_id=5ae48a4f-f113-4f7a-8ef4-6a91aaa3239c event_id=a721a399-a034-567f-935e-f482845daa1d disposition=applied
+2026-11-20T21:30:17.336473460Z 2026-11-20 21:30:17,336 INFO retorno case_id=30b0fa28-faa6-4c98-934d-51a0ef0d250d event_id=853a7c7d-0593-5caf-97f6-e3f0fee3993e disposition=applied
+2026-11-20T21:30:17.377981818Z 2026-11-20 21:30:17,377 INFO retorno case_id=622508e4-fe90-4912-b995-4ec1e52a2059 event_id=718fd61c-797a-58b0-9a56-96b883bee4cc disposition=applied
+2026-11-20T21:30:17.433954508Z 2026-11-20 21:30:17,433 INFO retorno case_id=13ac14f1-f94d-476e-a146-14b4154085e5 event_id=bddfb622-517b-5989-80d7-1eb54cb9ae74 disposition=applied
+2026-11-20T21:30:17.744870779Z 2026-11-20 21:30:17,744 INFO retorno case_id=436b63a5-1c36-4c33-9b35-cb387b234f2b event_id=c41e9e16-8c96-57af-a5c4-e0b1a432a57e disposition=applied
+2026-11-20T21:30:17.814565013Z 2026-11-20 21:30:17,813 INFO retorno case_id=cfa8aec6-d851-45fc-88ff-44367bb99775 event_id=c6c655cc-5050-5fba-a0c3-b8eb2609d533 disposition=applied
+2026-11-20T21:30:18.124087938Z 2026-11-20 21:30:18,123 INFO retorno case_id=766746d8-8f4a-4164-8799-a0bffe62ae5c event_id=4aa2c0ba-bd3e-560d-a4f4-23da2aa7e443 disposition=applied
+2026-11-20T21:30:18.175193180Z 2026-11-20 21:30:18,175 INFO retorno case_id=2c5a1f62-8454-4a5a-b61f-670c9831ab5a event_id=7fff5dac-1f05-517f-a6e1-045454ce9d4c disposition=applied
+2026-11-20T21:30:18.208001305Z 2026-11-20 21:30:18,207 INFO retorno case_id=7c00e14d-0358-4450-8be7-a56a5d75c3ed event_id=802dabf6-dd46-5dc3-8ebd-718c0edfc2a0 disposition=applied
+2026-11-20T21:30:18.565657924Z 2026-11-20 21:30:18,564 INFO retorno case_id=053b6c83-eca7-4f99-a368-1c140adceaee event_id=ac2929c4-54e4-5e1e-a346-770756abc7b9 disposition=applied
+2026-11-20T21:30:18.615401654Z 2026-11-20 21:30:18,615 INFO retorno case_id=2c19f5a4-1e0a-4737-a000-08d36d990329 event_id=f41ba52d-6879-523d-9eed-730dc8b4dfe4 disposition=applied
+2026-11-20T21:30:18.953129146Z 2026-11-20 21:30:18,952 INFO retorno case_id=6a3fd4c4-e43a-4342-8a60-4e26dd9322c8 event_id=3b4c2288-664f-598d-83cd-861a0a3e873a disposition=applied
+2026-11-20T21:30:18.981768189Z 2026-11-20 21:30:18,981 INFO retorno case_id=40cc66bf-2c61-4dae-8bc0-8ade766a9898 event_id=1d6456e0-4fc2-512e-adaa-7332cb529425 disposition=applied
+2026-11-20T21:30:19.024511477Z 2026-11-20 21:30:19,024 INFO retorno case_id=eafb573a-ad54-4d79-b429-537410c81834 event_id=3422e0b8-b37b-5763-9d06-38d46e257e59 disposition=applied
+2026-11-20T21:30:19.322234225Z 2026-11-20 21:30:19,321 INFO retorno case_id=9c1dccb5-b1c6-40db-8ccb-9161b5097103 event_id=353566dc-9f3f-5bbf-a988-96a6b983207b disposition=applied
+2026-11-20T21:30:19.373786475Z 2026-11-20 21:30:19,373 INFO retorno case_id=0b082100-298c-4b87-b6f0-530cd03ce6c0 event_id=c73d405f-f957-57db-a0a4-2f17bd93225c disposition=applied
+2026-11-20T21:30:19.776103255Z 2026-11-20 21:30:19,775 INFO retorno case_id=0aca51d8-31fd-4642-897c-2f6869fdade2 event_id=205b900c-f90f-5586-aeae-fa88f1b8473a disposition=applied
+2026-11-20T21:30:20.002180400Z 2026-11-20 21:30:20,001 INFO retorno case_id=eb72ee96-4d9d-4b46-ad1d-a2660d4d520b event_id=ceeacf9b-5833-50b7-9853-31cca81a12dd disposition=applied
+2026-11-20T21:30:20.148793529Z 2026-11-20 21:30:20,148 INFO retorno case_id=6901e363-e3a4-4eba-82da-80eeb3b3bafd event_id=79607c7f-9163-5a80-824d-722da14186c2 disposition=applied
+2026-11-20T21:30:20.191411856Z 2026-11-20 21:30:20,191 INFO retorno case_id=8491d793-67c0-4976-a1dc-fc9a0de8f6ba event_id=ad27a5ee-faee-503c-beb7-7f3078c29278 disposition=applied
+2026-11-20T21:30:20.348491152Z 2026-11-20 21:30:20,348 INFO retorno case_id=cd9849c8-e04c-43d8-9bc8-f7eebfb4dec2 event_id=f0f328dd-e8ec-545f-95c5-da6731ff4f28 disposition=applied
+2026-11-20T21:30:20.518184414Z 2026-11-20 21:30:20,518 INFO retorno case_id=f34bf3d0-4957-4b05-9962-c450b0059bf5 event_id=b336edad-1845-53b5-a406-d055c0036ca3 disposition=applied
+2026-11-20T21:30:20.916401278Z 2026-11-20 21:30:20,915 INFO retorno case_id=199eaaf0-d8b3-40cb-80e5-109e2d47f82c event_id=fca6e33d-7d70-5453-a716-dd6571d01356 disposition=applied
+2026-11-20T21:30:20.964818152Z 2026-11-20 21:30:20,964 INFO retorno case_id=4da05b2c-d47a-4785-9633-80e7ad8c8f7e event_id=6a413d6b-50bb-58f3-b387-2324b2898e24 disposition=applied
+2026-11-20T21:30:21.348539574Z 2026-11-20 21:30:21,348 INFO retorno case_id=0879bfd8-8349-4122-b6e7-970789e0fcbb event_id=2672f595-aa0c-523a-bad5-2d77368c6bd5 disposition=applied
+2026-11-20T21:30:21.419741731Z 2026-11-20 21:30:21,419 INFO retorno case_id=87199acd-3871-4af5-b844-3bef459a690c event_id=e74419b6-d629-54f0-b43e-11c08b525b27 disposition=applied
+2026-11-20T21:30:21.498996811Z 2026-11-20 21:30:21,498 INFO retorno case_id=6dcdf0e1-0dc1-4df4-a14c-9c7aa68dbb7b event_id=44c032d5-0a6f-54f0-b661-88fc16b19fed disposition=applied
+2026-11-20T21:30:21.601689235Z 2026-11-20 21:30:21,601 INFO retorno case_id=dda4be7e-21d6-459d-ad75-dd7f1c973f06 event_id=b1bc2fb3-d017-5b82-9921-9cdeaa0da95d disposition=applied
+2026-11-20T21:30:21.825969671Z 2026-11-20 21:30:21,825 INFO retorno case_id=f4fdaaac-8904-495d-a3e7-ef481ce387ee event_id=53e7e925-fe2a-5070-891f-55e2cebdb412 disposition=applied
+2026-11-20T21:30:21.974396605Z 2026-11-20 21:30:21,974 INFO retorno case_id=fc1b7a8d-93e4-4341-b1b3-cd69c3092c65 event_id=6a200061-6be7-54b3-9396-78915a05ce26 disposition=applied
+2026-11-20T21:30:22.016189514Z 2026-11-20 21:30:22,015 INFO retorno case_id=e213c08d-2db0-4d59-966a-4874cf2f217d event_id=f4e71de4-6418-535b-8c06-4e66a04b4064 disposition=applied
+2026-11-20T21:30:22.340266189Z 2026-11-20 21:30:22,340 INFO retorno case_id=b4d43b08-af46-42b6-8bb2-5d460aafea99 event_id=7d965c37-5a74-531b-b55d-4203dbd07a02 disposition=applied
+2026-11-20T21:30:22.362443817Z 2026-11-20 21:30:22,362 INFO retorno case_id=6dce0f31-16f1-4837-ac08-91d20af79e69 event_id=5dfa97cb-f831-5673-a4ec-27f18d4130c5 disposition=applied
+2026-11-20T21:30:22.390820561Z 2026-11-20 21:30:22,390 INFO retorno case_id=38313c06-24f2-4248-aa3a-d526ecaa2737 event_id=e934aec6-935e-507e-a165-595f455c7a4c disposition=applied
+2026-11-20T21:30:22.754766552Z 2026-11-20 21:30:22,752 INFO retorno case_id=c90c6483-6df2-4032-aee1-41ca0ed7339e event_id=2d88d83f-9735-5d19-afae-0b6660dcc504 disposition=applied
+2026-11-20T21:30:22.800902277Z 2026-11-20 21:30:22,800 INFO retorno case_id=30b0fa28-faa6-4c98-934d-51a0ef0d250d event_id=33cfdf16-3f3e-5e6f-bba9-e79cc4fd4831 disposition=applied
+2026-11-20T21:30:22.914480160Z 2026-11-20 21:30:22,914 INFO retorno case_id=34c698bc-603d-4b57-9922-e8bd303fb050 event_id=7588afc1-c9c8-5b8d-8d80-50a4166d30e0 disposition=applied
+2026-11-20T21:30:23.191689170Z 2026-11-20 21:30:23,191 INFO retorno case_id=96ec3ff9-9d4e-45c9-9c34-42d9260b5a2b event_id=8a21ae0e-6a2f-5a98-9c9f-d55a57c3da3d disposition=applied
+2026-11-20T21:30:23.333158254Z 2026-11-20 21:30:23,332 INFO retorno case_id=7182ff1f-12b3-4b54-ad5d-51f164681540 event_id=3204f036-4dca-5ab9-b605-d25493507d02 disposition=applied
+2026-11-20T21:30:23.565047697Z 2026-11-20 21:30:23,564 INFO retorno case_id=e4c0a360-3f01-4d9d-af5a-1910b2db97eb event_id=81e1b47a-c02c-5ac3-b76b-9dee33c164eb disposition=applied
+2026-11-20T21:30:23.615616921Z 2026-11-20 21:30:23,615 INFO retorno case_id=7c00e14d-0358-4450-8be7-a56a5d75c3ed event_id=76f89621-877e-52da-a22c-88c16482f344 disposition=applied
+2026-11-20T21:30:23.703045806Z 2026-11-20 21:30:23,702 INFO retorno case_id=312e89f3-7ceb-40b9-b9e3-a705a002e48a event_id=20dd21a6-ee39-5800-b5a4-b5c5ea810946 disposition=applied
+2026-11-20T21:30:24.030167135Z 2026-11-20 21:30:24,029 INFO retorno case_id=9b71c65d-c456-4853-b519-6915ad1aff60 event_id=af764293-db20-55f8-8d96-85ceefc9a528 disposition=applied
+2026-11-20T21:30:24.131771844Z 2026-11-20 21:30:24,131 INFO retorno case_id=a1ecde34-9679-428d-872c-178e5e164e5f event_id=d8abe0db-7d31-5f41-826b-6eb9bae50845 disposition=applied
+2026-11-20T21:30:24.363007966Z 2026-11-20 21:30:24,362 INFO retorno case_id=776b1e3c-0e5b-46d5-ac3f-dc93cb2c4acc event_id=3c17ea18-094a-5775-855c-bef189e4393f disposition=applied
+2026-11-20T21:30:24.395686057Z 2026-11-20 21:30:24,395 INFO retorno case_id=0293e231-82dd-4691-8120-856af2417302 event_id=57052289-e86f-525c-a9b7-a420b41230fb disposition=applied
+2026-11-20T21:30:24.725987654Z 2026-11-20 21:30:24,725 INFO retorno case_id=9c1dccb5-b1c6-40db-8ccb-9161b5097103 event_id=e0dd8823-08b4-5ce3-93e1-b6a736d261eb disposition=applied
+2026-11-20T21:30:24.784722756Z 2026-11-20 21:30:24,784 INFO retorno case_id=6325bbf0-53f3-4ae0-817e-0f5404d1a1af event_id=1e9a804e-7170-58d9-b1ed-a0fee96e767f disposition=applied
+2026-11-20T21:30:24.842760199Z 2026-11-20 21:30:24,842 INFO retorno case_id=ac6c4a48-bae8-4baf-898b-1793ad72c51d event_id=cef8e507-db4a-5b92-9e40-e8721100359f disposition=applied
+2026-11-20T21:30:25.163110887Z 2026-11-20 21:30:25,162 INFO retorno case_id=b87ab7bf-60e3-414a-abe7-f8a3827fc880 event_id=2f7abcb2-792a-5762-9239-28ba01207efc disposition=applied
+2026-11-20T21:30:25.199745438Z 2026-11-20 21:30:25,199 INFO retorno case_id=8d655f92-f872-4586-9175-f23a643d7fd5 event_id=56ba2730-5e07-5b8e-baf7-3d6638b683c2 disposition=applied
+2026-11-20T21:30:25.672854214Z 2026-11-20 21:30:25,672 INFO retorno case_id=3f28c006-a64e-488a-8f9d-eef63214449c event_id=1093cdbd-b0d0-5556-a568-6ebfa85ba736 disposition=applied
+2026-11-20T21:30:25.913324776Z 2026-11-20 21:30:25,913 INFO retorno case_id=e7fe43d1-3802-4d25-9e07-56df6aa80412 event_id=99629d68-2e27-5c3f-9818-d97250a2c060 disposition=applied
+2026-11-20T21:30:25.941797161Z 2026-11-20 21:30:25,941 INFO retorno case_id=cd9849c8-e04c-43d8-9bc8-f7eebfb4dec2 event_id=d1647193-08f5-56b7-8fd1-5f90b6bfb5a6 disposition=applied
+2026-11-20T21:30:25.965092270Z 2026-11-20 21:30:25,964 INFO retorno case_id=0a2ee859-c7af-45cb-9aa5-b1ab365a88bf event_id=51f2817e-367e-5593-ad83-a699c6d12645 disposition=applied
+2026-11-20T21:30:25.994224855Z 2026-11-20 21:30:25,994 INFO retorno case_id=1130f825-187c-4665-8035-011fa0a49ccb event_id=de17439e-ab28-538d-8820-6631c142f33c disposition=applied
+2026-11-20T21:30:26.272865442Z 2026-11-20 21:30:26,272 INFO retorno case_id=ed30b3fe-e9a6-47b6-85b3-e8d632d33243 event_id=02fbcbef-786c-5f74-9760-c3ea30ce5929 disposition=applied
+2026-11-20T21:30:26.557701617Z 2026-11-20 21:30:26,557 INFO retorno case_id=4798e8ae-1c4b-4ad4-a7cb-c0736969899b event_id=e9d9dc52-f7e3-52bd-8b91-7c9206fb9d6d disposition=applied
+2026-11-20T21:30:26.585312037Z 2026-11-20 21:30:26,585 INFO retorno case_id=456f8113-97d0-4385-bbd4-530ad5ba42d4 event_id=b9d70a73-8e0b-557c-80e3-d67829ef0f8e disposition=applied
+2026-11-20T21:30:26.895761390Z 2026-11-20 21:30:26,895 INFO retorno case_id=5ece569a-c1fc-4359-be56-b21e7bbd7351 event_id=c4d3031c-7c6c-56eb-b8bb-f2f375efec69 disposition=applied
+2026-11-20T21:30:26.924169204Z 2026-11-20 21:30:26,924 INFO retorno case_id=6dcdf0e1-0dc1-4df4-a14c-9c7aa68dbb7b event_id=bc5029e1-4e6c-5051-8c41-e2de2c46df09 disposition=applied
+2026-11-20T21:30:26.945862822Z 2026-11-20 21:30:26,945 INFO retorno case_id=600629b0-b184-4118-9ce6-72ea64e03d5c event_id=e617b7d0-317d-5b92-a883-8a6889663b8c disposition=applied
+2026-11-20T21:30:27.306377570Z 2026-11-20 21:30:27,306 INFO retorno case_id=0dbbc581-7f17-4f0c-91a0-d73e10a5c5b8 event_id=d246f701-43e3-523f-a19a-37d1ab3d5212 disposition=applied
+2026-11-20T21:30:27.621297872Z 2026-11-20 21:30:27,620 INFO retorno case_id=2cf0d4aa-8e52-4384-b5e3-52a3f71196c4 event_id=ff05f494-f71a-5db6-bcd3-fa47a3154ef4 disposition=applied
+2026-11-20T21:30:27.729251120Z 2026-11-20 21:30:27,728 INFO retorno case_id=aa979e73-0c52-4901-a1d7-820fae8e6ada event_id=a6535cb3-03bc-57c6-96e6-397055df42b7 disposition=applied
+2026-11-20T21:30:27.985408544Z 2026-11-20 21:30:27,985 INFO retorno case_id=5e562502-860c-4e59-95cc-6187a1a35346 event_id=aeee3127-db4c-585f-a1c1-22c10c7cc4bb disposition=applied
+2026-11-20T21:30:28.096784684Z 2026-11-20 21:30:28,096 INFO retorno case_id=c90c6483-6df2-4032-aee1-41ca0ed7339e event_id=fc6f4c13-a429-5dca-9d54-a3b9f03f19ae disposition=applied
+2026-11-20T21:30:28.120473180Z 2026-11-20 21:30:28,120 INFO retorno case_id=d144b00c-c1ab-4591-ae05-6ee606fbe7f2 event_id=c74630c0-42e3-51b5-b03a-d8e964da2702 disposition=applied
+2026-11-20T21:30:28.399100381Z 2026-11-20 21:30:28,398 INFO retorno case_id=1d81a02c-d416-41d3-acbd-3d67f94d3efc event_id=cbcea6ea-ec4f-5c70-853b-787fadb749ca disposition=applied
+2026-11-20T21:30:28.467997710Z 2026-11-20 21:30:28,467 INFO retorno case_id=28cf105c-2cc4-456f-9637-20a8851ce531 event_id=41beb106-c381-531f-a5ab-73c1b2c3ce44 disposition=applied
+2026-11-20T21:30:28.722207267Z 2026-11-20 21:30:28,722 INFO retorno case_id=8e6adafb-0c1a-422d-8941-95c7cb040738 event_id=cacfde02-f330-5b12-bfe6-de43c0cea1c5 disposition=applied
+2026-11-20T21:30:28.751795533Z 2026-11-20 21:30:28,751 INFO retorno case_id=eabf40f4-490b-4bab-8fb1-64eba4b6ce19 event_id=140c74db-cd32-5dca-a89a-6fa1a84eef36 disposition=applied
+2026-11-20T21:30:29.139810117Z 2026-11-20 21:30:29,139 INFO retorno case_id=2403b315-b633-4f4b-bbad-a50f43bd9db6 event_id=8bc403ed-e1b1-58ce-b3db-6a33edff9130 disposition=applied
+2026-11-20T21:30:29.189424837Z 2026-11-20 21:30:29,189 INFO retorno case_id=312e89f3-7ceb-40b9-b9e3-a705a002e48a event_id=19120dc9-8367-5d08-b095-87d602cefc05 disposition=applied
+2026-11-20T21:30:29.269950579Z 2026-11-20 21:30:29,269 INFO retorno case_id=9db9477f-c791-4e70-aecf-f323dc67bfde event_id=35a7db02-0ce3-5801-be75-84951339dbfe disposition=applied
+2026-11-20T21:30:29.573002351Z 2026-11-20 21:30:29,572 INFO retorno case_id=255a05b8-017c-4a98-b8f6-98382d8c531a event_id=0eea600a-502a-5829-a2ed-b184a110e376 disposition=applied
+2026-11-20T21:30:29.595434126Z 2026-11-20 21:30:29,595 INFO retorno case_id=4dcd0d2e-e4bf-4d9a-b927-143dfb826212 event_id=82cd93a2-3c5f-5a58-b75b-2ae3559ebf59 disposition=applied
+2026-11-20T21:30:30.011525731Z 2026-11-20 21:30:30,011 INFO retorno case_id=f6165935-534c-4306-ba57-b9a157968ebe event_id=caff8e07-5179-52ea-a415-652acc15887e disposition=applied
+2026-11-20T21:30:30.191248461Z 2026-11-20 21:30:30,190 INFO retorno case_id=9d3bcfa8-3bb5-429a-a618-ea6dc16b0a73 event_id=1cad1948-99c3-51a9-9ceb-6e9f7cf47148 disposition=applied
+2026-11-20T21:30:30.368772075Z 2026-11-20 21:30:30,368 INFO retorno case_id=6325bbf0-53f3-4ae0-817e-0f5404d1a1af event_id=0c80eadb-af15-5994-ab74-7ed08f3c9ee9 disposition=applied
+2026-11-20T21:30:30.466181868Z 2026-11-20 21:30:30,465 INFO retorno case_id=2b012d5b-b239-4f56-a6fb-b80e8c1f8cbe event_id=0989479d-495c-5ac3-a570-920e8d91fdfc disposition=applied
+2026-11-20T21:30:30.506231294Z 2026-11-20 21:30:30,506 INFO retorno case_id=1793e6bb-b178-4f67-a728-7707f05aa9eb event_id=2f1192b3-a21c-5be5-960c-1eadd4c86b1d disposition=applied
+2026-11-20T21:30:30.851274237Z 2026-11-20 21:30:30,850 INFO retorno case_id=0007dbdf-f213-4842-8aea-0677e3b4dd7c event_id=cc1e1e4e-4657-55f1-84ae-3fb58e2d27d8 disposition=applied
+2026-11-20T21:30:30.919789302Z 2026-11-20 21:30:30,919 INFO retorno case_id=5bf1e12d-e632-4d99-ac9d-81ee31d60312 event_id=6b5f881f-c7a5-51bc-9543-f143fa238725 disposition=applied
+2026-11-20T21:30:31.269657491Z 2026-11-20 21:30:31,268 INFO retorno case_id=38c647b4-588e-42cf-87f3-69fd04dcd10e event_id=90623dbc-8528-5868-8c0b-61529d4cc0d6 disposition=applied
+2026-11-20T21:30:31.339025281Z 2026-11-20 21:30:31,338 INFO retorno case_id=e7fe43d1-3802-4d25-9e07-56df6aa80412 event_id=721e8969-4a22-5587-8178-d05279296dd1 disposition=applied
+2026-11-20T21:30:31.387044395Z 2026-11-20 21:30:31,386 INFO retorno case_id=7c9a7719-8ee1-4381-bf55-34ea477f000f event_id=9aa27a06-a47c-5b8d-80a0-ef7e5f00bc12 disposition=applied
+2026-11-20T21:30:31.699461746Z 2026-11-20 21:30:31,699 INFO retorno case_id=1ec1e017-0346-446e-a9cb-d057869d600b event_id=faf14cdb-3fb3-52b4-be54-18d06b795d6c disposition=applied
+2026-11-20T21:30:31.738835602Z 2026-11-20 21:30:31,738 INFO retorno case_id=3ea89f9c-8bc3-4da7-b397-8153a829136b event_id=3ae56314-10bc-5564-a651-c2348a931fde disposition=applied
+2026-11-20T21:30:31.816806360Z 2026-11-20 21:30:31,816 INFO retorno case_id=b924c38d-e1a7-4a06-9429-63ab8b32ebcb event_id=ad4a987e-5be4-598e-800b-e6c69ac767c0 disposition=applied
+2026-11-20T21:30:32.105170191Z 2026-11-20 21:30:32,104 INFO retorno case_id=456f8113-97d0-4385-bbd4-530ad5ba42d4 event_id=06082d99-2053-5fdc-8bd4-3df679db87b2 disposition=applied
+2026-11-20T21:30:32.129018197Z 2026-11-20 21:30:32,128 INFO retorno case_id=055f6b4e-2525-468e-a44d-883a6b4e9c17 event_id=98d2f7f4-8621-5d23-bf88-54da52f30878 disposition=applied
+2026-11-20T21:30:32.147489641Z 2026-11-20 21:30:32,147 INFO retorno case_id=922c956e-ceb9-4edb-8b42-acc4092e8d0d event_id=04e0f8ba-8082-574a-8db5-0712b2acf897 disposition=applied
+2026-11-20T21:30:32.426536119Z 2026-11-20 21:30:32,426 INFO retorno case_id=850af86c-19d8-4660-81f8-d6accb7b7815 event_id=d931a589-860d-5499-8802-4d74507826b9 disposition=applied
+2026-11-20T21:30:32.752597842Z 2026-11-20 21:30:32,752 INFO retorno case_id=652dbc62-b37a-413b-946f-fd694082a9bb event_id=e6e6740c-9e4a-5858-9d66-ebbee820b916 disposition=applied
+2026-11-20T21:30:32.829538388Z 2026-11-20 21:30:32,829 INFO retorno case_id=59442290-460e-44ee-abc7-fa3ab5e029e9 event_id=967c5461-f5c0-5d3c-8636-2a169a870ee1 disposition=applied
+2026-11-20T21:30:33.139385209Z 2026-11-20 21:30:33,139 INFO retorno case_id=aa979e73-0c52-4901-a1d7-820fae8e6ada event_id=e638ea8f-2506-5efd-a76b-2f126671b3db disposition=applied
+2026-11-20T21:30:33.185921518Z 2026-11-20 21:30:33,185 INFO retorno case_id=a77e26d6-fb15-47df-934a-e93ca0e770cb event_id=a26ab9e6-bd42-54ee-9684-def9e8c2b1f7 disposition=applied
+2026-11-20T21:30:33.297224772Z 2026-11-20 21:30:33,296 INFO retorno case_id=34dd5018-6249-492f-a776-683be63f2118 event_id=fe53c6d7-db23-5018-9979-0c4d0c331e4f disposition=applied
+2026-11-20T21:30:33.578510472Z 2026-11-20 21:30:33,578 INFO retorno case_id=d4a557d3-d259-4a08-91f9-36a8a7e25c30 event_id=0104fd91-5a87-5bd0-8e68-72f72e26243e disposition=applied
+2026-11-20T21:30:33.642698701Z 2026-11-20 21:30:33,642 INFO retorno case_id=a14c6ea4-5b90-466a-b386-9f5fbe213fc4 event_id=94df36d1-3fc5-5a08-8777-7e1a4c81a09d disposition=applied
+2026-11-20T21:30:33.902693441Z 2026-11-20 21:30:33,902 INFO retorno case_id=1d81a02c-d416-41d3-acbd-3d67f94d3efc event_id=bf8bc4dc-f4bc-5e6b-a4fe-ec577b6bc1b6 disposition=applied
+2026-11-20T21:30:33.939868261Z 2026-11-20 21:30:33,939 INFO retorno case_id=c9031758-d06c-4cbb-8ba9-f4b86fd1d529 event_id=398df7c4-9713-5825-980b-da7ae77d0f2f disposition=applied
+2026-11-20T21:30:33.996990793Z 2026-11-20 21:30:33,996 INFO retorno case_id=5f668869-b6b0-4d67-8cc3-1e6f28f93262 event_id=760e202c-2858-5861-9bef-ac8266bf382b disposition=applied
+2026-11-20T21:30:34.270468088Z 2026-11-20 21:30:34,270 INFO retorno case_id=47d6e2e0-c828-4b02-9366-a754eab939cd event_id=f0241997-5635-59a4-90d2-d7752e52a9ec disposition=applied
+2026-11-20T21:30:34.300656203Z 2026-11-20 21:30:34,300 INFO retorno case_id=cb078cd4-de61-4554-95ff-2b1d8b89dd87 event_id=e7449c49-1701-502b-8f98-02809f174077 disposition=applied
+2026-11-20T21:30:34.672374754Z 2026-11-20 21:30:34,671 INFO retorno case_id=9db9477f-c791-4e70-aecf-f323dc67bfde event_id=cf7dde9b-8b2b-5c08-b97e-e7b1ab99fcdc disposition=applied
+2026-11-20T21:30:34.733334358Z 2026-11-20 21:30:34,733 INFO retorno case_id=158bba30-fc6f-42e7-9bd3-c97e34fc190c event_id=363e9de2-165e-513f-ab0a-a0a67a0b27be disposition=applied
+2026-11-20T21:30:35.077147632Z 2026-11-20 21:30:35,076 INFO retorno case_id=f1e9d7b3-411a-46de-8fde-b449c6e461b4 event_id=3bbac36d-afe2-5faf-8115-86afd71ae4e9 disposition=applied
+2026-11-20T21:30:35.169471286Z 2026-11-20 21:30:35,169 INFO retorno case_id=eb842f32-c5dc-4d78-a083-d5046b42a52e event_id=ca877d64-40e8-5f6b-9640-964cda73911e disposition=applied
+2026-11-20T21:30:35.532685011Z 2026-11-20 21:30:35,532 INFO retorno case_id=161b1fc1-6939-46b8-b40b-ed709a0621c0 event_id=45411511-11fb-5bc9-bb3b-2206ab03cd4c disposition=applied
+2026-11-20T21:30:35.594595392Z 2026-11-20 21:30:35,594 INFO retorno case_id=5179c124-f133-4ab3-a164-d7e5fddb0689 event_id=cb3f2c7e-4a45-59f0-a6de-f29d02fa18a0 disposition=applied
+2026-11-20T21:30:35.816930996Z 2026-11-20 21:30:35,816 INFO retorno case_id=99996d52-a836-4a97-87aa-e82a9837e224 event_id=4bb96be8-d0a9-51c1-b372-43e6fc9d42c2 disposition=applied
+2026-11-20T21:30:35.872819023Z 2026-11-20 21:30:35,872 INFO retorno case_id=9edca278-6ce6-4982-851a-c96a411ba36b event_id=7d37e55e-ccb5-5c8b-935f-a30f30b8b3ce disposition=applied
+2026-11-20T21:30:35.902860993Z 2026-11-20 21:30:35,902 INFO retorno case_id=2b012d5b-b239-4f56-a6fb-b80e8c1f8cbe event_id=3ccd3abd-1c94-512b-9960-83eb6103a5c9 disposition=applied
+2026-11-20T21:30:35.923484701Z 2026-11-20 21:30:35,923 INFO retorno case_id=07f3aded-0df4-4263-90da-3c10f6c32920 event_id=94e98520-76a5-588c-9154-ace140edeaf0 disposition=applied
+2026-11-20T21:30:36.209061926Z 2026-11-20 21:30:36,208 INFO retorno case_id=4b60a0e7-88e7-44ba-bdfb-cda1a04a1358 event_id=1540f840-41e1-5958-8c3a-3a8f05d163bc disposition=applied
+2026-11-20T21:30:36.539715653Z 2026-11-20 21:30:36,539 INFO retorno case_id=ab09a956-8feb-419d-8a08-9f9fe20734f5 event_id=20e38dac-feba-5143-8d49-67672f7ba854 disposition=applied
+2026-11-20T21:30:36.572507898Z 2026-11-20 21:30:36,571 INFO retorno case_id=7a541bb8-7bd2-4fed-8ca7-608eeed68f57 event_id=3ba205e5-9369-50f2-86ae-8552ca8a382f disposition=applied
+2026-11-20T21:30:36.623857766Z 2026-11-20 21:30:36,623 INFO retorno case_id=7c9a7719-8ee1-4381-bf55-34ea477f000f event_id=db76daf4-d5e8-55ea-8fe6-78176a552506 disposition=applied
+2026-11-20T21:30:36.941854364Z 2026-11-20 21:30:36,940 INFO retorno case_id=17142a87-1285-4d2e-804e-81eada40a323 event_id=cf747b7f-28b5-5027-a141-5d5f55931f89 disposition=applied
+2026-11-20T21:30:36.994684703Z 2026-11-20 21:30:36,994 INFO retorno case_id=3b3037be-ce4b-4494-93e9-ec1ca8c7d569 event_id=dc454781-4ac0-5132-9aad-0c3da934eec3 disposition=applied
+2026-11-20T21:30:37.359046479Z 2026-11-20 21:30:37,358 INFO retorno case_id=b67aa9f2-2b59-4f9e-a7db-e74c35c8bbc3 event_id=13cd914c-22f0-51d8-aad0-611a6dea8158 disposition=applied
+2026-11-20T21:30:37.665951815Z 2026-11-20 21:30:37,665 INFO retorno case_id=d579c701-7132-4dc9-a8a2-bc815f20d414 event_id=282d2d0b-af2a-5b89-9cb9-e33626f2feb2 disposition=applied
+2026-11-20T21:30:37.763067180Z 2026-11-20 21:30:37,762 INFO retorno case_id=922c956e-ceb9-4edb-8b42-acc4092e8d0d event_id=22877696-9f4b-59ec-ac21-b8542b0ad279 disposition=applied
+2026-11-20T21:30:37.818056221Z 2026-11-20 21:30:37,817 INFO retorno case_id=d6ea497e-e61f-4315-b444-c2327b110015 event_id=587f6491-6b3b-5490-9e25-119c1e4e1fb4 disposition=applied
+2026-11-20T21:30:38.044338481Z 2026-11-20 21:30:38,044 INFO retorno case_id=60b97d2b-717a-466c-8c2b-99e1b4e46540 event_id=54d012c2-6f7b-5a15-9f2a-f2d224a4c1ea disposition=applied
+2026-11-20T21:30:38.066995425Z 2026-11-20 21:30:38,066 INFO retorno case_id=c9e0ae0f-1be6-46fe-8959-0c3adea064cd event_id=83192bec-3e27-51b5-b96a-3cad0f747c9f disposition=applied
+2026-11-20T21:30:38.092351329Z 2026-11-20 21:30:38,092 INFO retorno case_id=ba0aa991-80ee-4060-a99a-5ce007410ea6 event_id=0376dc4e-12ae-5212-89e0-b224edff2522 disposition=applied
+2026-11-20T21:30:38.381704348Z 2026-11-20 21:30:38,381 INFO retorno case_id=92cdefc6-aa12-46b3-8bbc-2c32a6b11522 event_id=023966ca-5c43-5332-afd5-4db460c07434 disposition=applied
+2026-11-20T21:30:38.710194199Z 2026-11-20 21:30:38,709 INFO retorno case_id=0400e9a3-e89b-4a73-87cf-fcf88f81377e event_id=a68d8575-5e74-5f48-8023-c76d25e3d4f7 disposition=applied
+2026-11-20T21:30:38.741533987Z 2026-11-20 21:30:38,741 INFO retorno case_id=34dd5018-6249-492f-a776-683be63f2118 event_id=a0cf3e77-0eec-51b7-8466-56c5c6373d6f disposition=applied
+2026-11-20T21:30:38.770079598Z 2026-11-20 21:30:38,769 INFO retorno case_id=ed9b259e-65dd-4c3b-a26e-06571987e43f event_id=3f4fb549-515c-5af9-8a06-37a2f6441e15 disposition=applied
+2026-11-20T21:30:39.068630567Z 2026-11-20 21:30:39,068 INFO retorno case_id=1ae24086-7e15-4eff-b253-c947f9f1c1e4 event_id=12128867-b343-50cb-880b-9d445f23fdc0 disposition=applied
+2026-11-20T21:30:39.388863143Z 2026-11-20 21:30:39,388 INFO retorno case_id=dcc6a417-3902-4bcc-ba5e-13e0b4ffc76b event_id=4ec9df06-11f8-53a7-956c-b256b51fce74 disposition=applied
+2026-11-20T21:30:39.546943679Z 2026-11-20 21:30:39,546 INFO retorno case_id=4dddeb0f-71c1-43e2-8611-2f2b4a57b1f4 event_id=b4b962c1-9c79-5ba9-b7a6-45fab6461234 disposition=applied
+2026-11-20T21:30:39.774306432Z 2026-11-20 21:30:39,774 INFO retorno case_id=48f27726-53c3-4739-8089-8c3e2199f514 event_id=7cf88eda-b04e-5d2a-9fb9-5ea341c1b820 disposition=applied
+2026-11-20T21:30:39.906837975Z 2026-11-20 21:30:39,906 INFO retorno case_id=e292bf03-ce68-4e8b-a13a-6db0156556fb event_id=d8c5ad3a-9713-5b55-8ef8-8d0231f22c19 disposition=applied
+2026-11-20T21:30:40.195954428Z 2026-11-20 21:30:40,195 INFO retorno case_id=2b60bfa2-e8c0-4ff4-bb01-8affd69dc1bf event_id=2a9f2c63-e5bc-578d-b35a-c764f2de4522 disposition=applied
+2026-11-20T21:30:40.339803115Z 2026-11-20 21:30:40,339 INFO retorno case_id=158bba30-fc6f-42e7-9bd3-c97e34fc190c event_id=8a43aaad-07f3-5fef-93c7-9faf5ae02738 disposition=applied
+2026-11-20T21:30:40.372635841Z 2026-11-20 21:30:40,372 INFO retorno case_id=a83a0216-ccbb-4cb9-b106-fd7469db8aea event_id=9cd38a85-08ee-580e-931d-e717e31927f4 disposition=applied
+2026-11-20T21:30:40.752911631Z 2026-11-20 21:30:40,751 INFO retorno case_id=49084452-2be9-41bd-8a08-3d6880781157 event_id=f51d5c9b-668e-507c-98fc-d66db41ae85b disposition=applied
+2026-11-20T21:30:40.808079598Z 2026-11-20 21:30:40,807 INFO retorno case_id=d561d7da-8cf6-49b1-a1e7-28c6015dc43b event_id=32dc2da9-168b-5235-acc0-b3ddc5fadb4f disposition=applied
+2026-11-20T21:30:40.850098865Z 2026-11-20 21:30:40,849 INFO retorno case_id=32a0f830-e334-46d2-8b29-af94dff0cae7 event_id=150b78b9-eec6-550e-bcaf-31b11b769d4e disposition=applied
+2026-11-20T21:30:41.186855088Z 2026-11-20 21:30:41,186 INFO retorno case_id=869ebd7d-caae-4c5e-a7f6-2f736e333c8b event_id=f135753e-2d75-50e7-b7bf-d18760ed1ab4 disposition=applied
+2026-11-20T21:30:41.320808564Z 2026-11-20 21:30:41,320 INFO retorno case_id=99996d52-a836-4a97-87aa-e82a9837e224 event_id=8b9e1ea5-2d8b-51d5-832c-c4526fdf9033 disposition=applied
+2026-11-20T21:30:41.372952453Z 2026-11-20 21:30:41,372 INFO retorno case_id=d5371730-0280-4e72-8e4e-a17cbd1ebf4e event_id=0068627d-a16e-5c8d-a5fb-4dcf630b49a5 disposition=applied
+2026-11-20T21:30:41.623191342Z 2026-11-20 21:30:41,622 INFO retorno case_id=8dd6ec02-358d-45f8-84ad-51c7df768bf0 event_id=2868b3fc-b63f-559f-8179-a214366438b2 disposition=applied
+2026-11-20T21:30:41.667678160Z 2026-11-20 21:30:41,667 INFO retorno case_id=102e8b55-f26c-4be6-8fbf-031ccd59ccca event_id=c1d797e0-9f86-50e2-9ac2-1e21ad2afb6f disposition=applied
+2026-11-20T21:30:41.928509707Z 2026-11-20 21:30:41,928 INFO retorno case_id=89110d27-5303-4e49-959c-6873009a914e event_id=cc1589fb-f694-5a9a-88fb-274d9a819b25 disposition=applied
+2026-11-20T21:30:41.957918083Z 2026-11-20 21:30:41,957 INFO retorno case_id=7a541bb8-7bd2-4fed-8ca7-608eeed68f57 event_id=e6be42b4-b5df-55a2-afc5-b79482b0d91e disposition=applied
+2026-11-20T21:30:41.980594177Z 2026-11-20 21:30:41,980 INFO retorno case_id=3d980ece-e3dc-4c2f-bcfc-c0144eb12acd event_id=291172f5-1d17-590f-b770-bd2d7175835b disposition=applied
+2026-11-20T21:30:42.292213939Z 2026-11-20 21:30:42,291 INFO retorno case_id=945ac21f-724d-4b22-87c9-376f3ad262f0 event_id=89c8a768-08a8-53dd-b24e-a276824a383a disposition=applied
+2026-11-20T21:30:42.352695909Z 2026-11-20 21:30:42,352 INFO retorno case_id=3e65396d-aeb5-48cb-a56c-0f3fb0e8bc6f event_id=5119f971-65a0-5d50-aee8-6e872a6befb9 disposition=applied
+2026-11-20T21:30:42.690722324Z 2026-11-20 21:30:42,690 INFO retorno case_id=36b75565-8938-4a9a-a2a9-cfd23d55738a event_id=1545d373-a91b-58ce-889e-e38698764ed4 disposition=applied
+2026-11-20T21:30:42.954511420Z 2026-11-20 21:30:42,954 INFO retorno case_id=c2a0a665-a58f-4e3b-b0a8-a97d9e15fda0 event_id=40fa4e97-ad77-5b60-bb14-25795983c016 disposition=applied
+2026-11-20T21:30:43.027508860Z 2026-11-20 21:30:43,027 INFO retorno case_id=cb8884e8-8578-44b5-8c8b-87f469df287f event_id=70c3c1b4-bafa-584c-ba12-b59009122f1d disposition=applied
+2026-11-20T21:30:43.353158204Z 2026-11-20 21:30:43,352 INFO retorno case_id=d6ea497e-e61f-4315-b444-c2327b110015 event_id=07933e5f-51a8-5225-a186-d7563fc223d9 disposition=applied
+2026-11-20T21:30:43.376620066Z 2026-11-20 21:30:43,376 INFO retorno case_id=51f9453d-c727-439d-ae20-8089f038e18e event_id=e26d1d9d-2097-519c-890a-dba9b35b9efc disposition=applied
+2026-11-20T21:30:43.432316178Z 2026-11-20 21:30:43,432 INFO retorno case_id=8b038db2-088c-40db-add4-73bb45769bf5 event_id=ffd46ceb-6cca-5578-8e94-d7ff5aa06448 disposition=applied
+2026-11-20T21:30:43.748513023Z 2026-11-20 21:30:43,748 INFO retorno case_id=108c1e54-6fdf-482e-8864-155e8ba48084 event_id=bc4bacc3-fd68-5211-91fe-0912bc9d5463 disposition=applied
+2026-11-20T21:30:43.770405684Z 2026-11-20 21:30:43,770 INFO retorno case_id=80697be9-6ef9-4a46-a67c-30ff5c691b96 event_id=f5aef404-a213-537b-9ccc-d00319c2d65c disposition=applied
+2026-11-20T21:30:44.079982102Z 2026-11-20 21:30:44,079 INFO retorno case_id=0400e9a3-e89b-4a73-87cf-fcf88f81377e event_id=4c9d2955-0a4a-59e5-a571-f445ab8eace3 disposition=applied
+2026-11-20T21:30:44.107039465Z 2026-11-20 21:30:44,106 INFO retorno case_id=caa21ba8-fb2e-4801-92d4-6c39ec73bdf2 event_id=c6f27f80-92c6-5118-9d9f-5dff34fa4eb0 disposition=applied
+2026-11-20T21:30:44.155258284Z 2026-11-20 21:30:44,154 INFO retorno case_id=fd1c0f6d-2a8a-4bdc-b5a4-0e5db49cd692 event_id=ee17861d-df40-59b7-96ce-2fb677be0bb0 disposition=applied
+2026-11-20T21:30:44.507075126Z 2026-11-20 21:30:44,506 INFO retorno case_id=aaf1af7c-50e7-42b0-bc35-afcd5a550272 event_id=22bb0c65-d2e0-5270-b16a-39d1be1f058e disposition=applied
+2026-11-20T21:30:44.808966561Z 2026-11-20 21:30:44,808 INFO retorno case_id=d1cfc1dc-be96-48ea-b253-f5e667e3612c event_id=0fa7d358-0804-5291-8069-58149c3d3936 disposition=applied
+2026-11-20T21:30:44.935620786Z 2026-11-20 21:30:44,935 INFO retorno case_id=2f4a442d-f968-4e06-8c91-247f00cd3116 event_id=4046b76d-8595-5dc5-8ccc-44bc6710fb6c disposition=applied
+2026-11-20T21:30:45.164281976Z 2026-11-20 21:30:45,164 INFO retorno case_id=9492f457-8012-42fa-9c66-1b7a14702655 event_id=081e360e-7901-5b9f-bdcc-e45733885d12 disposition=applied
+2026-11-20T21:30:45.195010278Z 2026-11-20 21:30:45,194 INFO retorno case_id=48f27726-53c3-4739-8089-8c3e2199f514 event_id=e0e53dbc-425c-5c04-a935-cd80d303509c disposition=applied
+2026-11-20T21:30:45.228052437Z 2026-11-20 21:30:45,227 INFO retorno case_id=c863862e-e868-4c35-9d2e-e4bb16492b94 event_id=6bc722dc-9c02-57bb-9cbf-ef45cd403014 disposition=applied
+2026-11-20T21:30:45.579837577Z 2026-11-20 21:30:45,578 INFO retorno case_id=c886037e-4470-4458-b21c-ce58d25fc8ae event_id=1b737ea8-2764-5cd2-b5b9-6bdb148c2882 disposition=applied
+2026-11-20T21:30:45.628308042Z 2026-11-20 21:30:45,628 INFO retorno case_id=2b60bfa2-e8c0-4ff4-bb01-8affd69dc1bf event_id=742c99ee-6620-5a61-9648-5c74d3ae4ef9 disposition=applied
+2026-11-20T21:30:45.743991307Z 2026-11-20 21:30:45,743 INFO retorno case_id=e902424f-8c1a-416b-9489-3cd288d188c8 event_id=1f8b80c4-1577-5803-bbe7-f3a1f8e64227 disposition=applied
+2026-11-20T21:30:46.014837823Z 2026-11-20 21:30:46,014 INFO retorno case_id=6e33564d-122c-4c98-a87b-73e15cd3e08a event_id=d322ac94-1680-56a5-985e-56979f429d5b disposition=applied
+2026-11-20T21:30:46.146692837Z 2026-11-20 21:30:46,146 INFO retorno case_id=5c0b811f-2776-4c11-a313-7ba92b954551 event_id=d012c507-89f0-5b88-ad9c-794585cd9796 disposition=applied
+2026-11-20T21:30:46.442526359Z 2026-11-20 21:30:46,442 INFO retorno case_id=62fc163c-abb3-4c6c-9b35-11a7ce585abd event_id=0109add2-bab2-5e78-adf5-03892316c22e disposition=applied
+2026-11-20T21:30:46.513770152Z 2026-11-20 21:30:46,513 INFO retorno case_id=dd70ba37-47b8-40d4-b3b2-b7c12d47f969 event_id=1765a10f-8e62-5e97-a516-f077657af4b5 disposition=applied
+2026-11-20T21:30:46.814654683Z 2026-11-20 21:30:46,814 INFO retorno case_id=8a93d2de-0da1-4beb-b23d-68986c7abe5d event_id=8799da88-949b-5673-b787-61fce1f387aa disposition=applied
+2026-11-20T21:30:46.942842480Z 2026-11-20 21:30:46,942 INFO retorno case_id=869ebd7d-caae-4c5e-a7f6-2f736e333c8b event_id=18356713-44e5-532a-b789-682389b4a866 disposition=applied
+2026-11-20T21:30:46.981730861Z 2026-11-20 21:30:46,981 INFO retorno case_id=2a3419e7-854d-4c29-804e-22e2f8e8ffdd event_id=3d0abc33-e40c-5b94-9077-745da8cdcdc4 disposition=applied
+2026-11-20T21:30:47.025726511Z 2026-11-20 21:30:47,025 INFO retorno case_id=9c5c94a1-43f0-4852-83ea-b91b22f55ded event_id=2469ea5d-afcd-59f7-a744-30f749d4965d disposition=applied
+2026-11-20T21:30:47.380775212Z 2026-11-20 21:30:47,380 INFO retorno case_id=6023d474-11de-49c1-9262-cdc00feae3c6 event_id=dbec7bb8-b891-5f0f-bca8-0c1a3ca55f49 disposition=applied
+2026-11-20T21:30:47.731862907Z 2026-11-20 21:30:47,731 INFO retorno case_id=3d980ece-e3dc-4c2f-bcfc-c0144eb12acd event_id=999b0e76-9b95-50d4-9187-aae22a58a01a disposition=applied
+2026-11-20T21:30:47.785095042Z 2026-11-20 21:30:47,784 INFO retorno case_id=a1a060a6-894f-4133-ae6e-4b2217dcd7e0 event_id=88131549-60b3-5426-8c47-dce31fc9fb34 disposition=applied
+2026-11-20T21:30:47.885912576Z 2026-11-20 21:30:47,885 INFO retorno case_id=0d19b867-0add-414e-820f-169d0efc3b1a event_id=a6e5b162-e80b-566c-8dbd-558360d78568 disposition=applied
+2026-11-20T21:30:47.957881651Z 2026-11-20 21:30:47,957 INFO retorno case_id=25149abf-ffb9-4066-b58f-6da087fe7ff5 event_id=baa90746-5659-561c-9760-62c58ab34db8 disposition=applied
+2026-11-20T21:30:48.194144536Z 2026-11-20 21:30:48,193 INFO retorno case_id=b1346722-9359-41a4-b37c-14dc3a23fa16 event_id=8cffdc21-ead2-5e56-8aad-6ed988bf9a46 disposition=applied
+2026-11-20T21:30:48.300060737Z 2026-11-20 21:30:48,299 INFO retorno case_id=40746ced-8ab8-4f8e-aab7-383c322acb40 event_id=359048dc-556e-5d83-b365-756d0648247f disposition=applied
+2026-11-20T21:30:48.612721786Z 2026-11-20 21:30:48,612 INFO retorno case_id=be0623ac-b997-4c0f-add6-a2f68108af96 event_id=45afdc8a-19b3-535f-82aa-b83c378b68b7 disposition=applied
+2026-11-20T21:30:48.725793395Z 2026-11-20 21:30:48,725 INFO retorno case_id=cb8884e8-8578-44b5-8c8b-87f469df287f event_id=54d4fa29-13ea-514d-a9ad-b5a28360b9a7 disposition=applied
+2026-11-20T21:30:48.784526949Z 2026-11-20 21:30:48,784 INFO retorno case_id=ae869669-2295-42d5-a73e-78f6b2a33462 event_id=7a124124-5f04-5934-b284-11cc6a7ab5dd disposition=applied
+2026-11-20T21:30:49.106750241Z 2026-11-20 21:30:49,106 INFO retorno case_id=263e42a0-5735-4b3e-860b-906704ffcf27 event_id=3e610650-690f-5dfb-ba7f-0aed6af72937 disposition=applied
+2026-11-20T21:30:49.168834140Z 2026-11-20 21:30:49,168 INFO retorno case_id=d9a0ad16-b86a-4255-92ce-e0dd2d6af5c3 event_id=e6559325-a21b-5999-953b-1019ed02c66a disposition=applied
+2026-11-20T21:30:49.469869000Z 2026-11-20 21:30:49,469 INFO retorno case_id=ae566f8d-6d04-4904-bce2-02f1af295cb8 event_id=fbffbaae-6a30-51d4-9ca6-1655f847f687 disposition=applied
+2026-11-20T21:30:49.597267566Z 2026-11-20 21:30:49,597 INFO retorno case_id=42565d0d-6f88-420f-bf24-17848ddfac87 event_id=d6f283a1-efc7-510e-90e0-4ef13bd5af68 disposition=applied
+2026-11-20T21:30:49.666948098Z 2026-11-20 21:30:49,666 INFO retorno case_id=caa21ba8-fb2e-4801-92d4-6c39ec73bdf2 event_id=024f2df3-9946-56f5-866b-b730f778ff30 disposition=applied
+2026-11-20T21:30:49.971627876Z 2026-11-20 21:30:49,971 INFO retorno case_id=6dc81383-d679-40c9-ab34-3b4facccad3a event_id=379e7b0e-110e-5d0f-b226-b4ab9923fb9d disposition=applied
+2026-11-20T21:30:50.039760601Z 2026-11-20 21:30:50,039 INFO retorno case_id=2298602b-b00b-400a-a55e-21973881afa0 event_id=4795c11c-5bee-5005-8bfa-56edb9220a13 disposition=applied
+2026-11-20T21:30:50.123266976Z 2026-11-20 21:30:50,123 INFO retorno case_id=09cc34d7-ad2f-4827-98f9-6b7f9c3a195b event_id=08774a70-54b4-5edd-953f-dd9631afcd54 disposition=applied
+2026-11-20T21:30:50.302949760Z 2026-11-20 21:30:50,302 INFO retorno case_id=bab36618-d2dc-4863-ad94-fd5861d9c07c event_id=997b52df-679a-50cc-9eb7-75087516ae5a disposition=applied
+2026-11-20T21:30:50.335825770Z 2026-11-20 21:30:50,335 INFO retorno case_id=febc709f-9558-4400-a875-bd6b246d5301 event_id=b98523d4-c631-56bc-83e5-c382def9b089 disposition=applied
+2026-11-20T21:30:50.728378077Z 2026-11-20 21:30:50,727 INFO retorno case_id=9492f457-8012-42fa-9c66-1b7a14702655 event_id=4586a2b0-7c16-5f25-aa28-8f394c8d94e9 disposition=applied
+2026-11-20T21:30:50.766372571Z 2026-11-20 21:30:50,766 INFO retorno case_id=3d97d26f-e369-4640-b91f-207721d947c7 event_id=329a310b-edb1-5dca-87ba-831e8b703894 disposition=applied
+2026-11-20T21:30:50.790061739Z 2026-11-20 21:30:50,789 INFO retorno case_id=0361a0f8-d68f-4078-8a76-2218b0ecc7a1 event_id=8c7bc974-91dc-5b08-98d6-fd9426dd04c1 disposition=applied
+2026-11-20T21:30:51.056137703Z 2026-11-20 21:30:51,056 INFO retorno case_id=d845fb3d-cab8-4b1a-9b03-8889fbf8fbf6 event_id=72272f16-69aa-5b96-a426-dd1df1d5d328 disposition=applied
+2026-11-20T21:30:51.396847482Z 2026-11-20 21:30:51,395 INFO retorno case_id=2ed01c57-b944-4242-b227-91d0c034ba82 event_id=d793d40e-b7ae-5b62-b484-a6cb804cff25 disposition=applied
+2026-11-20T21:30:51.500848323Z 2026-11-20 21:30:51,500 INFO retorno case_id=3c5ebb53-11ff-47e0-abaf-f064d1871db4 event_id=3c87794a-1f4e-5fee-a072-0bfafd29ae79 disposition=applied
+2026-11-20T21:30:51.806891653Z 2026-11-20 21:30:51,806 INFO retorno case_id=f8375157-6591-4191-90e0-9fc1938d45d3 event_id=ba4383fb-9b3f-5bc6-853f-b54dee85a4f6 disposition=applied
+2026-11-20T21:30:51.917732886Z 2026-11-20 21:30:51,917 INFO retorno case_id=f944e9f4-cc6a-49ae-9db1-14841cb1484a event_id=7227cddf-2bab-5dd5-b549-543c99359e25 disposition=applied
+2026-11-20T21:30:52.198770606Z 2026-11-20 21:30:52,198 INFO retorno case_id=dd70ba37-47b8-40d4-b3b2-b7c12d47f969 event_id=3496d08e-9fc7-535b-9b2d-7e790f329f3c disposition=applied
+2026-11-20T21:30:52.332539950Z 2026-11-20 21:30:52,332 INFO retorno case_id=ef27767e-23ea-4141-80cc-be1c2e54d2f6 event_id=9d372264-a402-5f10-b2ac-25642c38be9c disposition=applied
+2026-11-20T21:30:52.361181901Z 2026-11-20 21:30:52,359 INFO retorno case_id=fc991dfb-e94b-4d89-9472-04a9cd772aef event_id=97e14633-10c0-5a44-a3de-ec090f9ff370 disposition=applied
+2026-11-20T21:30:52.657852724Z 2026-11-20 21:30:52,657 INFO retorno case_id=cbab7a82-ca41-4efb-89f3-4dffbdb48ac6 event_id=1862a99a-9320-53f6-a1d6-47ac0d68e053 disposition=applied
+2026-11-20T21:30:52.762619903Z 2026-11-20 21:30:52,762 INFO retorno case_id=9248b1b8-79f2-4c5a-83e9-9013d178c505 event_id=1d27a612-4835-5bed-8c41-4c6e7da7fb19 disposition=applied
+2026-11-20T21:30:53.017247642Z 2026-11-20 21:30:53,016 INFO retorno case_id=b46e59de-79a7-4c31-a35f-e081799e9c6e event_id=02d59f5b-4f99-530c-9e1a-4ba259da1af4 disposition=applied
+2026-11-20T21:30:53.144491985Z 2026-11-20 21:30:53,144 INFO retorno case_id=de6897db-fa70-452f-8333-6befff6351a3 event_id=6a03c162-243d-51d2-ba41-109583bd6973 disposition=applied
+2026-11-20T21:30:53.395231453Z 2026-11-20 21:30:53,395 INFO retorno case_id=6c0664a2-1e01-4650-aced-5658740e44b9 event_id=33e2109e-9ba6-5d17-9fd7-aaa35572c489 disposition=applied
+2026-11-20T21:30:53.530181489Z 2026-11-20 21:30:53,529 INFO retorno case_id=a1a060a6-894f-4133-ae6e-4b2217dcd7e0 event_id=830b6e34-3817-5da7-af06-9d1758fb27ba disposition=applied
+2026-11-20T21:30:53.588801265Z 2026-11-20 21:30:53,588 INFO retorno case_id=88b10877-8b83-4ecf-bc23-90e8d6dd3930 event_id=e72d73d1-c64c-50f5-8c10-43a534e33e4b disposition=applied
+2026-11-20T21:30:53.896786539Z 2026-11-20 21:30:53,896 INFO retorno case_id=4f100457-fd57-4566-ac5b-d89012a60454 event_id=33e14f2a-1421-58f3-baa2-83104177149c disposition=applied
+2026-11-20T21:30:53.946575045Z 2026-11-20 21:30:53,946 INFO retorno case_id=3a3cf4b6-b573-412f-a72f-e562c0d45aea event_id=644852d3-51e9-5296-9b14-a9a633468f75 disposition=applied
+2026-11-20T21:30:54.262126410Z 2026-11-20 21:30:54,261 INFO retorno case_id=d4871a69-160c-478b-9724-26bc5c3da307 event_id=fd25f848-4379-5ebd-9c8a-f9ee2171d1ae disposition=applied
+2026-11-20T21:30:54.364283564Z 2026-11-20 21:30:54,363 INFO retorno case_id=be0623ac-b997-4c0f-add6-a2f68108af96 event_id=3da3f758-aaf6-5ff6-a504-cce6f48fe797 disposition=applied
+2026-11-20T21:30:54.443009123Z 2026-11-20 21:30:54,442 INFO retorno case_id=a80a8c6d-518e-4465-a86b-f6dd5c8bdf45 event_id=b0de5150-5153-533a-af85-968ccde20a61 disposition=applied
+2026-11-20T21:30:54.532123640Z 2026-11-20 21:30:54,531 INFO retorno case_id=9c6d2f3d-e417-43dd-b8f8-97df491e3f26 event_id=66702b56-a42e-5f59-936a-3ae54c709d0b disposition=applied
+2026-11-20T21:30:54.803406284Z 2026-11-20 21:30:54,802 INFO retorno case_id=bdcb1fd1-ad80-4ee1-b62c-a4ada16fc111 event_id=212dfe4b-a466-54da-9183-b5b1521bd324 disposition=applied
+2026-11-20T21:30:54.918647508Z 2026-11-20 21:30:54,918 INFO retorno case_id=42565d0d-6f88-420f-bf24-17848ddfac87 event_id=a77bac68-2a25-5c51-9986-e318507ffd93 disposition=applied
+2026-11-20T21:30:54.960389219Z 2026-11-20 21:30:54,960 INFO retorno case_id=17733350-7cb6-4242-b915-6f4ad3b11bb6 event_id=d3c7b774-201d-5bba-ae5a-7af4765aec04 disposition=applied
+2026-11-20T21:30:55.229430811Z 2026-11-20 21:30:55,229 INFO retorno case_id=459b7866-f944-4d91-9fe1-5ce23af96739 event_id=063f7452-d7bc-5ca6-b6f4-c54194ed931c disposition=applied
+2026-11-20T21:30:55.357360484Z 2026-11-20 21:30:55,357 INFO retorno case_id=22dce9d1-6b84-4b48-810a-16a2fbfc63b2 event_id=6fbf708f-5121-5dcb-b71b-7e6d3ebb905b disposition=applied
+2026-11-20T21:30:55.545736378Z 2026-11-20 21:30:55,545 INFO retorno case_id=3a99c4bd-f9c8-4c4b-b7ee-15905c476515 event_id=0e33fd1d-5592-51f5-911f-32e9aee0815c disposition=applied
+2026-11-20T21:30:55.579998255Z 2026-11-20 21:30:55,579 INFO retorno case_id=febc709f-9558-4400-a875-bd6b246d5301 event_id=e9522d72-6d04-5513-bb1d-99e4718ddce0 disposition=applied
+2026-11-20T21:30:55.606016679Z 2026-11-20 21:30:55,605 INFO retorno case_id=cccb377a-476b-43f6-a867-f4346fe38848 event_id=86a90b4b-1d35-5379-9ae5-9635dd1ce291 disposition=applied
+2026-11-20T21:30:55.948814201Z 2026-11-20 21:30:55,948 INFO retorno case_id=fac518ff-ffc4-4302-bf6f-6f3d55a0e53a event_id=8afb41c2-326e-56ad-9ffe-6014e4392052 disposition=applied
+2026-11-20T21:30:56.031419515Z 2026-11-20 21:30:56,031 INFO retorno case_id=56b60ba7-9e93-4b3d-984d-311e4e784744 event_id=282dd149-2be5-5493-ad45-6023bed5e51f disposition=applied
+2026-11-20T21:30:56.363057386Z 2026-11-20 21:30:56,362 INFO retorno case_id=e58eeff3-7ebb-45cb-81a3-d9c8c5284df1 event_id=72088cb9-7f80-550d-9e4e-012c3dbc62a2 disposition=applied
+2026-11-20T21:30:56.390558496Z 2026-11-20 21:30:56,390 INFO retorno case_id=b896dfef-6dd0-4547-84ab-4c9f5f40071f event_id=e3aeeebf-b87e-5677-a65d-d3c5166dd92d disposition=applied
+2026-11-20T21:30:56.732707249Z 2026-11-20 21:30:56,732 INFO retorno case_id=fe36835c-5807-46c0-9365-77182d747482 event_id=191db370-cba9-5531-9db0-69b5b933fddb disposition=applied
+2026-11-20T21:30:56.785029266Z 2026-11-20 21:30:56,784 INFO retorno case_id=d035da35-00d0-43b6-87ff-116841046560 event_id=f2832a1b-1945-521d-8959-51679abb3e12 disposition=applied
+2026-11-20T21:30:57.110958456Z 2026-11-20 21:30:57,110 INFO retorno case_id=3c5ebb53-11ff-47e0-abaf-f064d1871db4 event_id=f16439b8-a1dc-5b16-93be-e68710443c1c disposition=applied
+2026-11-20T21:30:57.184984778Z 2026-11-20 21:30:57,184 INFO retorno case_id=072e895b-e258-4c99-917b-0e6c090caceb event_id=b82ee208-e3a9-550b-b34f-bb17d592afb9 disposition=applied
+2026-11-20T21:30:57.257748617Z 2026-11-20 21:30:57,257 INFO retorno case_id=730974bb-efc4-4c2a-a294-0fa1ebb1e8ef event_id=feb1a6d8-dcfe-57be-9466-bd5cfb5f7938 disposition=applied
+2026-11-20T21:30:57.506072735Z 2026-11-20 21:30:57,505 INFO retorno case_id=a36cb50f-8a2f-4506-96e9-9ed3ea151923 event_id=ede8aba5-e29f-54e8-a692-c12509f414cd disposition=applied
+2026-11-20T21:30:57.552982689Z 2026-11-20 21:30:57,552 INFO retorno case_id=fd44d6da-e86b-45d9-b189-6d9241354f5c event_id=2ac58897-19e7-54c4-a7b1-0d8be94c7a51 disposition=applied
+2026-11-20T21:30:57.943508191Z 2026-11-20 21:30:57,943 INFO retorno case_id=ef27767e-23ea-4141-80cc-be1c2e54d2f6 event_id=91629a5c-b769-5e9c-9d21-ef94613fe653 disposition=applied
+2026-11-20T21:30:57.970985000Z 2026-11-20 21:30:57,970 INFO retorno case_id=8eeae2d5-d8eb-438b-9b57-0bb20b6cd7bd event_id=3d2081b4-f51a-55d4-ba50-f75642d02398 disposition=applied
+2026-11-20T21:30:58.127159971Z %6|1795210258.127|FAIL|rdkafka#consumer-2| [thrd:GroupCoordinator]: GroupCoordinator: kafka:9092: Disconnected: connection closed by peer: receive 0 after POLLIN (after 62527ms in state UP)
+2026-11-20T21:30:58.127874712Z %3|1795210258.127|FAIL|rdkafka#consumer-2| [thrd:GroupCoordinator]: GroupCoordinator: kafka:9092: Connect to ipv4#172.20.0.3:9092 failed: Connection refused (after 0ms in state CONNECT)
+2026-11-20T21:30:58.127908131Z %6|1795210258.127|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/1]: kafka:9092/1: Disconnected: connection closed by peer: receive 0 after POLLIN (after 62534ms in state UP)
+2026-11-20T21:30:58.128662679Z %3|1795210258.128|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/1]: kafka:9092/1: Connect to ipv4#172.20.0.3:9092 failed: Connection refused (after 0ms in state CONNECT)
+2026-11-20T21:30:58.199270922Z %3|1795210258.199|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Connect to ipv4#172.20.0.3:9092 failed: Connection refused (after 3ms in state CONNECT)
+2026-11-20T21:30:58.317102011Z %3|1795210258.316|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/1]: kafka:9092/1: Connect to ipv4#172.20.0.3:9092 failed: Connection refused (after 0ms in state CONNECT, 1 identical error(s) suppressed)
+2026-11-20T21:30:58.347094518Z %3|1795210258.346|FAIL|rdkafka#consumer-2| [thrd:GroupCoordinator]: GroupCoordinator: kafka:9092: Connect to ipv4#172.20.0.3:9092 failed: Connection refused (after 0ms in state CONNECT, 1 identical error(s) suppressed)
+2026-11-20T21:30:58.393171915Z %3|1795210258.392|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Connect to ipv4#172.20.0.3:9092 failed: Connection refused (after 0ms in state CONNECT, 1 identical error(s) suppressed)
+2026-11-20T21:30:58.547800850Z %3|1795210258.547|FAIL|rdkafka#producer-1| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Connect to ipv4#172.20.0.3:9092 failed: Connection refused (after 0ms in state CONNECT)
+2026-11-20T21:30:59.445562027Z %3|1795210259.445|FAIL|rdkafka#consumer-2| [thrd:GroupCoordinator]: GroupCoordinator: kafka:9092: Failed to resolve 'kafka:9092': Temporary failure in name resolution (after 3ms in state CONNECT)
+2026-11-20T21:30:59.549310826Z %3|1795210259.549|FAIL|rdkafka#producer-1| [thrd:kafka:9092/1]: kafka:9092/1: Failed to resolve 'kafka:9092': Temporary failure in name resolution (after 1ms in state CONNECT)
+2026-11-20T21:31:00.549586503Z %3|1795210260.549|FAIL|rdkafka#producer-1| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Failed to resolve 'kafka:9092': Temporary failure in name resolution (after 1ms in state CONNECT)
+2026-11-20T21:31:01.549875860Z %3|1795210261.549|FAIL|rdkafka#producer-1| [thrd:kafka:9092/1]: kafka:9092/1: Failed to resolve 'kafka:9092': Temporary failure in name resolution (after 2ms in state CONNECT, 1 identical error(s) suppressed)
+2026-11-20T21:31:02.548451316Z %3|1795210262.548|FAIL|rdkafka#producer-1| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Failed to resolve 'kafka:9092': Temporary failure in name resolution (after 0ms in state CONNECT, 1 identical error(s) suppressed)
+2026-11-20T21:31:28.920946086Z %4|1795210288.920|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Connection setup timed out in state CONNECT (after 30032ms in state CONNECT)
+2026-11-20T21:31:28.936065262Z %3|1795210288.935|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Failed to resolve 'kafka:9092': Temporary failure in name resolution (after 1ms in state CONNECT)
+2026-11-20T21:31:29.099752711Z %4|1795210289.099|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/1]: kafka:9092/1: Connection setup timed out in state CONNECT (after 30032ms in state CONNECT)
+2026-11-20T21:31:29.101316186Z %3|1795210289.101|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/1]: kafka:9092/1: Failed to resolve 'kafka:9092': Temporary failure in name resolution (after 1ms in state CONNECT)
+2026-11-20T21:31:29.142206697Z %3|1795210289.142|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/1]: kafka:9092/1: Failed to resolve 'kafka:9092': Temporary failure in name resolution (after 2ms in state CONNECT, 1 identical error(s) suppressed)
+2026-11-20T21:31:29.561037009Z %3|1795210289.560|FAIL|rdkafka#producer-1| [thrd:kafka:9092/1]: kafka:9092/1: Connect to ipv4#172.20.0.3:9092 failed: Connection refused (after 1ms in state CONNECT)
+2026-11-20T21:31:29.958882992Z %3|1795210289.958|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Connect to ipv4#172.20.0.3:9092 failed: Connection refused (after 0ms in state CONNECT)
+2026-11-20T21:31:30.009141841Z %3|1795210290.009|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Connect to ipv4#172.20.0.3:9092 failed: Connection refused (after 0ms in state CONNECT, 1 identical error(s) suppressed)
+2026-11-20T21:31:30.142819538Z %3|1795210290.142|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/1]: kafka:9092/1: Connect to ipv4#172.20.0.3:9092 failed: Connection refused (after 0ms in state CONNECT)
+2026-11-20T21:31:30.560502325Z %3|1795210290.560|FAIL|rdkafka#producer-1| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Connect to ipv4#172.20.0.3:9092 failed: Connection refused (after 0ms in state CONNECT)
+2026-11-20T21:31:30.867788163Z %3|1795210290.867|FAIL|rdkafka#consumer-2| [thrd:GroupCoordinator]: GroupCoordinator: kafka:9092: Connect to ipv4#172.20.0.3:9092 failed: Connection refused (after 0ms in state CONNECT)
+2026-11-20T21:31:32.561263477Z %3|1795210292.561|FAIL|rdkafka#producer-1| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Connect to ipv4#172.20.0.3:9092 failed: Connection refused (after 0ms in state CONNECT, 2 identical error(s) suppressed)
+2026-11-20T21:31:40.637771953Z 2026-11-20 21:31:40,637 INFO retorno case_id=5e28fb00-3c58-4479-849f-348193ef551e event_id=4b2bfbc8-2b1b-5975-ab17-db4a057ec6cc disposition=applied
+2026-11-20T21:31:40.819116222Z %4|1795210300.818|SESSTMOUT|rdkafka#consumer-2| [thrd:main]: Consumer group session timed out (in join-state steady) after 45053 ms without a successful response from the group coordinator (broker 1, last error was Success): revoking assignment and rejoining group
+2026-11-20T21:31:40.907637526Z Traceback (most recent call last):
+2026-11-20T21:31:40.911307150Z   File "/app/agent_flow.py", line 329, in <module>
+2026-11-20T21:31:40.911424783Z     main()
+2026-11-20T21:31:40.911438519Z     ~~~~^^
+2026-11-20T21:31:40.911476493Z   File "/app/agent_flow.py", line 321, in main
+2026-11-20T21:31:40.911490581Z     consume(EVENTS, "platform-agent-events-v1", lambda record: forward_result(record, contracts, url, secret),
+2026-11-20T21:31:40.911500275Z     ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-20T21:31:40.911509442Z             publisher, brokers)
+2026-11-20T21:31:40.911561734Z             ^^^^^^^^^^^^^^^^^^^
+2026-11-20T21:31:40.911571005Z   File "/app/agent_flow.py", line 286, in consume
+2026-11-20T21:31:40.911577943Z     process_record(consumer, publisher, record, group, handle)
+2026-11-20T21:31:40.911584149Z     ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-20T21:31:40.911590468Z   File "/app/agent_flow.py", line 259, in process_record
+2026-11-20T21:31:40.911596770Z     commits = consumer.commit(message=record, asynchronous=False)
+2026-11-20T21:31:40.911641963Z cimpl.KafkaException: KafkaError{code=UNKNOWN_MEMBER_ID,val=25,str="Commit failed: Broker: Unknown member"}

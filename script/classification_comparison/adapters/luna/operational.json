@@ -1,0 +1,51 @@
+{
+  "version": "1.0.0",
+  "identity": {
+    "requested_model": "openai/gpt-5.6-luna",
+    "provider": "feita",
+    "fixture_provider": "simulador-c05-luna",
+    "adapter_version": "1.0.0",
+    "policy_version": "1.1.0",
+    "policy_origin": "C05-R2 (o cabeçalho Qwen/Feita identifica a origem histórica do texto preservado)"
+  },
+  "request": {
+    "method": "POST",
+    "url": "https://api.feita.ai/gateway/v1/chat/completions",
+    "parameters": {
+      "model": "openai/gpt-5.6-luna",
+      "reasoning_effort": "none",
+      "max_completion_tokens": 128,
+      "stream": false
+    },
+    "instruction_order": ["prompt", "rubric"],
+    "context": ["text", "brand", "catalog", "missing", "received"],
+    "response_format": "JSON Schema estrito, exclusivamente para os campos ausentes e com a opção informacao_insuficiente",
+    "requests_per_eligible_case": 1,
+    "bypass": ["complete", "invalid"]
+  },
+  "transport": {
+    "protocol": "HTTPS persistente, verificação TLS padrão",
+    "start": "Processo e conexão iniciados na primeira chamada, após início da medição",
+    "deadline": "Monotônico total por caso, incluindo início do processo, DNS, TLS e leitura em conexão nova ou reutilizada",
+    "reopen": "Após fechamento explícito pelo servidor ao fim de resposta completa, somente no próximo caso permitido",
+    "response_limit_bytes": 262144,
+    "preconnect": false,
+    "probes": false,
+    "retry": false,
+    "follow_redirects": false,
+    "close": "Fim de entrada no executor, encerramento do pai ou falha técnica encerram a sessão"
+  },
+  "failure": {
+    "dispatch": "Confirmar evidência local antes de tentar o único POST",
+    "technical": "Interromper a sessão sem novo POST em falha de transporte, HTTP não-200, timeout, saída inválida ou divergência de procedência",
+    "known_cost": "Entregar o corpo completo de HTTP não-200 ao executor para conciliar custo conhecido",
+    "unknown_cost": "Conservar reserva no executor e interromper o lote",
+    "semantic": "Recusa por política e abstenção explícita seguem para avaliação, sem aplicação parcial"
+  },
+  "public_sources": {
+    "feita_model": "https://feita.ai/models/openai/gpt-5.6-luna",
+    "openai_model": "https://developers.openai.com/api/docs/models/gpt-5.6-luna",
+    "openai_chat_completions": "https://platform.openai.com/docs/api-reference/chat/create",
+    "verification": "A proposta C05-R3 registra as fontes do modelo. Os campos do corpo seguem Chat Completions. A aceitação dos parâmetros e a identificação efetiva pela Feita permanecem por verificar."
+  }
+}

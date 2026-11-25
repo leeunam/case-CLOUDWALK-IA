@@ -1,0 +1,75 @@
+{
+  "run_id": "c03-5a1f42e8b3a143da8d6e065c63642cd5",
+  "identity": {
+    "mode": "real",
+    "provider": "feita",
+    "requested_model": "qwen/qwen3.8-27b",
+    "expected_returned_model": "qwen/qwen3.8-27b",
+    "adapter_version": "1.0.0",
+    "policy_version": "1.0.0"
+  },
+  "sources": {
+    "dataset": {
+      "path": "script/f08/jev/dataset.json",
+      "version": "1.1.0",
+      "sha256": "0e7e4c342c2a39cefd89855d8c0513f447d7878303eb4091488ca8af78928880"
+    },
+    "catalog": {
+      "path": "script/f08/jev/catalog.json",
+      "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271",
+      "version": "1.0.0"
+    },
+    "rubric": {
+      "path": "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
+      "version": "1.0.0",
+      "sha256": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac"
+    },
+    "protocol": {
+      "path": "docs/planejamento/classificacao-comparativa/protocolo-comparacao.json",
+      "sha256": "eb9bdbb786037bac864f3155ff6dfbb45feb83dfdb99958f463b6896a614dced",
+      "version": "1.0.0"
+    },
+    "split": {
+      "path": "docs/planejamento/classificacao-comparativa/divisao-dados.json",
+      "sha256": "8f7d0eab0d9431c2906e07bc022dc31a80684464f4b99f75dfc6ed1277fed1a9",
+      "version": "1.0.0"
+    },
+    "policy": {
+      "path": "script/classification_comparison/adapters/qwen/politica.txt",
+      "version": "1.0.0",
+      "sha256": "c1b459d24a874b3e5e44a67297314d322dded0ee6c7413c7d3a0cdd28f70f56b"
+    },
+    "prompt": {
+      "path": "script/classification_comparison/adapters/qwen/prompt.txt",
+      "version": "1.0.0",
+      "sha256": "b38edc9e1db036405b1e3eadb63f11219a01dec4aefe6996e40c6c6c19ec8527"
+    }
+  },
+  "planned_ids": [
+    "jev-003"
+  ],
+  "selected_ids": [
+    "jev-003"
+  ],
+  "control_ids": [],
+  "injected_controls": {
+    "ids": [],
+    "count": 0
+  },
+  "contract_version": "1.1.0",
+  "input": {
+    "path": "script/classification_comparison/adapters/qwen/plano-unitario-real-01/inputs.jsonl",
+    "sha256": "25ad46d9aef6ddcd1981ecfd740b82aca213c3293920bbe96576887c3249522f"
+  },
+  "concurrency": 1,
+  "attempts": 1,
+  "max_requests": 1,
+  "max_tokens": 128,
+  "input_token_ceiling": 1024000,
+  "billable_output_token_ceiling": 131072,
+  "reasoning": {
+    "enabled": false
+  },
+  "request_body_bytes": 4975,
+  "reservation_usd": null
+}

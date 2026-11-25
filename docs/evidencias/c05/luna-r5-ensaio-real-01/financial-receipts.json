@@ -1,0 +1,589 @@
+{
+  "task": "C05-R5/financial-receipts",
+  "run_ids": {
+    "development": "luna-r5-8ff7998ec1654eea8328825b154dac09",
+    "final_interrupted": "luna-r5-20d81be917a04b2ab0910b631b970ece"
+  },
+  "rows": [
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-001",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.0004154",
+      "receipt": "gateway:gen-1795613856-BLMHtqkTyhCrHnJuzRjA",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.04154",
+        "converted_credits_usd": "0.0004154"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-002",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00043245",
+      "receipt": "gateway:gen-1795613857-bMszZp0mnbPuqrxGnIop",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.043245",
+        "converted_credits_usd": "0.00043245"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-003",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.0004214",
+      "receipt": "gateway:gen-1795613859-CzYQiO1APCqRxXbY8r26",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.04214",
+        "converted_credits_usd": "0.0004214"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-004",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00041915",
+      "receipt": "gateway:gen-1795613860-5xzFftGHZNdxHhfYCh8o",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.041915",
+        "converted_credits_usd": "0.00041915"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-005",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00013877",
+      "receipt": "gateway:gen-1795613863-g3mq9XWLOZyaCaGFw8ku",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.013877",
+        "converted_credits_usd": "0.00013877"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-006",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00013832",
+      "receipt": "gateway:gen-1795613866-R0xgWGqIjvS4IXe0v4SJ",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.013832",
+        "converted_credits_usd": "0.00013832"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-007",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00042985",
+      "receipt": "gateway:gen-1795613870-qoK1xYzXGNMMDeqFEi8b",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.042985",
+        "converted_credits_usd": "0.00042985"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-008",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00014577",
+      "receipt": "gateway:gen-1795613871-DdB2151nDxrpHEbNuYFH",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.014577",
+        "converted_credits_usd": "0.00014577"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-009",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00041975",
+      "receipt": "gateway:gen-1795613873-UgzcAy1qYSlOUSVr9UVI",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.041975",
+        "converted_credits_usd": "0.00041975"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-010",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00014312",
+      "receipt": "gateway:gen-1795613875-zPCwlwE6RT2jZ806vupu",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.014312",
+        "converted_credits_usd": "0.00014312"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-011",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.0004036",
+      "receipt": "gateway:gen-1795613877-G8zUTHvsp0F96MmOCzvk",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.04036",
+        "converted_credits_usd": "0.0004036"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-012",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00042495",
+      "receipt": "gateway:gen-1795613878-421VbjylOPkNPwHGtr8F",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.042495",
+        "converted_credits_usd": "0.00042495"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-013",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00013246",
+      "receipt": "gateway:gen-1795613880-phpdUg3aXePBTiEt1RQL",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.013246",
+        "converted_credits_usd": "0.00013246"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-014",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00015786",
+      "receipt": "gateway:gen-1795613882-9dmOtxSuX0apQd6atTM3",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.015786",
+        "converted_credits_usd": "0.00015786"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-015",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00014691",
+      "receipt": "gateway:gen-1795613884-B66snRRLlJgAZM6mU5Be",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.014691",
+        "converted_credits_usd": "0.00014691"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-016",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.0004231",
+      "receipt": "gateway:gen-1795613887-6iFDo25qgmoumo2c2rxg",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.04231",
+        "converted_credits_usd": "0.0004231"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-017",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00012251",
+      "receipt": "gateway:gen-1795613888-sQgiulfbjLAfMuGuWOma",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.012251",
+        "converted_credits_usd": "0.00012251"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-018",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.0004247",
+      "receipt": "gateway:gen-1795613890-wEawPp8iBNLqQvIttYhp",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.04247",
+        "converted_credits_usd": "0.0004247"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-019",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00013351",
+      "receipt": "gateway:gen-1795613891-L1v6E2Y1J2zXCtdh5oIF",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.013351",
+        "converted_credits_usd": "0.00013351"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-020",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00013256",
+      "receipt": "gateway:gen-1795613894-C68vcws9YDjqG04TXLaA",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.013256",
+        "converted_credits_usd": "0.00013256"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-021",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00043065",
+      "receipt": "gateway:gen-1795613896-w0ckaEzdWbI4Nl3e4dT1",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.043065",
+        "converted_credits_usd": "0.00043065"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-022",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00015601",
+      "receipt": "gateway:gen-1795613898-zwGQtjvklGvsCzWquR4u",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.015601",
+        "converted_credits_usd": "0.00015601"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-023",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00014486",
+      "receipt": "gateway:gen-1795613900-EXKWXuXkONMJwEIWFWWg",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.014486",
+        "converted_credits_usd": "0.00014486"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-024",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00013186",
+      "receipt": "gateway:gen-1795613903-0HxGLj0aqEquMjua9OcW",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.013186",
+        "converted_credits_usd": "0.00013186"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-025",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00015609",
+      "receipt": "gateway:gen-1795613905-Vdz0BlsGauCQmXXc9qZf",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.015609",
+        "converted_credits_usd": "0.00015609"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-026",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00047865",
+      "receipt": "gateway:gen-1795613907-9zRHIs2nVH7JB3rW1GOu",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.047865",
+        "converted_credits_usd": "0.00047865"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-027",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00019134",
+      "receipt": "gateway:gen-1795613908-23ddaczuN8oBeYSBQhsP",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.019134",
+        "converted_credits_usd": "0.00019134"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-028",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00019174",
+      "receipt": "gateway:gen-1795613911-0HwvqHWzgrVlL8P7f8GR",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.019174",
+        "converted_credits_usd": "0.00019174"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-029",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00016434",
+      "receipt": "gateway:gen-1795613913-zbLiKKLDZmtMJOP9hEz9",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.016434",
+        "converted_credits_usd": "0.00016434"
+      }
+    },
+    {
+      "run_id": "luna-r5-20d81be917a04b2ab0910b631b970ece",
+      "case_id": "r2-030",
+      "reserved": "1.239",
+      "state": "staged",
+      "observed": null,
+      "receipt": null,
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {}
+    },
+    {
+      "run_id": "luna-r5-8ff7998ec1654eea8328825b154dac09",
+      "case_id": "jev-002",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.0004369",
+      "receipt": "gateway:gen-1795613742-xaeRGzWWFFVm8t8k8Oir",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.04369",
+        "converted_credits_usd": "0.0004369"
+      }
+    },
+    {
+      "run_id": "luna-r5-8ff7998ec1654eea8328825b154dac09",
+      "case_id": "jev-004",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00041805",
+      "receipt": "gateway:gen-1795613739-WAmoQUhNth0nzDIXg1Ep",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.041805",
+        "converted_credits_usd": "0.00041805"
+      }
+    },
+    {
+      "run_id": "luna-r5-8ff7998ec1654eea8328825b154dac09",
+      "case_id": "jev-006",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.0004705",
+      "receipt": "gateway:gen-1795613746-7JGCqO27FOLVmaEmf5y7",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.04705",
+        "converted_credits_usd": "0.0004705"
+      }
+    },
+    {
+      "run_id": "luna-r5-8ff7998ec1654eea8328825b154dac09",
+      "case_id": "jev-013",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.0004175",
+      "receipt": "gateway:gen-1795613741-hYOckDDMdiRPCIdSq2Fe",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.04175",
+        "converted_credits_usd": "0.0004175"
+      }
+    },
+    {
+      "run_id": "luna-r5-8ff7998ec1654eea8328825b154dac09",
+      "case_id": "jev-023",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00039855",
+      "receipt": "gateway:gen-1795613744-SU9o38MwwKBjg8kd9ZR5",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.039855",
+        "converted_credits_usd": "0.00039855"
+      }
+    },
+    {
+      "run_id": "luna-r5-8ff7998ec1654eea8328825b154dac09",
+      "case_id": "jev-039",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00013239",
+      "receipt": "gateway:gen-1795613749-iOiGzqr4GNZIEiGqNJXT",
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "gateway_usage": {
+        "credits": "0.013239",
+        "converted_credits_usd": "0.00013239"
+      }
+    }
+  ],
+  "r5_known_usd": "0.00992557",
+  "r5_unresolved_reserved_usd": "1.239",
+  "accounted_without_new_unresolved_hold_usd": "0.04086069",
+  "accounted_including_unresolved_hold_usd": "1.27986069",
+  "remaining_under_global_cap_usd": "8.72013931",
+  "cap_usd": "10",
+  "source": "Read-only export of original account. No mutation, reconciliation, credential access or API call. The staged amount is a conservative hold, not a confirmed charge."
+}

@@ -1,0 +1,16 @@
+{
+  "command": "rtk proxy python3 -B script/classification_comparison/adapters/qwen/single_pilot.py --pilot .superpowers/sdd/C03-qwen/economic-live-01/pilot.json --output NOVO_DIRETORIO --authorization .superpowers/sdd/C03-qwen/economic-live-01/authorization.json",
+  "contract_version": "1.1.0",
+  "pilot_sha256": "de7909799763746951a7fb0e148b7fd0b0b79be952ecea086816dd92160312a8",
+  "authorization_sha256": "2463f634b80eab3b8950b6f2feb9d002c0087820fed8f076252e616c360a7949",
+  "launcher_sha256": "2b4be6ee5241a843c59d54d5211308ab62b90e250b065137057e7e1f837115c1",
+  "control_policy": {
+    "path": "docs/planejamento/classificacao-comparativa/contratos/politica-controles.json",
+    "version": "1.0.0",
+    "sha256": "2611786ddde1eb2b064b02f7dda7bb7a0aae06cc8f127a9fc7e8fec14e937fb7"
+  },
+  "attempts": 1,
+  "concurrency": 1,
+  "dry_run": false,
+  "synthetic_transport": false
+}

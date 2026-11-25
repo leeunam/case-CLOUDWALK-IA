@@ -1,0 +1,42 @@
+{
+  "contract_version": "1.1.0",
+  "profile_version": "1.0.0",
+  "identity": {
+    "mode": "real",
+    "provider": "feita",
+    "requested_model": "openai/gpt-5.6-luna",
+    "expected_returned_model": "openai/gpt-5.6-luna",
+    "adapter_version": "2.0.0",
+    "policy_version": "2.1.0"
+  },
+  "prompt": {
+    "path": "script/classification_comparison/adapters/luna/r5/prompt.txt",
+    "version": "2.0.0",
+    "sha256": "fb4437c677a6b6eea2fb55d6fdebd7143b22c9738f273a561f4601cac38e1610"
+  },
+  "policy": {
+    "path": "script/classification_comparison/adapters/luna/r5/evidence.py",
+    "version": "2.1.0",
+    "sha256": "42dcd4fd4806a485606d359eb64b86bcb59e4e299892288ce4e3624cde971557"
+  },
+  "rubric": {
+    "path": "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
+    "version": "1.0.0",
+    "sha256": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac"
+  },
+  "adapter": {
+    "path": "script/classification_comparison/adapters/luna/r5/adapter.py",
+    "version": "2.0.0",
+    "sha256": "8ac5c50ace54a58293bd63c4147a262a6dfbfcb566a2f5be2aac3f3eb5dfeecf"
+  },
+  "operational": {
+    "path": "script/classification_comparison/adapters/luna/r5/operational.json",
+    "version": "2.0.0",
+    "sha256": "745fbc7eeef9abf17c7fb2e3a8a28619a40941362ea4a8e8c01e75b20b28f1f3"
+  },
+  "evidence_schema": {
+    "path": "script/classification_comparison/adapters/luna/r5/evidence-envelope.schema.json",
+    "version": "1.0.0",
+    "sha256": "c788f313a1c002f4c6e78b400a91120a2373d744184006b50725f91f7239f579"
+  }
+}

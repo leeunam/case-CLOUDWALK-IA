@@ -1,0 +1,7 @@
+{
+  "schema": "../schemas/v1.json#/$defs/SimulatorMessage",
+  "data": {
+    "external_conversation_id": "whatsapp-conversation-01",
+    "text": "A tela voltou a acender por alguns segundos e apagou de novo."
+  }
+}

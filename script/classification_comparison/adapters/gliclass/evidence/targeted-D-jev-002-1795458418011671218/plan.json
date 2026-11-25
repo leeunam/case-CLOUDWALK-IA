@@ -1,0 +1,93 @@
+{
+  "run_id": "c04-targeted-060c97465807497ca3726fe6a2cfef88",
+  "identity": {
+    "mode": "real",
+    "provider": "knowledgator-local",
+    "requested_model": "knowledgator/gliclass-multilang-mini",
+    "expected_returned_model": "knowledgator/gliclass-multilang-mini",
+    "expected_weights_revision": "0bd888b6c3ef9fca5f0a9d407bddfbbc7623486b",
+    "adapter_version": "1.2.0",
+    "policy_version": "1.3.0-dev.d"
+  },
+  "sources": {
+    "dataset": {
+      "path": "script/f08/jev/dataset.json",
+      "version": "1.1.0",
+      "sha256": "0e7e4c342c2a39cefd89855d8c0513f447d7878303eb4091488ca8af78928880"
+    },
+    "catalog": {
+      "path": "script/f08/jev/catalog.json",
+      "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271",
+      "version": "1.0.0"
+    },
+    "rubric": {
+      "path": "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
+      "version": "1.0.0",
+      "sha256": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac"
+    },
+    "protocol": {
+      "path": "docs/planejamento/classificacao-comparativa/protocolo-comparacao.json",
+      "sha256": "eb9bdbb786037bac864f3155ff6dfbb45feb83dfdb99958f463b6896a614dced",
+      "version": "1.0.0"
+    },
+    "split": {
+      "path": "docs/planejamento/classificacao-comparativa/divisao-dados.json",
+      "sha256": "8f7d0eab0d9431c2906e07bc022dc31a80684464f4b99f75dfc6ed1277fed1a9",
+      "version": "1.0.0"
+    },
+    "policy": {
+      "path": "script/classification_comparison/adapters/gliclass/policy-dev-d.json",
+      "version": "1.3.0-dev.d",
+      "sha256": "610cc099cd74e4770d9fd26023c98b6e326624dc6b07f51d738cfa60bd86dc9c"
+    },
+    "prompt": {
+      "path": "script/classification_comparison/adapters/gliclass/prompt-dev-descriptive.json",
+      "version": "1.2.0",
+      "sha256": "e3d8e60a324045d16c797980a1722484b3b9e87fc1bff32d4fa45331ab566b11"
+    }
+  },
+  "planned_ids": [
+    "jev-002"
+  ],
+  "selected_ids": [
+    "jev-002"
+  ],
+  "control_ids": [
+    "ctl-completo",
+    "ctl-simples",
+    "ctl-duplo",
+    "ctl-invalido",
+    "ctl-sem-assunto",
+    "ctl-saida-invalida",
+    "ctl-timeout",
+    "ctl-saida-ausente",
+    "ctl-versao",
+    "ctl-catalogo",
+    "ctl-tipo",
+    "ctl-politica",
+    "ctl-injetado-aplicacao-parcial"
+  ],
+  "injected_controls": {
+    "ids": [
+      "ctl-injetado-aplicacao-parcial"
+    ],
+    "count": 1,
+    "policy": {
+      "path": "docs/planejamento/classificacao-comparativa/contratos/politica-controles.json",
+      "version": "1.0.0",
+      "sha256": "2611786ddde1eb2b064b02f7dda7bb7a0aae06cc8f127a9fc7e8fec14e937fb7"
+    },
+    "identity": {
+      "mode": "fixture",
+      "name": "controle-aplicacao-parcial",
+      "policy_version": "1.0.0"
+    }
+  },
+  "contract_version": "1.1.0",
+  "input": {
+    "path": "script/classification_comparison/adapters/gliclass/evidence/targeted-D-jev-002-1795458418011671218/inputs.jsonl",
+    "sha256": "bf9c8e70a07764a6ce7ae8744d6b36ece431992449d74cd980b10c0cafcc788f"
+  },
+  "concurrency": 1,
+  "attempts": 1
+}

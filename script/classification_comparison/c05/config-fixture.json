@@ -1,0 +1,25 @@
+{
+  "scope": "c05-qwen-final",
+  "mode": "fixture",
+  "max_tokens": 128,
+  "reasoning": {
+    "enabled": false
+  },
+  "billable_input_token_ceiling": 1024000,
+  "billable_output_token_ceiling": 131072,
+  "billable_limits_reference": "limites sintéticos do transporte fixture da C05",
+  "billable_limits_confirmed": true,
+  "tariff_verified": true,
+  "tariff": {
+    "unit": "USD/Mtoken",
+    "source": "tarifa sintética para exercitar a reserva da C05",
+    "date": "2026-11-23",
+    "input": "0.425",
+    "output": "2.55",
+    "cache_read": "0.085",
+    "cache_write": "0.53125"
+  },
+  "usage_cost_unit": "USD",
+  "usage_cost_reference": "usage.cost em USD emitido pelo transporte fixture da C05",
+  "usage_credits": null
+}

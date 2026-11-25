@@ -1,0 +1,9 @@
+{
+  "schema": "../schemas/v1.json#/$defs/Error",
+  "data": {
+    "error": {
+      "code": "forbidden",
+      "message": "A sessão não tem permissão para agir neste atendimento."
+    }
+  }
+}

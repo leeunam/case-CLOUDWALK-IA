@@ -1,0 +1,12 @@
+{
+  "schema": "../schemas/v1.json#/$defs/Error",
+  "data": {
+    "error": {
+      "code": "idempotency_conflict",
+      "message": "O ID de origem já foi aceito com outro conteúdo.",
+      "details": {
+        "source_event_id": "chat-aurora-01"
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+cd "$(dirname "$0")"
+umask 077
+mkdir -p .cache/tmp
+unset HF_TOKEN HUGGING_FACE_HUB_TOKEN FEITA_API_KEY TYPESAFE_API_KEY
+unset PIP_INDEX_URL PIP_EXTRA_INDEX_URL PIP_TRUSTED_HOST PIP_FIND_LINKS
+export HF_HUB_DISABLE_IMPLICIT_TOKEN=1 HF_HUB_DISABLE_TELEMETRY=1
+export PIP_CONFIG_FILE=/dev/null PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_NO_CACHE_DIR=1
+export TMPDIR="$PWD/.cache/tmp"
+exec python3 -B supervise.py install

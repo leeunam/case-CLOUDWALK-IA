@@ -1,0 +1,7 @@
+{
+  "schema": "../schemas/v1.json#/$defs/HealthUnavailable",
+  "data": {
+    "status": "error",
+    "database": "unavailable"
+  }
+}

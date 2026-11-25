@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://class-001.invalid/v1/decision.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "id", "run_id", "attempts", "outcome", "reason", "fields"],
+  "properties": {
+    "contract_version": {"$ref": "common.schema.json#/$defs/version"},
+    "id": {"$ref": "common.schema.json#/$defs/id"},
+    "run_id": {"$ref": "common.schema.json#/$defs/id"},
+    "attempts": {"enum": [0, 1]},
+    "outcome": {"enum": ["complete", "review"]},
+    "reason": {
+      "enum": ["channel_complete", "all_predicted", "invalid_input", "incompatible_catalog", "incomplete_prediction"]
+    },
+    "fields": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "priority"],
+      "properties": {
+        "category": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "applied"],
+          "properties": {
+            "status": {"enum": ["provided", "predicted", "abstained", "invalid", "error", "not_requested"]},
+            "applied": {"anyOf": [{"type": "string", "minLength": 1, "pattern": "\\S"}, {"type": "null"}]}
+          }
+        },
+        "priority": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "applied"],
+          "properties": {
+            "status": {"enum": ["provided", "predicted", "abstained", "invalid", "error", "not_requested"]},
+            "applied": {"anyOf": [{"type": "string", "minLength": 1, "pattern": "\\S"}, {"type": "null"}]}
+          }
+        }
+      }
+    }
+  }
+}

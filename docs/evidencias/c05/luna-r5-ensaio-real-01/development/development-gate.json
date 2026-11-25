@@ -1,0 +1,93 @@
+{
+  "profile": "observed-total-luna-r5",
+  "protocol_version": "1.5.0",
+  "report_version": "1.6.0",
+  "ipc_contract_version": "1.1.0",
+  "correct_targets": 8,
+  "preserved_fields": 4,
+  "correct_completions": 3,
+  "integral_reviews": 3,
+  "raw_urgent": 1,
+  "errors": 0,
+  "settled_requests": 6,
+  "latency_samples": 6,
+  "p95_ms": {
+    "state": "measured",
+    "value": 2886.3712759994087,
+    "numerator": null,
+    "denominator": 6
+  },
+  "status": "pass",
+  "luna_evidence": {
+    "path": "docs/evidencias/c05/luna-r5-ensaio-real-01/development/luna-evidence.jsonl",
+    "sha256": "4c5045587e22fe841abe150fb169cfb9245c8a11b1993903556a0bac3d2ba6b3",
+    "count": 6,
+    "schema_version": "1.0.0"
+  },
+  "stage": "development",
+  "run_id": "luna-r5-8ff7998ec1654eea8328825b154dac09",
+  "mode": "real",
+  "binding_sha256": "9c543e65d31de3306aa9a0d79e3fa0ffe22aa28e5bc3ffa2c3414b6cbb2bbcd9",
+  "manifest_sha256": "bebd86d3bbc57f29ca34068f6c45e77741e71e1433bcbd2ecfdf9e0ff8f5da47",
+  "observed_usd": "0.00227389",
+  "costs": {
+    "jev-004": {
+      "observed_usd": "0.00041805",
+      "receipt": "gateway:gen-1795613739-WAmoQUhNth0nzDIXg1Ep"
+    },
+    "jev-013": {
+      "observed_usd": "0.0004175",
+      "receipt": "gateway:gen-1795613741-hYOckDDMdiRPCIdSq2Fe"
+    },
+    "jev-002": {
+      "observed_usd": "0.0004369",
+      "receipt": "gateway:gen-1795613742-xaeRGzWWFFVm8t8k8Oir"
+    },
+    "jev-023": {
+      "observed_usd": "0.00039855",
+      "receipt": "gateway:gen-1795613744-SU9o38MwwKBjg8kd9ZR5"
+    },
+    "jev-006": {
+      "observed_usd": "0.0004705",
+      "receipt": "gateway:gen-1795613746-7JGCqO27FOLVmaEmf5y7"
+    },
+    "jev-039": {
+      "observed_usd": "0.00013239",
+      "receipt": "gateway:gen-1795613749-iOiGzqr4GNZIEiGqNJXT"
+    }
+  },
+  "artifacts": {
+    "plan.json": {
+      "path": "docs/evidencias/c05/luna-r5-ensaio-real-01/development/plan.json",
+      "sha256": "d169025b5710c8196fb3c792c8b482f8e5c1106f5559cc73fbbfec03fb233771"
+    },
+    "invocation.json": {
+      "path": "docs/evidencias/c05/luna-r5-ensaio-real-01/development/invocation.json",
+      "sha256": "25e3292a5ab8f10eae4c12a26bcfd5ffb26cc5459258bf9eafb32627fbbfc31a"
+    },
+    "journal.jsonl": {
+      "path": "docs/evidencias/c05/luna-r5-ensaio-real-01/development/journal.jsonl",
+      "sha256": "748320ea53f7278acecd25929c376b84ec37e4ad76df554241172a3a56682623"
+    },
+    "report.json": {
+      "path": "docs/evidencias/c05/luna-r5-ensaio-real-01/development/report.json",
+      "sha256": "2dfe7aab879cdc4aa2e421454ac5353b2b0574c386cb918838b69700b340f71e"
+    },
+    "inputs.jsonl": {
+      "path": "docs/evidencias/c05/luna-r5-ensaio-real-01/development/inputs.jsonl",
+      "sha256": "73d102c83d0267d71e4be63b4da489efdaca626e7c2200202d4031d5be990fab"
+    },
+    "observations.jsonl": {
+      "path": "docs/evidencias/c05/luna-r5-ensaio-real-01/development/observations.jsonl",
+      "sha256": "253ced6615942cac02af8bf75477441d17693176e7067f60a908a1e61bb57675"
+    },
+    "decisions.jsonl": {
+      "path": "docs/evidencias/c05/luna-r5-ensaio-real-01/development/decisions.jsonl",
+      "sha256": "48d8aa60fcaf4bfcd5ffaa805119788f4835a37676d566b5f547dd2bd376dcd6"
+    },
+    "luna-evidence.jsonl": {
+      "path": "docs/evidencias/c05/luna-r5-ensaio-real-01/development/luna-evidence.jsonl",
+      "sha256": "4c5045587e22fe841abe150fb169cfb9245c8a11b1993903556a0bac3d2ba6b3"
+    }
+  }
+}

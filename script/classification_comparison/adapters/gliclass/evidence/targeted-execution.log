@@ -1,0 +1,20 @@
+Loading weights:   0%|          | 0/227 [00:00<?, ?it/s]Loading weights:   3%|▎         | 7/227 [00:00<00:04, 49.48it/s]Loading weights: 100%|██████████| 227/227 [00:00<00:00, 1554.26it/s]
+[transformers] You are using a model of type `GLiClass` to instantiate a model of type ``. This may be expected if you are loading a checkpoint that shares a subset of the architecture (e.g., loading a `sam2_video` checkpoint into `Sam2Model`), but is otherwise not supported and can yield errors. Please verify that the checkpoint is compatible with the model you are instantiating.
+C04 tokens do contexto: 1416/2048
+[transformers] `use_return_dict` is deprecated! Use `return_dict` instead!
+C04 tokens do contexto: 1352/2048
+C04 tokens do contexto: 1279/2048
+C04 tokens do contexto: 1442/2048
+C04 tokens do contexto: 1423/2048
+C04 tokens do contexto: 1326/2048
+C04 tokens do contexto: 1314/2048
+C04 tokens do contexto: 1413/2048
+{"worker_user_cpu_s": 50.295727, "worker_system_cpu_s": 24.335578, "peak_memory_bytes": 2590920704}
+{"output": "script/classification_comparison/adapters/gliclass/evidence/targeted-D-jev-002-1795458418011671218", "id": "jev-002", "choices": {"priority": {"status": "predicted", "raw": "basic", "reason": null, "score": {"kind": "ranking", "value": 0.9516679048538208}}}, "elapsed_ms": 4061.103816000468, "temperature": "warm", "requests": 1, "questions": 1, "eligibility": "inconclusive"}
+Loading weights:   0%|          | 0/227 [00:00<?, ?it/s]Loading weights:   3%|▎         | 7/227 [00:00<00:04, 44.44it/s]Loading weights: 100%|██████████| 227/227 [00:00<00:00, 1388.64it/s]
+[transformers] You are using a model of type `GLiClass` to instantiate a model of type ``. This may be expected if you are loading a checkpoint that shares a subset of the architecture (e.g., loading a `sam2_video` checkpoint into `Sam2Model`), but is otherwise not supported and can yield errors. Please verify that the checkpoint is compatible with the model you are instantiating.
+C04 tokens do contexto: 1416/2048
+[transformers] `use_return_dict` is deprecated! Use `return_dict` instead!
+C04 tokens do contexto: 1440/2048
+{"worker_user_cpu_s": 16.739968, "worker_system_cpu_s": 8.004593, "peak_memory_bytes": 2589822976}
+{"output": "script/classification_comparison/adapters/gliclass/evidence/targeted-D-jev-003-1795458457580006012", "id": "jev-003", "choices": {"category": {"status": "error", "raw": null, "reason": "timeout", "score": null}, "priority": {"status": "error", "raw": null, "reason": "timeout", "score": null}}, "elapsed_ms": 4861.625311999887, "temperature": "warm", "requests": 1, "questions": 2, "eligibility": "inconclusive"}

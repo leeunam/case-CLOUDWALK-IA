@@ -1,0 +1,106 @@
+x-rails-env: &rails-env
+  RAILS_ENV: development
+  POSTGRES_HOST: db
+  POSTGRES_USER: ${POSTGRES_USER:?}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+  SECRET_KEY_BASE: ${F07_RAILS_SECRET:?}
+  CLOUDWALK_CHANNEL_SECRET: ${CLOUDWALK_CHANNEL_SECRET:?}
+  CLOUDWALK_AGENT_REQUESTS_SECRET: ${CLOUDWALK_AGENT_REQUESTS_SECRET:?}
+  CLOUDWALK_AGENT_EVENTS_SECRET: ${CLOUDWALK_AGENT_EVENTS_SECRET:?}
+  CLOUDWALK_AGENT_REQUEST_URL: http://requests:8080/webhooks/v1/agent/requests
+  CLOUDWALK_SIMULATOR_BRANDS: aurora,horizonte
+  CLOUDWALK_DEMO_PASSWORDS: ${CLOUDWALK_DEMO_PASSWORDS:?}
+  CLOUDWALK_JEV_MODE: fixture
+  TYPESAFE_API_KEY: ""
+  RAILS_LOG_LEVEL: warn
+
+x-integration: &integration
+  build: ./integration
+  environment: &integration-env
+    KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    CLOUDWALK_CONTRACT_SCHEMA: /workspace/docs/contratos/schemas/v1.json
+    CLOUDWALK_AGENT_REQUESTS_SECRET: ${CLOUDWALK_AGENT_REQUESTS_SECRET:?}
+    CLOUDWALK_AGENT_EVENTS_SECRET: ${CLOUDWALK_AGENT_EVENTS_SECRET:?}
+  volumes:
+    - ./docs/contratos:/workspace/docs/contratos:ro
+
+services:
+  kafka:
+    environment:
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,F07://0.0.0.0:19092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,F07://ack-gate:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,F07:PLAINTEXT
+  ack-gate:
+    image: python:3.13-slim
+    command: [python, -B, /f07/ack_gate.py]
+    volumes:
+      - ./script/f07:/f07:ro
+  api:
+    environment: *rails-env
+    ports: !reset []
+  writer:
+    build: ./backend
+    environment: *rails-env
+    volumes:
+      - ./docs/contratos:/workspace/docs/contratos:ro
+    depends_on:
+      db_setup:
+        condition: service_completed_successfully
+    command: [bundle, exec, rails, server, -b, 0.0.0.0, -P, /tmp/cloudwalk-server.pid]
+  worker:
+    environment: *rails-env
+  db_setup:
+    environment: *rails-env
+  outbox:
+    build: ./backend
+    environment: *rails-env
+    depends_on:
+      db_setup:
+        condition: service_completed_successfully
+    command: [bundle, exec, rails, runner, script/f02_outbox.rb]
+  requests:
+    <<: *integration
+    command: [requests]
+  events:
+    <<: *integration
+    command: [events]
+    depends_on:
+      - ack-gate
+    environment:
+      <<: *integration-env
+      KAFKA_BOOTSTRAP_SERVERS: ack-gate:9092
+      CLOUDWALK_AGENT_EVENTS_URL: http://fault:8080/webhooks/v1/agent/events
+  mock:
+    <<: *integration
+    command: [mock]
+  fault:
+    image: python:3.13-slim
+    command: [python, -B, /f07/fault.py]
+    volumes:
+      - ./script/f07:/f07:ro
+  web:
+    ports: !reset []
+    command: [node, -e, "setInterval(() => {}, 3600000)"]
+    healthcheck:
+      disable: true
+    volumes:
+      - ./script/f07:/f07:ro
+  probe:
+    build:
+      context: ./script/f07
+      additional_contexts:
+        product: ./integration
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      CLOUDWALK_CHANNEL_SECRET: ${CLOUDWALK_CHANNEL_SECRET:?}
+      CLOUDWALK_AGENT_REQUESTS_SECRET: ${CLOUDWALK_AGENT_REQUESTS_SECRET:?}
+      CLOUDWALK_AGENT_EVENTS_SECRET: ${CLOUDWALK_AGENT_EVENTS_SECRET:?}
+      CLOUDWALK_DEMO_PASSWORDS: ${CLOUDWALK_DEMO_PASSWORDS:?}
+    volumes:
+      - ./script/f07:/f07:ro
+      - ./integration/agent_flow.py:/product/agent_flow.py:ro
+
+networks:
+  default:
+    internal: true

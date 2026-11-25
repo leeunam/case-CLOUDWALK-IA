@@ -1,0 +1,32 @@
+{
+  "task": "F10-renewal",
+  "date": "2026-11-25",
+  "started_at_utc": "2026-11-25T15:44:11.891240+00:00",
+  "ended_at_utc": "2026-11-25T15:44:32.779817+00:00",
+  "workspace_source_revision": "bf6322df792283e20cec5c12ef4dcc462bb5b846",
+  "project": "cloudwalk_publish_integrator",
+  "previous_origin": "https://tribal-louisville-container-bind.trycloudflare.com",
+  "previous_failure": {
+    "dns": "Name or service not known; other public domains resolved normally",
+    "cloudflared": "Unauthorized: Tunnel not found"
+  },
+  "new_origin": "https://newbie-aqua-stem-reveal.trycloudflare.com",
+  "actions": [
+    "force-recreate only cloudflared",
+    "reuse existing API and web images, configure new public origin",
+    "Stack.publish verified public HTTPS /api/v1/health and tunnel running"
+  ],
+  "api_image": "sha256:557e91921e7aaf59aa9606312f560b833387c90164400c7a8f44be342ffe5c80",
+  "web_image": "sha256:8bfffb04f7eed17214e8c2e894bdde222d011e97b43e0d54542b561a53b67d0b",
+  "images_rebuilt": false,
+  "volumes_removed": false,
+  "database_reset": false,
+  "classifier": "fixture",
+  "attendant": "deterministic_mock",
+  "new_paid_model_requests": 0,
+  "external_network_full_flow": "pending",
+  "limitations": [
+    "HTTPS health verification from original computer does not prove the complete flow from a second network",
+    "URL is temporary and depends on this computer and tunnel"
+  ]
+}

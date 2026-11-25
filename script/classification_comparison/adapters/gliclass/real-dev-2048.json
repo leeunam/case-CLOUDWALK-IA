@@ -1,0 +1,27 @@
+{
+  "contract_version": "1.1.0",
+  "identity": {
+    "mode": "real",
+    "provider": "knowledgator-local",
+    "requested_model": "knowledgator/gliclass-multilang-mini",
+    "expected_returned_model": "knowledgator/gliclass-multilang-mini",
+    "expected_weights_revision": "0bd888b6c3ef9fca5f0a9d407bddfbbc7623486b",
+    "adapter_version": "1.1.0",
+    "policy_version": "1.2.0-dev.1"
+  },
+  "command": [
+    "script/classification_comparison/adapters/gliclass/.venv/bin/python",
+    "-B",
+    "script/classification_comparison/adapters/gliclass/adapter.py"
+  ],
+  "prompt": {
+    "path": "script/classification_comparison/adapters/gliclass/prompt.json",
+    "version": "1.1.0",
+    "sha256": "4d391db33a41240d0acd24a518afa569c1176b48875c474334edf056bd786ad9"
+  },
+  "policy": {
+    "path": "script/classification_comparison/adapters/gliclass/policy-dev-2048.json",
+    "version": "1.2.0-dev.1",
+    "sha256": "488bc88dee4195305460c91a5eedf4af0bad93058a77da624f5eb5564be21906"
+  }
+}

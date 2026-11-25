@@ -1,0 +1,26 @@
+{
+  "contract_version": "1.1.0",
+  "identity": {
+    "mode": "real",
+    "provider": "feita",
+    "requested_model": "openai/gpt-5.6-luna",
+    "expected_returned_model": "openai/gpt-5.6-luna",
+    "adapter_version": "1.0.0",
+    "policy_version": "1.1.0"
+  },
+  "prompt": {
+    "path": "script/classification_comparison/adapters/luna/r4/prompt.txt",
+    "version": "1.2.0",
+    "sha256": "026c70c89da05102f9c6b84c87ba8e2c522d8d77cd2405403849d6823b7e2741"
+  },
+  "policy": {
+    "path": "script/classification_comparison/adapters/qwen/r2/politica.txt",
+    "version": "1.1.0",
+    "sha256": "6893a119e6dc90aef81e10cc803dba8d66e3cf4c04cc4f3f2d333515c4b2a039"
+  },
+  "rubric": {
+    "path": "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
+    "version": "1.0.0",
+    "sha256": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac"
+  }
+}

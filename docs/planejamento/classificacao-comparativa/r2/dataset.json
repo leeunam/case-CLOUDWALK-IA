@@ -1,0 +1,612 @@
+{
+  "version": "2.0.0",
+  "review": "exploratory_ai_reviewed",
+  "language": "pt-BR",
+  "cases": [
+    {"id": "jev-002", "text": "A única leitora da farmácia ficou com a tela preta. Estamos no horário do plantão, ninguém consegue pagar e não temos outro meio de cobrança.", "received": {"category": "terminal"}, "missing": ["priority"], "expected": {"priority": "urgent"}, "stratum": "urgente", "rationale": "O caixa inteiro está interrompido em horário ativo e não há alternativa."},
+    {"id": "jev-003", "text": "Saíram três Pix que não autorizei e acabou de sair mais um enquanto escrevo. Preciso interromper essas transferências agora.", "received": {}, "missing": ["category", "priority"], "expected": {"category": "pix", "priority": "urgent"}, "stratum": "urgente", "rationale": "São transferências Pix com perda em andamento e necessidade imediata de bloqueio."},
+    {"id": "jev-004", "text": "Uma venda no crédito de terça ainda não entrou no lote que caiu na minha conta. O restante das vendas já apareceu.", "received": {"priority": "intermediate"}, "missing": ["category"], "expected": {"category": "payouts"}, "stratum": "rotina", "rationale": "A divergência está na liquidação da venda, depois da autorização."},
+    {"id": "jev-005", "text": "Quero aprender a cadastrar uma chave aleatória para usar mês que vem. Nunca tentei antes.", "received": {"category": "pix"}, "missing": ["priority"], "expected": {"priority": "basic"}, "stratum": "rotina", "rationale": "É uma orientação preventiva sem problema operacional atual."},
+    {"id": "jev-006", "text": "Ganhei uma segunda maquininha. Onde encontro a opção de aumentar a letra da tela antes de pôr no balcão?", "received": {}, "missing": ["category", "priority"], "expected": {"category": "terminal", "priority": "basic"}, "stratum": "rotina", "rationale": "É configuração da interface do dispositivo, sem prejuízo atual."},
+    {"id": "jev-007", "text": "O leitor de cartão do balcão externo não reconhece chip. Fechei esse balcão e centralizei tudo no interno até amanhã.", "received": {"priority": "advanced"}, "missing": ["category"], "expected": {"category": "terminal"}, "stratum": "rotina", "rationale": "O defeito do leitor é o assunto principal."},
+    {"id": "jev-008", "text": "Só o valor de uma venda pequena não caiu na data prevista. Recebi o resto e consigo pagar as despesas de hoje.", "received": {"category": "payouts"}, "missing": ["priority"], "expected": {"priority": "intermediate"}, "stratum": "rotina", "rationale": "Há um atraso pontual com a operação preservada."},
+    {"id": "jev-009", "text": "Metade das vendas a crédito da semana sumiu da agenda de recebimento. Tenho caixa para trabalhar pelos próximos dias, mas preciso reconciliar esse valor.", "received": {}, "missing": ["category", "priority"], "expected": {"category": "payouts", "priority": "advanced"}, "stratum": "rotina", "rationale": "A agenda de liquidação tem divergência relevante sem prazo imediato."},
+    {"id": "jev-010", "text": "No evento que começou agora só aceitamos Pix. Todo pagamento pelo código do caixa volta com erro e a fila está parada.", "received": {"priority": "urgent"}, "missing": ["category"], "expected": {"category": "pix"}, "stratum": "urgente", "rationale": "A falha ocorre no pagamento Pix, não no leitor de cartão."},
+    {"id": "jev-013", "text": "Onde vejo aquele dinheiro que passou pelo aparelho e apareceu no aplicativo? É só para conferir.", "received": {"priority": "basic"}, "missing": ["category"], "expected": {"category": "informacao_insuficiente"}, "stratum": "ambiguo", "rationale": "O relato não distingue cobrança do dispositivo, Pix ou recebimento da venda."},
+    {"id": "jev-014", "text": "Os Pix de cobrança do site falham para quase todos os clientes. Já conseguimos receber por cartão, mas perdemos boa parte das vendas de hoje.", "received": {"category": "pix"}, "missing": ["priority"], "expected": {"priority": "advanced"}, "stratum": "rotina", "rationale": "Há impacto relevante, com alternativa e sem interrupção total informada."},
+    {"id": "jev-015", "text": "Para treinamento da equipe, onde acho o histórico daquela operação? É só para fazer um passo a passo e tudo está funcionando.", "received": {}, "missing": ["category", "priority"], "expected": {"category": "informacao_insuficiente", "priority": "basic"}, "stratum": "ambiguo", "rationale": "Não há assunto identificável e a finalidade de treinamento é de rotina."},
+    {"id": "jev-018", "text": "O lote de valores das vendas de cartão era para cair antes da abertura e não caiu. O único fornecedor já está no portão e vai voltar com toda a mercadoria se eu não pagar agora.", "received": {}, "missing": ["category", "priority"], "expected": {"category": "payouts", "priority": "urgent"}, "stratum": "urgente", "rationale": "É liquidação de vendas com risco imediato à abertura e sem outra fonte de pagamento indicada."},
+    {"id": "jev-019", "text": "Quero mudar o nome que sai impresso no papelzinho do aparelho de cartão. Onde fica esse ajuste?", "received": {"priority": "basic"}, "missing": ["category"], "expected": {"category": "terminal"}, "stratum": "rotina", "rationale": "A orientação trata da configuração da maquininha."},
+    {"id": "jev-023", "text": "Tem uma cobrança instantânea que não está do jeito de sempre. Podem olhar?", "received": {"category": "pix"}, "missing": ["priority"], "expected": {"priority": "informacao_insuficiente"}, "stratum": "ambiguo", "rationale": "Faltam estado, alcance e consequência da anomalia para definir urgência."},
+    {"id": "jev-024", "text": "Minha maquininha exibiu um código depois de uma atualização. Não lembro o código e ainda não sei se aceita cartão.", "received": {}, "missing": ["category", "priority"], "expected": {"category": "terminal", "priority": "informacao_insuficiente"}, "stratum": "ambiguo", "rationale": "O assunto é o terminal e o efeito operacional é desconhecido."},
+    {"id": "jev-028", "text": "Recebi um alerta sobre uma operação, mas a tela fechou. Foi metade do movimento de ontem e vou precisar refazer o fechamento.", "received": {"priority": "advanced"}, "missing": ["category"], "expected": {"category": "informacao_insuficiente"}, "stratum": "ambiguo", "rationale": "Não é possível identificar a natureza da operação mencionada."},
+    {"id": "jev-032", "text": "Os clientes escaneiam meu QR e cai dinheiro em outra conta. Ainda tem gente pagando neste momento e preciso suspender a cobrança.", "received": {"category": "pix"}, "missing": ["priority"], "expected": {"priority": "urgent"}, "stratum": "urgente", "rationale": "Há desvio ativo de pagamentos e necessidade imediata de intervenção."},
+    {"id": "jev-033", "text": "Toda cobrança Pix programada para este mês saiu com data errada. Pausei o envio e mantive as cobranças por boleto, mas vou refazer a agenda de todos os contratos.", "received": {}, "missing": ["category", "priority"], "expected": {"category": "pix", "priority": "advanced"}, "stratum": "rotina", "rationale": "A falha é nas cobranças Pix e exige retrabalho relevante, com meio alternativo."},
+    {"id": "jev-035", "text": "O lote inteiro de sexta veio a menor e a diferença é grande. Tenho reserva para honrar todos os compromissos desta semana.", "received": {"category": "payouts"}, "missing": ["priority"], "expected": {"priority": "advanced"}, "stratum": "rotina", "rationale": "A diferença é relevante, com compromissos imediatos cobertos."},
+    {"id": "jev-037", "text": "As vendas foram autorizadas, mas a liquidação de todos os lotes prometidos para hoje não entrou. A folha vence daqui a uma hora e não tenho outro saldo.", "received": {"priority": "urgent"}, "missing": ["category"], "expected": {"category": "payouts"}, "stratum": "urgente", "rationale": "O dinheiro falta na etapa de liquidação e não na captura das vendas."},
+    {"id": "jev-039", "text": "Aquele negócio que aparece no canto sumiu. Dá para ver aí?", "received": {}, "missing": ["category", "priority"], "expected": {"category": "informacao_insuficiente", "priority": "informacao_insuficiente"}, "stratum": "ambiguo", "rationale": "Não há referência que permita identificar o assunto ou o impacto."},
+    {"id": "jev-040", "text": "Consigo gerar um QR Pix de valor livre para deixar impresso na bancada para a próxima semana?", "received": {"priority": "basic"}, "missing": ["category"], "expected": {"category": "pix"}, "stratum": "rotina", "rationale": "É configuração de recebimento via Pix."},
+    {"id": "jev-041", "text": "Um reembolso por Pix ainda não confirmou no app. Avisei aquele cliente e o resto das devoluções seguiu normalmente.", "received": {"category": "pix"}, "missing": ["priority"], "expected": {"priority": "informacao_insuficiente"}, "stratum": "ambiguo", "rationale": "A pendência afeta um reembolso, mas o relato não informa prazo nem consequência desse caso para estabelecer a prioridade."},
+    {
+      "id": "r2-001",
+      "text": "Fechamos o ponto sazonal e a maquininha de cartão vai ficar seis meses no armário. Qual é a orientação da Triz Lunar para conservar a bateria com o equipamento guardado? Volto a usar na próxima temporada.",
+      "received": {
+        "category": null,
+        "priority": "basic"
+      },
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "terminal"
+      },
+      "stratum": "rotina",
+      "rationale": "O pedido é de orientação para armazenar e conservar a bateria da maquininha de cartão fora do período de uso."
+    },
+    {
+      "id": "r2-002",
+      "text": "Nos três créditos desta quinzena, a Favo Índigo tirou uma parte das vendas parceladas como ajuste. Vou ter de reabrir vários diários para ver o que ficou retido. As despesas deste mês estão cobertas.",
+      "received": {
+        "priority": "advanced"
+      },
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "payouts"
+      },
+      "stratum": "rotina",
+      "rationale": "O ajuste incide sobre os créditos das vendas parceladas e a solicitação trata dos valores retidos no repasse."
+    },
+    {
+      "id": "r2-003",
+      "text": "Para receber as contribuições do clube na próxima temporada, quero mandar a chave aleatória no convite. Onde copio essa chave da Vela Salina para as transferências instantâneas? A arrecadação deste mês já fechou.",
+      "received": {
+        "category": "   ",
+        "priority": "basic"
+      },
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "pix"
+      },
+      "stratum": "rotina",
+      "rationale": "A chave aleatória é usada para receber contribuições por transferência instantânea, o que identifica Pix."
+    },
+    {
+      "id": "r2-004",
+      "text": "O pino da base de recarga da Quina Cobre entortou. Consigo continuar passando cartão ao ligar o cabo direto na maquininha, mas preciso saber se dá para trocar só a base.",
+      "received": {
+        "category": null,
+        "priority": "intermediate"
+      },
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "terminal"
+      },
+      "stratum": "rotina",
+      "rationale": "O pino e a base são acessórios da maquininha de cartão. O relato pede orientação sobre o defeito."
+    },
+    {
+      "id": "r2-005",
+      "text": "As vendas do balcão do anexo continuam entrando, mas o dinheiro delas foi creditado junto do lote da sede. Preciso separar o depósito desse balcão para conseguir fechar o seu caixa.",
+      "received": {
+        "priority": "intermediate"
+      },
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "payouts"
+      },
+      "stratum": "rotina",
+      "rationale": "O problema está em identificar o depósito que liquidou as vendas do balcão do anexo."
+    },
+    {
+      "id": "r2-006",
+      "text": "Uma cobrança da feira fica voltando como expirada quando a pessoa tenta pagar pela leitura da imagem no celular. Se eu passo a chave aleatória, o mesmo pagamento instantâneo entra. Só acontece naquele pedido.",
+      "received": {
+        "category": "",
+        "priority": "intermediate"
+      },
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "pix"
+      },
+      "stratum": "rotina",
+      "rationale": "O código da cobrança e a chave aleatória são duas formas de iniciar o mesmo pagamento instantâneo."
+    },
+    {
+      "id": "r2-007",
+      "text": "Estou escrevendo o manual para os caixas da próxima edição do bazar. Na maquininha da Pinhão Violeta, como divido o valor de uma mesma venda entre dois cartões, um de cada pessoa? A edição deste ano já encerrou.",
+      "received": {
+        "category": null,
+        "priority": "basic"
+      },
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "terminal"
+      },
+      "stratum": "rotina",
+      "rationale": "O pedido trata da operação da maquininha de cartão para dividir uma venda entre dois cartões."
+    },
+    {
+      "id": "r2-008",
+      "text": "A feira da cooperativa vai passar a acontecer às quintas. As vendas por cartão caem toda terça, certinho. É possível escolher outro dia fixo para receber o dinheiro dessas vendas quando mudarmos a feira?",
+      "received": {
+        "priority": "basic",
+        "category": " "
+      },
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "payouts"
+      },
+      "stratum": "rotina",
+      "rationale": "O cliente quer alterar quando recebe em conta os valores das vendas por cartão."
+    },
+    {
+      "id": "r2-009",
+      "text": "A associação enviou as ajudas de custo por Pix no início da semana. Alguns bolsistas receberam com o valor errado e vou ter de rastrear cada devolução antes de refazer a planilha. A prestação de contas só vence no próximo mês.",
+      "received": {
+        "priority": "advanced"
+      },
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "pix"
+      },
+      "stratum": "rotina",
+      "rationale": "O pedido de rastreio se refere à devolução de transferências Pix usadas nas ajudas de custo."
+    },
+    {
+      "id": "r2-010",
+      "text": "No caixa do mezanino, os cartões são aprovados, mas o visor do leitor fica tão fraco que a gente precisa confirmar o valor na contraluz. Os leitores dos outros caixas estão bons.",
+      "received": {
+        "category": null,
+        "priority": "intermediate"
+      },
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "terminal"
+      },
+      "stratum": "rotina",
+      "rationale": "O problema é no visor do leitor usado para aprovar pagamentos por cartão."
+    },
+    {
+      "id": "r2-011",
+      "text": "Apontei a câmera para o QR que a Pinhão Violeta mostrou no material da oficina e veio uma página diferente. Estou só preparando a demonstração da semana que vem. Qual seria o caminho esperado?",
+      "received": {
+        "category": "  ",
+        "priority": "basic"
+      },
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "informacao_insuficiente"
+      },
+      "stratum": "ambiguo",
+      "rationale": "O QR e a página não identificam a função demonstrada. O relato não informa a finalidade ou a operação associada."
+    },
+    {
+      "id": "r2-012",
+      "text": "Uma linha apareceu em dobro no painel da Favo Índigo e o detalhe dela não abre. Faço tudo de sempre no restante do painel, mas precisei conferir essa parte à mão para fechar o turno.",
+      "received": {
+        "priority": "intermediate"
+      },
+      "missing": [
+        "category"
+      ],
+      "expected": {
+        "category": "informacao_insuficiente"
+      },
+      "stratum": "ambiguo",
+      "rationale": "A linha duplicada não é identificada por origem, tipo de operação ou função do painel."
+    },
+    {
+      "id": "r2-013",
+      "text": "Ficha para a turma de operação: como deixo sem som a unidade de demonstração do leitor da Quina Cobre? Ela fica na sala de formação, e as máquinas que usamos nos caixas seguem ligadas.",
+      "received": {
+        "category": "terminal"
+      },
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "basic"
+      },
+      "stratum": "rotina",
+      "rationale": "O ajuste é na unidade de treinamento e os caixas continuam operando normalmente."
+    },
+    {
+      "id": "r2-014",
+      "text": "Fiz um Pix Saque no caixa eletrônico do cais. O débito foi confirmado, mas o compartimento abriu vazio e o saldo ficou zerado. O embarque da última balsa fecha em seis minutos. A passagem só é vendida em dinheiro e preciso atravessar para assumir o plantão na ilha.",
+      "received": {
+        "category": "pix",
+        "priority": null
+      },
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "urgent"
+      },
+      "stratum": "urgente",
+      "rationale": "O saque consumiu o saldo sem entregar cédulas. Sem dinheiro em espécie, o cliente perde o último embarque em seis minutos e não chega a tempo para o plantão."
+    },
+    {
+      "id": "r2-015",
+      "text": "No relatório de repasses, a coluna de referência sumiu só no arquivo da filial da praça. Os créditos estão entrando e consigo conciliar as outras filiais. Nesta vou cruzar o lote com o extrato na mão.",
+      "received": {
+        "category": "payouts",
+        "priority": " "
+      },
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "intermediate"
+      },
+      "stratum": "rotina",
+      "rationale": "Os repasses seguem disponíveis e só uma filial exige conciliação manual."
+    },
+    {
+      "id": "r2-016",
+      "text": "Quatorze dos vinte leitores estão rejeitando pagamentos depois de uma troca de configuração. Para recuperar os postos afetados, temos de reinstalar um por um. Os seis leitores restantes cobrem o movimento de hoje.",
+      "received": {
+        "category": "terminal",
+        "priority": null
+      },
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "advanced"
+      },
+      "stratum": "rotina",
+      "rationale": "O defeito atinge a maioria dos leitores e gera retrabalho substancial. Os aparelhos restantes sustentam a operação de hoje."
+    },
+    {
+      "id": "r2-017",
+      "text": "Passei para cá como combinaram. O Pix que mencionei é o do protocolo de ontem, no fim da conversa com a Vela Salina.",
+      "received": {
+        "category": "pix"
+      },
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "informacao_insuficiente"
+      },
+      "stratum": "ambiguo",
+      "rationale": "A mensagem referencia um relato ausente e não indica o estado da transferência, o efeito na operação ou um prazo."
+    },
+    {
+      "id": "r2-018",
+      "text": "Recebemos as vendas nas datas de sempre. Vou preparar quem cobre minhas férias e quero entender os nomes das colunas do calendário de créditos da Triz Lunar.",
+      "received": {
+        "category": "payouts",
+        "priority": ""
+      },
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "basic"
+      },
+      "stratum": "rotina",
+      "rationale": "A solicitação é de treinamento e os créditos das vendas estão chegando nas datas esperadas."
+    },
+    {
+      "id": "r2-019",
+      "text": "A maquininha da Cedro Níquel começou a soltar fumaça pela emenda da carcaça. Tirei o carregador da tomada, mas a fumaça continua e o aparelho está no balcão junto aos clientes. Para quem passo isso?",
+      "received": {
+        "category": "terminal",
+        "priority": null
+      },
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "urgent"
+      },
+      "stratum": "urgente",
+      "rationale": "A fumaça persiste mesmo com o aparelho fora da tomada e há pessoas próximas, o que exige ação imediata."
+    },
+    {
+      "id": "r2-020",
+      "text": "O convênio recusou uma despesa porque no PDF do comprovante Pix da Pinhão Violeta o identificador está cortado na margem. O reembolso dessa compra ficou preso até eu substituir o documento. Os outros itens já seguiram para análise.",
+      "received": {
+        "category": "pix",
+        "priority": "   "
+      },
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "intermediate"
+      },
+      "stratum": "rotina",
+      "rationale": "O documento defeituoso bloqueou um reembolso específico. As outras despesas seguem em análise."
+    },
+    {
+      "id": "r2-021",
+      "text": "A Cedro Níquel marcou como concluídos os repasses a quarenta concessões, mas ninguém recebeu a parte da semana. Temos caixa para manter o serviço e o próximo compromisso é daqui a dez dias. Vou precisar conferir as retenções de cada operação.",
+      "received": {
+        "category": "payouts"
+      },
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "advanced"
+      },
+      "stratum": "rotina",
+      "rationale": "O atraso afeta dezenas de concessões e exige conciliação individual. A operação dispõe de caixa e o próximo compromisso é em dez dias."
+    },
+    {
+      "id": "r2-022",
+      "text": "No detalhe do repasse de cartões, toda a agenda de créditos do mês foi marcada para liquidação antecipada. Ninguém aqui pediu isso. Às 18h a confirmação é automática, faltam seis minutos e a tarifa calculada vai consumir o que separamos para a folha. A opção de suspender não está abrindo.",
+      "received": {
+        "category": "payouts",
+        "priority": null
+      },
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "urgent"
+      },
+      "stratum": "urgente",
+      "rationale": "A confirmação da antecipação está a seis minutos de causar um desconto que compromete a folha e o cliente não consegue suspendê-la pelo painel."
+    },
+    {
+      "id": "r2-023",
+      "text": "O relógio da maquininha do caixa de encomendas virou para um fuso que põe as vendas na data seguinte. Os cartões seguem aprovando ali, mas para conferir o turno preciso buscar cada pagamento pelo número da transação. Só esse caixa está com as datas trocadas.",
+      "received": {
+        "category": "terminal",
+        "priority": ""
+      },
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "intermediate"
+      },
+      "stratum": "rotina",
+      "rationale": "O problema de data exige conferência manual em um caixa. Os pagamentos continuam sendo aprovados nesse equipamento."
+    },
+    {
+      "id": "r2-024",
+      "text": "Conforme pediram, o triângulo que eu mencionei fica do lado do símbolo da bateria do leitor de cartão da Quina Cobre.",
+      "received": {
+        "category": "terminal"
+      },
+      "missing": [
+        "priority"
+      ],
+      "expected": {
+        "priority": "informacao_insuficiente"
+      },
+      "stratum": "ambiguo",
+      "rationale": "A posição do símbolo não indica se o leitor deixou de funcionar, qual foi o impacto ou quando seria preciso intervir."
+    },
+    {
+      "id": "r2-025",
+      "text": "Para a primeira aula do curso de caixa, quero mostrar como programar um Pix para outra data. É só o roteiro da aula, sem transferência para fazer agora.",
+      "received": {
+        "category": null,
+        "priority": ""
+      },
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "pix",
+        "priority": "basic"
+      },
+      "stratum": "rotina",
+      "rationale": "A dúvida trata do agendamento de uma transferência Pix para um roteiro de formação sem operação afetada."
+    },
+    {
+      "id": "r2-026",
+      "text": "O painel tátil da maquininha do armário de retirada deixou de responder. Ainda dá para completar a venda pelas teclas físicas, mas esse ponto passou a levar mais tempo. O balcão principal segue normal.",
+      "received": {},
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "terminal",
+        "priority": "intermediate"
+      },
+      "stratum": "rotina",
+      "rationale": "O defeito afeta o painel tátil da maquininha. O atendimento continua pelas teclas físicas e o outro balcão funciona normalmente."
+    },
+    {
+      "id": "r2-027",
+      "text": "Recebemos no banco o dinheiro das vendas de onze unidades em um depósito só, sem a divisão que costumava vir. Para fechar o balanço, vamos reconstruir os créditos a partir dos extratos das unidades. A conferência formal é daqui a três semanas.",
+      "received": {
+        "category": " ",
+        "priority": null
+      },
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "payouts",
+        "priority": "advanced"
+      },
+      "stratum": "rotina",
+      "rationale": "A falta de discriminação nos créditos de vendas obriga a reconstituir os repasses de onze unidades. A conferência tem prazo de três semanas."
+    },
+    {
+      "id": "r2-028",
+      "text": "Os repasses automáticos das vendas da Quina Cobre estão indo para a conta que deixou de ser da associação. O primeiro depósito já seguiu, o segundo está sendo enviado agora e há outros na fila dessa mesma conta.",
+      "received": {
+        "priority": null
+      },
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "payouts",
+        "priority": "urgent"
+      },
+      "stratum": "urgente",
+      "rationale": "O relato trata dos repasses de vendas. Há um novo depósito em andamento para uma conta que não pertence mais à associação."
+    },
+    {
+      "id": "r2-029",
+      "text": "Posso instalar a maquininha de cartão da Cedro Níquel numa bancada sem cabo de rede? É a bancada do ponto novo que ainda está em obra. Os caixas atuais não mudam com isso.",
+      "received": {
+        "category": null
+      },
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "terminal",
+        "priority": "basic"
+      },
+      "stratum": "rotina",
+      "rationale": "A dúvida é de instalação da maquininha em um ponto futuro. Os caixas atuais seguem em operação."
+    },
+    {
+      "id": "r2-030",
+      "text": "O Pix recorrente do entregador continua aparecendo para segunda mesmo depois de eu mudar a programação para quarta. Depois de dois acertos de data feitos com ele, suspendi essa série e assumi o pagamento do contrato à mão. Os demais pagamentos do negócio seguem normalmente.",
+      "received": {
+        "category": "",
+        "priority": "   "
+      },
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "pix",
+        "priority": "intermediate"
+      },
+      "stratum": "rotina",
+      "rationale": "A falha afeta a programação de uma série recorrente de Pix. Um contrato passou a exigir pagamento manual e os demais seguem normalmente."
+    },
+    {
+      "id": "r2-031",
+      "text": "O lote de bobinas que usamos no fim de semana deixou resíduos na impressora de 38 maquininhas. Os caixas conseguem vender e mandar a via por mensagem. Para voltar a imprimir, vamos ter de tirar cada aparelho do balcão para limpeza, em rodízio nas próximas duas semanas.",
+      "received": {
+        "priority": ""
+      },
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "terminal",
+        "priority": "advanced"
+      },
+      "stratum": "rotina",
+      "rationale": "O uso das impressoras de 38 maquininhas foi afetado e a limpeza de todos os aparelhos exige retrabalho. As vendas e a emissão digital seguem, com manutenção programada em rodízio."
+    },
+    {
+      "id": "r2-032",
+      "text": "O Pix para a chave enviada pelo centro de eventos falha antes de confirmar. O prazo da caução acaba em cinco minutos e, se o dinheiro não constar, nosso horário vai para outro grupo. Só aceitam transferência por aquela chave.",
+      "received": {
+        "category": "   "
+      },
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "pix",
+        "priority": "urgent"
+      },
+      "stratum": "urgente",
+      "rationale": "A transferência Pix falhou e é a única forma de quitar a caução antes de perder a reserva em cinco minutos."
+    },
+    {
+      "id": "r2-033",
+      "text": "O crédito das vendas da banca do térreo já entrou no banco, mas no painel da Cedro Níquel esse lote continua em trânsito. A conciliação automática pula esse repasse por causa do status. A banca continua aberta e estou fechando esse turno com o lançamento à mão.",
+      "received": {
+        "category": null,
+        "priority": null
+      },
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "payouts",
+        "priority": "intermediate"
+      },
+      "stratum": "rotina",
+      "rationale": "O pedido é sobre o estado de um lote de repasse já recebido. Só a conciliação dessa banca exige registro manual e as vendas continuam."
+    },
+    {
+      "id": "r2-034",
+      "text": "O acesso do nosso negócio foi bloqueado com a loja aberta. A equipe toda ficou presa antes de chegar às funções do painel. A operação está paralisada e não temos outro jeito de atender enquanto esse acesso não volta.",
+      "received": {},
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "informacao_insuficiente",
+        "priority": "urgent"
+      },
+      "stratum": "ambiguo",
+      "rationale": "O bloqueio de acesso precede qualquer função identificável do catálogo. A operação está totalmente interrompida durante o atendimento e não há alternativa."
+    },
+    {
+      "id": "r2-035",
+      "text": "Oi, queria ensinar no curso a chegar no menu que vi na apresentação de vocês. A turma só começa no mês que vem. A loja segue funcionando do jeito de sempre.",
+      "received": {
+        "category": "",
+        "priority": null
+      },
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "informacao_insuficiente",
+        "priority": "basic"
+      },
+      "stratum": "ambiguo",
+      "rationale": "O menu não é identificado pela função ou pelo assunto. O pedido é para um treinamento futuro e a loja opera normalmente."
+    },
+    {
+      "id": "r2-036",
+      "text": "Mandaram continuar por este canal. A notificação na Triz Lunar só dizia 'aguarde atualização'. Quando abri, ela já tinha sumido.",
+      "received": {
+        "priority": " "
+      },
+      "missing": [
+        "category",
+        "priority"
+      ],
+      "expected": {
+        "category": "informacao_insuficiente",
+        "priority": "informacao_insuficiente"
+      },
+      "stratum": "ambiguo",
+      "rationale": "A notificação não identifica o assunto do atendimento, o impacto da situação ou um prazo de intervenção."
+    }
+  ]
+}

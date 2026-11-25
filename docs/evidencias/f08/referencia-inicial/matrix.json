@@ -1,0 +1,492 @@
+[
+  {
+    "run_id": "f08-reference-1795207088594-f6c560-01",
+    "parameters": {
+      "scenario": "reference",
+      "ordinal": 1,
+      "seed": 8026,
+      "stages": [
+        [
+          5,
+          300
+        ]
+      ],
+      "observe_seconds": 120,
+      "vus": 50,
+      "fault_after_seconds": null,
+      "fault_seconds": null,
+      "chat": null,
+      "run_id": "f08-reference-1795207088594-f6c560-01"
+    },
+    "state": "aprovado",
+    "reason": null,
+    "cleanup": "concluída",
+    "goals": {
+      "p95_aceite_ate_500_ms": true,
+      "aceite_inicial_minimo_99_pct_do_plano": true,
+      "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+      "escoamento_na_janela": true,
+      "todos_segundos_turnos_enviados_e_concluidos": true,
+      "jev_sem_solicitacoes_ou_tentativas": true
+    },
+    "initial": {
+      "planned": 1500,
+      "offered": 1500,
+      "http_202": 1500,
+      "accepted_with_ids": 1500,
+      "acceptance_of_planned": 1.0,
+      "acceptance_of_offered": 1.0,
+      "non_202": 0,
+      "latency_accept": {
+        "unit": "ms",
+        "n": 1500,
+        "p50": 59,
+        "p95": 123
+      },
+      "latency_persisted": {
+        "unit": "ms",
+        "n": 1500,
+        "p50": 273.72900390625,
+        "p95": 398.1201171875
+      },
+      "negative_clock_deltas": 0,
+      "statuses": {
+        "202": 1500
+      },
+      "error_codes": {
+        "0": 1500
+      },
+      "timeouts": 0,
+      "states": {
+        "concluído": 1500
+      }
+    },
+    "followups": {
+      "planned": 300,
+      "offered": 300,
+      "http_202": 300,
+      "accepted_with_ids": 300,
+      "acceptance_of_planned": 1.0,
+      "acceptance_of_offered": 1.0,
+      "non_202": 0,
+      "latency_accept": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 56.214568,
+        "p95": 131.092331
+      },
+      "latency_persisted": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 278.693115234375,
+        "p95": 419.39306640625
+      },
+      "negative_clock_deltas": 0,
+      "statuses": {
+        "202": 300
+      },
+      "error_codes": {},
+      "timeouts": 0,
+      "states": {
+        "concluído": 300
+      },
+      "unissued_reasons": {},
+      "send_delay_after_target": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 125.31201171875,
+        "p95": 247.756103515625
+      },
+      "visibility_observation_delay": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 162.30908203125,
+        "p95": 277.85888671875
+      }
+    },
+    "rates": {
+      "arrival_seconds": 300,
+      "offered_initial_per_s": 5.0,
+      "accepted_initial_per_s": 5.0
+    },
+    "completions": {
+      "observation_seconds_including_load": 420.0,
+      "ai_turns_in_window": 1800,
+      "resolved_cases_in_window": 300,
+      "ai_turns_per_s": 4.285714285714286,
+      "resolved_cases_per_s": 0.7142857142857143
+    },
+    "outage": null,
+    "integrity": {
+      "confirmed_losses": 0,
+      "duplicated_effect_identities": 0,
+      "persisted_without_http_202": 0,
+      "not_reconciled_http_202": 0
+    },
+    "chat": null,
+    "human": null,
+    "observed_failures": []
+  },
+  {
+    "run_id": "f08-reference-1795207088594-f6c560-02",
+    "parameters": {
+      "scenario": "reference",
+      "ordinal": 2,
+      "seed": 8026,
+      "stages": [
+        [
+          5,
+          300
+        ]
+      ],
+      "observe_seconds": 120,
+      "vus": 50,
+      "fault_after_seconds": 60,
+      "fault_seconds": 30,
+      "chat": null,
+      "run_id": "f08-reference-1795207088594-f6c560-02"
+    },
+    "state": "aprovado",
+    "reason": null,
+    "cleanup": "concluída",
+    "goals": {
+      "p95_aceite_ate_500_ms": true,
+      "aceite_inicial_minimo_99_pct_do_plano": true,
+      "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+      "escoamento_na_janela": true,
+      "todos_segundos_turnos_enviados_e_concluidos": true,
+      "jev_sem_solicitacoes_ou_tentativas": true
+    },
+    "initial": {
+      "planned": 1500,
+      "offered": 1500,
+      "http_202": 1500,
+      "accepted_with_ids": 1500,
+      "acceptance_of_planned": 1.0,
+      "acceptance_of_offered": 1.0,
+      "non_202": 0,
+      "latency_accept": {
+        "unit": "ms",
+        "n": 1500,
+        "p50": 66,
+        "p95": 112
+      },
+      "latency_persisted": {
+        "unit": "ms",
+        "n": 1500,
+        "p50": 302.10498046875,
+        "p95": 28090.736083984375
+      },
+      "negative_clock_deltas": 0,
+      "statuses": {
+        "202": 1500
+      },
+      "error_codes": {
+        "0": 1500
+      },
+      "timeouts": 0,
+      "states": {
+        "concluído": 1500
+      }
+    },
+    "followups": {
+      "planned": 300,
+      "offered": 300,
+      "http_202": 300,
+      "accepted_with_ids": 300,
+      "acceptance_of_planned": 1.0,
+      "acceptance_of_offered": 1.0,
+      "non_202": 0,
+      "latency_accept": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 66.209891,
+        "p95": 134.465252
+      },
+      "latency_persisted": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 309.73193359375,
+        "p95": 3622.81689453125
+      },
+      "negative_clock_deltas": 0,
+      "statuses": {
+        "202": 300
+      },
+      "error_codes": {},
+      "timeouts": 0,
+      "states": {
+        "concluído": 300
+      },
+      "unissued_reasons": {},
+      "send_delay_after_target": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 137.222900390625,
+        "p95": 246.240966796875
+      },
+      "visibility_observation_delay": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 149.196044921875,
+        "p95": 279.303955078125
+      }
+    },
+    "rates": {
+      "arrival_seconds": 300,
+      "offered_initial_per_s": 5.0,
+      "accepted_initial_per_s": 5.0
+    },
+    "completions": {
+      "observation_seconds_including_load": 420.0,
+      "ai_turns_in_window": 1800,
+      "resolved_cases_in_window": 300,
+      "ai_turns_per_s": 4.285714285714286,
+      "resolved_cases_per_s": 0.7142857142857143
+    },
+    "outage": {
+      "stop_observed_at_ms": 1795207628199.2139,
+      "start_observed_at_ms": 1795207658520.283,
+      "broker_ready_observed_ms": 1795207662558,
+      "outage_to_ready_ms": 34358.7861328125,
+      "process_down_ms": 30321.069091796875,
+      "drained_sample_ms": 1795207696295,
+      "drain_after_readiness_ms": 33737,
+      "initiated_while_unavailable_or_recovering": {
+        "planned": 172,
+        "offered": 172,
+        "http_202": 172,
+        "accepted_with_ids": 172,
+        "acceptance_of_planned": 1.0,
+        "acceptance_of_offered": 1.0,
+        "non_202": 0,
+        "latency_accept": {
+          "unit": "ms",
+          "n": 172,
+          "p50": 61,
+          "p95": 93
+        },
+        "latency_persisted": {
+          "unit": "ms",
+          "n": 172,
+          "p50": 25745.158935546875,
+          "p95": 42271.406982421875
+        },
+        "negative_clock_deltas": 0,
+        "statuses": {
+          "202": 172
+        },
+        "error_codes": {
+          "0": 172
+        },
+        "timeouts": 0,
+        "states": {
+          "concluído": 172
+        }
+      }
+    },
+    "integrity": {
+      "confirmed_losses": 0,
+      "duplicated_effect_identities": 0,
+      "persisted_without_http_202": 0,
+      "not_reconciled_http_202": 0
+    },
+    "chat": null,
+    "human": null,
+    "observed_failures": []
+  },
+  {
+    "run_id": "f08-reference-1795207088594-f6c560-03",
+    "parameters": {
+      "scenario": "reference",
+      "ordinal": 3,
+      "seed": 8026,
+      "stages": [
+        [
+          5,
+          300
+        ]
+      ],
+      "observe_seconds": 120,
+      "vus": 50,
+      "fault_after_seconds": null,
+      "fault_seconds": null,
+      "chat": null,
+      "run_id": "f08-reference-1795207088594-f6c560-03"
+    },
+    "state": "bloqueado",
+    "reason": "captura Kafka sem par request/resultado causal para 1800 turnos concluídos; leitura de eventos Kafka incompleta",
+    "cleanup": "concluída",
+    "goals": {
+      "p95_aceite_ate_500_ms": true,
+      "aceite_inicial_minimo_99_pct_do_plano": true,
+      "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+      "escoamento_na_janela": true,
+      "todos_segundos_turnos_enviados_e_concluidos": true,
+      "jev_sem_solicitacoes_ou_tentativas": true
+    },
+    "initial": {
+      "planned": 1500,
+      "offered": 1500,
+      "http_202": 1500,
+      "accepted_with_ids": 1500,
+      "acceptance_of_planned": 1.0,
+      "acceptance_of_offered": 1.0,
+      "non_202": 0,
+      "latency_accept": {
+        "unit": "ms",
+        "n": 1500,
+        "p50": 68,
+        "p95": 113
+      },
+      "latency_persisted": {
+        "unit": "ms",
+        "n": 1500,
+        "p50": 285.698974609375,
+        "p95": 391.35009765625
+      },
+      "negative_clock_deltas": 0,
+      "statuses": {
+        "202": 1500
+      },
+      "error_codes": {
+        "0": 1500
+      },
+      "timeouts": 0,
+      "states": {
+        "concluído": 1500
+      }
+    },
+    "followups": {
+      "planned": 300,
+      "offered": 300,
+      "http_202": 300,
+      "accepted_with_ids": 300,
+      "acceptance_of_planned": 1.0,
+      "acceptance_of_offered": 1.0,
+      "non_202": 0,
+      "latency_accept": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 63.003838,
+        "p95": 129.468808
+      },
+      "latency_persisted": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 294.136962890625,
+        "p95": 406.756103515625
+      },
+      "negative_clock_deltas": 0,
+      "statuses": {
+        "202": 300
+      },
+      "error_codes": {},
+      "timeouts": 0,
+      "states": {
+        "concluído": 300
+      },
+      "unissued_reasons": {},
+      "send_delay_after_target": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 122.6708984375,
+        "p95": 247.8779296875
+      },
+      "visibility_observation_delay": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 169.676025390625,
+        "p95": 286.14697265625
+      }
+    },
+    "rates": {
+      "arrival_seconds": 300,
+      "offered_initial_per_s": 5.0,
+      "accepted_initial_per_s": 5.0
+    },
+    "completions": {
+      "observation_seconds_including_load": 420.0,
+      "ai_turns_in_window": 1800,
+      "resolved_cases_in_window": 300,
+      "ai_turns_per_s": 4.285714285714286,
+      "resolved_cases_per_s": 0.7142857142857143
+    },
+    "outage": null,
+    "integrity": {
+      "confirmed_losses": 0,
+      "duplicated_effect_identities": 0,
+      "persisted_without_http_202": 0,
+      "not_reconciled_http_202": 0
+    },
+    "chat": null,
+    "human": null,
+    "observed_failures": []
+  },
+  {
+    "run_id": "f08-reference-1795207088594-f6c560-04",
+    "parameters": {
+      "scenario": "reference",
+      "ordinal": 4,
+      "seed": 8026,
+      "stages": [
+        [
+          5,
+          300
+        ]
+      ],
+      "observe_seconds": 120,
+      "vus": 50,
+      "fault_after_seconds": 60,
+      "fault_seconds": 30,
+      "chat": null
+    },
+    "state": "não executada",
+    "executed": false,
+    "reason": "Interrompida após f08-reference-1795207088594-f6c560-03: captura Kafka sem par request/resultado causal para 1800 turnos concluídos; leitura de eventos Kafka incompleta"
+  },
+  {
+    "run_id": "f08-reference-1795207088594-f6c560-05",
+    "parameters": {
+      "scenario": "reference",
+      "ordinal": 5,
+      "seed": 8026,
+      "stages": [
+        [
+          5,
+          300
+        ]
+      ],
+      "observe_seconds": 120,
+      "vus": 50,
+      "fault_after_seconds": null,
+      "fault_seconds": null,
+      "chat": null
+    },
+    "state": "não executada",
+    "executed": false,
+    "reason": "Interrompida após f08-reference-1795207088594-f6c560-03: captura Kafka sem par request/resultado causal para 1800 turnos concluídos; leitura de eventos Kafka incompleta"
+  },
+  {
+    "run_id": "f08-reference-1795207088594-f6c560-06",
+    "parameters": {
+      "scenario": "reference",
+      "ordinal": 6,
+      "seed": 8026,
+      "stages": [
+        [
+          5,
+          300
+        ]
+      ],
+      "observe_seconds": 120,
+      "vus": 50,
+      "fault_after_seconds": 60,
+      "fault_seconds": 30,
+      "chat": null
+    },
+    "state": "não executada",
+    "executed": false,
+    "reason": "Interrompida após f08-reference-1795207088594-f6c560-03: captura Kafka sem par request/resultado causal para 1800 turnos concluídos; leitura de eventos Kafka incompleta"
+  }
+]

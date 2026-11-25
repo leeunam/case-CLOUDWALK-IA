@@ -1,0 +1,17 @@
+{
+  "task": "C05-R3/real",
+  "authorized_on": "2026-11-24",
+  "answer": "Autorizar 6 + 44 condicionadas (recomendado)",
+  "provider": "feita",
+  "model": "openai/gpt-5.6-luna",
+  "development_max_requests": 6,
+  "final_max_requests": 44,
+  "final_requires": "original real development gate pass and original seal; no unresolved costs",
+  "concurrency": 1,
+  "attempts": 1,
+  "total_cumulative_cap_usd": "10",
+  "conservative_prior_accounted_usd": "0.02687405",
+  "existing_account_required": true,
+  "retries_or_extra_probe_authorized": false,
+  "eligible_model_adopted": false
+}

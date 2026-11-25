@@ -1,0 +1,274 @@
+require "test_helper"
+
+class SimulatorTest < ActionDispatch::IntegrationTest
+  setup do
+    Rails.application.load_seed
+    @aurora = Operations::Brand.find_by!(code: "aurora")
+    @horizonte = Operations::Brand.find_by!(code: "horizonte")
+    @chat = @aurora.channels.find_by!(kind: "chat")
+    @whatsapp = @horizonte.channels.find_by!(kind: "whatsapp")
+    @email = @horizonte.channels.find_by!(kind: "email")
+    @old_brands = ENV["CLOUDWALK_SIMULATOR_BRANDS"]
+    @old_passwords = ENV["CLOUDWALK_DEMO_PASSWORDS"]
+    @old_channel_secret = ENV["CLOUDWALK_CHANNEL_SECRET"]
+    @forgery_protection = Api::V1::BrowserController.allow_forgery_protection
+    ENV["CLOUDWALK_SIMULATOR_BRANDS"] = "aurora,horizonte"
+    ENV["CLOUDWALK_DEMO_PASSWORDS"] = { "bia@example.test" => "test", "supervisor@example.test" => "test" }.to_json
+    ENV["CLOUDWALK_CHANNEL_SECRET"] = "test-channel"
+    Api::V1::BrowserController.allow_forgery_protection = true
+  end
+
+  teardown do
+    ENV["CLOUDWALK_SIMULATOR_BRANDS"] = @old_brands
+    ENV["CLOUDWALK_DEMO_PASSWORDS"] = @old_passwords
+    ENV["CLOUDWALK_CHANNEL_SECRET"] = @old_channel_secret
+    Api::V1::BrowserController.allow_forgery_protection = @forgery_protection
+  end
+
+  test "sessão renova CSRF e seus IDs não permitem assumir conversa de outro cliente" do
+    owner = open_session
+    guest = open_session
+    owner.get "/api/v1/session"
+    anonymous_csrf = json(owner).fetch("csrf_token")
+    owner.post "/api/v1/simulator/session"
+    assert_equal 403, owner.response.status
+    owner_csrf = start_simulator(owner, csrf: anonymous_csrf)
+    guest_csrf = start_simulator(guest)
+
+    send_message(owner, @chat, anonymous_csrf, key: "new")
+    assert_equal 403, owner.response.status
+    send_message(owner, @chat, owner_csrf, key: "new")
+    assert_equal 202, owner.response.status
+    receipt = json(owner)
+    assert WebhookV1::Contract.valid?("SimulatorReceipt", receipt)
+
+    owner.get "/api/v1/cases/#{receipt.fetch("case_id")}"
+    assert_equal 401, owner.response.status
+    guest.get "/api/v1/simulator/cases/#{receipt.fetch("case_id")}"
+    assert_equal 404, guest.response.status
+    guest.get "/api/v1/simulator/cases/#{receipt.fetch("case_id")}/messages"
+    assert_equal 404, guest.response.status
+    guest.get "/api/v1/simulator/cases"
+    assert_empty json(guest).fetch("items")
+    send_message(guest, @chat, guest_csrf, key: "spoof", conversation: receipt.fetch("external_conversation_id"))
+    assert_equal 404, guest.response.status
+    send_message(owner, @whatsapp, owner_csrf, key: "wrong-channel", conversation: receipt.fetch("external_conversation_id"))
+    assert_equal 404, owner.response.status
+
+    cookie = owner.cookies["_cloudwalk_session"]
+    owner.delete "/api/v1/session", headers: { "X-CSRF-Token" => owner_csrf }
+    assert_equal 204, owner.response.status
+    replay = open_session
+    replay.cookies["_cloudwalk_session"] = cookie
+    replay.get "/api/v1/simulator/cases/#{receipt.fetch("case_id")}"
+    assert_equal 401, replay.response.status
+  end
+
+  test "três canais, paginação, reentrega e continuação usam o histórico canônico" do
+    client = open_session
+    csrf = start_simulator(client)
+    receipts = [@chat, @email, @whatsapp].map do |channel|
+      send_message(client, channel, csrf, key: "opening")
+      assert_equal 202, client.response.status
+      receipt = json(client)
+      send_message(client, channel, csrf, key: "opening")
+      assert_equal receipt, json(client)
+      receipt
+    end
+    assert_equal 3, receipts.map { |receipt| receipt.fetch("case_id") }.uniq.size
+
+    chat = receipts.first
+    conversation = chat.fetch("external_conversation_id")
+    send_message(client, @chat, csrf, key: "opening", text: "Outro conteúdo")
+    assert_equal 409, client.response.status
+    send_message(client, @chat, csrf, key: "follow-up", conversation: conversation, text: "Continuo com dúvida")
+    assert_equal chat, json(client)
+    record = Attendances::SupportCase.find(chat.fetch("case_id"))
+    assert_equal 2, record.messages.count
+    assert_equal 1, record.turns.count
+
+    client.get "/api/v1/simulator/cases", params: { limit: 2 }
+    page = json(client)
+    assert WebhookV1::Contract.valid?("SimulatorCaseList", page)
+    assert_equal 2, page.fetch("items").size
+    client.get "/api/v1/simulator/cases", params: { limit: 2, cursor: page.fetch("next_cursor") }
+    assert_equal 1, json(client).fetch("items").size
+    client.get "/api/v1/simulator/cases/#{record.id}"
+    assert WebhookV1::Contract.valid?("SimulatorCase", json(client))
+    client.get "/api/v1/simulator/cases/#{record.id}/messages", params: { limit: 1 }
+    assert_equal 1, json(client).fetch("next_after_sequence")
+    client.get "/api/v1/simulator/cases/#{record.id}/messages", params: { after_sequence: 1 }
+    assert_equal "Continuo com dúvida", json(client).fetch("items").sole.fetch("text")
+  end
+
+  test "reentrega com identidade esperada mantém o recibo e impede novo caso após troca de sessão" do
+    client = open_session
+    csrf = start_simulator(client)
+    original_id = json(client).dig("user", "id")
+    assert_difference "Attendances::SupportCase.count", 1 do
+      send_message(client, @chat, csrf, key: "opening-uncertain", session_id: original_id)
+      assert_equal 202, client.response.status
+    end
+    receipt = json(client)
+    original_case = Attendances::SupportCase.find(receipt.fetch("case_id"))
+
+    assert_no_difference ["Attendances::SupportCase.count", "original_case.messages.count"] do
+      send_message(client, @chat, csrf, key: "opening-uncertain", session_id: original_id)
+      assert_equal 202, client.response.status
+      assert_equal receipt, json(client)
+    end
+
+    client.delete "/api/v1/session", headers: { "X-CSRF-Token" => csrf }
+    assert_equal 204, client.response.status
+    client.get "/api/v1/session"
+    send_message(client, @chat, json(client).fetch("csrf_token"), key: "opening-uncertain", session_id: original_id)
+    assert_equal 401, client.response.status
+    csrf = start_simulator(client)
+    new_id = json(client).dig("user", "id")
+    refute_equal original_id, new_id
+
+    assert_no_difference ["Attendances::SupportCase.count", "Attendances::ChannelEntry.count", "original_case.messages.count"] do
+      # O cookie atual trocou, mesmo se o cliente acabou de ler a identidade de origem.
+      send_message(client, @chat, csrf, key: "opening-uncertain", session_id: original_id)
+      assert_equal 409, client.response.status
+      assert_equal "simulator_session_changed", json(client).dig("error", "code")
+      send_message(client, @chat, csrf, key: "opening-uncertain", session_id: "not-a-uuid")
+      assert_equal 422, client.response.status
+      assert_equal "invalid_simulator_session_id", json(client).dig("error", "code")
+    end
+    client.get "/api/v1/simulator/cases"
+    assert_empty json(client).fetch("items")
+
+    send_message(client, @chat, csrf, key: "new-opening", text: "Novo envio", session_id: new_id)
+    assert_equal 202, client.response.status
+    new_case = Attendances::SupportCase.find(json(client).fetch("case_id"))
+    assert_equal ["Novo envio"], new_case.messages.pluck(:text)
+    assert_equal ["Dúvida sobre Pix"], original_case.messages.pluck(:text)
+  end
+
+  test "corpo canônico do simulador pode ser reentregue pelo webhook autenticado" do
+    client = open_session
+    csrf = start_simulator(client)
+    send_message(client, @chat, csrf, key: "opening")
+    assert_equal 202, client.response.status
+    receipt = json(client)
+    entry = Attendances::ChannelEntry.find_by!(channel_id: @chat.id, support_case_id: receipt.fetch("case_id"))
+    assert_equal Digest::SHA256.hexdigest(entry.body), entry.body_sha256
+
+    channel = open_session
+    secret = WebhookV1::Signature.channel_secret(@chat)
+    webhook = "/webhooks/v1/channels/#{@chat.id}/messages"
+    channel.post webhook, params: entry.body, headers: WebhookV1::Signature.headers("wrong", entry.body)
+      .merge("Content-Type" => "application/json")
+    assert_equal 401, channel.response.status
+    channel.post webhook, params: entry.body, headers: WebhookV1::Signature.headers(secret, entry.body)
+      .merge("Content-Type" => "application/json")
+    assert_equal 202, channel.response.status
+    assert_equal receipt.slice("case_id", "correlation_id"), json(channel)
+
+    changed = entry.body + " "
+    channel.post webhook, params: changed, headers: WebhookV1::Signature.headers(secret, changed)
+      .merge("Content-Type" => "application/json")
+    assert_equal 409, channel.response.status
+    assert_equal "idempotency_conflict", json(channel).dig("error", "code")
+    assert_equal 1, entry.support_case.messages.count
+    assert_equal 1, entry.support_case.turns.count
+  end
+
+  test "identidades operacional e sintética coexistem com escopos próprios" do
+    client = open_session
+    client.get "/api/v1/session"
+    client.post "/api/v1/session", params: { email: "bia@example.test", password: "test" }, as: :json,
+      headers: { "X-CSRF-Token" => json(client).fetch("csrf_token") }
+    assert_equal 200, client.response.status
+    client.get "/api/v1/simulator/cases"
+    assert_equal 401, client.response.status
+    csrf = start_simulator(client)
+    send_message(client, @whatsapp, csrf, key: "another-brand")
+    receipt = json(client)
+    client.get "/api/v1/cases/#{receipt.fetch("case_id")}"
+    assert_equal 404, client.response.status
+    client.get "/api/v1/simulator/cases/#{receipt.fetch("case_id")}"
+    assert_equal 200, client.response.status
+  end
+
+  test "catálogo paginado inclui nomes somente das marcas autorizadas" do
+    client = open_session
+    client.get "/api/v1/channels"
+    assert_equal 401, client.response.status
+    ENV["CLOUDWALK_SIMULATOR_BRANDS"] = "aurora"
+    csrf = start_simulator(client)
+
+    client.get "/api/v1/channels", params: { limit: 2 }
+    first = json(client)
+    assert WebhookV1::Contract.valid?("ChannelList", first)
+    assert_equal 2, first.fetch("items").size
+    client.get "/api/v1/channels", params: { cursor: first.fetch("next_cursor") }
+    second = json(client)
+    channels = first.fetch("items") + second.fetch("items")
+    assert_equal 3, channels.size
+    assert_equal [@aurora.name], channels.pluck("brand_name").uniq
+    assert_equal [@aurora.id], channels.pluck("brand_id").uniq
+    send_message(client, @whatsapp, csrf, key: "outside-scope")
+    assert_equal 404, client.response.status
+  end
+
+  test "catálogo explícito do simulador exige sessão sintética mesmo com sessão operacional" do
+    ENV["CLOUDWALK_SIMULATOR_BRANDS"] = "aurora"
+    client = open_session
+    client.get "/api/v1/session"
+    client.post "/api/v1/session", params: { email: "supervisor@example.test", password: "test" }, as: :json,
+      headers: { "X-CSRF-Token" => json(client).fetch("csrf_token") }
+    assert_equal 200, client.response.status
+    client.get "/api/v1/channels", params: { audience: "simulator" }
+    assert_equal 401, client.response.status
+
+    start_simulator(client)
+    identity = BrowserAccess::Session.find(json(client).dig("user", "id"))
+    client.get "/api/v1/channels", params: { audience: "simulator" }
+    assert_equal 200, client.response.status
+    assert_equal [@aurora.name], json(client).fetch("items").pluck("brand_name").uniq
+    client.get "/api/v1/channels"
+    assert_equal 200, client.response.status
+    assert_equal [@aurora.name], json(client).fetch("items").pluck("brand_name").uniq
+
+    ["staff", "", ["simulator"]].each do |invalid|
+      client.get "/api/v1/channels", params: { audience: invalid }
+      assert_equal 422, client.response.status
+      assert_equal "invalid_query", json(client).dig("error", "code")
+    end
+
+    identity.update!(expires_at: 1.second.ago)
+    client.get "/api/v1/channels", params: { audience: "simulator" }
+    assert_equal 401, client.response.status
+    assert_equal "unauthenticated", json(client).dig("error", "code")
+    refute json(client).key?("items")
+
+    client.get "/api/v1/channels"
+    assert_equal 200, client.response.status
+    assert_equal [@aurora.name, @horizonte.name].sort, json(client).fetch("items").pluck("brand_name").uniq.sort
+  end
+
+  private
+
+  def start_simulator(client, csrf: nil)
+    unless csrf
+      client.get "/api/v1/session"
+      csrf = json(client).fetch("csrf_token")
+    end
+    client.post "/api/v1/simulator/session", headers: { "X-CSRF-Token" => csrf }
+    assert_equal 201, client.response.status
+    assert_equal "simulator", json(client).dig("user", "role")
+    json(client).fetch("csrf_token")
+  end
+
+  def send_message(client, channel, csrf, key:, text: "Dúvida sobre Pix", conversation: nil, session_id: nil)
+    client.post "/api/v1/simulator/channels/#{channel.id}/messages", as: :json,
+      params: { text: text, category: "pix", priority: "basic", external_conversation_id: conversation }.compact,
+      headers: { "X-CSRF-Token" => csrf, "Idempotency-Key" => key, "X-Simulator-Session-Id" => session_id }.compact
+  end
+
+  def json(client)
+    client.response.parsed_body
+  end
+end

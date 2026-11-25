@@ -1,0 +1,169 @@
+import { useCallback, useState, type ReactNode } from 'react'
+import { configuration } from '../api/configuration'
+import type { CaseFilters, StaffCase, StaffCommand } from '../api/contract'
+import { readPages } from '../api/pagination'
+import { staff } from '../api/staff'
+import { ConfigurationForm } from '../configuration/ConfigurationForm'
+import type { Priority } from '../simulator/contract'
+import { categoryLabels, formatTimestamp, priorityLabels } from '../simulator/presentation'
+import { useResource } from '../simulator/useResource'
+import { usePagedCases } from '../usePagedCases'
+
+type RunCommand = (command: StaffCommand) => Promise<unknown>
+
+function ActionDisclosure({ title, children }: { title: string; children: ReactNode }) {
+  const [visited, setVisited] = useState(false)
+  return <details className="configuration-audit" onToggle={event => {
+    if (event.currentTarget.open) setVisited(true)
+  }}>
+    <summary>{title}</summary>
+    {visited && children}
+  </details>
+}
+
+function Transfer({ detail, expectedVersion, revision, run }: {
+  detail: StaffCase; expectedVersion: number; revision: number; run: RunCommand
+}) {
+  const [queueId, setQueueId] = useState(detail.queue_id)
+  const loadQueues = useCallback(() => readPages(cursor => configuration.queues(detail.brand_id, cursor)), [detail.brand_id])
+  const queues = useResource(loadQueues, revision)
+  const active = queues.data?.items.filter(queue => queue.active) ?? []
+  const queue = active.find(item => item.id === queueId)
+
+  return <>
+    {queues.error && <p role="alert">{queues.error}</p>}
+    <label>Fila de destino
+      <select value={queueId} onChange={event => setQueueId(event.target.value)} disabled={!active.length}>
+        {!queue && <option value={queueId}>Selecione uma fila</option>}
+        {active.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
+      </select>
+    </label>
+    {queue && <TransferForm key={queue.id} brandId={detail.brand_id} expectedVersion={expectedVersion}
+      queue={queue.id} revision={revision} run={run} />}
+  </>
+}
+
+function TransferForm({ brandId, expectedVersion, queue, revision, run }: {
+  brandId: string; expectedVersion: number; queue: string; revision: number; run: RunCommand
+}) {
+  const load = useCallback(() => readPages(async cursor => {
+    const page = await configuration.queueAnalysts(brandId, queue, cursor)
+    return { ...page, items: page.items.map(person => ({ ...person, id: person.user_id })) }
+  }), [brandId, queue])
+  const candidates = useResource(load, revision)
+  return <ConfigurationForm submit="Transferir" onSave={data => run({
+    type: 'transfer', expected_version: expectedVersion, reason: String(data.get('reason')).trim(),
+    destination_queue_id: queue, destination_assignee_id: String(data.get('assignee')) || null,
+  })}>
+    {candidates.error && <p role="alert">{candidates.error}</p>}
+    <label>Responsável de destino
+      <select name="assignee" defaultValue="">
+        <option value="">Distribuição automática</option>
+        {candidates.data?.items.map(person => <option key={person.attendant_id} value={person.attendant_id}>{person.name}</option>)}
+      </select>
+    </label>
+    <label>Motivo da transferência <input name="reason" required /></label>
+  </ConfigurationForm>
+}
+
+function CaseAudit({ id, revision }: { id: string; revision: number }) {
+  const load = useCallback((cursor?: string) => staff.audit(id, cursor), [id])
+  const audit = usePagedCases(load, revision)
+  return <>
+    {audit.loading && !audit.data && <p role="status">Carregando auditoria…</p>}
+    {audit.error && <p role="alert">{audit.error}</p>}
+    {audit.data?.items.length === 0 && <p className="muted">Nenhum evento registrado.</p>}
+    <ul>{audit.data?.items.map(item => <li key={item.id}>
+      <time dateTime={item.occurred_at}>{formatTimestamp(item.occurred_at)}</time> · {item.type}
+      {item.reason && <p>{item.reason}</p>}
+      {item.routing && <p>Fila {item.routing.queue_id} · {item.routing.rule_id
+        ? `Regra ${item.routing.rule_id}, versão ${item.routing.rule_version}` : 'Fila padrão'}</p>}
+    </li>)}</ul>
+    {audit.data?.next_cursor && <button className="secondary" disabled={audit.loading} onClick={audit.loadMore}>Carregar mais eventos</button>}
+  </>
+}
+
+function SupervisorForms({ detail, filters, expectedVersion, revision, run }: {
+  detail: StaffCase; filters: CaseFilters | null; expectedVersion: number; revision: number; run: RunCommand
+}) {
+  const [force, setForce] = useState(false)
+  const categories = filters?.brands.find(brand => brand.id === detail.brand_id)?.categories ??
+    Object.entries(categoryLabels).map(([key, name]) => ({ key, name, active: true }))
+  const active = categories.filter(category => category.active)
+  const canTransfer = ['waiting_human', 'human_active', 'waiting_customer', 'waiting_resumption'].includes(detail.status)
+  const failed = detail.status === 'ai_active' && detail.integration_status === 'failed'
+
+  return <>
+    {failed && <details open className="configuration-audit">
+      <summary>Recuperar integração da IA</summary>
+      <ConfigurationForm submit={force ? 'Encaminhar para humano' : 'Tentar IA novamente'} onSave={data => {
+        const reason = String(data.get('reason')).trim()
+        return run(force
+          ? { type: 'force_handoff', expected_version: expectedVersion, reason, summary: String(data.get('summary')).trim() }
+          : { type: 'retry_agent', expected_version: expectedVersion, reason })
+      }}>
+        <label>Ação de recuperação
+          <select value={force ? 'handoff' : 'retry'} onChange={event => setForce(event.target.value === 'handoff')}>
+            <option value="retry">Tentar IA novamente</option>
+            <option value="handoff">Forçar encaminhamento humano</option>
+          </select>
+        </label>
+        <label>Motivo da recuperação <input name="reason" required /></label>
+        {force && <label>Resumo para o analista <textarea name="summary" required /></label>}
+      </ConfigurationForm>
+    </details>}
+    {detail.status !== 'resolved' && <ActionDisclosure title="Corrigir classificação">
+      <ConfigurationForm submit="Aplicar correção" onSave={data => run({
+          type: 'classification', expected_version: expectedVersion, reason: String(data.get('reason')).trim(),
+          category: String(data.get('category')), priority: String(data.get('priority')) as Priority,
+        })}>
+        <label>Categoria revisada
+          <select name="category" required defaultValue={active.some(item => item.key === detail.classification.category) ? detail.classification.category! : ''}>
+            <option value="">Selecione uma categoria</option>
+            {active.map(item => <option key={item.key} value={item.key}>{item.name}</option>)}
+          </select>
+        </label>
+        <label>Prioridade revisada
+          <select name="priority" required defaultValue={detail.classification.priority ?? ''}>
+            <option value="">Selecione uma prioridade</option>
+            {Object.entries(priorityLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+        </label>
+        <label>Motivo da correção <input name="reason" required /></label>
+      </ConfigurationForm>
+    </ActionDisclosure>}
+    {canTransfer && <ActionDisclosure title="Transferir atendimento">
+      <Transfer detail={detail} expectedVersion={expectedVersion} revision={revision} run={run} />
+    </ActionDisclosure>}
+  </>
+}
+
+export function SupervisorActions({ detail, filters, revision, disabled, run }: {
+  detail: StaffCase; filters: CaseFilters | null; revision: number; disabled: boolean
+  run: (command: StaffCommand) => Promise<boolean>
+}) {
+  const [auditOpen, setAuditOpen] = useState(false)
+  const [draftVersion, setDraftVersion] = useState<number | null>(null)
+  const expectedVersion = draftVersion ?? detail.version
+  const stale = expectedVersion !== detail.version
+
+  return <section aria-label="Ações de supervisão">
+    {stale && <div>
+      <p role="status">O atendimento mudou desde o início do rascunho.</p>
+      <button type="button" className="secondary" disabled={disabled} onClick={() => setDraftVersion(null)}>
+        Descartar rascunho e revisar atendimento
+      </button>
+    </div>}
+    <fieldset className="supervisor-action-fields" disabled={disabled || stale}
+      onChange={() => setDraftVersion(previous => previous ?? expectedVersion)}>
+      <SupervisorForms key={expectedVersion} detail={detail} filters={filters} expectedVersion={expectedVersion}
+        revision={revision} run={async command => {
+          if (!disabled && !stale && await run(command)) setDraftVersion(null)
+        }} />
+    </fieldset>
+    <details className="configuration-audit" onToggle={event => setAuditOpen(event.currentTarget.open)}>
+      <summary>Auditoria do atendimento</summary>
+      {auditOpen && <CaseAudit id={detail.id} revision={revision} />}
+    </details>
+  </section>
+}

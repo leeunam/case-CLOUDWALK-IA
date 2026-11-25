@@ -1,0 +1,130 @@
+{
+  "task": "C05-R3/financial-receipts",
+  "run_id": "luna-a23fe8ecda5e4a759cc3436f95dda867",
+  "accounted_usd": "0.02869232",
+  "cap_usd": "10",
+  "rows": [
+    {
+      "run_id": "luna-a23fe8ecda5e4a759cc3436f95dda867",
+      "case_id": "jev-004",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.0003424",
+      "receipt": "gateway:gen-1795549842-GgZ4beBllANfPhDY6Ctr",
+      "prior_observed": null,
+      "prior_receipt": null,
+      "gateway_usage": {
+        "credits": "0.03424",
+        "converted_credits_usd": "0.0003424"
+      },
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "detail": null,
+      "created_at": "2026-11-24 19:50:41"
+    },
+    {
+      "run_id": "luna-a23fe8ecda5e4a759cc3436f95dda867",
+      "case_id": "jev-013",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.0003406",
+      "receipt": "gateway:gen-1795549843-FvFdvDtmbC8YKEIxduPG",
+      "prior_observed": null,
+      "prior_receipt": null,
+      "gateway_usage": {
+        "credits": "0.03406",
+        "converted_credits_usd": "0.0003406"
+      },
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "detail": null,
+      "created_at": "2026-11-24 19:50:42"
+    },
+    {
+      "run_id": "luna-a23fe8ecda5e4a759cc3436f95dda867",
+      "case_id": "jev-002",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.0003417",
+      "receipt": "gateway:gen-1795549844-HL1jKJmJaEZZIXJnvBft",
+      "prior_observed": null,
+      "prior_receipt": null,
+      "gateway_usage": {
+        "credits": "0.03417",
+        "converted_credits_usd": "0.0003417"
+      },
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "detail": null,
+      "created_at": "2026-11-24 19:50:44"
+    },
+    {
+      "run_id": "luna-a23fe8ecda5e4a759cc3436f95dda867",
+      "case_id": "jev-023",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00034305",
+      "receipt": "gateway:gen-1795549847-duFdxb0J3MyTBaq2g6as",
+      "prior_observed": null,
+      "prior_receipt": null,
+      "gateway_usage": {
+        "credits": "0.034305",
+        "converted_credits_usd": "0.00034305"
+      },
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "detail": null,
+      "created_at": "2026-11-24 19:50:46"
+    },
+    {
+      "run_id": "luna-a23fe8ecda5e4a759cc3436f95dda867",
+      "case_id": "jev-006",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00035075",
+      "receipt": "gateway:gen-1795549848-8c9g8l7iotZDqUdSUEOr",
+      "prior_observed": null,
+      "prior_receipt": null,
+      "gateway_usage": {
+        "credits": "0.035075",
+        "converted_credits_usd": "0.00035075"
+      },
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "detail": null,
+      "created_at": "2026-11-24 19:50:47"
+    },
+    {
+      "run_id": "luna-a23fe8ecda5e4a759cc3436f95dda867",
+      "case_id": "jev-039",
+      "reserved": "1.239",
+      "state": "settled",
+      "observed": "0.00009977",
+      "receipt": "gateway:gen-1795549849-BAxOqIYHpnNcSNL40f5R",
+      "prior_observed": null,
+      "prior_receipt": null,
+      "gateway_usage": {
+        "credits": "0.009977",
+        "converted_credits_usd": "0.00009977"
+      },
+      "gateway_observed": null,
+      "gateway_receipt": null,
+      "gateway_pending": null,
+      "financial_expired": 0,
+      "detail": null,
+      "created_at": "2026-11-24 19:50:49"
+    }
+  ],
+  "receipt_corrections": [],
+  "source": "Filtered snapshot of existing schema4 account; no mutation/reconciliation/API call."
+}

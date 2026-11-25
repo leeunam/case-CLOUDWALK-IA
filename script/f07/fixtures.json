@@ -1,0 +1,19 @@
+{
+  "channel": {
+    "external_customer_id": "f07-cliente-sintetico",
+    "text": "Qual é o prazo de confirmação do Pix?",
+    "category": "pix",
+    "priority": "basic"
+  },
+  "handoff": {
+    "text": "A maquininha parou de funcionar.",
+    "category": "terminal",
+    "priority": "advanced"
+  },
+  "simulator": {
+    "text": "Qual é o prazo de confirmação do Pix?",
+    "category": "pix",
+    "priority": "basic"
+  },
+  "human_reply": "Recebi o contexto da maquininha e iniciei a análise."
+}

@@ -1,0 +1,65 @@
+{
+  "schema": "../schemas/v1.json#/$defs/ConfigurationAuditList",
+  "data": {
+    "items": [
+      {
+        "brand_id": "22222222-2222-4222-8222-222222222222",
+        "actor": {
+          "type": "supervisor",
+          "id": "00000000-0000-4000-8000-000000000107"
+        },
+        "resource_type": "routing_rule",
+        "resource_id": "00000000-0000-4000-8000-000000000801",
+        "id": "00000000-0000-4000-8000-000000000852",
+        "correlation_id": "00000000-0000-4000-8000-000000000853",
+        "version": 2,
+        "occurred_at": "2026-11-17T12:05:00Z",
+        "before": {
+          "id": "00000000-0000-4000-8000-000000000801",
+          "brand_id": "22222222-2222-4222-8222-222222222222",
+          "active": true,
+          "position": 1,
+          "queue_id": "00000000-0000-4000-8000-000000000912",
+          "category": "terminal",
+          "priority": null,
+          "version": 1
+        },
+        "after": {
+          "id": "00000000-0000-4000-8000-000000000801",
+          "brand_id": "22222222-2222-4222-8222-222222222222",
+          "active": true,
+          "position": 1,
+          "queue_id": "00000000-0000-4000-8000-000000000912",
+          "category": "terminal",
+          "priority": "advanced",
+          "version": 2
+        }
+      },
+      {
+        "brand_id": "22222222-2222-4222-8222-222222222222",
+        "actor": {
+          "type": "supervisor",
+          "id": "00000000-0000-4000-8000-000000000107"
+        },
+        "resource_type": "routing_rule",
+        "resource_id": "00000000-0000-4000-8000-000000000801",
+        "id": "00000000-0000-4000-8000-000000000850",
+        "correlation_id": "00000000-0000-4000-8000-000000000851",
+        "version": 1,
+        "occurred_at": "2026-11-17T12:00:00Z",
+        "before": null,
+        "after": {
+          "id": "00000000-0000-4000-8000-000000000801",
+          "brand_id": "22222222-2222-4222-8222-222222222222",
+          "active": true,
+          "position": 1,
+          "queue_id": "00000000-0000-4000-8000-000000000912",
+          "category": "terminal",
+          "priority": null,
+          "version": 1
+        }
+      }
+    ],
+    "next_cursor": null
+  }
+}

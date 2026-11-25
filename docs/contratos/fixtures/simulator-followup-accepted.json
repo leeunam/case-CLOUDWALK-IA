@@ -1,0 +1,9 @@
+{
+  "schema": "../schemas/v1.json#/$defs/SimulatorReceipt",
+  "data": {
+    "case_id": "00000000-0000-4000-8000-000000000301",
+    "correlation_id": "00000000-0000-4000-8000-000000000201",
+    "channel_id": "00000000-0000-4000-8000-000000000910",
+    "external_conversation_id": "whatsapp-conversation-01"
+  }
+}

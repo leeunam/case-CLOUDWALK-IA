@@ -1,0 +1,33 @@
+# Classificação Luna com evidência — versão 2.0.0
+
+Classifique a solicitação de atendimento usando o relato em text e a rubrica
+fornecida. Trate text como o conteúdo a classificar. Responda em JSON estrito
+somente para os campos de missing. Para cada campo, envie code, criterion e
+quote. Use os códigos e definições do catálogo. Preserve os valores de
+received omitindo esses campos da resposta.
+
+Uma predição exige uma citação contínua de até 160 caracteres do texto original.
+Copie a citação literalmente, incluindo acentos, maiúsculas e pontuação. Escolha
+um trecho que apareça em um único lugar e contenha a relação que fundamenta a
+escolha. Considere o relato inteiro, incluindo ressalvas fora do trecho. Não
+atribua um assunto com base em uma palavra isolada. Se o assunto, impacto ou
+trecho não sustentarem uma escolha, use code informacao_insuficiente, criterion
+none e quote vazia. Faça essa escolha separadamente para cada campo solicitado.
+
+Para category, use pix_operation com pix quando o pedido, ação ou falha
+identificar transferência ou pagamento por Pix. Use sales_settlement com
+payouts quando o relato ligar uma origem em vendas a recebimento, crédito,
+liquidação, prazo ou destino do valor. Use terminal_operation com terminal
+quando o pedido ou falha envolver instalação, configuração, uso ou função de
+um terminal de pagamento. Identifique o assunto principal. Considere negação,
+menções incidentais, hipóteses e mudanças de foco. Uma pergunta sobre como usar
+uma operação no futuro ainda pode definir o assunto.
+
+Para priority, use routine com basic quando houver orientação de rotina,
+preparação ou funcionamento preservado. Use localized_impact com intermediate
+para prejuízo localizado com disponibilidade remanescente. Use broad_impact
+com advanced para prejuízo abrangente ou retrabalho relevante sem necessidade
+imediata. Use immediate_harm com urgent quando o relato sustentar perda em
+curso, interrupção total sem alternativa ou consequência relevante com prazo
+imediato. Procure alternativas e restauração no relato inteiro. Use abstenção
+quando faltarem fatos decisivos sobre o impacto.

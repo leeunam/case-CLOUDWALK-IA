@@ -1,0 +1,21 @@
+{
+  "model": "knowledgator/gliclass-multilang-mini",
+  "revision": "0bd888b6c3ef9fca5f0a9d407bddfbbc7623486b",
+  "license": "Apache-2.0",
+  "files": {
+    "model.safetensors": 567503348,
+    "config.json": 2098,
+    "tokenizer.json": 16336328,
+    "tokenizer_config.json": 20444,
+    "special_tokens_map.json": 970,
+    "spm.model": 4305025,
+    "added_tokens.json": 92
+  },
+  "snapshot_bytes": 588168305,
+  "weights_sha256": "440d8f17603d3e6f7d13a4fe7ffa7e9ef2c5a2581cceccb2f643334b92c8aea8",
+  "first_population": true,
+  "snapshot_download_or_reuse_ms": 501882.4740870005,
+  "public_metadata_ms": 365.5890099998942,
+  "network_transfer_bytes": null,
+  "api_usd": 0
+}

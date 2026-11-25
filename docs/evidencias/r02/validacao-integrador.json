@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "task": "R02",
+  "date": "2026-11-23",
+  "code_revision": "49242d0a276f2926acdb73cca107cf211376cf49",
+  "checks": [
+    {
+      "command": "rtk proxy python3 -B -m unittest discover -s script/f08/load -v",
+      "tests": 49,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "elapsed_seconds": 6.343,
+      "exit_code": 0
+    }
+  ],
+  "review": {
+    "spec_compliance": "approved",
+    "quality": "approved",
+    "round": 1,
+    "findings_addressed": 3
+  },
+  "historical_comparison": {
+    "artifact": "comparacao-revisao-1.json",
+    "runs": 7,
+    "reconciliation_rows": 12600,
+    "preserved": true,
+    "original_artifacts_modified": false
+  }
+}

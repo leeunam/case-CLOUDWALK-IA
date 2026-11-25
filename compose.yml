@@ -1,0 +1,129 @@
+name: ${COMPOSE_PROJECT_NAME:-cloudwalk}
+
+x-backend: &backend
+  build: ./backend
+  environment: &backend-environment
+    RAILS_ENV: development
+    POSTGRES_HOST: db
+    POSTGRES_USER: ${POSTGRES_USER:-cloudwalk}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cloudwalk_local}
+    KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    CLOUDWALK_SIMULATOR_BRANDS: ${CLOUDWALK_SIMULATOR_BRANDS:-aurora,horizonte}
+  volumes:
+    - ./backend:/app
+    - ./script:/workspace/script:ro
+    - ./docs/contratos:/workspace/docs/contratos:ro
+
+services:
+  db:
+    image: postgres:17-alpine@sha256:a77aa70e641402a21411b92b721c58d10f23b50ae5fdd2333efd22d166e1e5f7
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cloudwalk}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cloudwalk_local}
+      POSTGRES_DB: cloudwalk_development
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  kafka:
+    image: apache/kafka:4.4.0@sha256:833b867a9585a141da455dc2b57431c65cbccb27f11c91f694444cca9f777e0f
+    environment:
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_HEAP_OPTS: -Xms256m -Xmx512m
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+      - ./script:/workspace/script:ro
+    healthcheck:
+      test: ["CMD", "/opt/kafka/bin/kafka-topics.sh", "--bootstrap-server", "kafka:9092", "--list"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 15s
+
+  kafka_setup:
+    image: apache/kafka:4.4.0@sha256:833b867a9585a141da455dc2b57431c65cbccb27f11c91f694444cca9f777e0f
+    entrypoint: ["/bin/bash", "/workspace/script/setup_kafka.sh"]
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_RETENTION_MS: ${KAFKA_RETENTION_MS:-604800000}
+    volumes:
+      - ./script:/workspace/script:ro
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  db_setup:
+    <<: *backend
+    command: ["bundle", "exec", "rails", "db:prepare"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    <<: *backend
+    command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-P", "/tmp/cloudwalk-server.pid"]
+    ports:
+      - "127.0.0.1:${API_PORT:-3000}:3000"
+    depends_on:
+      db_setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - ruby
+        - -rnet/http
+        - -e
+        - "exit(Net::HTTP.get_response(URI('http://localhost:3000/api/v1/health')).code == '200' ? 0 : 1)"
+      interval: 5s
+      timeout: 5s
+      retries: 15
+
+  worker:
+    <<: *backend
+    environment:
+      <<: *backend-environment
+      CLOUDWALK_JEV_MODE: ${CLOUDWALK_JEV_MODE:-disabled}
+      CLOUDWALK_JEV_MODEL: ${CLOUDWALK_JEV_MODEL:-jev-latest}
+      TYPESAFE_API_KEY: ${TYPESAFE_API_KEY:-}
+    command: ["bundle", "exec", "ruby", "bin/jobs"]
+    depends_on:
+      db_setup:
+        condition: service_completed_successfully
+
+  web:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:${WEB_PORT:-5173}:5173"
+    depends_on:
+      api:
+        condition: service_healthy
+      kafka_setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:5173').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+
+volumes:
+  postgres_data:
+  kafka_data:

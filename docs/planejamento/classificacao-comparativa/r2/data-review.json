@@ -1,0 +1,408 @@
+{
+  "task": "C05-R2/Task 2",
+  "status": "approved_exploratory_ai",
+  "spec_verdict": "pass",
+  "quality_verdict": "pass",
+  "dataset_sha256": "17f5bae372983f90aa1956d0d583db25483a77a3ff35e4f1041ad4d51b897af9",
+  "authorship_sha256": "e4ee3ff880c230dff7b53136c64e6db30b4c96e774d3f695663786793f3495bc",
+  "base_commit": "c00ac5431630c92d30349c13529d5071ad9879b4",
+  "dataset_commit": "9648208b47112fa87a8e584bb30e2779f2449ed8",
+  "origin": "exploratory_ai_review",
+  "exploratory_ai": true,
+  "human_approval": false,
+  "author_agent": "/root/r2_autor_dados",
+  "reviewer_agent": "/root/r2_revisar_dados",
+  "scope": "Revisão semântica de todos os alvos por agente distinto. A conferência de similaridade tem registro separado.",
+  "references": [
+    "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
+    "script/f08/jev/catalog.json"
+  ],
+  "counts": {
+    "total": 36,
+    "agreed": 36,
+    "disputed": 0,
+    "targets": 48,
+    "classifiable": 29,
+    "review": 7,
+    "by_mask": {
+      "category": {
+        "total": 12,
+        "classifiable": 10,
+        "review": 2
+      },
+      "priority": {
+        "total": 12,
+        "classifiable": 10,
+        "review": 2
+      },
+      "both": {
+        "total": 12,
+        "classifiable": 9,
+        "review": 3
+      }
+    },
+    "insufficient_category": 5,
+    "insufficient_priority": 3,
+    "insufficient_both": 1,
+    "urgent_missing_priority": {
+      "total": 6,
+      "priority": 3,
+      "both_classifiable": 2,
+      "both_review": 1
+    },
+    "by_stratum": {
+      "rotina": 24,
+      "urgente": 5,
+      "ambiguo": 7
+    }
+  },
+  "open_disputes": [],
+  "cases": [
+    {
+      "id": "r2-001",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "terminal"
+      },
+      "basis": "Conservação de bateria de uma maquininha identificada durante armazenamento sazonal.",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-002",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "payouts"
+      },
+      "basis": "ajuste nos créditos de vendas parceladas",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-003",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "pix"
+      },
+      "basis": "chave aleatória para transferências instantâneas",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-004",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "terminal"
+      },
+      "basis": "defeito na base de recarga da maquininha",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-005",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "payouts"
+      },
+      "basis": "depósito que agrupa vendas de dois balcões",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-006",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "pix"
+      },
+      "basis": "cobrança e chave alternativa referem-se ao mesmo pagamento instantâneo",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-007",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "terminal"
+      },
+      "basis": "Uso do leitor para repartir o pagamento de uma venda entre dois cartões.",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-008",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "payouts"
+      },
+      "basis": "mudança no calendário de liquidação de vendas",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-009",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "pix"
+      },
+      "basis": "rastreio de devoluções de transferências Pix",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-010",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "terminal"
+      },
+      "basis": "falha física de visor de leitor de cartões",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-011",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "informacao_insuficiente"
+      },
+      "basis": "QR de material didático sem indicação de função de pagamento",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-012",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "informacao_insuficiente"
+      },
+      "basis": "duplicidade de registro sem identificação do que a linha representa",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-013",
+      "status": "agreed",
+      "reviewed_expected": {
+        "priority": "basic"
+      },
+      "basis": "configuração de equipamento de formação com caixas em funcionamento",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-014",
+      "status": "agreed",
+      "reviewed_expected": {
+        "priority": "urgent"
+      },
+      "basis": "Débito confirmado sem entrega do dinheiro. A passagem exige espécie para o último embarque em seis minutos, com consequência imediata para o deslocamento ao plantão.",
+      "verification": "reassessed"
+    },
+    {
+      "id": "r2-015",
+      "status": "agreed",
+      "reviewed_expected": {
+        "priority": "intermediate"
+      },
+      "basis": "conciliação manual localizada em uma filial com créditos disponíveis",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-016",
+      "status": "agreed",
+      "reviewed_expected": {
+        "priority": "advanced"
+      },
+      "basis": "maioria dos leitores afetada e reinstalações individuais, com capacidade residual suficiente",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-017",
+      "status": "agreed",
+      "reviewed_expected": {
+        "priority": "informacao_insuficiente"
+      },
+      "basis": "referência a protocolo anterior sem estado atual, impacto ou prazo",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-018",
+      "status": "agreed",
+      "reviewed_expected": {
+        "priority": "basic"
+      },
+      "basis": "orientação para treinar substituto com recebimentos normais",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-019",
+      "status": "agreed",
+      "reviewed_expected": {
+        "priority": "urgent"
+      },
+      "basis": "O aparelho continua soltando fumaça após desligar o carregador e está junto aos clientes. A necessidade de intervenção é atual.",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-020",
+      "status": "agreed",
+      "reviewed_expected": {
+        "priority": "intermediate"
+      },
+      "basis": "Um comprovante defeituoso bloqueia um reembolso. Os demais itens seguem para análise.",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-021",
+      "status": "agreed",
+      "reviewed_expected": {
+        "priority": "advanced"
+      },
+      "basis": "muitas concessões e conciliações individuais, com caixa para manter o serviço e próximo compromisso em dez dias",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-022",
+      "status": "agreed",
+      "reviewed_expected": {
+        "priority": "urgent"
+      },
+      "basis": "A confirmação automática em seis minutos compromete recursos da folha, e o comando para suspender falha.",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-023",
+      "status": "agreed",
+      "reviewed_expected": {
+        "priority": "intermediate"
+      },
+      "basis": "A data errada obriga conferência manual em um único caixa que continua aprovando vendas.",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-024",
+      "status": "agreed",
+      "reviewed_expected": {
+        "priority": "informacao_insuficiente"
+      },
+      "basis": "posição de um ícone sem informação sobre funcionamento, efeito ou prazo",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-025",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "pix",
+        "priority": "basic"
+      },
+      "basis": "preparo de aula sobre agendamento de Pix sem transferência atual",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-026",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "terminal",
+        "priority": "intermediate"
+      },
+      "basis": "um painel tátil falha e as teclas permitem a venda, com atraso local",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-027",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "payouts",
+        "priority": "advanced"
+      },
+      "basis": "reconstrução de créditos de onze unidades para conferência futura",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-028",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "payouts",
+        "priority": "urgent"
+      },
+      "basis": "um repasse está em andamento para uma conta que deixou de pertencer à associação",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-029",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "terminal",
+        "priority": "basic"
+      },
+      "basis": "instalação de maquininha em ponto futuro com caixas atuais preservados",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-030",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "pix",
+        "priority": "intermediate"
+      },
+      "basis": "Uma série Pix exige pagamento manual de um contrato, com funcionamento normal dos demais pagamentos.",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-031",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "terminal",
+        "priority": "advanced"
+      },
+      "basis": "A impressão de 38 maquininhas exige manutenção em rodízio durante duas semanas. Vendas e comprovante digital continuam disponíveis.",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-032",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "pix",
+        "priority": "urgent"
+      },
+      "basis": "único Pix aceito para caução falha a minutos da perda da reserva",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-033",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "payouts",
+        "priority": "intermediate"
+      },
+      "basis": "O estado de um lote de repasse já recebido impede a conciliação automática. O lançamento manual permite fechar o turno.",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-034",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "informacao_insuficiente",
+        "priority": "urgent"
+      },
+      "basis": "acesso bloqueado antes de identificar um serviço, com paralisação total sem alternativa",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-035",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "informacao_insuficiente",
+        "priority": "basic"
+      },
+      "basis": "menu de função desconhecida, preparação de treinamento e loja em funcionamento",
+      "verification": "carried_forward_byte_identical"
+    },
+    {
+      "id": "r2-036",
+      "status": "agreed",
+      "reviewed_expected": {
+        "category": "informacao_insuficiente",
+        "priority": "informacao_insuficiente"
+      },
+      "basis": "a notificação não informa a função, a consequência, o funcionamento ou o prazo",
+      "verification": "carried_forward_byte_identical"
+    }
+  ],
+  "reviewed_delta": {
+    "base_commit": "96b9dfa920756236b5e81a08e04df2a3e71a4acf",
+    "base_dataset_sha256": "4f1d712b87bbee326e3602b3fb74398558f929b08c1709b11407676869a21145",
+    "base_label_review_sha256": "90aeba5068d0135be5e122f5f1ca6597cdb1a0067b24b81e938504835fc5ca1f",
+    "review_package_sha256": "1e646e8f3fbb48c20f9b5af685b492bbf0af48961996aeb9530dcfd4d32194dd",
+    "reassessed_cases": 1,
+    "carried_forward_cases": 35,
+    "reassessed_targets": 1,
+    "carried_forward_targets": 47
+  }
+}

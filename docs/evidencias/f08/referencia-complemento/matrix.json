@@ -1,0 +1,602 @@
+[
+  {
+    "run_id": "f08-reference-1795208792430-8b61b6-01",
+    "parameters": {
+      "scenario": "reference",
+      "ordinal": 1,
+      "seed": 8026,
+      "stages": [
+        [
+          5,
+          300
+        ]
+      ],
+      "observe_seconds": 120,
+      "vus": 50,
+      "fault_after_seconds": null,
+      "fault_seconds": null,
+      "chat": null,
+      "run_id": "f08-reference-1795208792430-8b61b6-01"
+    },
+    "state": "aprovado",
+    "reason": null,
+    "cleanup": "concluída",
+    "goals": {
+      "p95_aceite_ate_500_ms": true,
+      "aceite_inicial_minimo_99_pct_do_plano": true,
+      "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+      "escoamento_na_janela": true,
+      "todos_segundos_turnos_enviados_e_concluidos": true,
+      "jev_sem_solicitacoes_ou_tentativas": true
+    },
+    "initial": {
+      "planned": 1500,
+      "offered": 1500,
+      "http_202": 1500,
+      "accepted_with_ids": 1500,
+      "acceptance_of_planned": 1.0,
+      "acceptance_of_offered": 1.0,
+      "non_202": 0,
+      "latency_accept": {
+        "unit": "ms",
+        "n": 1500,
+        "p50": 80,
+        "p95": 142
+      },
+      "latency_persisted": {
+        "unit": "ms",
+        "n": 1500,
+        "p50": 312.594970703125,
+        "p95": 433.05908203125
+      },
+      "negative_clock_deltas": 0,
+      "statuses": {
+        "202": 1500
+      },
+      "error_codes": {
+        "0": 1500
+      },
+      "timeouts": 0,
+      "states": {
+        "concluído": 1500
+      }
+    },
+    "followups": {
+      "planned": 300,
+      "offered": 300,
+      "http_202": 300,
+      "accepted_with_ids": 300,
+      "acceptance_of_planned": 1.0,
+      "acceptance_of_offered": 1.0,
+      "non_202": 0,
+      "latency_accept": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 81.357054,
+        "p95": 159.667586
+      },
+      "latency_persisted": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 337.947021484375,
+        "p95": 477.94189453125
+      },
+      "negative_clock_deltas": 0,
+      "statuses": {
+        "202": 300
+      },
+      "error_codes": {},
+      "timeouts": 0,
+      "states": {
+        "concluído": 300
+      },
+      "unissued_reasons": {},
+      "send_delay_after_target": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 150.27099609375,
+        "p95": 260.89794921875
+      },
+      "visibility_observation_delay": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 166.762939453125,
+        "p95": 287.912109375
+      }
+    },
+    "rates": {
+      "arrival_seconds": 300,
+      "offered_initial_per_s": 5.0,
+      "accepted_initial_per_s": 5.0
+    },
+    "completions": {
+      "observation_seconds_including_load": 420.0,
+      "ai_turns_in_window": 1800,
+      "resolved_cases_in_window": 300,
+      "ai_turns_per_s": 4.285714285714286,
+      "resolved_cases_per_s": 0.7142857142857143
+    },
+    "outage": null,
+    "integrity": {
+      "confirmed_losses": 0,
+      "duplicated_effect_identities": 0,
+      "persisted_without_http_202": 0,
+      "not_reconciled_http_202": 0
+    },
+    "chat": null,
+    "human": null,
+    "observed_failures": []
+  },
+  {
+    "run_id": "f08-reference-1795208792430-8b61b6-02",
+    "parameters": {
+      "scenario": "reference",
+      "ordinal": 2,
+      "seed": 8026,
+      "stages": [
+        [
+          5,
+          300
+        ]
+      ],
+      "observe_seconds": 120,
+      "vus": 50,
+      "fault_after_seconds": 60,
+      "fault_seconds": 30,
+      "chat": null,
+      "run_id": "f08-reference-1795208792430-8b61b6-02"
+    },
+    "state": "aprovado",
+    "reason": null,
+    "cleanup": "concluída",
+    "goals": {
+      "p95_aceite_ate_500_ms": true,
+      "aceite_inicial_minimo_99_pct_do_plano": true,
+      "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+      "escoamento_na_janela": true,
+      "todos_segundos_turnos_enviados_e_concluidos": true,
+      "jev_sem_solicitacoes_ou_tentativas": true
+    },
+    "initial": {
+      "planned": 1500,
+      "offered": 1500,
+      "http_202": 1500,
+      "accepted_with_ids": 1500,
+      "acceptance_of_planned": 1.0,
+      "acceptance_of_offered": 1.0,
+      "non_202": 0,
+      "latency_accept": {
+        "unit": "ms",
+        "n": 1500,
+        "p50": 72,
+        "p95": 121
+      },
+      "latency_persisted": {
+        "unit": "ms",
+        "n": 1500,
+        "p50": 312.197021484375,
+        "p95": 31753.946044921875
+      },
+      "negative_clock_deltas": 0,
+      "statuses": {
+        "202": 1500
+      },
+      "error_codes": {
+        "0": 1500
+      },
+      "timeouts": 0,
+      "states": {
+        "concluído": 1500
+      }
+    },
+    "followups": {
+      "planned": 300,
+      "offered": 300,
+      "http_202": 300,
+      "accepted_with_ids": 300,
+      "acceptance_of_planned": 1.0,
+      "acceptance_of_offered": 1.0,
+      "non_202": 0,
+      "latency_accept": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 70.571982,
+        "p95": 143.896468
+      },
+      "latency_persisted": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 325.8798828125,
+        "p95": 5187.041015625
+      },
+      "negative_clock_deltas": 0,
+      "statuses": {
+        "202": 300
+      },
+      "error_codes": {},
+      "timeouts": 0,
+      "states": {
+        "concluído": 300
+      },
+      "unissued_reasons": {},
+      "send_delay_after_target": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 138.635009765625,
+        "p95": 253.748046875
+      },
+      "visibility_observation_delay": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 141.321044921875,
+        "p95": 288.6259765625
+      }
+    },
+    "rates": {
+      "arrival_seconds": 300,
+      "offered_initial_per_s": 5.0,
+      "accepted_initial_per_s": 5.0
+    },
+    "completions": {
+      "observation_seconds_including_load": 420.0,
+      "ai_turns_in_window": 1800,
+      "resolved_cases_in_window": 300,
+      "ai_turns_per_s": 4.285714285714286,
+      "resolved_cases_per_s": 0.7142857142857143
+    },
+    "outage": {
+      "stop_observed_at_ms": 1795209337172.589,
+      "start_observed_at_ms": 1795209367583.3372,
+      "broker_ready_observed_ms": 1795209370966,
+      "outage_to_ready_ms": 33793.410888671875,
+      "process_down_ms": 30410.748046875,
+      "drained_sample_ms": 1795209407088,
+      "drain_after_readiness_ms": 36122,
+      "initiated_while_unavailable_or_recovering": {
+        "planned": 169,
+        "offered": 169,
+        "http_202": 169,
+        "accepted_with_ids": 169,
+        "acceptance_of_planned": 1.0,
+        "acceptance_of_offered": 1.0,
+        "non_202": 0,
+        "latency_accept": {
+          "unit": "ms",
+          "n": 169,
+          "p50": 70,
+          "p95": 99
+        },
+        "latency_persisted": {
+          "unit": "ms",
+          "n": 169,
+          "p50": 29971.1220703125,
+          "p95": 47200.756103515625
+        },
+        "negative_clock_deltas": 0,
+        "statuses": {
+          "202": 169
+        },
+        "error_codes": {
+          "0": 169
+        },
+        "timeouts": 0,
+        "states": {
+          "concluído": 169
+        }
+      }
+    },
+    "integrity": {
+      "confirmed_losses": 0,
+      "duplicated_effect_identities": 0,
+      "persisted_without_http_202": 0,
+      "not_reconciled_http_202": 0
+    },
+    "chat": null,
+    "human": null,
+    "observed_failures": []
+  },
+  {
+    "run_id": "f08-reference-1795208792430-8b61b6-03",
+    "parameters": {
+      "scenario": "reference",
+      "ordinal": 3,
+      "seed": 8026,
+      "stages": [
+        [
+          5,
+          300
+        ]
+      ],
+      "observe_seconds": 120,
+      "vus": 50,
+      "fault_after_seconds": null,
+      "fault_seconds": null,
+      "chat": null,
+      "run_id": "f08-reference-1795208792430-8b61b6-03"
+    },
+    "state": "aprovado",
+    "reason": null,
+    "cleanup": "concluída",
+    "goals": {
+      "p95_aceite_ate_500_ms": true,
+      "aceite_inicial_minimo_99_pct_do_plano": true,
+      "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+      "escoamento_na_janela": true,
+      "todos_segundos_turnos_enviados_e_concluidos": true,
+      "jev_sem_solicitacoes_ou_tentativas": true
+    },
+    "initial": {
+      "planned": 1500,
+      "offered": 1500,
+      "http_202": 1500,
+      "accepted_with_ids": 1500,
+      "acceptance_of_planned": 1.0,
+      "acceptance_of_offered": 1.0,
+      "non_202": 0,
+      "latency_accept": {
+        "unit": "ms",
+        "n": 1500,
+        "p50": 99,
+        "p95": 145
+      },
+      "latency_persisted": {
+        "unit": "ms",
+        "n": 1500,
+        "p50": 332.0791015625,
+        "p95": 487.615966796875
+      },
+      "negative_clock_deltas": 0,
+      "statuses": {
+        "202": 1500
+      },
+      "error_codes": {
+        "0": 1500
+      },
+      "timeouts": 0,
+      "states": {
+        "concluído": 1500
+      }
+    },
+    "followups": {
+      "planned": 300,
+      "offered": 300,
+      "http_202": 300,
+      "accepted_with_ids": 300,
+      "acceptance_of_planned": 1.0,
+      "acceptance_of_offered": 1.0,
+      "non_202": 0,
+      "latency_accept": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 98.025101,
+        "p95": 179.547772
+      },
+      "latency_persisted": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 356.722900390625,
+        "p95": 505.193115234375
+      },
+      "negative_clock_deltas": 0,
+      "statuses": {
+        "202": 300
+      },
+      "error_codes": {},
+      "timeouts": 0,
+      "states": {
+        "concluído": 300
+      },
+      "unissued_reasons": {},
+      "send_delay_after_target": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 142.68310546875,
+        "p95": 258.318115234375
+      },
+      "visibility_observation_delay": {
+        "unit": "ms",
+        "n": 300,
+        "p50": 178.946044921875,
+        "p95": 308.675048828125
+      }
+    },
+    "rates": {
+      "arrival_seconds": 300,
+      "offered_initial_per_s": 5.0,
+      "accepted_initial_per_s": 5.0
+    },
+    "completions": {
+      "observation_seconds_including_load": 420.0,
+      "ai_turns_in_window": 1800,
+      "resolved_cases_in_window": 300,
+      "ai_turns_per_s": 4.285714285714286,
+      "resolved_cases_per_s": 0.7142857142857143
+    },
+    "outage": null,
+    "integrity": {
+      "confirmed_losses": 0,
+      "duplicated_effect_identities": 0,
+      "persisted_without_http_202": 0,
+      "not_reconciled_http_202": 0
+    },
+    "chat": null,
+    "human": null,
+    "observed_failures": []
+  },
+  {
+    "run_id": "f08-reference-1795208792430-8b61b6-04",
+    "parameters": {
+      "scenario": "reference",
+      "ordinal": 4,
+      "seed": 8026,
+      "stages": [
+        [
+          5,
+          300
+        ]
+      ],
+      "observe_seconds": 120,
+      "vus": 50,
+      "fault_after_seconds": 60,
+      "fault_seconds": 30,
+      "chat": null,
+      "run_id": "f08-reference-1795208792430-8b61b6-04"
+    },
+    "state": "reprovado",
+    "reason": null,
+    "cleanup": "concluída",
+    "goals": {
+      "p95_aceite_ate_500_ms": true,
+      "aceite_inicial_minimo_99_pct_do_plano": true,
+      "efeitos_sem_duplicacao_ou_perda_entre_aceitos": true,
+      "escoamento_na_janela": false,
+      "todos_segundos_turnos_enviados_e_concluidos": false,
+      "jev_sem_solicitacoes_ou_tentativas": true
+    },
+    "initial": {
+      "planned": 1500,
+      "offered": 1500,
+      "http_202": 1500,
+      "accepted_with_ids": 1500,
+      "acceptance_of_planned": 1.0,
+      "acceptance_of_offered": 1.0,
+      "non_202": 0,
+      "latency_accept": {
+        "unit": "ms",
+        "n": 1500,
+        "p50": 86,
+        "p95": 126
+      },
+      "latency_persisted": {
+        "unit": "ms",
+        "n": 301,
+        "p50": 335.528076171875,
+        "p95": 492.76904296875
+      },
+      "negative_clock_deltas": 0,
+      "statuses": {
+        "202": 1500
+      },
+      "error_codes": {
+        "0": 1500
+      },
+      "timeouts": 0,
+      "states": {
+        "concluído": 301,
+        "falho": 1199
+      }
+    },
+    "followups": {
+      "planned": 300,
+      "offered": 60,
+      "http_202": 60,
+      "accepted_with_ids": 60,
+      "acceptance_of_planned": 0.2,
+      "acceptance_of_offered": 1.0,
+      "non_202": 0,
+      "latency_accept": {
+        "unit": "ms",
+        "n": 60,
+        "p50": 100.916442,
+        "p95": 194.918154
+      },
+      "latency_persisted": {
+        "unit": "ms",
+        "n": 55,
+        "p50": 382.56494140625,
+        "p95": 537.68896484375
+      },
+      "negative_clock_deltas": 0,
+      "statuses": {
+        "202": 60
+      },
+      "error_codes": {},
+      "timeouts": 0,
+      "states": {
+        "concluído": 55,
+        "falho": 5,
+        "não enviado": 240
+      },
+      "unissued_reasons": {
+        "primeira_resposta_ausente_na_janela": 240
+      },
+      "send_delay_after_target": {
+        "unit": "ms",
+        "n": 60,
+        "p50": 149.169921875,
+        "p95": 243.677978515625
+      },
+      "visibility_observation_delay": {
+        "unit": "ms",
+        "n": 60,
+        "p50": 124.055908203125,
+        "p95": 264.452880859375
+      }
+    },
+    "rates": {
+      "arrival_seconds": 300,
+      "offered_initial_per_s": 5.0,
+      "accepted_initial_per_s": 5.0
+    },
+    "completions": {
+      "observation_seconds_including_load": 420.0,
+      "ai_turns_in_window": 356,
+      "resolved_cases_in_window": 55,
+      "ai_turns_per_s": 0.8476190476190476,
+      "resolved_cases_per_s": 0.13095238095238096
+    },
+    "outage": {
+      "stop_observed_at_ms": 1795210258854.624,
+      "start_observed_at_ms": 1795210289377.781,
+      "broker_ready_observed_ms": 1795210293698,
+      "outage_to_ready_ms": 34843.3759765625,
+      "process_down_ms": 30523.156982421875,
+      "drained_sample_ms": null,
+      "drain_after_readiness_ms": null,
+      "initiated_while_unavailable_or_recovering": {
+        "planned": 174,
+        "offered": 174,
+        "http_202": 174,
+        "accepted_with_ids": 174,
+        "acceptance_of_planned": 1.0,
+        "acceptance_of_offered": 1.0,
+        "non_202": 0,
+        "latency_accept": {
+          "unit": "ms",
+          "n": 174,
+          "p50": 95,
+          "p95": 122
+        },
+        "latency_persisted": {
+          "unit": "ms",
+          "n": 1,
+          "p50": 39017.93603515625,
+          "p95": 39017.93603515625
+        },
+        "negative_clock_deltas": 0,
+        "statuses": {
+          "202": 174
+        },
+        "error_codes": {
+          "0": 174
+        },
+        "timeouts": 0,
+        "states": {
+          "falho": 173,
+          "concluído": 1
+        }
+      }
+    },
+    "integrity": {
+      "confirmed_losses": 0,
+      "duplicated_effect_identities": 0,
+      "persisted_without_http_202": 0,
+      "not_reconciled_http_202": 1204
+    },
+    "chat": null,
+    "human": null,
+    "observed_failures": [
+      "metas do ensaio não atingidas: escoamento_na_janela, todos_segundos_turnos_enviados_e_concluidos"
+    ]
+  }
+]

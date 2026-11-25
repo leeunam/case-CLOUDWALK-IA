@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "old_revision": "10125a57a8d72abd69a646dea0970cca59cf3ce2",
+  "new_revision": "dfbcc79f4ced07e5460eb73d06e956d94799d453",
+  "product_paths_unchanged": [
+    "backend",
+    "integration",
+    "frontend",
+    "compose.yml"
+  ],
+  "images_unchanged": {
+    "observe": "sha256:bbb026a4f4bc05651f187522075f0048a8c89a47537f5206ec417a8a684b8882",
+    "events": "sha256:4b4de3cd856eb6e2d71594c8aa9335abc251f15927f695d7b2d04e0e45cc5249",
+    "mock": "sha256:917ae193c8b68f16801c21f9f7489be3093aed5b912bf3c35a2df10ebdc19311",
+    "requests": "sha256:d9d3d1325b34477d0d25710a0afb19e7963845e873eca39ce2b5c0c66c37aa8b",
+    "worker": "sha256:1a246ab0b12c30e72a4a91832161c5d1a1fe00e461e1e3f3a5796fe6e25385fb",
+    "api": "sha256:7f64514d4a05b5a48aa06c6cf216634ebbba2314375abb97dbd7ac1ba0e6bace",
+    "outbox": "sha256:495f5cdab45a54c35276a98a8cdd26f0ebab2cbdb2525930544b712878ec26b5",
+    "db_setup": "sha256:57e49618dc7c250674d96a5fded685475d533cabda019ae0cc670e5f0cd5d182",
+    "kafka_setup": "sha256:106771d53c40556b88a51d942728f038a1edb99e69cd242faee9956516484da6",
+    "db": "sha256:6b75136145ddabf3d9a4b69660402082de7c56b734cfe50555b0674774dd742a",
+    "kafka": "sha256:106771d53c40556b88a51d942728f038a1edb99e69cd242faee9956516484da6"
+  },
+  "same_observer_parameters": {
+    "sql_period_ms": 2000,
+    "eligibility_period_ms": 250,
+    "kafka_period_ms": 5000,
+    "resources_period_ms": 5000,
+    "followup_workers": 32,
+    "kafka_lag_timeout_ms": 8000,
+    "kafka_evidence_timeout_ms": 52000,
+    "kafka_client_scope": "subprocesso por leitura"
+  },
+  "same_topology": {
+    "puma_threads": 5,
+    "solid_queue_processes": 1,
+    "solid_queue_threads_per_process": 3,
+    "outbox_processes": 1,
+    "replicas_per_service": 1,
+    "kafka_partitions_per_topic": 3
+  },
+  "same_host": {
+    "ServerVersion": "29.3.0",
+    "OperatingSystem": "Ubuntu 26.04.1 LTS",
+    "OSType": "linux",
+    "Architecture": "x86_64",
+    "NCPU": 12,
+    "MemTotal": 16433455104,
+    "CgroupDriver": "systemd",
+    "CgroupVersion": "2"
+  },
+  "window_loop_through_snapshot_sha256": "c440d4dc43c5014cb8db0a4974cd55b252c1ad2247004b64afd1fb1d4d07a455",
+  "equal_observer_definitions": [
+    "database",
+    "readiness",
+    "Followups"
+  ],
+  "source_differences": [
+    "script/f08/load/kafka_capture.py",
+    "script/f08/load/kafka_reader.py",
+    "script/f08/load/observe.py",
+    "script/f08/load/report.py",
+    "script/f08/load/test_load.py",
+    "script/f08/load/test_probe.py"
+  ],
+  "interpretation": "As alteracoes em producao, geracao e coleta durante a janela sao inexistentes. A captura final e sua exposicao no relatorio diferem; custos e revisoes sao publicados por rodada."
+}

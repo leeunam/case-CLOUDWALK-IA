@@ -1,0 +1,139 @@
+{
+  "enabled": true,
+  "manifest_id": "luna-r4-b20a6abd9b5584bbdd18e955f9e0cb94c0bfab5807747fdeec848fa3b1241304",
+  "binding": {
+    "profile": "observed-total-luna-r4",
+    "protocol_version": "1.4.0",
+    "report_version": "1.5.0",
+    "ipc_contract_version": "1.1.0",
+    "scope": "c05-feita-luna-r4",
+    "stage": "development",
+    "git_revision": "1c89c264ca7cba4e8cde72ec9098181435def74d",
+    "identity": {
+      "mode": "real",
+      "provider": "feita",
+      "requested_model": "openai/gpt-5.6-luna",
+      "expected_returned_model": "openai/gpt-5.6-luna",
+      "adapter_version": "1.0.0",
+      "policy_version": "1.1.0"
+    },
+    "sources": {
+      "dataset": {
+        "path": "docs/planejamento/classificacao-comparativa/r2/dataset.json",
+        "sha256": "3f4e69af44f03c89d1767d54ba07264327d616f18b0548656cc00c7bb89e3845",
+        "version": "2.0.0"
+      },
+      "catalog": {
+        "path": "script/f08/jev/catalog.json",
+        "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271",
+        "version": "1.0.0"
+      },
+      "rubric": {
+        "path": "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
+        "version": "1.0.0",
+        "sha256": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac"
+      },
+      "protocol": {
+        "path": "docs/planejamento/classificacao-comparativa/r4/protocol.json",
+        "sha256": "85590d95926acc76c05e50bae420180f869ff1084856f4c1fcf11542175df8fd",
+        "version": "1.4.0"
+      },
+      "split": {
+        "path": "docs/planejamento/classificacao-comparativa/r2/split.json",
+        "sha256": "054f0d572e5cb35e15bcc8b1e96df992bc9bf443edf1d4cd512c61e74b017e62",
+        "version": "2.0.0"
+      },
+      "policy": {
+        "path": "script/classification_comparison/adapters/qwen/r2/politica.txt",
+        "version": "1.1.0",
+        "sha256": "6893a119e6dc90aef81e10cc803dba8d66e3cf4c04cc4f3f2d333515c4b2a039"
+      },
+      "prompt": {
+        "path": "script/classification_comparison/adapters/luna/r4/prompt.txt",
+        "version": "1.2.0",
+        "sha256": "026c70c89da05102f9c6b84c87ba8e2c522d8d77cd2405403849d6823b7e2741"
+      }
+    },
+    "candidate": {
+      "path": "script/classification_comparison/adapters/luna/r4/candidate.json",
+      "sha256": "ba0701bd3b003cb146f8212bef1753d45c9a2ef8d548472ffe3d04d83cced888"
+    },
+    "data_freeze": {
+      "path": "docs/planejamento/classificacao-comparativa/r4/binding.json",
+      "sha256": "fdccf2127947da876720cd501c972000d52af365111787f096111748300855b5"
+    },
+    "final_cases": {
+      "path": "docs/planejamento/classificacao-comparativa/r2/final-cases.json",
+      "sha256": "17f5bae372983f90aa1956d0d583db25483a77a3ff35e4f1041ad4d51b897af9"
+    },
+    "config_sha256": "1ebee327b046644d1c0bf69f674f923a2b3aff7ed1c517d3006b9b401a9d0bad",
+    "control_policy": {
+      "path": "docs/planejamento/classificacao-comparativa/contratos/politica-controles.json",
+      "version": "1.0.0",
+      "sha256": "2611786ddde1eb2b064b02f7dda7bb7a0aae06cc8f127a9fc7e8fec14e937fb7"
+    },
+    "inputs_sha256": "73d102c83d0267d71e4be63b4da489efdaca626e7c2200202d4031d5be990fab",
+    "selected_ids": [
+      "jev-004",
+      "jev-013",
+      "jev-002",
+      "jev-023",
+      "jev-006",
+      "jev-039"
+    ],
+    "control_ids": [],
+    "candidate_ids": [
+      "jev-004",
+      "jev-013",
+      "jev-002",
+      "jev-023",
+      "jev-006",
+      "jev-039"
+    ],
+    "concurrency": 1,
+    "attempts": 1,
+    "max_requests": 6,
+    "reservation_usd": "1.239",
+    "executor_sha256": {
+      "script/classification_comparison/c05/execute.py": "cc488cf9110b2b80c67551a6ff912cd598d3f90981f20edc181aaef4697387ef",
+      "script/classification_comparison/c05/settings.py": "b4454da14661fcd86df77492fc68e67c5109de6b5da277d00730354fbab13792",
+      "script/classification_comparison/c05/budget.py": "d9a81084546db988ef8afc6f33732120749c749a9415bebae07f3402dbbef44e",
+      "script/classification_comparison/c05/final_adapter.py": "c61524b79bdb77c04d5196a2328ce96401b9c2cf5b2100c0b40fd831cc780140",
+      "script/classification_comparison/adapters/qwen/adapter.py": "fefe1b4458d667bf9701e59ce2071d368a92169848ba14e6ccd516ab7d74c90f",
+      "script/classification_comparison/adapters/qwen/pilot.py": "5605c8cfc06af9acea2319aad2c9284c46ab381e3262362fbeda99e5e866c79b",
+      "script/classification_comparison/adapters/qwen/transport.py": "a93f322b347efe69096aa4fa1483ae003b2ef06a2e1e1077ed09cbcab4f030f2",
+      "script/classification_comparison/adapters/qwen/fixture.py": "7d0d2d3a86971481664652488afb4eb83bcd961be693b03dfdc1c1904b1a5dbf",
+      "script/classification_comparison/run.py": "3507d04c595d0b65406db28db742ff53957f4a11c83686fa742958320821f1f4",
+      "script/classification_comparison/common.py": "5429d8ca197516e03d01f97fa132c07e4fab0bc39f17cd425a025bed786fc547",
+      "script/classification_comparison/journal.py": "877847fe6552f465a13ebb823fda27b02284832a711f019acb6d8f9c53ce670b",
+      "script/classification_comparison/metrics.py": "a025054e9e3eecfb377020e95e8ac43f6b3cb671aedd295afcf59443a4a1474a",
+      "script/check_classification_contracts.py": "4cfabdca19c17b7fd2cfd922153870896262d2e2c7188e5399c07730ebf98743",
+      "script/classification_comparison/r2/execute.py": "d8f4c9a2709918ae8536380c5decd3933a03382bca0e11432092368bf45ebb30",
+      "script/classification_comparison/r2/plan.py": "5436ff20924b47a6b7046edaf027cb71e07e8eb7867f30b80612e724b06afb5d",
+      "script/classification_comparison/r2/gate.py": "e623d47bea14ad6b9e1d62529186b2cf11760543109f920d7992c63ea75b8331",
+      "script/classification_comparison/r2/seal.py": "c33f574ddee40fcb652fc991322693053d58cc56ac3d348cacf31627dc0c7ef9",
+      "script/classification_comparison/luna/round_spec.py": "cf7406176031219c55c44eb0f20e2b9f216b0024f5938d690844ec23c57e2d8d",
+      "script/classification_comparison/luna/execute.py": "4ba3c07367d706be15e11f6e03797b702e3fe2889fc01f6bad22aabad3b49da1",
+      "script/classification_comparison/adapters/luna/adapter.py": "cf221d6d1f39f27bbc3d4388d6c14091fe869e0351ca8564c713284eca4b3845",
+      "script/classification_comparison/adapters/luna/transport.py": "60673dff9db3f3dd8e16db409843ec6d073397053a66e664a5b65e2b98d03ea0",
+      "script/classification_comparison/luna_r4/round_spec.py": "24bacc577cf6033ce82719a6f5944edb68b2434317e7ea80e7f3e1c0a3262f37",
+      "script/classification_comparison/luna_r4/execute.py": "65b7b58f3e2954932edeaeefd1c3732d27df15130c404afb6d9da376396fc913"
+    },
+    "operational": {
+      "path": "script/classification_comparison/adapters/luna/operational.json",
+      "version": "1.0.0",
+      "sha256": "0666cdd1c99f58c52512681563b72ddcaf4f97593071a1797104526d062678da"
+    },
+    "source_lock": {
+      "path": "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.5/sources.lock.json",
+      "sha256": "ea1531d622ea21c0db68f71b576acea59cef829d765ed16a76a36312b25584be"
+    },
+    "development_gate": null,
+    "account": {
+      "path": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/c05-comparacao/.superpowers/financial/c05-qwen/account-v4.sqlite3",
+      "id": "903a037b4b9140438e152ade172889ca",
+      "scope": "real",
+      "cap_usd": "10"
+    }
+  }
+}

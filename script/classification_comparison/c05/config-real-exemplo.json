@@ -1,0 +1,25 @@
+{
+  "scope": "c05-qwen-final",
+  "mode": "real",
+  "max_tokens": 128,
+  "reasoning": {
+    "enabled": false
+  },
+  "billable_input_token_ceiling": 1024000,
+  "billable_output_token_ceiling": 131072,
+  "billable_limits_reference": "docs/evidencias/c03/preflight-modelo-publico.json",
+  "billable_limits_confirmed": false,
+  "tariff_verified": false,
+  "tariff": {
+    "unit": "USD/Mtoken",
+    "source": "https://feita.ai/models/qwen/qwen3.8-27b",
+    "date": "2026-11-23",
+    "input": "0.425",
+    "output": "2.55",
+    "cache_read": "0.085",
+    "cache_write": "0.53125"
+  },
+  "usage_cost_unit": null,
+  "usage_cost_reference": null,
+  "usage_credits": null
+}

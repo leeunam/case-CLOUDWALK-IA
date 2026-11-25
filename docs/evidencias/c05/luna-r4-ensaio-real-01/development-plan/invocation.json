@@ -1,0 +1,16 @@
+{
+  "profile": "observed-total-luna-r4",
+  "protocol_version": "1.4.0",
+  "report_version": "1.5.0",
+  "ipc_contract_version": "1.1.0",
+  "stage": "development",
+  "git_revision": "1c89c264ca7cba4e8cde72ec9098181435def74d",
+  "command": "rtk proxy python3 -B script/classification_comparison/luna_r4/execute.py run --stage development --mode real --config /home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/r4-luna-executor/docs/evidencias/c05/luna-r4-preflight-2026-11-24/config-real-planejada.json --account /home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/c05-comparacao/.superpowers/financial/c05-qwen/account-v4.sqlite3 --account-id 903a037b4b9140438e152ade172889ca --cap-usd 10 --output NOVO_DIRETORIO --dry-run",
+  "config_sha256": "1ebee327b046644d1c0bf69f674f923a2b3aff7ed1c517d3006b9b401a9d0bad",
+  "manifest_id": "luna-r4-b20a6abd9b5584bbdd18e955f9e0cb94c0bfab5807747fdeec848fa3b1241304",
+  "manifest_sha256": null,
+  "dry_run": true,
+  "synthetic_transport": false,
+  "concurrency": 1,
+  "attempts": 1
+}

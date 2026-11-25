@@ -1,0 +1,39 @@
+{
+  "manifest_version": "1.0.0",
+  "model": "knowledgator/gliclass-multilang-mini",
+  "revision": "0bd888b6c3ef9fca5f0a9d407bddfbbc7623486b",
+  "metadata_source": "https://huggingface.co/api/models/knowledgator/gliclass-multilang-mini/revision/0bd888b6c3ef9fca5f0a9d407bddfbbc7623486b?blobs=true",
+  "files": {
+    "added_tokens.json": {
+      "size": 92,
+      "git_blob_sha1": "f08b83b40f4c62a06087ca87dea470b00c9833d5"
+    },
+    "config.json": {
+      "size": 2098,
+      "git_blob_sha1": "65b2991480f768aa9923a2374f178a8cbf7e8f89"
+    },
+    "model.safetensors": {
+      "size": 567503348,
+      "git_blob_sha1": "e2f34dcf4baba9c670eec77dd075e856809dfa34",
+      "lfs_sha256": "440d8f17603d3e6f7d13a4fe7ffa7e9ef2c5a2581cceccb2f643334b92c8aea8"
+    },
+    "special_tokens_map.json": {
+      "size": 970,
+      "git_blob_sha1": "83fb22de184abab1b193b1f6001e3015e865e50b"
+    },
+    "spm.model": {
+      "size": 4305025,
+      "git_blob_sha1": "247be4d955032ae6dedb60bfc8cf409e8cddac26",
+      "lfs_sha256": "13c8d666d62a7bc4ac8f040aab68e942c861f93303156cc28f5c7e885d86d6e3"
+    },
+    "tokenizer.json": {
+      "size": 16336328,
+      "git_blob_sha1": "1012cbe27562da2515a0a921e71841820d04774f",
+      "lfs_sha256": "77e1661635eafe733781f83318eececcdf1190bc4c3199b32e5abb9def39daf4"
+    },
+    "tokenizer_config.json": {
+      "size": 20444,
+      "git_blob_sha1": "d444abf6a94eed24a394c4d37592aad36539af19"
+    }
+  }
+}

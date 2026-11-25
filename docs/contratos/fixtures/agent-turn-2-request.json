@@ -1,0 +1,54 @@
+{
+  "schema": "../schemas/v1.json#/$defs/AgentTurnRequested",
+  "data": {
+    "schema_version": "1.0",
+    "event_id": "00000000-0000-4000-8000-000000000602",
+    "event_type": "agent.turn.requested",
+    "occurred_at": "2026-11-17T13:31:00Z",
+    "correlation_id": "00000000-0000-4000-8000-000000000200",
+    "case_id": "00000000-0000-4000-8000-000000000300",
+    "brand_id": "11111111-1111-4111-8111-111111111111",
+    "assignment_generation": 1,
+    "turn_id": "00000000-0000-4000-8000-000000000702",
+    "payload": {
+      "classification": {
+        "category": "pix",
+        "category_source": "channel",
+        "priority": "basic",
+        "priority_source": "channel"
+      },
+      "history": [
+        {
+          "id": "00000000-0000-4000-8000-000000000501",
+          "sequence": 1,
+          "author": {
+            "type": "customer",
+            "id": "00000000-0000-4000-8000-000000000102"
+          },
+          "text": "Qual é o prazo de confirmação de um Pix?",
+          "created_at": "2026-11-17T13:30:00Z"
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000502",
+          "sequence": 2,
+          "author": {
+            "type": "ai",
+            "id": "00000000-0000-4000-8000-000000000101"
+          },
+          "text": "Consulte o comprovante no histórico para conferir a confirmação.",
+          "created_at": "2026-11-17T13:30:01Z"
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000503",
+          "sequence": 3,
+          "author": {
+            "type": "customer",
+            "id": "00000000-0000-4000-8000-000000000102"
+          },
+          "text": "Funcionou. Obrigado!",
+          "created_at": "2026-11-17T13:31:00Z"
+        }
+      ]
+    }
+  }
+}

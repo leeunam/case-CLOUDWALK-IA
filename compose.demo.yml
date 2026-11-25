@@ -1,0 +1,95 @@
+x-demo-rails: &demo-rails
+  SECRET_KEY_BASE: ${DEMO_RAILS_SECRET:?execute python3 script/demo.py init}
+  POSTGRES_PASSWORD: ${DEMO_POSTGRES_PASSWORD:?execute python3 script/demo.py init}
+  TYPESAFE_API_KEY: ""
+  RAILS_LOG_LEVEL: warn
+
+x-integration: &integration
+  build: ./integration
+  environment: &integration-env
+    KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    CLOUDWALK_CONTRACT_SCHEMA: /workspace/docs/contratos/schemas/v1.json
+  volumes:
+    - ./docs/contratos:/workspace/docs/contratos:ro
+  depends_on:
+    kafka_setup:
+      condition: service_completed_successfully
+
+services:
+  db:
+    environment:
+      POSTGRES_PASSWORD: ${DEMO_POSTGRES_PASSWORD:?execute python3 script/demo.py init}
+  db_setup:
+    environment: *demo-rails
+    volumes: !override &demo-volumes
+      - ./script:/workspace/script:ro
+      - ./docs/contratos:/workspace/docs/contratos:ro
+  api:
+    environment:
+      <<: *demo-rails
+      CLOUDWALK_CHANNEL_SECRET: ${DEMO_CHANNEL_SECRET:?execute python3 script/demo.py init}
+      CLOUDWALK_AGENT_EVENTS_SECRET: ${DEMO_AGENT_EVENTS_SECRET:?execute python3 script/demo.py init}
+      CLOUDWALK_DEMO_PASSWORDS: ${DEMO_PASSWORDS:?execute python3 script/demo.py init}
+    volumes: *demo-volumes
+    ports: !override
+      - "127.0.0.1:${DEMO_API_PORT:-43109}:3000"
+    networks: [default, local_access]
+  worker:
+    environment:
+      <<: *demo-rails
+      CLOUDWALK_JEV_MODE: ${DEMO_CLASSIFIER_MODE:-fixture}
+    volumes: *demo-volumes
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        case "$$CLOUDWALK_JEV_MODE" in
+          fixture|disabled) exec bundle exec ruby bin/jobs ;;
+          *) echo "Classificador demo aceita fixture ou disabled." >&2; exit 1 ;;
+        esac
+  web:
+    ports: !override
+      - "127.0.0.1:${DEMO_WEB_PORT:-45179}:5173"
+    networks: [default, local_access]
+  outbox:
+    build: ./backend
+    environment:
+      <<: *demo-rails
+      RAILS_ENV: development
+      POSTGRES_HOST: db
+      POSTGRES_USER: ${POSTGRES_USER:-cloudwalk}
+      CLOUDWALK_AGENT_REQUEST_URL: http://requests:8080/webhooks/v1/agent/requests
+      CLOUDWALK_AGENT_REQUESTS_SECRET: ${DEMO_AGENT_REQUESTS_SECRET:?execute python3 script/demo.py init}
+    volumes: *demo-volumes
+    command: [bundle, exec, rails, runner, script/f02_outbox.rb]
+    depends_on:
+      db_setup:
+        condition: service_completed_successfully
+      requests:
+        condition: service_started
+  requests:
+    <<: *integration
+    environment:
+      <<: *integration-env
+      CLOUDWALK_AGENT_REQUESTS_SECRET: ${DEMO_AGENT_REQUESTS_SECRET:?execute python3 script/demo.py init}
+    command: [requests]
+  events:
+    <<: *integration
+    environment:
+      <<: *integration-env
+      CLOUDWALK_AGENT_EVENTS_SECRET: ${DEMO_AGENT_EVENTS_SECRET:?execute python3 script/demo.py init}
+      CLOUDWALK_AGENT_EVENTS_URL: http://api:3000/webhooks/v1/agent/events
+    depends_on:
+      kafka_setup:
+        condition: service_completed_successfully
+      api:
+        condition: service_healthy
+    command: [events]
+  mock:
+    <<: *integration
+    command: [mock]
+
+networks:
+  default:
+    internal: true
+  local_access:

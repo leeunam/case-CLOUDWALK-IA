@@ -1,0 +1,11 @@
+{
+  "schema": "../schemas/v1.json#/$defs/SimulatorCase",
+  "data": {
+    "id": "00000000-0000-4000-8000-000000000301",
+    "previous_case_id": null,
+    "channel_id": "00000000-0000-4000-8000-000000000910",
+    "status": "waiting_human",
+    "updated_at": "2026-11-17T13:32:02Z",
+    "external_conversation_id": "whatsapp-conversation-01"
+  }
+}

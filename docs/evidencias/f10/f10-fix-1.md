@@ -1,0 +1,9 @@
+# F10-A · Correção consolidada round1/5
+
+Fonte7b30c4eb868a01d1b4d4d85a0b3e1126c51e6015, mesma branch/worktree. Leia f10-review.md no SDD raiz. Escopo somente P2/P3 operacionais. Sem alterar semântica de TLS/login/contratos/classificador/pins nem publicar túnel. Sem subagentes/envreal/contareal/API/merge/push.
+
+P2: unpublish/down falham ao ler arquivo privado ausente/0644 e não oferecem parada de emergência. O parecer permite documentar uma saída Docker direta, portanto prefira mudança mínima de documentação com comando verificado: identificar explicitamente o projeto/serviço cloudflared correto por labels Compose e parar somente esse contêiner sem ler segredos ou interpolar Compose. Funcionar com .env.publish.local ausente ou inseguro; nenhuma chave ou segredo deve ser impresso. Não usar default ambíguo nem apagar volumes; nomes e labels devem ser conferíveis antes de parar. Não parar outros projetos/containeres. Pode implementar um caminho de emergência dedicado se indispensável, mas não relaxar validação do arquivo nos comandos que usam segredos. Documentar o que permanece ligado e como retomar a configuração depois.
+
+P3: explicitar que checkout, arquivo privado, projeto e volumes formam um conjunto inclusive após down. Cada checkout/instância nova recebe --project distinto; retomar o original reutiliza nome+arquivo originais. Não adicionar gerenciador de identidades ou resetvolumes para corrigir senha.
+
+Verificação dirigida com configuração sintética/labels ou Docker simulado e, se útil, contêiner descartável isolado sem rede externa. Provar seleção correta e nenhuma chamada a outro projeto, com arquivo ausente e permissão inválida. Não iniciar túnel nem rerodar a stack/suítes intactas por ajuste documental. Atualizar f10-report.md comapêndice/comandosrealmenteexecutados,commitselecionadoportuguês,retornocurto. Re-review dirigida aos dois achados, semnovaampla.

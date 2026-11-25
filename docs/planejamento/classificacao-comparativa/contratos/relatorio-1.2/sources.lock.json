@@ -1,0 +1,12 @@
+{
+  "docs/planejamento/classificacao-comparativa/contratos/common.schema.json": "bc242132690bfef7504e0124a1758b56c9a336359ab9ffde038f8645a8cef0c3",
+  "docs/planejamento/classificacao-comparativa/contratos/decision.schema.json": "2894c6763940a41657de72db5b37672493b495c3b77b0a8812505ede88a58582",
+  "docs/planejamento/classificacao-comparativa/contratos/input.schema.json": "2e943f5b228181366da189b9b51b463ffb1ea8140aabf01e701ad9e4232339fa",
+  "docs/planejamento/classificacao-comparativa/contratos/observation.schema.json": "0df9647efe7e57768904cdecf24c1e42a3ce2ce6e977a73a073b0b5169bc3d38",
+  "docs/planejamento/classificacao-comparativa/contratos/politica-controles.json": "2611786ddde1eb2b064b02f7dda7bb7a0aae06cc8f127a9fc7e8fec14e937fb7",
+  "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.2/negative.json": "892f353ad122f7ff165da3b74cc3fe744720eda710cd62029125a6f338f27926",
+  "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.2/report.json": "76b21b66fcbb3b106d5e3757aebee275ce446e6517ba48f132b691ed31d8c0b8",
+  "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.2/report.schema.json": "7798ad962d604c46d3fdb6e9d4a9413eafd2acf22b805a051ea181149b713c4e",
+  "docs/planejamento/classificacao-comparativa/contratos/report.schema.json": "4820101137d6297446c9950ffce98d751db21df85f7c400059f50d91fa90aac2",
+  "docs/planejamento/classificacao-comparativa/protocolo-comparacao-1.1.json": "061a91a0c9b1b054ca2c9579077453d77ac765f24d725667fb97b5749db1aed7"
+}

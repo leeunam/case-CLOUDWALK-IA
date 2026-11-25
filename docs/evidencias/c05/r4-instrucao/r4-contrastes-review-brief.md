@@ -1,0 +1,9 @@
+# Task3-D2 revisão por tarefa dos diagnósticos novos
+
+LeiaAGENTS/RTK,r4-contrastes-brief.md e report r4-contrastes-report.md nesta pasta. Semrede/LLM/.env/chave/SQLite/finais/subagentes/Gitmutations. Você nãoalteraprompt/critérios/gabaritos. A instruçãonovaD1jáfoirevisadaeformalmentecongeladaemmain;autorD1nuncaviu16pares.
+
+Base3e59f4a -> a8c0519224a60d76039785dd9a962957c96b219f,WT.r4-luna-contrastes. Leiaopacoteúnicoreview-3e59f4a..a8c0519.diff nesta pasta;semregenerarGitnemreleralteradossalvohunkcortado. Report do autorafirmaestrutura16/8pares. Rootintegradormostcaprotulou16entradascegamente(semgold/novoprompt):r4-blind-labels.jsongravadoantesannotations; r4-blind-comparison.jsonaponta16/16casos18/18alvosconcordantes. IA,nãoaprovaçãohumana,nãoLunaaccuracy. Fontescatalog/rubricinalteradas.
+
+JulgueSPEC/QUALITYpelotask-reviewer-prompt: estruturaexataIPC/semleaklabels,paresetargetscoerentes/invariantesprioridade,interpretaçãocategorianãoindíciosisolados,paráfrasespositivasclaras/negações/ambiguidades,proveniência/nãoconfundirpreparaçãocommedição. Não precisaatribuirrótuloscegosnovamentenemsuítes;checagempontualapenasporrisconomeado. EstaéaleituraporTarefa,noescopopequeno3arquivos;reviewamplaR4depoisincluiA+D2.
+
+Report r4-contrastes-review.mdcomveredictosSPEC/QUALITY,referênciaslinhaeachadosreais. Nenhumainferênciaoulabels«geradospeloLuna».

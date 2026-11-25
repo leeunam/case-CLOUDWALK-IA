@@ -1,0 +1,18 @@
+{
+  "account_id": "903a037b4b9140438e152ade172889ca",
+  "scope": "real",
+  "cap_usd": "10",
+  "accounted_usd": "1.27986069",
+  "available_usd": "8.72013931",
+  "frozen_reason": null,
+  "runs_count": 6,
+  "run_states": {
+    "finished": 4,
+    "interrupted": 2
+  },
+  "reservation_states": {
+    "settled": 97,
+    "staged": 1
+  },
+  "gateway_pending_count": 0
+}

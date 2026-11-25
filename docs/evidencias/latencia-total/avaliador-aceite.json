@@ -1,0 +1,33 @@
+{
+  "task": "C02-L",
+  "status": "accepted_offline",
+  "code_revision": "3abbfe1b4c0ff9624a9695e7d9fb3b0a55f0decf",
+  "profile": "observed-total-1.1",
+  "quality_protocol_version": "1.1.0",
+  "report_contract_version": "1.2.0",
+  "ipc_version": "1.1.0",
+  "c02_tests": 39,
+  "qwen_compatibility_tests": 7,
+  "gliclass_compatibility_tests": 2,
+  "historical_reports_verified_unchanged": 17,
+  "fixture": {
+    "report": "script/classification_comparison/example-observed-total-1.2/report.json",
+    "cases": 24,
+    "controls": 13,
+    "observations": 33,
+    "candidate_attempts": 32,
+    "eligibility": "inconclusive",
+    "latency": {
+      "state": "unmeasured",
+      "value": null,
+      "numerator": null,
+      "denominator": 24
+    }
+  },
+  "provider_calls_during_change": 0,
+  "review": "task and whole-branch final approved, one documentation fix re-reviewed",
+  "limits": [
+    "No new model benchmark or holdout inference",
+    "Default legacy profile preserved; new runs select observed-total-1.1 explicitly"
+  ]
+}

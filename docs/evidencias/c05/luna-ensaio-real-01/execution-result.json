@@ -1,0 +1,27 @@
+{
+  "stage": "development",
+  "source_revision": "e8434bb8ed7a01ec564f8bf3b02aa35d7bde1575",
+  "started_at": "2026-11-24T19:50:40.325111+00:00",
+  "ended_at": "2026-11-24T19:50:51.068763+00:00",
+  "exit_code": 2,
+  "repeated": false,
+  "financial": {
+    "account_id": "903a037b4b9140438e152ade172889ca",
+    "scope": "real",
+    "cap_usd": "10",
+    "accounted_usd": "0.02869232",
+    "available_usd": "9.97130768",
+    "frozen_reason": null,
+    "runs_count": 3,
+    "run_states": {
+      "finished": 2,
+      "interrupted": 1
+    },
+    "reservation_states": {
+      "settled": 56
+    }
+  },
+  "gate_status": "failed",
+  "correct_targets": 7,
+  "observed_usd": "0.00181827"
+}

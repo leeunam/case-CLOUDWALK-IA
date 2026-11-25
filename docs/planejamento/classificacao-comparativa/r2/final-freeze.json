@@ -1,0 +1,37 @@
+{
+  "task": "C05-R2/Task2",
+  "status": "approved_frozen_offline",
+  "dataset_commit": "9648208b47112fa87a8e584bb30e2779f2449ed8",
+  "dataset_path": "docs/planejamento/classificacao-comparativa/r2/final-cases.json",
+  "dataset_sha256": "17f5bae372983f90aa1956d0d583db25483a77a3ff35e4f1041ad4d51b897af9",
+  "authorship_sha256": "e4ee3ff880c230dff7b53136c64e6db30b4c96e774d3f695663786793f3495bc",
+  "candidate_sha256": "db8005776018a1c94abaffe4ea0f5d6cdcf5a67836e19931bac747e68e1628f3",
+  "reviews": {
+    "labels": {
+      "path": "docs/planejamento/classificacao-comparativa/r2/data-review.json",
+      "sha256": "bc63fe5e84f6e665f9bda0cdaedff42bac8cecd3db9a0d7fb5c50b3855d8c4a5",
+      "verdict": "pass",
+      "open_findings": 0
+    },
+    "similarity": {
+      "path": "docs/planejamento/classificacao-comparativa/r2/similarity-review.json",
+      "sha256": "a2e1e26b99c09e93b75ddd0c7b7ef686f5847ba0b256328616f72028add22c54",
+      "verdict": "pass",
+      "open_findings": 0
+    }
+  },
+  "reference_scope": "synthetic_exploratory_ai_reference",
+  "human_case_approvals": 0,
+  "new_cases": 36,
+  "target_fields": 48,
+  "fully_classifiable": 29,
+  "expected_review": 7,
+  "urgent_priority_omitted": 6,
+  "paid_calls": 0,
+  "candidate_frozen_before_integrator_opened_final": true,
+  "limitations": [
+    "AI review is not human reference validation.",
+    "Similarity review does not establish mathematical independence.",
+    "No candidate inference or improvement claim."
+  ]
+}

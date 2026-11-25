@@ -1,0 +1,53 @@
+{
+  "stage": "development",
+  "source_revision": "8314ca56645e016167adf94833cb991be44421f6",
+  "started_at": "2026-11-25T13:35:38.452762+00:00",
+  "ended_at": "2026-11-25T13:35:52.137451+00:00",
+  "exit_code": 0,
+  "supervisor_exit_code": 0,
+  "execution_state": "closed",
+  "repeated": false,
+  "financial_before": {
+    "account_id": "903a037b4b9140438e152ade172889ca",
+    "scope": "real",
+    "cap_usd": "10",
+    "accounted_usd": "0.03093512",
+    "available_usd": "9.96906488",
+    "frozen_reason": null,
+    "runs_count": 4,
+    "run_states": {
+      "finished": 3,
+      "interrupted": 1
+    },
+    "reservation_states": {
+      "settled": 62
+    },
+    "gateway_pending_count": 0
+  },
+  "financial": {
+    "account_id": "903a037b4b9140438e152ade172889ca",
+    "scope": "real",
+    "cap_usd": "10",
+    "accounted_usd": "0.03320901",
+    "available_usd": "9.96679099",
+    "frozen_reason": null,
+    "runs_count": 5,
+    "run_states": {
+      "finished": 4,
+      "interrupted": 1
+    },
+    "reservation_states": {
+      "settled": 68
+    },
+    "gateway_pending_count": 0
+  },
+  "financial_snapshot_provisional": false,
+  "record_errors": [],
+  "cli_exit_code": 0,
+  "error_kind": null,
+  "process_group_id": 801247,
+  "tree_shutdown_confirmed": true,
+  "gate_status": "pass",
+  "correct_targets": 8,
+  "observed_usd": "0.00227389"
+}

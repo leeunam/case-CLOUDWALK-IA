@@ -1,0 +1,14 @@
+{
+  "profile": "observed-total-1.1",
+  "protocol_version": "1.1.0",
+  "report_version": "1.2.0",
+  "ipc_contract_version": "1.1.0",
+  "command": "rtk proxy python3 -B script/classification_comparison/c05/execute.py run --mode real --config /home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/c05-comparacao/docs/evidencias/c05/ensaio-real-01/config.json --output NOVO_DIRETORIO --account /home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/c05-comparacao/.superpowers/financial/c05-qwen/account-v4.sqlite3 --account-id 903a037b4b9140438e152ade172889ca --cap-usd 10 --manifest /home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/c05-comparacao/.superpowers/financial/c05-qwen/manifesto-real.json --confirm-execution",
+  "config_sha256": "8cd3d1fbcb2d2550d8c65b52169402407597431e31d44fd97c314ba1a666da60",
+  "manifest_sha256": "aeb4ae6e2daa4b8979f037e6bb3c0faedbdace5cc1c38b3f35e0ef08340bf474",
+  "dry_run": false,
+  "git_revision": "19a56fe3dc4fb80a48122182fcc6bcdf1d9855d7",
+  "synthetic_transport": false,
+  "concurrency": 1,
+  "attempts": 1
+}

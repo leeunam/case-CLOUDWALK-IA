@@ -1,0 +1,13 @@
+{
+  "schema": "../schemas/v1.json#/$defs/Error",
+  "data": {
+    "error": {
+      "code": "invalid_envelope",
+      "message": "O envelope de entrada é inválido.",
+      "details": {
+        "field": "text",
+        "reason": "required"
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "task": "C05-E",
+  "checked_on": "2026-11-23",
+  "source": "https://feita.ai/models/qwen/qwen3.8-27b",
+  "method": "read-only Overview pricing table and API Chat Completions example",
+  "pricing_statement": "Cobrança em créditos; 1 crédito = US$ 0,01",
+  "credit_unit_usd": "0.01",
+  "documented_usage_example": {
+    "prompt_tokens": 9,
+    "completion_tokens": 8,
+    "total_tokens": 17,
+    "cost": "0.00012",
+    "credits": "0.012"
+  },
+  "decisions": [
+    "Support explicitly confirmed credits-to-USD conversion in the financial sidecar, preserving original values and source.",
+    "Do not assume the unit of usage.cost from the numerical example.",
+    "Missing or invalid monetary evidence keeps the reservation; estimates cannot release it.",
+    "Real final-run examples remain disabled and the credits conversion requires explicit confirmation.",
+    "If independently confirmed USD and credits coexist, account for the larger valid amount."
+  ],
+  "limitations": [
+    "The example is documentation, not a billing receipt or a new API response.",
+    "No guarantee of max_tokens covering all billable tokens was established by the page.",
+    "No paid call was made during this reference lookup."
+  ]
+}

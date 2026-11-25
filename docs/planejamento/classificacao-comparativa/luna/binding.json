@@ -1,0 +1,35 @@
+{
+  "task": "C05-R3",
+  "historical_protocol": {
+    "path": "docs/planejamento/classificacao-comparativa/r2/protocol.json",
+    "sha256": "4e89f10dcb15b4a9593532aa52d05917b68df4771972d570dd646a7ce11163d1"
+  },
+  "historical_data_freeze": {
+    "path": "docs/planejamento/classificacao-comparativa/r2/final-freeze.json",
+    "sha256": "3bfe4604614e019ccfb07d63ca1ceceb5130dbcd30dae55f971c83c34952c7a1"
+  },
+  "candidate_freeze": {
+    "path": "docs/evidencias/c05/luna-planejamento/candidate-freeze.json",
+    "sha256": "d54be325ca254797be9056039bfa5004824a2d587ac78f1d2f9614fe68820c2d"
+  },
+  "candidate": {
+    "path": "script/classification_comparison/adapters/luna/candidate.json",
+    "version": "1.0.0",
+    "sha256": "1daac4749be2e8ac07989780ce5b4aae58f3f7f2bbbf460fdfb904a98295caf5"
+  },
+  "operational": {
+    "path": "script/classification_comparison/adapters/luna/operational.json",
+    "version": "1.0.0",
+    "sha256": "0666cdd1c99f58c52512681563b72ddcaf4f97593071a1797104526d062678da"
+  },
+  "final_cases": {
+    "path": "docs/planejamento/classificacao-comparativa/r2/final-cases.json",
+    "sha256": "17f5bae372983f90aa1956d0d583db25483a77a3ff35e4f1041ad4d51b897af9"
+  },
+  "offline_approval": {
+    "path": "docs/planejamento/classificacao-comparativa/rodada-3-proposta.md",
+    "sha256": "37d8ea6f9530e46bfad9b48aedbf5887889f30b7d852e142312d195f147733ec"
+  },
+  "new_final_human_case_approvals": 0,
+  "paid_execution_authorized": false
+}

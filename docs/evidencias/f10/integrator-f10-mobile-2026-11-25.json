@@ -1,0 +1,22 @@
+{
+  "task": "F10-mobile-access",
+  "date": "2026-11-25",
+  "origin": "https://newbie-aqua-stem-reveal.trycloudflare.com",
+  "evidence_kind": "user_report",
+  "requested_environment": "Mobile phone with Wi-Fi off / mobile data",
+  "initial_reply": "foi",
+  "clarification_reply": "Apenas abri a página",
+  "confirmed_scope": [
+    "page_opened"
+  ],
+  "not_verified": [
+    "two_turn_chat",
+    "responses",
+    "history_after_reload",
+    "human_handoff",
+    "analyst_access",
+    "brand_isolation_from_second_network"
+  ],
+  "full_external_acceptance": "pending",
+  "notes": "Record only the scope explicitly clarified by the user. No case identifier or completed conversation was reported."
+}

@@ -1,0 +1,25 @@
+{
+  "scope": "c05-feita-luna-r5",
+  "mode": "fixture",
+  "billable_input_token_ceiling": 1050000,
+  "billable_output_token_ceiling": 140000,
+  "billable_limits_reference": "Limites sintéticos Luna",
+  "billable_limits_confirmed": true,
+  "tariff_verified": true,
+  "tariff": {
+    "unit": "USD/Mtoken",
+    "source": "Tarifa sintética Luna, incluindo cache e contexto longo",
+    "date": "2026-11-23",
+    "input": "0.425",
+    "output": "2.55",
+    "cache_read": "0.085",
+    "cache_write": "0.53125"
+  },
+  "usage_cost_unit": "USD",
+  "usage_cost_reference": "Uso em USD declarado pelo transporte sintético Luna",
+  "usage_credits": null,
+  "max_completion_tokens": 384,
+  "reasoning_effort": "none",
+  "stream": false,
+  "financial_evidence": null
+}

@@ -1,0 +1,26 @@
+{
+  "identity": {
+    "mode": "fixture",
+    "provider": "fixture",
+    "requested_model": "modelo-sintetico-v1",
+    "adapter_version": "1.1.0",
+    "policy_version": "1.1.0",
+    "expected_returned_model": "modelo-sintetico-v1"
+  },
+  "prompt": {
+    "path": "docs/planejamento/classificacao-comparativa/contratos/fixtures/prompt-fixture.txt",
+    "sha256": "8930d0e49a042bcc22da651ca5b9c7bae91e2b32f108782550d0862be9102932",
+    "version": "1.0.0"
+  },
+  "policy": {
+    "path": "script/classification_comparison/fixture-policy-1.1.txt",
+    "version": "1.1.0",
+    "sha256": "9b7d150b1d687847182cb5dfc60f58e9984b12d7697a660fce52c3571ed31187"
+  },
+  "command": [
+    "python3",
+    "-B",
+    "script/classification_comparison/fixture_adapter.py"
+  ],
+  "contract_version": "1.1.0"
+}

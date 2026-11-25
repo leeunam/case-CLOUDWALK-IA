@@ -1,0 +1,26 @@
+{
+  "contract_version": "1.1.0",
+  "command": [
+    "python3",
+    "-B",
+    "script/classification_comparison/adapters/qwen/adapter.py"
+  ],
+  "identity": {
+    "mode": "fixture",
+    "provider": "feita",
+    "requested_model": "qwen/qwen3.8-27b",
+    "expected_returned_model": "qwen/qwen3.8-27b",
+    "adapter_version": "1.0.0",
+    "policy_version": "1.0.0"
+  },
+  "prompt": {
+    "path": "script/classification_comparison/adapters/qwen/prompt.txt",
+    "version": "1.0.0",
+    "sha256": "b38edc9e1db036405b1e3eadb63f11219a01dec4aefe6996e40c6c6c19ec8527"
+  },
+  "policy": {
+    "path": "script/classification_comparison/adapters/qwen/politica.txt",
+    "version": "1.0.0",
+    "sha256": "c1b459d24a874b3e5e44a67297314d322dded0ee6c7413c7d3a0cdd28f70f56b"
+  }
+}
