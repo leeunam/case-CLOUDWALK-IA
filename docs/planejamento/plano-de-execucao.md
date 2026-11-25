@@ -138,13 +138,21 @@ O responsável autorizou o piloto local SetFit (C05-SF1) e propôs adiar a
 categorização para avançar nas outras frentes. O piloto concluiu a avaliação
 exploratória de categoria. A escolha e a calibração do classificador (C05),
 a integração (C06) e o complemento real em instalação limpa (C07/F09 final)
-ficam em espera até retomada explícita. O requisito de classificação real
+ficaram em espera até a retomada explícita. O requisito de classificação real
 continua no plano. A preparação F09-A já foi verificada com fixture, e o
-aceite externo da demonstração F10 pode avançar nesse modo.
+aceite externo da demonstração F10 foi concluído nesse modo.
 [Piloto SetFit](classificacao-comparativa/setfit-piloto.md) ·
 [Estado da entrega](../estado-entrega.md) · [Plano de conclusão](conclusao-projeto.md).
 O [guia dos chats](classificacao-comparativa/guia-dos-chats.md) explica base Git,
 isolamento, propriedade, modelos sugeridos, revisão e exercícios de aprendizagem.
+
+Na retomada SF2 de 25/11/2026, o responsável aprovou 360 relatos novos:
+150 de treino, 90 de validação e 120 finais. A
+[especificação proposta](classificacao-comparativa/sf2/especificacao.md) fixa
+treino de categoria/prioridade, revisão e teste independente, com
+[tarefas isoladas](classificacao-comparativa/sf2/tarefas.md). Os demais
+parâmetros e a execução aguardam revisão da proposta; C06/C07 continuam
+condicionadas à qualificação e adoção. Não há inferências/treinos novos.
 
 ### Evolução futura depois da publicação — E01
 

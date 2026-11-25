@@ -1,0 +1,171 @@
+{
+  "id": "C05-SF2",
+  "version": "1.0.0",
+  "status": "draft_for_review",
+  "application_base": "38e56e0013fcf2ce4fe773725c42e9cbcb4bb6b9",
+  "approval": {
+    "resume_setfit": true,
+    "dataset_totals": "approved_by_user_2026-11-25",
+    "internal_quotas_training_policy_execution": "proposed",
+    "model_adoption": false,
+    "project_provider_api_calls_authorized": false
+  },
+  "sources": {
+    "rubric": {
+      "path": "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
+      "sha256": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac"
+    },
+    "catalog": {
+      "path": "script/f08/jev/catalog.json",
+      "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271"
+    },
+    "model_lock": {
+      "path": "script/classification_comparison/setfit_pilot/model-lock.json",
+      "sha256": "a4dfd95949bbc1fd75ea46e5e3fe18f850dbd518bb2ec426a52bc628ebb455a0"
+    },
+    "requirements": {
+      "path": "script/classification_comparison/setfit_pilot/requirements.txt",
+      "sha256": "14bf9aeefaf8e8275de3b014ea63b10dea42246a0e80736220098fa546091b97"
+    }
+  },
+  "labels": {
+    "category": ["pix", "payouts", "terminal", "informacao_insuficiente"],
+    "priority": ["basic", "intermediate", "advanced", "urgent", "informacao_insuficiente"],
+    "review_is_catalog_value": false
+  },
+  "data": {
+    "total_new_narratives": 360,
+    "language": "pt",
+    "synthetic": true,
+    "historical_examples_allowed_for_learning_or_qualification": false,
+    "train": {
+      "total": 150,
+      "both_clear": 120,
+      "per_clear_category_priority_pair": 10,
+      "category_insufficient_only": 12,
+      "priority_insufficient_only": 12,
+      "both_insufficient": 6,
+      "category_support": {"pix": 44, "payouts": 44, "terminal": 44, "informacao_insuficiente": 18},
+      "priority_support": {"basic": 33, "intermediate": 33, "advanced": 33, "urgent": 33, "informacao_insuficiente": 18}
+    },
+    "validation": {
+      "total": 90,
+      "masks": ["category", "priority", "both"],
+      "per_mask": 30,
+      "classifiable_per_mask": 24,
+      "review_per_mask": 6,
+      "both_mask_review": {"category_only_insufficient": 2, "priority_only_insufficient": 2, "both_insufficient": 2},
+      "classifiable_cases": 72,
+      "expected_review_cases": 18,
+      "target_fields": {"category": 60, "priority": 60},
+      "clear_priority_support_per_priority_mask": 6,
+      "clear_priority_support_per_both_mask": 6,
+      "urgent_target_cases": 13,
+      "min_auto_completions": 51,
+      "min_raw_urgent_choices": 11
+    },
+    "final": {
+      "total": 120,
+      "masks": ["category", "priority", "both"],
+      "per_mask": 40,
+      "classifiable_per_mask": 32,
+      "review_per_mask": 8,
+      "both_mask_review": {"category_only_insufficient": 3, "priority_only_insufficient": 3, "both_insufficient": 2},
+      "classifiable_cases": 96,
+      "expected_review_cases": 24,
+      "target_fields": {"category": 80, "priority": 80},
+      "clear_priority_support_per_priority_mask": 8,
+      "clear_priority_support_per_both_mask": 8,
+      "urgent_target_cases": 17,
+      "min_auto_completions": 68,
+      "min_raw_urgent_choices": 14,
+      "private_directory": ".superpowers/sdd/conclusao-projeto/sf2-final",
+      "seal_before_first_training": true,
+      "expose_to_candidate_authors_before_freeze": false,
+      "controls_in_narrative_count": false
+    },
+    "annotation": {
+      "independent_annotations_per_record": 2,
+      "unresolved_disagreements_before_seal": 0,
+      "required_family_partition_disjointness": true,
+      "normalization": "NFKC + casefold + collapsed whitespace",
+      "exact_cross_partition_duplicates": 0,
+      "token_jaccard_review_threshold": 0.8,
+      "cross_partition_lexical_neighbors_reviewed_per_record": 3,
+      "short_text_review_token_count_lt": 5,
+      "semantic_review_required": true,
+      "model_receives": ["text"]
+    }
+  },
+  "training": {
+    "model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+    "revision": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
+    "independent_encoders": true,
+    "targets": ["category", "priority"],
+    "seed": 42,
+    "device": "cpu",
+    "torch_intraop_threads": 2,
+    "torch_interop_threads": 2,
+    "num_epochs": 1,
+    "num_iterations": 5,
+    "batch_size": 8,
+    "body_learning_rate": 0.00002,
+    "head": {
+      "class": "LogisticRegression",
+      "solver": "lbfgs",
+      "C": 1.0,
+      "tol": 0.0001,
+      "max_iter": 1000,
+      "class_weight": "balanced",
+      "random_state": 42
+    },
+    "silent_truncation": false,
+    "max_sequence_length": 128,
+    "hyperparameter_or_seed_search": false,
+    "provision_limit_seconds": 1800,
+    "aggregate_training_limit_seconds": 1800,
+    "reload_score_absolute_tolerance": 0.000001
+  },
+  "review_policy": {
+    "score_interpretation": "uncalibrated_head_scores_not_empirical_correctness_probability",
+    "tau_grid": [0.5, 0.6, 0.7, 0.8, 0.9],
+    "delta_grid": [0.0, 0.1, 0.2],
+    "joint_policy_count": 225,
+    "rules": ["raw_label_is_review", "top_score_lt_tau", "margin_lte_delta", "invalid_input_output_catalog_or_error"],
+    "sum_scores_absolute_tolerance": 0.000001,
+    "atomic_case_application": true,
+    "only_missing_head_invocations": true,
+    "raw_urgent_measured_before_policy": true,
+    "selection_order": ["correct_complete_cases_desc", "correct_applied_urgent_targets_desc", "wrong_auto_completed_cases_asc", "automatic_coverage_desc", "tau_category_asc", "delta_category_asc", "tau_priority_asc", "delta_priority_asc"],
+    "no_eligible_validation_policy": "do_not_open_final"
+  },
+  "gates": {
+    "channel_field_preservation_ratio": 1.0,
+    "complete_or_invalid_controls_model_calls": 0,
+    "partial_application_after_abstention_or_error": 0,
+    "automatic_completion_on_expected_review_cases": 0,
+    "automatic_non_urgent_applied_when_expected_urgent": 0,
+    "applied_accuracy_per_field_min": 0.9,
+    "automatic_coverage_on_fully_classifiable_cases_min": 0.7,
+    "raw_urgent_recognition_min": 0.8,
+    "final_observed_total_latency_p95_ms_max": 3000,
+    "all_metrics_and_denominators_required": true
+  },
+  "execution": {
+    "contract_namespace": "sf2-ipc/1.0",
+    "legacy_contracts_may_be_rewritten": false,
+    "concurrency": 1,
+    "attempts_per_final_case": 1,
+    "timeout_ms_per_case": 5000,
+    "artificial_final_warmup": false,
+    "startup_before_ready_reported_separately": true,
+    "percentile_method": "nearest_rank",
+    "final_p95_rank": 114,
+    "gold_sent_to_adapter": false,
+    "runtime_failure": "record_interruption_and_inconclusive_without_case_retry",
+    "paid_classifier_api_calls": 0,
+    "freeze_required_before_final_access": true,
+    "predictions_sealed_before_metric_computation": true,
+    "model_adoption_requires_decision": true
+  }
+}

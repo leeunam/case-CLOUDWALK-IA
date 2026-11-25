@@ -1,9 +1,9 @@
 # Estado da entrega em 25/11/2026
 
 A publicação temporária da plataforma passou no aceite externo da F10 com
-classificação fixture e atendente simulado. O complemento real da classificação
-segue em espera até retomada explícita. O responsável autorizou o piloto SetFit
-e propôs adiar a categorização para avançar nas demais frentes.
+classificação fixture e atendente simulado. O responsável retomou a classificação
+com SetFit e aprovou 360 relatos novos (150 de treino, 90 de validação, 120 finais).
+A especificação SF2 está em revisão; não há novo treino ou modelo adotado.
 [Plano de execução e critérios de aceite](planejamento/plano-de-execucao.md).
 
 ## Plataforma e demonstração
@@ -37,16 +37,19 @@ publicada. Nos 16 casos sintéticos de desenvolvimento, acertou 15 decisões,
 com 12/12 acertos nos casos classificáveis e 3/4 revisões reconhecidas. No
 caso `jev-013`, o piloto previu `terminal` quando se esperava revisão. O p95
 de inferência por texto foi de 21,078 ms (n=16). Prioridade, calibração e
-qualificação final ficam para uma eventual retomada.
+qualificação final compõem a proposta SF2, ainda sem nova execução.
 [Plano do piloto SetFit](planejamento/classificacao-comparativa/setfit-piloto.md).
 
 A demonstração continua com fixture. A R5 é o último ensaio registrado do
 protocolo de qualificação. A candidata foi descartada para adoção e a reserva
 da tentativa interrompida segue pendente. [Resultado R5](c05-luna-r5-resultado.md).
 
-A escolha e a calibração (C05), a integração (C06) e a reprodução do
-complemento real em instalação limpa (C07/F09 final) ficam em espera até
-retomada explícita. O fechamento completo ainda requer qualificação conforme
+A escolha e a regra de revisão (C05) foram retomadas no planejamento da
+[SF2](planejamento/classificacao-comparativa/sf2/especificacao.md), com
+[tarefas para agentes](planejamento/classificacao-comparativa/sf2/tarefas.md).
+Somente os totais dos dados estão aprovados; os demais parâmetros são proposta.
+A integração (C06) e a reprodução do complemento real (C07/F09 final) continuam
+condicionadas. O fechamento completo ainda requer qualificação conforme
 os critérios vigentes, adoção aprovada e o aceite do complemento real com
 proveniência, revisão humana, broker e handoff. O atendente conversacional
 real (E01) fica como evolução posterior e opcional.
