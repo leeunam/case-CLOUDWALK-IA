@@ -295,9 +295,10 @@ Após concluir o aceite externo da F10 em fixture, o responsável pediu retomar
 a classificação, preparar a especificação SF2 e dividir o trabalho entre agentes.
 Aprovou 360 relatos sintéticos novos: 150 para treino, 90 para validação da
 regra de revisão e 120 finais independentes. A
-[proposta SF2](classificacao-comparativa/sf2/especificacao.md) e seu
+[SF2](classificacao-comparativa/sf2/especificacao.md) e seu
 [plano de tarefas](classificacao-comparativa/sf2/tarefas.md) explicitam os demais
-parâmetros para revisão antes da execução. Não tratam o piloto 15/16 como adoção,
+parâmetros aprovados pelo responsável, que liberou a primeira onda 00/01/02.
+Não tratam o piloto 15/16 como adoção,
 não reutilizam os finais consumidos e não fazem chamadas pagas.
 
 C05 está retomada em planejamento. C06 e C07/F09 final permanecem condicionadas

@@ -1,12 +1,14 @@
 {
   "id": "C05-SF2",
   "version": "1.0.0",
-  "status": "draft_for_review",
+  "status": "approved",
   "application_base": "38e56e0013fcf2ce4fe773725c42e9cbcb4bb6b9",
   "approval": {
     "resume_setfit": true,
     "dataset_totals": "approved_by_user_2026-11-25",
-    "internal_quotas_training_policy_execution": "proposed",
+    "internal_quotas_training_policy_execution": "approved_by_user_2026-11-25",
+    "execution_release": ["SF2-00", "SF2-01", "SF2-02"],
+    "approval_record": "docs/planejamento/classificacao-comparativa/sf2/aprovacao.json",
     "model_adoption": false,
     "project_provider_api_calls_authorized": false
   },

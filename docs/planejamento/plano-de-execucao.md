@@ -148,10 +148,10 @@ isolamento, propriedade, modelos sugeridos, revisão e exercícios de aprendizag
 
 Na retomada SF2 de 25/11/2026, o responsável aprovou 360 relatos novos:
 150 de treino, 90 de validação e 120 finais. A
-[especificação proposta](classificacao-comparativa/sf2/especificacao.md) fixa
+[especificação aprovada](classificacao-comparativa/sf2/especificacao.md) fixa
 treino de categoria/prioridade, revisão e teste independente, com
 [tarefas isoladas](classificacao-comparativa/sf2/tarefas.md). Os demais
-parâmetros e a execução aguardam revisão da proposta; C06/C07 continuam
+parâmetros foram aprovados e 00/01/02 foram liberadas; C06/C07 continuam
 condicionadas à qualificação e adoção. Não há inferências/treinos novos.
 
 ### Evolução futura depois da publicação — E01

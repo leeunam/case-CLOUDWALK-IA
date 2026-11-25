@@ -178,16 +178,16 @@ O custo confirmado da R5 foi US$ 0,00992557; uma reserva de US$ 1,239 permanece
 pendente e não representa cobrança confirmada. Não houve repetição. Novas
 chamadas pagas estão suspensas. O piloto local SetFit (C05-SF1) concluiu a
 avaliação exploratória de categoria. O responsável retomou a qualificação
-(C05) com a proposta SF2 e aprovou 360 relatos novos: 150 de treino, 90 de
-validação e 120 finais. Treino, regra de revisão e execução estão em revisão
-antes de iniciar. C06 e C07/F09 final dependem da qualificação e decisão de
+(C05) com a SF2 e aprovou a especificação, incluindo 360 relatos novos:
+150 de treino, 90 de validação e 120 finais. A primeira onda 00/01/02 está
+liberada; ainda não há novo treino. C06 e C07/F09 final dependem da qualificação e decisão de
 adoção; a demonstração segue com fixture.
 O atendente conversacional real (E01) fica como evolução posterior e opcional.
 [Resultado real R5](docs/c05-luna-r5-resultado.md) ·
 [Candidata R5](docs/c05-luna-r5-candidata.md) ·
 [Preparação R5](docs/planejamento/classificacao-comparativa/rodada-5-implementacao.md) ·
 [Piloto SetFit](docs/planejamento/classificacao-comparativa/setfit-piloto.md) ·
-[Proposta SF2 e divisão dos agentes](docs/planejamento/classificacao-comparativa/sf2/especificacao.md) ·
+[SF2 e divisão dos agentes](docs/planejamento/classificacao-comparativa/sf2/especificacao.md) ·
 [Plano de conclusão](docs/planejamento/conclusao-projeto.md).
 
 [Contrato HTTP e eventos](docs/contratos/openapi.yaml) ·

@@ -1,9 +1,9 @@
 # SF2 — tarefas, dependências e trabalho paralelo
 
-Este plano executa a [especificação proposta](especificacao.md), não autoriza
-treino por si só. Os totais 150/90/120 foram aprovados; a proposta completa
-precisa de revisão do responsável antes de iniciar as tarefas abaixo.
-Nenhuma destas branches operacionais foi criada nesta etapa de planejamento.
+Este plano executa a [especificação aprovada](especificacao.md). O responsável
+aprovou a SF2 e liberou a primeira onda 00/01/02 em 25/11/2026:
+[registro](aprovacao.json). Treino real continua bloqueado pelos aceites previstos.
+O integrador prepara branches/worktrees antes de cada passagem.
 
 ## Contrato de trabalho de todos os agentes
 
@@ -214,5 +214,5 @@ Nenhum marcador de aprovação é criado pelo autor para aprovar o próprio trab
 O integrador revisa o retorno, executa os aceites relevantes, integra apenas
 arquivos da tarefa e preserva as demais frentes. Não há push ou publicação de
 novas issues nesta etapa. Os cards C05/C06/C07 existentes são referências de
-objetivo; esta especificação proposta precisa ser aprovada antes de ampliar
-o seu escopo histórico para SetFit treinado.
+objetivo. A SF2 aprovada amplia a pesquisa para SetFit treinado; a integração
+C06/C07 permanece condicionada aos resultados e à decisão de adoção.

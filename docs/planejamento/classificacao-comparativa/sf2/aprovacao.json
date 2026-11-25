@@ -1,0 +1,16 @@
+{
+  "id": "SF2-approval-2026-11-25",
+  "approved_specification_commit": "2f50ef8076f29aed82f4f032e75b58259e4200bc",
+  "approved_by": "responsável pelo projeto",
+  "approved_on": "2026-11-25",
+  "source": "resposta explícita no chat central",
+  "exact_user_instruction": "Show, aprovo a SF2. Pode iniciar a primeira onda (00, 01 e 02) com agentes em paralelo e me explicar o que vamos acompanhar aqui.",
+  "scope": {
+    "specification_and_protocol": "approved",
+    "released_tasks": ["SF2-00", "SF2-01", "SF2-02"],
+    "later_tasks": "dependem dos aceites e bases integradas previstos no plano",
+    "model_adoption": false,
+    "paid_classifier_api_calls": false,
+    "publication_or_push": false
+  }
+}

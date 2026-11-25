@@ -1,11 +1,12 @@
 # C05-SF2 — especificação do classificador local
 
-Versão de proposta: **1.0.0**, 25/11/2026. Base de aplicação `38e56e0013fcf2ce4fe773725c42e9cbcb4bb6b9`.
+Versão aprovada: **1.0.0**, 25/11/2026. Base de aplicação `38e56e0013fcf2ce4fe773725c42e9cbcb4bb6b9`.
 
-**Confirmado:** retomada com SetFit e 360 relatos novos, separados em 150 de treino,
-90 de validação e 120 finais. **Proposto para revisão:** quotas internas,
-treinamento, política e execução descritos abaixo. Não há adoção aprovada,
-novo treino executado, resultado SF2 ou autorização para API paga nesta proposta.
+**Aprovado:** retomada com SetFit, 360 relatos novos (150 de treino, 90 de
+validação, 120 finais), quotas, treinamento, política e execução descritos abaixo.
+O responsável liberou a primeira onda 00/01/02 no
+[registro de aprovação](aprovacao.json). Não há adoção aprovada, novo treino
+executado, resultado SF2 ou autorização para API paga.
 
 [Protocolo declarativo](protocolo.json) · [Tarefas e passagens](tarefas.md) ·
 [Prompts dos agentes](prompts.md) · [Piloto SF1](../../../c05-setfit-piloto.md).
@@ -123,7 +124,7 @@ Reutilizar o modelo e os arquivos públicos de
 e do [snapshot](../../../../script/classification_comparison/setfit_pilot/model-lock.json).
 Não atualizar versões implicitamente nem executar código remoto do modelo.
 
-| Parâmetro | Valor proposto |
+| Parâmetro | Valor aprovado |
 | --- | --- |
 | Ambiente | Python 3.11, CPU; duas threads intra/inter-op; sem GPU |
 | Inicialização | Um modelo novo a partir do mesmo snapshot para cada campo |
