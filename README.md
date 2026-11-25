@@ -1,10 +1,12 @@
 # Help desk multimarca CloudWalk
 
 Projeto individual do TAPI Inteli/CloudWalk. O help desk reúne atendimentos
-simulados de chat, WhatsApp e e-mail em filas por marca. Um atendente simulado
-responde pelo Kafka e encaminha casos que precisam de intervenção humana. O
-analista recebe o histórico e as referências do encaminhamento. A supervisão
-pode revisar a classificação, auditar decisões e configurar a operação.
+simulados de chat, WhatsApp e e-mail em filas por marca. A demonstração usa
+respostas determinísticas (fixture) para completar a classificação. Um
+atendente simulado responde pelo Kafka e encaminha casos ao analista com
+histórico e referências da conversa. O frontend usa a API Rails real e os
+atendimentos ficam no PostgreSQL. A supervisão pode revisar a classificação,
+auditar decisões e configurar a operação.
 
 ## Demonstração local
 
@@ -35,10 +37,31 @@ A primeira subida cria o arquivo privado e ignorado `.env.demo.local`, prepara
 os tópicos Kafka e inicializa o banco com Aurora e Horizonte, quatro filas,
 três analistas e supervisão. O projeto Compose padrão é `cloudwalk_demo`.
 Use um nome de projeto distinto por checkout ou worktree, pois `down`
-preserva os volumes vinculados ao nome. O classificador usa respostas
-fixture determinísticas, e a interface usa a API real. O
-[roteiro completo](docs/f09.md) inclui três canais, duas marcas, revisão,
-atendimento humano, reinício, troca de portas e comandos Docker diretos.
+preserva os volumes vinculados ao nome. Para retomar a mesma demonstração,
+use o mesmo nome de projeto e o arquivo privado original. A preparação F09
+foi verificada em instalação limpa. O [roteiro completo](docs/f09.md) inclui
+três canais, duas marcas, revisão, atendimento humano, reinício, troca de
+portas e comandos Docker diretos.
+
+## Publicação temporária
+
+A demonstração da F10 foi publicada em HTTPS com classificação fixture e
+atendente simulado. O reinício preservou os atendimentos, e a restauração da
+cópia em uma instalação isolada recuperou o mesmo caso. A reorganização da
+interface e o tema inspirado na CloudWalk foram aceitos e publicados.
+[Resultado F10](docs/f10-resultado.md) ·
+[Aceite UX01](docs/ux01.md) · [Aceite UX02](docs/ux02.md).
+
+A [última URL verificada](https://tribal-louisville-container-bind.trycloudflare.com/)
+é a da UX02. O endereço depende do computador e do túnel ligados e muda ao
+recriar o túnel. O serviço limita a 200 requisições simultâneas em voo e não
+garante disponibilidade. O teste por dados móveis foi registrado no endereço
+anterior. [Evidências da publicação](docs/f10-resultado.md).
+
+O [roteiro de publicação](docs/f10.md) orienta a escolher um projeto exclusivo
+e executar `init`, `up` e `check` com `script/publish.py` antes de `prepare` e
+`publish`. Use `credentials` em terminal privado para obter o acesso sintético.
+O mesmo roteiro cobre como parar, retomar e restaurar a demonstração.
 
 ## Arquitetura
 
@@ -95,19 +118,26 @@ verificação da imagem Python.
 
 ## Resultados e limites
 
-A matriz histórica F08 permanece com cinco das seis rodadas aprovadas. Na
+A referência de carga F08 teve cinco das seis rodadas aprovadas. Na
 rodada que reprovou após a interrupção do Kafka, 1.199 entradas ficaram sem
 primeira resposta. A R01 confirmou a recuperação em um ensaio controlado
 posterior. A R02 corrigiu o analisador e reprocessou as evidências preservadas.
-A carga de dez mil sessões de chat continua sem medição de capacidade.
+A falha original permanece no resultado. O ensaio exploratório de dez mil
+conexões de chat segue sem medição. [Resultados F08](docs/f08.md).
 
-A fixture viabiliza percorrer a classificação, a revisão e o percurso do
-atendente simulado. A qualidade, latência e custo de classificadores reais
-são tratados na avaliação C05. C06, C07 e a publicação F10 ficam no
-[plano de conclusão](docs/planejamento/conclusao-projeto.md). Os próximos
-passos de evolução incluem a integração de um classificador elegível, a
-validação da instalação por URL e novas medições de capacidade. A pilha
-local serve o React pelo Vite e mantém as duas portas no loopback.
+A Luna acertou 7 de 8 campos em seis chamadas de desenvolvimento na C05-R4,
+com zero erros técnicos e p95 de 1.762,223 ms. A atribuição de categoria a
+um caso com informação insuficiente reprovou o gate e bloqueou as 44 chamadas
+finais. O custo conservador acumulado até essa rodada foi de US$ 0,03093512.
+[Resultado C05-R4](docs/c05-luna-r4-resultado.md).
+
+A R5, que mantém a Luna e acrescenta evidência verificável com validação
+conservadora, está em preparação. A integração do classificador real (C06)
+aguarda qualificação e decisão de adoção. A validação final (C07/F09) também
+segue pendente. O atendente conversacional real (E01) fica como evolução
+posterior e opcional.
+[Preparação R5](docs/planejamento/classificacao-comparativa/rodada-5-implementacao.md) ·
+[Plano de conclusão](docs/planejamento/conclusao-projeto.md).
 
 [Contrato HTTP e eventos](docs/contratos/openapi.yaml) ·
 [Roteiro de desenvolvimento do frontend](frontend/README.md) ·
