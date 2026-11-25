@@ -1,0 +1,35 @@
+{
+  "id": "controle-01",
+  "text_sha256": "8e414ce0120cd6bdd1e49db4574d01182cfec2b248c61227dd072eeea5342585",
+  "annotations": [
+    {
+      "annotator": "autor-fixture",
+      "origin": "ai",
+      "labels": {
+        "category": "pix",
+        "priority": "basic"
+      },
+      "rationale": {
+        "category": "O relato nomeia o meio.",
+        "priority": "Uso futuro sem impacto."
+      },
+      "evidence": {
+        "category": [
+          "Pix"
+        ],
+        "priority": [
+          "venda futura"
+        ]
+      }
+    }
+  ],
+  "reconciliation": null,
+  "rubric": {
+    "version": "1.0.0",
+    "sha256": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac"
+  },
+  "catalog": {
+    "version": "1.0.0",
+    "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271"
+  }
+}

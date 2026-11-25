@@ -1,0 +1,17 @@
+{
+  "id": "controle-01",
+  "family_id": "fixture",
+  "partition": "validation",
+  "text": "Quero aprender a fazer um Pix para uma venda futura.",
+  "gold": {
+    "category": "pix",
+    "priority": "basic"
+  },
+  "author": "autor-fixture",
+  "missing_fields": [
+    "category"
+  ],
+  "received": {
+    "priority": "basic"
+  }
+}
