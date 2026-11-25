@@ -1,11 +1,12 @@
 """Supervisão POSIX externa ao processo de instalação/treino."""
 
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from datetime import datetime, timezone
 import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import signal
 import socket
 import subprocess
@@ -17,6 +18,7 @@ SF2 = Path(__file__).resolve().parents[1]
 MODULE = "script.classification_comparison.setfit_sf2.training"
 LIMITS = ROOT / "docs/planejamento/classificacao-comparativa/sf2/protocolo.json"
 POLL = 0.1
+CANCEL_SIGNALS = (signal.SIGINT, signal.SIGTERM)
 
 
 def now():
@@ -39,7 +41,20 @@ class Supervisor:
         self.cancelled_by = None
 
     def cancel(self, signum, _frame):
-        self.cancelled_by = signum
+        if self.cancelled_by is None:
+            self.cancelled_by = signum
+
+    def commit(self, prepared, receipt):
+        previous = signal.pthread_sigmask(signal.SIG_BLOCK, CANCEL_SIGNALS)
+        try:
+            # Depois desta consulta, os sinais da seção protegida são posteriores ao compromisso.
+            pending = signal.sigpending().intersection(CANCEL_SIGNALS)
+            if pending:
+                self.cancel(min(pending), None)
+            self.wait_time()
+            prepared.replace(receipt)
+        finally:
+            signal.pthread_sigmask(signal.SIG_SETMASK, previous)
 
     def wait_time(self, deadline=None):
         if self.cancelled_by:
@@ -116,34 +131,63 @@ def watch_training(supervisor, process, parent, limit, expected_stages):
             raise Interrupted("failed", 1, "Evento de supervisão inesperado")
 
 
-def supervise_run(output, operation):
+def remove_artifact(path):
+    if path.is_dir():
+        shutil.rmtree(path)
+    else:
+        path.unlink(missing_ok=True)
+
+
+def supervise_run(output, operation, *, artifacts=()):
     output.mkdir(parents=True)
     supervisor = Supervisor()
-    handlers = {signum: signal.signal(signum, supervisor.cancel) for signum in (signal.SIGINT, signal.SIGTERM)}
-    report = {"task": "SF2-03", "started_at_utc": now(), "status": "running"}
+    handlers = {signum: signal.signal(signum, supervisor.cancel) for signum in CANCEL_SIGNALS}
+    initial = {"task": "SF2-03", "started_at_utc": now()}
     path = output / "status.json"
+    staging = output / "staging"
 
-    def persist():
+    def prepare_report(status, **details):
         temp = output / "status.tmp"
+        report = {**initial, "status": status, **details}
         temp.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        temp.replace(path)
+        return temp
 
-    code = 0
-    persist()
     try:
-        with (output / "commands.log").open("w", encoding="utf-8") as log:
-            details = operation(supervisor, log)
-        report.update(status="complete", **details)
-    except (Interrupted, OSError, ValueError) as error:
+        prepare_report("running").replace(path)
+        with ExitStack() as rollback:
+            if artifacts:
+                rollback.callback(remove_artifact, staging)
+            with (output / "commands.log").open("w", encoding="utf-8") as log:
+                details = operation(supervisor, log)
+            # A elegibilidade só é publicada junto ao recibo complete.
+            for name in artifacts:
+                supervisor.wait_time()
+                destination = output / name
+                rollback.callback(remove_artifact, destination)
+                (staging / name).replace(destination)
+            if artifacts:
+                remove_artifact(staging)
+            complete = prepare_report("complete", finished_at_utc=now(), exit_code=0, **details)
+            supervisor.commit(complete, path)
+            rollback.pop_all()
+    except BaseException as error:
+        try:
+            supervisor.wait_time()
+        except Interrupted as cancellation:
+            error = cancellation
+        status = error.kind if isinstance(error, Interrupted) else "failed"
         code = error.code if isinstance(error, Interrupted) else 1
-        report.update(status=error.kind if isinstance(error, Interrupted) else "failed", message=str(error))
-        print(str(error), file=sys.stderr)
+        handled = isinstance(error, (Interrupted, OSError, ValueError))
+        message = str(error) if handled else f"{type(error).__name__}: {error}"
+        prepare_report(status, finished_at_utc=now(), exit_code=code, message=message).replace(path)
+        if not handled:
+            raise
+        print(message, file=sys.stderr)
+        return code
     finally:
-        report.update(finished_at_utc=now(), exit_code=code)
-        persist()
         for signum, handler in handlers.items():
             signal.signal(signum, handler)
-    return code
+    return 0
 
 
 def install(snapshot, output):
@@ -184,29 +228,22 @@ def train(output, worker_args):
     limit = budget("aggregate_training_limit_seconds")
 
     def operation(supervisor, log):
-        import shutil
-
         staging = output / "staging"
         staging.mkdir()
-        try:
-            parent, child = socket.socketpair()
-            with parent, child:
-                argv = [sys.executable, "-B", "-m", MODULE, "run-worker", *worker_args,
-                        "--staging", staging, "--control-fd", str(child.fileno())]
-                with supervisor.child(argv, pass_fds=(child.fileno(),), stdout=log,
-                                      stderr=subprocess.STDOUT) as process:
-                    child.close()
-                    seconds = watch_training(supervisor, process, parent, limit, expected_stages=2)
-            supervisor.wait_time()
-            manifest = staging / "package/manifest.json"
-            receipt = json.loads((staging / "evidence.json").read_text(encoding="utf-8"))
-            package_digest = hashlib.sha256(manifest.read_bytes()).hexdigest()
-            if receipt["package_sha256"] != package_digest:
-                raise ValueError("Manifesto produzido difere do recibo de reload")
-            (staging / "evidence.json").replace(output / "evidence.json")
-            (staging / "package").replace(output / "package")
-            return {"package_sha256": package_digest, "training_seconds": seconds}
-        finally:
-            shutil.rmtree(staging)
+        parent, child = socket.socketpair()
+        with parent, child:
+            argv = [sys.executable, "-B", "-m", MODULE, "run-worker", *worker_args,
+                    "--staging", staging, "--control-fd", str(child.fileno())]
+            with supervisor.child(argv, pass_fds=(child.fileno(),), stdout=log,
+                                  stderr=subprocess.STDOUT) as process:
+                child.close()
+                seconds = watch_training(supervisor, process, parent, limit, expected_stages=2)
+        supervisor.wait_time()
+        manifest = staging / "package/manifest.json"
+        receipt = json.loads((staging / "evidence.json").read_text(encoding="utf-8"))
+        package_digest = hashlib.sha256(manifest.read_bytes()).hexdigest()
+        if receipt["package_sha256"] != package_digest:
+            raise ValueError("Manifesto produzido difere do recibo de reload")
+        return {"package_sha256": package_digest, "training_seconds": seconds}
 
-    return supervise_run(output, operation)
+    return supervise_run(output, operation, artifacts=("evidence.json", "package"))

@@ -15,13 +15,16 @@ REQUIREMENTS = HERE / "requirements.txt"
 RECIPE = PROTOCOL["training"]
 
 
-def pinned_distributions(path=REQUIREMENTS):
-    pins = {}
+def resolved_requirements(path=REQUIREMENTS):
+    path = path.resolve()
+    pins, files = {}, {path}
     for line in path.read_text(encoding="utf-8").splitlines():
         if not line or line.startswith("#"):
             continue
         if line.startswith("-r "):
-            pins.update(pinned_distributions(path.parent / line.removeprefix("-r ")))
+            included_pins, included_files = resolved_requirements(path.parent / line.removeprefix("-r "))
+            pins.update(included_pins)
+            files.update(included_files)
         elif line.startswith("torch @ "):
             # O lock do SF1 fixa a URL e o hash do wheel; normalize a versão local do CPU.
             filename = unquote(line.split("/")[-1])
@@ -29,13 +32,13 @@ def pinned_distributions(path=REQUIREMENTS):
         else:
             name, expected = line.split("==")
             pins[name] = expected
-    return pins
+    return pins, files
 
 
 def check_pins():
     require(sys.version_info[:2] == (3, 11), "SF2 exige Python 3.11")
     verify_sources()
-    pins = pinned_distributions()
+    pins, _ = resolved_requirements()
     installed = {name: version(name) for name in pins}
     for name, expected in pins.items():
         require(installed[name] == expected, f"Pin divergente para {name}: {installed[name]} != {expected}")

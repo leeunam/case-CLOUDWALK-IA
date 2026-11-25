@@ -11,14 +11,17 @@ from ..adapter.decide import assess
 from ..contracts.artifacts import validate_manifest
 from ..contracts.core import CATALOG, FIELDS, LABELS, PLAN, PROTOCOL, ROOT, SCHEMA_PATH, decode, read, require, sha256
 from ..contracts.ipc import validate_vector
-from .environment import HERE, RECIPE, check_pins, configure_cpu, length, load_body, snapshot_receipt
+from .environment import HERE, RECIPE, check_pins, configure_cpu, length, load_body, resolved_requirements, snapshot_receipt
 from .package import export_specialist, head_classes, load_package, read_hashed, score_vector, seal_package, write_json
 
 
 def code_manifest():
-    paths = [*HERE.glob("*.py"), HERE / "requirements.txt", HERE.parent / "adapter/decide.py",
-             ROOT / "script/classification_comparison/setfit_pilot/provision.py"]
-    paths = [p for p in paths if not p.name.startswith(("test_", "_fixture"))]
+    contract_dir = HERE.parent / "contracts"
+    _, requirements = resolved_requirements(HERE / "requirements.txt")
+    paths = {*HERE.glob("*.py"), *requirements, HERE.parent / "adapter/decide.py",
+             ROOT / "script/classification_comparison/setfit_pilot/provision.py"}
+    paths.update(path for path in contract_dir.glob("*.py") if path.name != "__main__.py")
+    paths = {path for path in paths if not path.name.startswith(("test_", "_fixture"))}
     return {"files": {path.relative_to(ROOT).as_posix(): sha256(path) for path in sorted(paths)}}
 
 

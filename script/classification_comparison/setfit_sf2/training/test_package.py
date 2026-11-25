@@ -2,9 +2,11 @@
 
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 from tempfile import TemporaryDirectory
+from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
 import warnings
@@ -12,6 +14,7 @@ import warnings
 from ..adapter.test_decide import record
 from ..contracts.core import FIELDS, LABELS, VERSION, read, sha256
 from ..contracts.ipc import project, validate_decision
+from . import fit
 from .environment import check_pins, configure_cpu, load_body
 from .fit import build_trainer, fit_specialist, preflight_tokenization, resolved_setfit_arguments, verify_reload
 from .package import export_specialist, load_package, read_hashed, read_verified_package, score_vector, seal_package, write_json
@@ -19,6 +22,45 @@ from .scores import COLLECTION_POLICY, publish_new
 
 FIXTURE = "fixture-sf2-03: parâmetros sintéticos, sem otimização de encoder ou cabeça"
 MODULE = "script.classification_comparison.setfit_sf2.adapter"
+
+
+class CodeManifestTests(unittest.TestCase):
+    def test_mudanca_em_cada_dependencia_efetiva_invalida_o_congelamento(self):
+        base = Path("script/classification_comparison")
+        contract_dir = base / "setfit_sf2/contracts"
+        required = (
+            *(contract_dir / f"{module}.py" for module in ("__init__", "artifacts", "core", "data", "ipc")),
+            base / "requirements.txt",
+            base / "setfit_pilot/requirements.txt",
+            base / "setfit_sf2/training/requirements.txt",
+        )
+        original = fit.code_manifest()["files"]
+        self.assertFalse({path.as_posix() for path in required} - original.keys())
+
+        with TemporaryDirectory() as temp:
+            root = Path(temp)
+            training = root / base / "setfit_sf2/training"
+            for path in original:
+                copy = root / path
+                copy.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(fit.ROOT / path, copy)
+            freeze = root / "training-code.json"
+            write_json(freeze, {"files": original})
+            role_names = ("train", "validation", "annotations", "public_manifest", "review_receipt",
+                          "token_lengths", "final_seal", "arguments", "training_code")
+            args = SimpleNamespace(**dict.fromkeys(role_names, freeze))
+            with patch.object(fit, "ROOT", root), patch.object(fit, "HERE", training):
+                self.assertEqual(fit.code_manifest(), {"files": original})
+                for dependency in required:
+                    with self.subTest(dependency=dependency):
+                        copy = root / dependency
+                        immutable = copy.read_bytes()
+                        try:
+                            copy.write_bytes(immutable + b"\n# alteracao de fixture\n")
+                            with self.assertRaisesRegex(ValueError, "inventário do código de treino diverge"):
+                                fit.checked_inputs(args)
+                        finally:
+                            copy.write_bytes(immutable)
 
 
 class PackageTests(unittest.TestCase):
