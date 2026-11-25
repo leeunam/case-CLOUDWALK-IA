@@ -20,8 +20,9 @@ rede com os perfis sintéticos de cliente e analista. Verificar atualização
 do chat, resposta do atendente simulado, handoff com histórico e isolamento
 por marca. A [última URL verificada](https://newbie-aqua-stem-reveal.trycloudflare.com/)
 é do túnel reaberto em 25/11/2026, com verificação da saúde da API em HTTPS.
-O acesso depende do computador e do túnel ativos e o endereço muda ao
-recriar o túnel. [Resultado F10](f10-resultado.md) · [Roteiro F10](f10.md).
+O responsável confirmou a abertura da página nesse endereço. O acesso
+depende do computador e do túnel ativos e o endereço muda ao recriar o túnel.
+[Resultado F10](f10-resultado.md) · [Roteiro F10](f10.md).
 
 Repetir a matriz F08 nas mesmas condições reforçaria a evidência sob carga
 após as correções. Aumento progressivo de taxa, carga de atendimento humano
