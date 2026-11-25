@@ -3,8 +3,9 @@
 A publicação temporária da plataforma passou no aceite externo da F10 com
 classificação fixture e atendente simulado. O responsável retomou a classificação
 com SetFit e aprovou 360 relatos novos (150 de treino, 90 de validação, 120 finais).
-A especificação SF2 foi aprovada e a primeira onda 00/01/02 foi liberada;
-não há novo treino ou modelo adotado.
+A SF2 concluiu contratos, dados, código e a validação dos dois especialistas
+treinados. Nenhuma das 225 políticas de revisão atingiu todos os critérios.
+Os 120 casos finais permanecem fechados e nenhum modelo foi adotado.
 [Plano de execução e critérios de aceite](planejamento/plano-de-execucao.md).
 
 ## Plataforma e demonstração
@@ -37,20 +38,28 @@ O piloto C05-SF1 de categoria foi concluído em CPU, fora da aplicação
 publicada. Nos 16 casos sintéticos de desenvolvimento, acertou 15 decisões,
 com 12/12 acertos nos casos classificáveis e 3/4 revisões reconhecidas. No
 caso `jev-013`, o piloto previu `terminal` quando se esperava revisão. O p95
-de inferência por texto foi de 21,078 ms (n=16). Prioridade, calibração e
-qualificação final compõem a SF2 aprovada, ainda sem novo treino.
+de inferência por texto foi de 21,078 ms (n=16). O resultado é histórico e
+não substitui o ensaio SF2 de categoria e prioridade abaixo.
 [Plano do piloto SetFit](planejamento/classificacao-comparativa/setfit-piloto.md).
 
-A demonstração continua com fixture. A R5 é o último ensaio registrado do
-protocolo de qualificação. A candidata foi descartada para adoção e a reserva
+A demonstração continua com fixture. No histórico da R5, a candidata foi
+descartada para adoção e a reserva
 da tentativa interrompida segue pendente. [Resultado R5](c05-luna-r5-resultado.md).
 
 A escolha e a regra de revisão (C05) foram retomadas no planejamento da
 [SF2](planejamento/classificacao-comparativa/sf2/especificacao.md), com
 [tarefas para agentes](planejamento/classificacao-comparativa/sf2/tarefas.md).
-A especificação completa foi aprovada, com a primeira onda 00/01/02 liberada.
+Após o aceite de 00–04, os dois modelos completaram o treino em 913,685 s
+acumulados e passaram no reload. A coleta SF2-05A registrou 90 relatos e cinco
+controles. Na política de coleta, categoria acertou 45/47 complementos
+aplicados e prioridade 39/44, com p95 de 177,61 ms. As 225 políticas testadas
+concluíram pelo menos dois casos que exigiam revisão, impedindo a qualificação.
+A [evidência revisada](evidencias/c05/sf2/qualificacao-01/README.md) foi
+integrada localmente. Sem política elegível, não houve congelamento, avaliação
+dos 120 finais ou liberação de C06.
+
 A integração (C06) e a reprodução do complemento real (C07/F09 final) continuam
-condicionadas. O fechamento completo ainda requer qualificação conforme
+bloqueadas. O fechamento completo ainda requer qualificação conforme
 os critérios vigentes, adoção aprovada e o aceite do complemento real com
 proveniência, revisão humana, broker e handoff. O atendente conversacional
 real (E01) fica como evolução posterior e opcional.

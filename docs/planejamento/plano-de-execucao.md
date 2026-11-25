@@ -151,8 +151,13 @@ Na retomada SF2 de 25/11/2026, o responsável aprovou 360 relatos novos:
 [especificação aprovada](classificacao-comparativa/sf2/especificacao.md) fixa
 treino de categoria/prioridade, revisão e teste independente, com
 [tarefas isoladas](classificacao-comparativa/sf2/tarefas.md). Os demais
-parâmetros foram aprovados e 00/01/02 foram liberadas; C06/C07 continuam
-condicionadas à qualificação e adoção. Não há inferências/treinos novos.
+parâmetros foram aprovados. Após o aceite de 00–04, SF2-05A treinou os dois
+especialistas e coletou uma vez os 90 relatos de validação e cinco controles.
+Nenhuma das 225 políticas cumpriu todos os critérios. A entrega negativa
+passou por revisão independente; os 120 finais permanecem fechados, sem
+congelamento ou adoção. C06/C07 continuam bloqueadas. A demonstração fixture
+foi preservada e não houve chamadas pagas nessa execução.
+[Resultado e evidências](../evidencias/c05/sf2/qualificacao-01/README.md).
 
 ### Evolução futura depois da publicação — E01
 

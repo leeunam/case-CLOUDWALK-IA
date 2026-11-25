@@ -6,15 +6,20 @@ executou modelos; as implementações e medições posteriores estão registrada
 
 [Especificação CLASS-SPEC-001](especificacao.md) · [Guia para os chats](guia-dos-chats.md).
 
-## Situação atual — SF2 aprovada, 25/11/2026
+## Situação atual — validação SF2 reprovada, 25/11/2026
 
 Após o piloto SetFit e o aceite externo F10 em fixture, o responsável retomou
 a classificação. Foram aprovados 360 relatos novos: 150 de treino, 90 de
 validação e 120 finais. A [especificação SF2](sf2/especificacao.md), o
 [protocolo declarativo](sf2/protocolo.json) e a [divisão dos agentes](sf2/tarefas.md)
-foram aprovados pelo responsável, que liberou 00/01/02. Dois especialistas,
-regra de revisão e quotas internas estão fixados; nenhum modelo SF2 foi treinado/adotado.
-C06/C07 continuam condicionadas à qualificação e adoção, sem novas chamadas pagas.
+foram aprovados pelo responsável. Após o aceite de 00–04, os dois especialistas
+foram treinados e a validação única registrou 90 relatos e cinco controles.
+Nenhuma das 225 regras de revisão passou por todos os critérios: todas
+concluíram pelo menos dois casos que exigiam revisão. A
+[execução revisada](../../evidencias/c05/sf2/qualificacao-01/README.md) teve
+zero chamadas de API. Os 120 casos finais continuam privados e não foram
+executados. C06/C07 permanecem bloqueadas; nenhum modelo foi adotado.
+[Acompanhamento e próximas dependências](sf2/acompanhamento.md).
 
 ## Histórico de decisões e limites
 

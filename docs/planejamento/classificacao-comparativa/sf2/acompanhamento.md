@@ -83,7 +83,7 @@ A [interface local](interface-onda2.md) registra o transporte e a coleta única
 de validação. Neste chat, o integrador acompanha interfaces, revisões
 independentes e o aceite combinado antes de liberar o treino.
 
-## SF2-05 — qualificação local liberada
+## SF2-05 — validação concluída e reprovada
 
 O pedido de continuidade retoma o fluxo aprovado, agora com 00–04 e a
 integração aceitas. 05 executa a receita fixa, sem busca de hiperparâmetros:
@@ -91,5 +91,35 @@ um treino por campo, coleta única de validação e comparação das 225 políti
 O limite acumulado de treino é 30 minutos em CPU. O executor é separado do
 autor da candidata. Textos e anotações finais continuam privados até a
 validação cumprir os gates, a auditoria aprovar a seleção e o pacote ser
-congelado. Nenhum resultado SF2 real foi produzido no fechamento desta etapa
-de preparação. Adoção e chamadas pagas continuam sem liberação.
+congelado. Essa liberação produziu a entrega abaixo, sem adoção ou chamadas pagas.
+
+SF2-05A foi executada na base `99885274`, branch `feat/sf2-qualificacao`,
+worktree `.worktrees/sf2-qualificacao`. Os dois especialistas completaram
+um ajuste por campo em 913,685 s acumulados; os seis testes de reload
+reproduziram os scores. Uma coleta registrou 90 relatos e cinco controles.
+Os extratores 03 e 04 concordaram nos mesmos 120 vetores, sem nova inferência.
+
+**Nenhuma das 225 políticas ficou elegível.** Todas concluíram pelo menos
+dois dos 18 casos que exigiam revisão. Na política de coleta, categoria
+acertou 45/47 complementos aplicados e prioridade 39/44; houve um urgente
+rebaixado. O p95 observado dessa coleta foi 177,61 ms. Essas métricas
+descrevem a validação e sua política de coleta, não um teste final ou uma
+política vencedora.
+
+A [evidência](../../../evidencias/c05/sf2/qualificacao-01/README.md), integrada
+em `4eb86a3`, passou por
+[revisão independente](../../../evidencias/c05/sf2/revisoes-qualificacao-01/revisao.md).
+O primeiro lançamento falhou com erro de permissão sem anúncio de ajuste;
+os registros foram preservados. O relançamento autorizado manteve código,
+dados e receita. A operação exata da primeira falha não foi identificada.
+
+| Etapa | Estado após a revisão |
+| --- | --- |
+| 05 · treino e validação | Entrega negativa aceita; nenhum congelamento ou digest de liberação |
+| Final independente | 120 relatos continuam privados, sem execução |
+| 06 · integração | Bloqueada por qualificação e decisão de adoção |
+| 07 · reprodução real | Bloqueada por 06; demonstração fixture preservada |
+
+Qualquer extensão da grade ou novo treino exige proposta separada. A receita,
+o protocolo e os dados desta execução permanecem inalterados. A próxima
+decisão não autoriza antecipar o final nem reduzir os critérios de qualidade.
