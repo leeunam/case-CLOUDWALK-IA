@@ -235,3 +235,32 @@ A R5-A foi implementada e aprovada na revisão por tarefa em `53b1131`, com 29 t
 O executor encontrou falta de cobertura em quatro alvos claros de desenvolvimento na política 2.0.0, antes de qualquer inferência R5. A candidata foi reaberta por essa evidência pública de desenvolvimento, com autores novos sem acesso ao final, e passou à política 2.1.0. Os 33 testes e a revisão dirigida passaram, incluindo a disponibilidade de outra forma de pagamento. O [novo congelamento](../evidencias/c05/r5-candidata-v2/candidate-freeze.json) preserva o anterior e registra que B já acessara o pacote final, sem fornecer seus exemplos ou resultados aos autores da candidata. A qualidade real ainda não foi medida.
 
 A preparação R5 A+B está integrada após revisão ampla aprovada em `a949f52`. O controle público e os selos verificam diário, envelopes, custos e vínculos nas duas etapas. A reprodução fixture percorreu 6+44 chamadas sintéticas, sem medir a Luna real. O integrador retoma o ensaio limitado dentro do teto global de US$ 10 e da estratégia escolhida, conforme o [registro operacional](../evidencias/c05/luna-r5-preflight-2026-11-25/autorizacao-continuacao.json). Essa interpretação não substitui as aprovações históricas apenas offline por falas novas do usuário. A conta foi conferida antes da etapa, com US$ 0,03093512 contabilizados e zero pendências. O final depende do gate e selo reais da própria candidata. Nenhuma chamada diagnóstica, repetição, orçamento recorrente ou inferência paga pública é habilitada.
+
+### Resultado R5 real — 25/11/2026
+
+O desenvolvimento passou em 8/8 alvos, com seis chamadas, p95 de 2.886,371 ms
+e selo conferido. O final foi interrompido na tentativa 30 das até 44
+planejadas: erro de transporte sem custo conciliável. Não houve repetição
+ou envio das 14 restantes. O prefixo oficial permanece inconclusivo, com
+1/26 conclusões em casos classificáveis, 0/4 urgentes reconhecidos após o
+veto e p95 de 3.269,135 ms. A candidata Luna com política 2.1.0 não será
+adotada. [Resultado e auditoria R5](../c05-luna-r5-resultado.md).
+
+A auditoria separou o modelo do filtro. Das 33 propostas válidas, 30 foram
+corretas; a Luna completou indevidamente os três campos ambíguos. O filtro
+vetou 28 propostas corretas junto com as três indevidas. As quatro urgências
+tinham propostas corretas, mas foram vetadas. Assim, nem manter o filtro
+estreito nem simplesmente removê-lo resolve o aceite. O desenvolvimento
+aprovado não demonstrou generalização para o conjunto maior.
+
+Os 35 recibos R5 somam US$ 0,00992557. A tentativa sem custo informado
+mantém reserva interna de US$ 1,239, sem cobrança confirmada. O total
+conservador global é US$ 1,27986069 incluindo a reserva, com US$ 8,72013931
+disponíveis sob o teto; não é saldo consultado na Feita. Nenhuma liquidação
+fictícia ou nova conta foi criada. Novas chamadas estão suspensas.
+
+C06/C07 continuam bloqueadas por qualificação e decisão de adoção. Outra
+estratégia exige desenho e avaliação independente: não ajustar usando o
+final consumido e reapresentá-lo como teste cego. Conciliar a tentativa
+interrompida exige evidência real de cobrança, sem repetir a inferência.
+A demonstração pública segue em fixture, e E01 permanece posterior/opcional.

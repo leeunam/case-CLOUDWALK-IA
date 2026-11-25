@@ -158,13 +158,16 @@ um caso com informação insuficiente reprovou o gate e bloqueou as 44 chamadas
 finais. O custo conservador acumulado até essa rodada foi de US$ 0,03093512.
 [Resultado C05-R4](docs/c05-luna-r4-resultado.md).
 
-A R5, que mantém a Luna e acrescenta evidência verificável com validação
-conservadora, tem a candidata com política 2.1.0 congelada após testes offline.
-O executor e a reprodução com fixture estão em revisão ampla e a qualidade
-real da R5 segue sem medição. A integração do classificador (C06) aguarda
-qualificação e decisão de adoção. A validação final (C07/F09) também está
-pendente. O atendente conversacional real (E01) fica como evolução posterior
-e opcional.
+A R5, Luna com evidência e política 2.1.0, passou nos 8/8 alvos do
+desenvolvimento real. O final parou na tentativa 30 de até 44 por falha de
+transporte sem custo conciliável. No prefixo, o filtro permitiu apenas 1/26
+conclusões em casos classificáveis: a candidata não está apta para adoção.
+O custo confirmado da R5 foi US$ 0,00992557; uma reserva de US$ 1,239 permanece
+pendente e não representa cobrança confirmada. Não houve repetição. Novas
+chamadas estão suspensas. A integração do classificador (C06) e a validação
+final (C07/F09) continuam pendentes. O atendente conversacional real (E01)
+fica como evolução posterior e opcional.
+[Resultado real R5](docs/c05-luna-r5-resultado.md) ·
 [Candidata R5](docs/c05-luna-r5-candidata.md) ·
 [Preparação R5](docs/planejamento/classificacao-comparativa/rodada-5-implementacao.md) ·
 [Plano de conclusão](docs/planejamento/conclusao-projeto.md).

@@ -119,13 +119,17 @@ naquela etapa. [Resultado e auditoria R2](../c05-r2-resultado.md).
 
 #### Estado em 25/11/2026
 
-A última medição real registrada era a R4. A Luna acertou 7/8 campos em
-seis chamadas, com zero erros técnicos e p95 de 1.762,223 ms. O gate reprovou
-e bloqueou as 44 chamadas finais. A candidata R5-A com política 2.1.0 foi
-congelada após testes offline. O executor R5-B passou em nove testes offline,
-incluindo as etapas sintéticas de seis chamadas de desenvolvimento e 44 de
-final, e segue em revisão ampla. A qualidade real da R5 segue sem medição.
+A R4 acertou 7/8 campos e reprovou o gate. A preparação R5 A+B passou nas
+revisões e foi seguida por seis chamadas reais de desenvolvimento: 8/8 alvos,
+p95 de 2.886,371 ms, gate aprovado. O final da R5 parou na tentativa 30 de
+até 44 por erro de transporte sem custo conciliável, sem repetição. O
+prefixo permanece inconclusivo e mostrou 1/26 conclusões automáticas em
+casos classificáveis, 0/4 urgentes reconhecidos após a política e p95 de
+3.269,135 ms. A candidata não está apta para adoção. Os 35 recibos R5 somam
+US$ 0,00992557 e há reserva pendente de US$ 1,239, sem cobrança confirmada
+para a última tentativa. Novas chamadas estão suspensas.
 [Resultado R4](../c05-luna-r4-resultado.md) ·
+[Resultado real R5](../c05-luna-r5-resultado.md) ·
 [Candidata R5](../c05-luna-r5-candidata.md).
 
 A sequência da qualificação é C01 → C02 → C03 → C05 → C06 → C07. Os ajustes

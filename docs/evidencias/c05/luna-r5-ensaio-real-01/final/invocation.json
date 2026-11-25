@@ -1,0 +1,16 @@
+{
+  "profile": "observed-total-luna-r5",
+  "protocol_version": "1.5.0",
+  "report_version": "1.6.0",
+  "ipc_contract_version": "1.1.0",
+  "stage": "final",
+  "git_revision": "8314ca56645e016167adf94833cb991be44421f6",
+  "command": "rtk proxy python3 -B script/classification_comparison/luna_r5/execute.py run --stage final --mode real --config /home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/r5-luna-executor/docs/evidencias/c05/luna-r5-preflight-2026-11-25/config-real-planejada.json --account /home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/c05-comparacao/.superpowers/financial/c05-qwen/account-v4.sqlite3 --account-id 903a037b4b9140438e152ade172889ca --cap-usd 10 --development-gate /home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/r5-luna-executor/docs/evidencias/c05/luna-r5-ensaio-real-01/development/development-gate.json --output NOVO_DIRETORIO --manifest /home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/r5-luna-executor/docs/evidencias/c05/luna-r5-ensaio-real-01/final-manifest.json --confirm-execution",
+  "config_sha256": "410295f76d63cf55cc0d074eb9672292f6eede3075daac00265464e76420c8bf",
+  "manifest_id": "luna-r5-7aca6f21e73cea8881d0e38bbca1c62c4fda96369230f07864a0ad5137d0b36a",
+  "manifest_sha256": "6999f8fa576953a566f54ce39054c0eb88cb8fc5321904bc053ab96e7e0fc0b5",
+  "dry_run": false,
+  "synthetic_transport": false,
+  "concurrency": 1,
+  "attempts": 1
+}
