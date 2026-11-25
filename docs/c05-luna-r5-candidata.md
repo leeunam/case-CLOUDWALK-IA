@@ -29,9 +29,23 @@ resposta recebida.
 
 ## Alcance da política
 
+A política 2.1.0 reconhece uma venda ausente de um lote quando a oração
+identifica crédito ou depósito em conta. A impossibilidade atual de todos
+pagarem sustenta urgência quando o relato também declara a ausência de outro
+meio e a citação contém a paralisação. Uma via de cobrança em funcionamento
+impede essa aceitação.
+
+Para o ajuste de exibição de um terminal em preparação, a categoria exige
+uma citação contínua que cubra o nome do equipamento na declaração de
+aquisição e o ajuste da letra ou do brilho na pergunta imediatamente seguinte.
+Para rotina, a pergunta pode ser citada sozinha quando o contexto identifica
+esse preparo e a operação está livre de prejuízo conhecido. Por exemplo,
+uma perda de vendas em andamento veta rotina mesmo que o ajuste da tela
+esteja bem documentado. O adaptador e o corpo da requisição seguem em 2.0.0.
+
 As relações buscam operações de Pix, recebimento associado a vendas e funções
 de um equipamento de pagamento identificável. A parte citada precisa conter
-uma relação reconhecida no contexto da própria oração. O sujeito da falha
+uma relação reconhecida na oração ou no par de orações de preparo. O sujeito da falha
 e o objeto da ação ajudam a distinguir operação de menção incidental.
 A leitura do relato inteiro verifica
 hipóteses, exclusões de assunto, transições de foco, impactos e alternativas.

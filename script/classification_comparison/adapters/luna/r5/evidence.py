@@ -9,7 +9,7 @@ import unicodedata
 from adapters.qwen.adapter import choice, parse_object
 from common import c01
 
-POLICY_VERSION = "2.0.0"
+POLICY_VERSION = "2.1.0"
 POLICY_SHA256 = sha256(Path(__file__).read_bytes()).hexdigest()
 QUOTE_LIMIT = 160
 
@@ -74,9 +74,17 @@ SALES_MEDIA = (
     r"(?:vendi|vendemos|vendido|vendida)\s+(?:a|no?|com)\s+(?:credito|debito|cartao))"
 )
 SALES_MEDIA_OBJECT = rf"(?:(?:o que|das vendas que) )?{SALES_MEDIA}"
-BANK_RECEIPT = (
-    r"(?:cair|cai|caiu|entrar|entra|entrou|depositar|depositad[oa]) "
-    r"(?:na (?:minha |nossa )?conta|em (?:minha|nossa) conta|no saldo)"
+BANK_DESTINATION = r"(?:na (?:minha |nossa )?conta|em (?:minha|nossa) conta|no saldo)"
+BANK_RECEIPT = rf"(?:cair|cai|caiu|entrar|entra|entrou|depositar|depositad[oa]) {BANK_DESTINATION}"
+# O lote precisa ser identificado pelo recebimento bancário. Um lote pode
+# também ser de cupons ou de documentos.
+SALE_DATE = r"(?:de (?:ontem|hoje|segunda|terca|quarta|quinta|sexta|sabado|domingo)(?:-feira)?)"
+BATCH = r"(?:lote|repasse|deposito)"
+MISSING_FROM_BATCH = (
+    rf"{SALES_MEDIA} (?:{SALE_DATE} )?(?:ainda )?nao "
+    r"(?:entrou|apareceu|consta|foi incluid[ao]) "
+    rf"(?:no|nesse|neste) {BATCH} (?:que (?:ja )?(?:caiu|entrou)|"
+    rf"(?:ja )?(?:creditado|depositado)) {BANK_DESTINATION}"
 )
 SETTLEMENT_FAILURE = (
     r"(?:nao (?:foi (?:creditad[oa]|depositad[oa]|liquidad[oa])|caiu|entrou|creditou|liquidou)|"
@@ -114,12 +122,14 @@ CATEGORY_RELATIONS = {
         rf"{SUBJECT_START}(?P<subject_relation>{PIX_OPERATION} {ASPECT}{OPERATION_FAILURE})\b"
     ),
     "sales_settlement": re.compile(
+        rf"^{DETERMINER}(?P<batch_relation>{MISSING_FROM_BATCH})\b|"
         rf"\b(?:receb(?:er|i|o|imento)|consult(?:ar|ei)|acompanhar|liquidar|creditar)"
         rf"(?: das?| do| de)?{OBJECT_GAP}{SALES_FUNDS}\b|"
         rf"\b(?:prazo|data|saldo) (?:do|da|de) {SALES_FUNDS}\b|"
         rf"\b(?:{BANK_RECEIPT}){OBJECT_GAP}(?:{SALES_FUNDS}|{SALES_MEDIA_OBJECT})\b|"
-        rf"{SUBJECT_START}(?P<subject_relation>(?:{SALES_FUNDS}|{SALES_MEDIA_OBJECT}) {ASPECT}"
-        rf"(?:{BANK_RECEIPT}|{SETTLEMENT_FAILURE}))\b"
+        rf"{SUBJECT_START}(?P<subject_relation>{SALES_FUNDS} {ASPECT}{SETTLEMENT_FAILURE}|"
+        rf"(?:{SALES_FUNDS}|{SALES_MEDIA_OBJECT}) {ASPECT}"
+        rf"(?:{BANK_RECEIPT}|{SETTLEMENT_FAILURE}(?! (?:no|nesse|neste) {BATCH}\b)))\b"
     ),
     "terminal_operation": re.compile(
         rf"\b{TERMINAL_USE}(?: (?:do|da|de|na|no))?{OBJECT_GAP}{TERMINAL}\b|"
@@ -184,6 +194,23 @@ FUTURE = re.compile(
 )
 CONTRAST_WORDS = re.compile(r"^(?:mas|porem|contudo|no entanto|so que)\b[\s,]*")
 
+# Duas orações adjacentes: aquisição do equipamento e pedido de ajuste
+# antes do uso. Exigir os complementos inteiros evita atribuir ao terminal
+# a tela de outro aparelho ou uma tarefa incidental.
+ACQUIRED_TERMINAL = re.compile(
+    r"(?:eu |nos )?(?:ganhei|recebi|comprei|adquiri|ganhamos|recebemos|compramos|adquirimos) "
+    rf"(?:uma?|[ao]) (?:(?:nov[oa]|segund[oa]|primeir[oa]) )?(?P<device>{TERMINAL})"
+    r"(?: nov[oa])?"
+)
+DISPLAY_SETUP = re.compile(
+    r"(?:onde (?:encontro|acho|fica|localizo) (?:a opcao|o ajuste|a configuracao) (?:de|para) "
+    r"|como (?:posso |podemos )?|onde (?:posso |podemos ))"
+    r"(?P<adjustment>(?:aumentar|diminuir|alterar|ajustar|mudar) "
+    r"(?:a (?:letra|fonte)|o tamanho (?:da (?:fonte|letra)|das letras)|o brilho) da tela) "
+    r"antes de (?:(?:por|colocar|instalar) (?:no balcao|na loja|no caixa)|"
+    r"(?:comecar a (?:usar|vender|atender)|abrir a loja))"
+)
+
 
 @dataclass(frozen=True)
 class Clause:
@@ -225,15 +252,34 @@ def excluded(clause):
 
 def category_evidence_in_quote(pattern, clause):
     for match in pattern.finditer(clause.text):
-        span = match.span("subject_relation") if match.group("subject_relation") else match.span()
+        span = match.span(match.lastgroup or 0)
         if clause.quote_start <= span[0] and span[1] <= clause.quote_end:
             return True
     return False
 
 
+def quoted_setup_requests(context, *, require_device):
+    """Indexa pedidos ligados ao terminal e verifica o alcance da citação."""
+    requests = {}
+    for equipment, request in zip(context, context[1:]):
+        introduction = ACQUIRED_TERMINAL.fullmatch(equipment.text.rstrip(".!"))
+        setting = DISPLAY_SETUP.fullmatch(request.text.rstrip("?.!"))
+        if introduction and setting and not request.contrast:
+            if require_device:
+                cited = (equipment.quote_start <= introduction.start("device")
+                         and introduction.end("device") <= equipment.quote_end
+                         and request.quote_start == 0 and setting.end("adjustment") <= request.quote_end)
+            else:
+                cited = request.quote_start == 0 and setting.end() <= request.quote_end
+            requests[request] = cited
+    return requests
+
+
 def category_reason(criterion, context):
     selected = CATEGORY_RELATIONS[criterion]
-    if not any(selected.search(clause.excerpt) for clause in context):
+    setup_requests = quoted_setup_requests(context, require_device=True)
+    if (not any(selected.search(clause.excerpt) for clause in context)
+            and not (criterion == "terminal_operation" and any(setup_requests.values()))):
         return "insufficient_relation"
 
     active = set()
@@ -251,12 +297,15 @@ def category_reason(criterion, context):
         if ((NORMAL_OR_RECOVERED.search(clause.text) or FUTURE.search(clause.text)) and not asks):
             continue
         matched = {name for name, pattern in CATEGORY_RELATIONS.items() if pattern.search(clause.text)}
+        if clause in setup_requests:
+            matched.add("terminal_operation")
         changes_focus = FOCUS.search(clause.text) or DIRECT_REQUEST.search(clause.text)
         if (changes_focus and matched != active) or clause.contrast and (asks or matched):
             active.clear()
             evidence_seen = False
         active.update(matched)
         evidence_seen |= criterion in matched and category_evidence_in_quote(selected, clause)
+        evidence_seen |= criterion == "terminal_operation" and setup_requests.get(clause, False)
 
     if not evidence_seen or active != {criterion}:
         return "context_conflict"
@@ -299,6 +348,8 @@ CONTINUED_SERVICE = (
 )
 ALTERNATIVE = re.compile(
     rf"\b(?:{CONTINUED_SERVICE}|"
+    r"(?:clientes|compradores) (?:(?:agora|ja|ainda) )?(?:conseguem|podem) pagar|"
+    r"(?:aceitamos|recebemos|cobramos) (?:normalmente |tambem )?(?:em dinheiro|por pix|pelo celular)|"
     r"(?<!nao )(?<!nao ainda )(?:consigo|conseguimos|posso|podemos) "
     r"(?:atender|vender|receber|cobrar|pagar|operar|processar)|"
     r"(?:o(?:s)? (?:outros?|demais)|a(?:s)? (?:outras?|demais)) "
@@ -306,7 +357,7 @@ ALTERNATIVE = re.compile(
     r"vendas?|pagamentos?|cobrancas?|transferencias?) "
     r"(?:ainda )?(?:funciona[m]?|opera[m]?|passa[m]?|segue[m]?|continua[m]?)|"
     r"(?<!nao )(?:temos|tenho|ha|existe) (?:uma |um )?(?:outra (?:forma|opcao|alternativa)|"
-    r"alternativa|outro (?:caixa|terminal|leitor)|maquininha reserva)|"
+    r"alternativa|outro (?:caixa|terminal|leitor|meio de (?:pagamento|cobranca))|maquininha reserva)|"
     r"(?:operacao|atendimento|vendas?) (?:segue[m]?|continua[m]?|permanece[m]?) "
     r"(?:disponivel|disponiveis|funcionando|pelos?|com))\b"
 )
@@ -327,10 +378,16 @@ BROAD = re.compile(
     r"o (?:fechamento|lote|balanco) (?:inteiro|completo|todo))|"
     r"(?:horas|dias) (?:de|para) (?:retrabalho|refazer|reprocessar))\b"
 )
+PAYER_BLOCKED = re.compile(
+    r"\b(?:ninguem|nenhum (?:cliente|comprador|dos (?:clientes|compradores))) "
+    r"(?:consegue|pode) (?:pagar|fazer o pagamento)\b"
+)
 TOTAL_STOP = re.compile(
     r"\b(?:(?:a operacao|o atendimento|as vendas|os pagamentos|as cobrancas) "
     r"(?:parou|pararam|esta|estao|ficou|ficaram) "
     r"(?:inteiramente|totalmente|completamente|interrompid[oa]s?|parad[oa]s?)|"
+    rf"{PAYER_BLOCKED.pattern}(?: agora| neste momento)?"
+    r"(?=\s*(?:$|[.,;:!?]|e\b))|"
     r"(?:nenhuma|nenhum) (?:venda|cobranca|transferencia|pagamento|caixa|terminal|"
     r"leitor[ae]|maquininha) (?:passa|funciona|liga|conclui|esta disponivel)|"
     r"nao (?:consigo|conseguimos|da para) (?:atender|vender|cobrar|pagar|receber|"
@@ -345,6 +402,12 @@ NO_ALTERNATIVE = re.compile(
     r"nao (?:ha|temos|tenho|existe) (?:mais |nenhuma |uma )?(?:alternativa|outra (?:opcao|"
     r"forma|maneira)|outro (?:meio|caixa|terminal)|maquininha reserva)|"
     r"(?:nenhuma outra forma|nenhum outro meio) (?:funciona|esta disponivel))\b"
+    r"(?! (?:de|para) (?!receber\b|cobrar\b|pagar\b|vender\b|pagamento\b|cobranca\b))"
+)
+AVAILABILITY_CLAUSE = re.compile(
+    r"(?:,\s*(?:e )?|\s+e )(?=(?:(?:agora|ja|ainda) )?(?:nao|sem|temos|tenho|existe|ha|"
+    r"consigo|conseguimos|podemos|posso|sigo|seguimos|continuo|continuamos|"
+    r"aceitamos|recebemos|cobramos|os clientes|os compradores)\b)"
 )
 IMMEDIATE_LOSS = re.compile(
     r"\b(?:(?:estou|estamos|seguimos|continuo|continuamos) perdendo "
@@ -479,7 +542,8 @@ def ambiguous_impact(text):
 
 def priority_reason(criterion, context):
     proof = PRIORITY_EVIDENCE[criterion]
-    if not any(any_match(proof, clause.excerpt) for clause in context):
+    setup_requests = quoted_setup_requests(context, require_device=False) if criterion == "routine" else {}
+    if not any(any_match(proof, clause.excerpt) for clause in context) and not any(setup_requests.values()):
         return "insufficient_relation"
 
     active = [clause for clause in context if not excluded(clause)
@@ -493,10 +557,20 @@ def priority_reason(criterion, context):
     handled = max((i for i, clause in enumerate(pending) if asserted_matches(HANDLED_DEADLINE, clause.text)), default=-1)
     immediate = [(clause, match) for clause in pending[handled + 1:] for match in pending_consequences(clause)]
     no_impact = any(asserted_matches(NEGATED_IMPACT, clause.text) for clause in current)
-    alternative = any(asserted_matches(ALTERNATIVE, clause.text) and not asserted_matches(NO_ALTERNATIVE, clause.text)
-                      for clause in current)
-    no_alternative = any(asserted_matches(NO_ALTERNATIVE, clause.text) for clause in current)
     total = [(clause, match) for clause in current for match in asserted_matches(TOTAL_STOP, clause.text)]
+    # Em “ninguém consegue pagar e não temos outra forma”, cada negação
+    # pertence a uma declaração diferente. Também pode haver uma ressalva
+    # coordenada depois da declaração de falta de alternativa.
+    stops = {clause for clause, _ in total}
+    statements = []
+    for clause in current:
+        if clause in stops or asserted_matches(NO_ALTERNATIVE, clause.text):
+            statements.extend(AVAILABILITY_CLAUSE.split(clause.text))
+        else:
+            statements.append(clause.text)
+    alternative = any(asserted_matches(ALTERNATIVE, part) and not asserted_matches(NO_ALTERNATIVE, part)
+                      for part in statements)
+    no_alternative = any(asserted_matches(NO_ALTERNATIVE, part) for part in statements)
     total_without_alternative = total if no_alternative and not alternative else []
     payment_damage = False
     loss = [(clause, match) for clause in current for match in asserted_matches(IMMEDIATE_LOSS, clause.text)]
@@ -522,15 +596,17 @@ def priority_reason(criterion, context):
     elif local and alternative and not total and not broad and not no_alternative:
         found, support = "localized_impact", local
     elif not (local or total or broad or loss or immediate or payment_damage
-              or any(CURRENT_PROBLEM.search(c.text) or asserted_matches(CURRENT_LOSS, c.text) for c in current)
+              or any(CURRENT_PROBLEM.search(c.text) or asserted_matches(CURRENT_LOSS, c.text)
+                     or asserted_matches(PAYER_BLOCKED, c.text) for c in current)
               or any(ambiguous_impact(c.text) for c in context)):
         routine = [clause for clause in active[max(0, recovery):]
-                   if any_match(PRIORITY_EVIDENCE["routine"], clause.text)]
+                   if any_match(PRIORITY_EVIDENCE["routine"], clause.text) or clause in setup_requests]
         found, support = "routine", routine
     else:
         return "context_conflict"
 
-    if found == criterion and any(any_match(proof, clause.excerpt) for clause in support):
+    if found == criterion and any(any_match(proof, clause.excerpt) or setup_requests.get(clause, False)
+                                  for clause in support):
         return "supported_relation"
     return "context_conflict"
 
