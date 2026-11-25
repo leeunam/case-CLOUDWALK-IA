@@ -9,7 +9,7 @@ from journal import sync_directory
 
 
 def path_for(plan, account):
-    return account.path.parent / f".{plan.manifest_id(account)}.development-seal.json"
+    return account.path.parent / f".{plan.manifest_id(account)}.{plan.stage}-seal.json"
 
 
 def commitment(plan, account, gate, proof_sha):
@@ -38,12 +38,12 @@ def verify(plan, account, gate, proof_sha):
         with os.fdopen(descriptor, "rb") as stream:
             mode = os.fstat(stream.fileno()).st_mode
             if not stat.S_ISREG(mode) or mode & 0o077:
-                raise BudgetError("selo de development exige arquivo privado")
+                raise BudgetError(f"selo de {plan.stage} exige arquivo privado")
             recorded = decode(stream.read())
         expected = commitment(plan, account, gate, proof_sha)
         if canonical_digest(recorded) != canonical_digest(expected):
-            raise BudgetError("selo de development divergente: prova ou saídas adulteradas")
+            raise BudgetError(f"selo de {plan.stage} divergente: prova ou saídas adulteradas")
     except BudgetError:
         raise
     except (OSError, ValueError, KeyError, TypeError, AttributeError) as error:
-        raise BudgetError("selo de development ausente ou corrompido") from error
+        raise BudgetError(f"selo de {plan.stage} ausente ou corrompido") from error

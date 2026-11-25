@@ -1,0 +1,769 @@
+{
+  "contract_version": "1.6.0",
+  "run_id": "luna-r5-controles-sinteticos",
+  "score_calibration": "not_evaluated",
+  "identity": {
+    "mode": "fixture",
+    "provider": "simulador-c05-luna-r5",
+    "requested_model": "openai/gpt-5.6-luna",
+    "expected_returned_model": "openai/gpt-5.6-luna",
+    "adapter_version": "2.0.0",
+    "policy_version": "2.1.0"
+  },
+  "split": "control",
+  "git_revision": "433c442d135925098f4d724ed6688b80bf43bf1b",
+  "environment": {
+    "hardware": "fixture estática",
+    "runtime": "Controle sintético reproduzido com a candidata R5 congelada.",
+    "seed": null,
+    "concurrency": 1,
+    "timeout_ms": 5000,
+    "peak_memory_bytes": null,
+    "cold_start_ms": null,
+    "infrastructure_usd": null
+  },
+  "sources": {
+    "dataset": {
+      "path": "docs/planejamento/classificacao-comparativa/r2/dataset.json",
+      "sha256": "3f4e69af44f03c89d1767d54ba07264327d616f18b0548656cc00c7bb89e3845",
+      "version": "2.0.0"
+    },
+    "catalog": {
+      "path": "script/f08/jev/catalog.json",
+      "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271",
+      "version": "1.0.0"
+    },
+    "rubric": {
+      "path": "docs/planejamento/classificacao-comparativa/rubrica-comum.md",
+      "version": "1.0.0",
+      "sha256": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac"
+    },
+    "protocol": {
+      "path": "docs/planejamento/classificacao-comparativa/r5/protocol.json",
+      "sha256": "343bf7e3a0377a0fc129fb98282662cbbae034604d62cee0d33c3480649cde3c",
+      "version": "1.5.0"
+    },
+    "split": {
+      "path": "docs/planejamento/classificacao-comparativa/r2/split.json",
+      "sha256": "054f0d572e5cb35e15bcc8b1e96df992bc9bf443edf1d4cd512c61e74b017e62",
+      "version": "2.0.0"
+    },
+    "policy": {
+      "path": "script/classification_comparison/adapters/luna/r5/evidence.py",
+      "version": "2.1.0",
+      "sha256": "42dcd4fd4806a485606d359eb64b86bcb59e4e299892288ce4e3624cde971557"
+    },
+    "prompt": {
+      "path": "script/classification_comparison/adapters/luna/r5/prompt.txt",
+      "version": "2.0.0",
+      "sha256": "fb4437c677a6b6eea2fb55d6fdebd7143b22c9738f273a561f4601cac38e1610"
+    }
+  },
+  "artifacts": {
+    "inputs": {
+      "path": "docs/planejamento/classificacao-comparativa/contratos/fixtures/inputs.jsonl",
+      "sha256": "78773100a5c1b20a8b94d66a832372f20e18be3676f16af083d14f8cf66a7744"
+    },
+    "observations": {
+      "path": "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.6/observations.jsonl",
+      "sha256": "d0f714424095b4c3e1fb9bf669ec9c4ee7e4476c7de82991d4ce6d8786aa4013"
+    },
+    "decisions": {
+      "path": "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.6/decisions.jsonl",
+      "sha256": "b457ec04c42f294cb6030525d3b0dbb2f96b7f52b592abad2fe59302f4f7f5ee"
+    }
+  },
+  "planned_ids": [],
+  "completed_ids": [],
+  "control_ids": [
+    "ctl-completo",
+    "ctl-simples",
+    "ctl-duplo",
+    "ctl-invalido",
+    "ctl-sem-assunto",
+    "ctl-saida-invalida",
+    "ctl-timeout",
+    "ctl-saida-ausente",
+    "ctl-versao",
+    "ctl-catalogo",
+    "ctl-tipo",
+    "ctl-politica",
+    "ctl-injetado-aplicacao-parcial"
+  ],
+  "injected_controls": {
+    "count": 1,
+    "ids": [
+      "ctl-injetado-aplicacao-parcial"
+    ],
+    "identity": {
+      "mode": "fixture",
+      "name": "controle-aplicacao-parcial",
+      "policy_version": "1.0.0"
+    },
+    "policy": {
+      "path": "docs/planejamento/classificacao-comparativa/contratos/politica-controles.json",
+      "version": "1.0.0",
+      "sha256": "2611786ddde1eb2b064b02f7dda7bb7a0aae06cc8f127a9fc7e8fec14e937fb7"
+    }
+  },
+  "gates": {
+    "channel_field_preservation_ratio": {
+      "state": "measured",
+      "numerator": 9,
+      "denominator": 9,
+      "value": 1.0
+    },
+    "complete_or_invalid_controls_model_calls": {
+      "state": "measured",
+      "numerator": 0,
+      "denominator": 4,
+      "value": 0
+    },
+    "partial_application_after_abstention_or_error": {
+      "state": "measured",
+      "numerator": 0,
+      "denominator": 9,
+      "value": 0
+    },
+    "automatic_completion_on_expected_review_cases": {
+      "state": "unmeasured",
+      "numerator": null,
+      "denominator": 0,
+      "value": null
+    },
+    "automatic_non_urgent_applied_when_expected_urgent": {
+      "state": "unmeasured",
+      "numerator": null,
+      "denominator": 0,
+      "value": null
+    },
+    "automatic_coverage_on_fully_classifiable_cases_min": {
+      "state": "unmeasured",
+      "numerator": null,
+      "denominator": 0,
+      "value": null
+    },
+    "raw_urgent_recognition_min": {
+      "state": "unmeasured",
+      "numerator": null,
+      "denominator": 0,
+      "value": null
+    },
+    "observed_total_latency_p95_ms_max": {
+      "state": "unmeasured",
+      "value": null,
+      "numerator": null,
+      "denominator": 0
+    },
+    "applied_category_accuracy": {
+      "state": "unmeasured",
+      "numerator": null,
+      "denominator": 0,
+      "value": null
+    },
+    "applied_priority_accuracy": {
+      "state": "unmeasured",
+      "numerator": null,
+      "denominator": 0,
+      "value": null
+    }
+  },
+  "by_field": {
+    "category": {
+      "raw_accuracy": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "applied_accuracy": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "correct_abstention": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "undue_abstention": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "invalid_output": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "operational_error": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "unapplied_choices": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "review": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "automatic_coverage": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "correct_completion_coverage": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      }
+    },
+    "priority": {
+      "raw_accuracy": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "applied_accuracy": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "correct_abstention": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "undue_abstention": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "invalid_output": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "operational_error": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "unapplied_choices": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "review": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "automatic_coverage": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "correct_completion_coverage": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      }
+    }
+  },
+  "by_mask": {
+    "category": {
+      "raw_accuracy": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "applied_accuracy": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "correct_abstention": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "undue_abstention": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "invalid_output": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "operational_error": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "unapplied_choices": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "review": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "automatic_coverage": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "correct_completion_coverage": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      }
+    },
+    "priority": {
+      "raw_accuracy": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "applied_accuracy": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "correct_abstention": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "undue_abstention": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "invalid_output": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "operational_error": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "unapplied_choices": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "review": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "automatic_coverage": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "correct_completion_coverage": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      }
+    },
+    "category+priority": {
+      "raw_accuracy": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "applied_accuracy": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "correct_abstention": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "undue_abstention": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "invalid_output": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "operational_error": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "unapplied_choices": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "review": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "automatic_coverage": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "correct_completion_coverage": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      }
+    }
+  },
+  "by_stratum": {
+    "rotina": {
+      "raw_accuracy": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "applied_accuracy": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "correct_abstention": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "undue_abstention": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "invalid_output": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "operational_error": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "unapplied_choices": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "review": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "automatic_coverage": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "correct_completion_coverage": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      }
+    },
+    "urgente": {
+      "raw_accuracy": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "applied_accuracy": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "correct_abstention": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "undue_abstention": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "invalid_output": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "operational_error": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "unapplied_choices": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "review": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "automatic_coverage": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "correct_completion_coverage": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      }
+    },
+    "ambiguo": {
+      "raw_accuracy": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "applied_accuracy": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "correct_abstention": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "undue_abstention": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "invalid_output": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "operational_error": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "unapplied_choices": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "review": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "automatic_coverage": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      },
+      "correct_completion_coverage": {
+        "state": "unmeasured",
+        "numerator": null,
+        "denominator": 0,
+        "value": null
+      }
+    }
+  },
+  "urgent_outcomes": {
+    "applied_urgent": {
+      "state": "unmeasured",
+      "numerator": null,
+      "denominator": 0,
+      "value": null
+    },
+    "applied_lower": {
+      "state": "unmeasured",
+      "numerator": null,
+      "denominator": 0,
+      "value": null
+    },
+    "review": {
+      "state": "unmeasured",
+      "numerator": null,
+      "denominator": 0,
+      "value": null
+    },
+    "abstained": {
+      "state": "unmeasured",
+      "numerator": null,
+      "denominator": 0,
+      "value": null
+    },
+    "invalid": {
+      "state": "unmeasured",
+      "numerator": null,
+      "denominator": 0,
+      "value": null
+    },
+    "operational_error": {
+      "state": "unmeasured",
+      "numerator": null,
+      "denominator": 0,
+      "value": null
+    }
+  },
+  "latency_p50_ms": {
+    "state": "unmeasured",
+    "value": null,
+    "numerator": null,
+    "denominator": 0
+  },
+  "eligibility": "inconclusive",
+  "usage": {
+    "attempts": {
+      "state": "measured",
+      "value": 8,
+      "samples": 8,
+      "expected_samples": 8
+    },
+    "requests": {
+      "state": "measured",
+      "value": 8,
+      "samples": 8,
+      "expected_samples": 8
+    },
+    "questions": {
+      "state": "measured",
+      "value": 11,
+      "samples": 8,
+      "expected_samples": 8
+    },
+    "input_tokens": {
+      "state": "measured",
+      "value": 8000,
+      "samples": 8,
+      "expected_samples": 8
+    },
+    "output_tokens": {
+      "state": "measured",
+      "value": 800,
+      "samples": 8,
+      "expected_samples": 8
+    },
+    "observed_api_usd": {
+      "state": "unmeasured",
+      "value": null,
+      "samples": 0,
+      "expected_samples": 8
+    },
+    "estimated_api_usd": {
+      "state": "unmeasured",
+      "value": null,
+      "samples": 0,
+      "expected_samples": 8
+    }
+  },
+  "ipc_contract_version": "1.1.0",
+  "luna_evidence": {
+    "path": "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.6/luna-evidence.jsonl",
+    "sha256": "29867320dcc784819a3734f17012639cec74b27c6b859bf10dcbe1c4c281d304",
+    "count": 8,
+    "schema_version": "1.0.0"
+  }
+}

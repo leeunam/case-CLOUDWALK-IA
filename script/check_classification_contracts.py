@@ -1,5 +1,6 @@
 """Validate CLASS-001 contracts and their static fixtures offline (no evaluator)."""
 import argparse
+import ast
 from copy import deepcopy
 from dataclasses import dataclass
 from hashlib import sha256
@@ -25,7 +26,9 @@ OBSERVED = "observed-total-1.1"
 R2 = "observed-total-r2"
 LUNA = "observed-total-luna-1.0"
 LUNA_R4 = "observed-total-luna-r4"
-LUNA_PROFILES = (LUNA, LUNA_R4)
+LUNA_R5 = "observed-total-luna-r5"
+LUNA_R5_FIXTURE_PROVIDER = "simulador-c05-luna-r5"
+LUNA_PROFILES = (LUNA, LUNA_R4, LUNA_R5)
 DEDICATED = (R2, *LUNA_PROFILES)
 LUNA_FIXTURE_PROVIDER = "simulador-c05-luna"
 R2_FIXTURE_PROVIDER = "simulador-c05-r2"
@@ -86,6 +89,10 @@ PROFILES = {
                            "r4/protocol.json", "85590d95926acc76c05e50bae420180f869ff1084856f4c1fcf11542175df8fd",
                            "relatorio-1.5/report.json", "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.5/sources.lock.json",
                            "ea1531d622ea21c0db68f71b576acea59cef829d765ed16a76a36312b25584be"),
+    LUNA_R5: ReportProfile(LUNA_R5, "1.5.0", "1.6.0", "1.1.0", OBSERVED_GATE,
+                           "r5/protocol.json", "343bf7e3a0377a0fc129fb98282662cbbae034604d62cee0d33c3480649cde3c",
+                           "relatorio-1.6/report.json", "docs/planejamento/classificacao-comparativa/contratos/relatorio-1.6/sources.lock.json",
+                           "5e3c8afa8ef0e8e3e48b02a4ec8e17e6e7c7b3a2026eeb8c97370a087c3bcd84"),
 }
 
 
@@ -459,7 +466,8 @@ def verify_sources(report, protocol, split):
         candidate = read(source_path(round_sources(protocol)["candidate"]))
         identity = candidate["identity"]
         if report["identity"]["mode"] == "fixture":
-            identity = dict(identity, mode="fixture", provider=LUNA_FIXTURE_PROVIDER if profile.is_luna else R2_FIXTURE_PROVIDER)
+            provider = LUNA_FIXTURE_PROVIDER if profile.is_luna else R2_FIXTURE_PROVIDER
+            identity = dict(identity, mode="fixture", provider=LUNA_R5_FIXTURE_PROVIDER if profile.name == LUNA_R5 else provider)
         require(report["identity"] == identity, "r2_identity", report["run_id"])
         expected.update(prompt=candidate["prompt"], policy=candidate["policy"])
     for name, entry in report["sources"].items():
@@ -656,6 +664,17 @@ def verify_run(bundle, validation, protocol, split, catalog, dataset):
         for name, expected in derived.items():
             require(report[name] == expected, "r2_metrics", name)
     verify_metrics(report, protocol, full, dataset, indexed["decisions"], profile.latency_gate)
+    if profile.name == LUNA_R5:
+        # Os auxiliares congelados da candidata importam a partir destas duas raízes.
+        engine = ROOT / "script/classification_comparison"
+        for directory in (engine, engine / "adapters/qwen"):
+            if str(directory) not in sys.path:
+                sys.path.insert(0, str(directory))
+        from luna_r5.audit import verify
+        try:
+            verify(bundle)
+        except (ValueError, OSError, TypeError, KeyError) as error:
+            raise ContractError("luna_evidence", str(error)) from error
     for kind, path in paths.items():
         # Compare JSON types too: Python considers False == 0 and True == 1.
         require(json.dumps(bundle[kind], sort_keys=True) == json.dumps(read_records(path), sort_keys=True),
@@ -769,6 +788,9 @@ def verify_luna_package(profile, protocol, split, data):
             "luna_criteria", "projeção ou critérios divergentes da R2")
     freeze = read(source_path(binding["candidate_freeze"]))
     candidate = read(source_path(sources["candidate"]))
+    if profile.name == LUNA_R5:
+        verify_luna_r5_freeze(protocol, binding, historical, freeze, candidate)
+        return
     if profile.name == LUNA_R4:
         verify_luna_r4_freeze(protocol, binding, historical, freeze, candidate)
         return
@@ -815,6 +837,39 @@ def verify_luna_r4_freeze(protocol, binding, historical, freeze, candidate):
         source_path({"path": path, "sha256": pin})
 
 
+def verify_luna_r5_freeze(protocol, binding, historical, freeze, candidate):
+    sources = protocol["luna"]
+    previous = read(source_path(binding["previous_luna_protocol"]))
+    original = binding["original_r5_candidate_freeze"]
+    source_path(original)
+    pins = freeze["runtime_and_semantic_sources_sha256"]
+    require(binding["candidate"]["sha256"] == pins[binding["candidate"]["path"]]
+            and all(original[k] == freeze["supersedes"][k] for k in ("path", "sha256"))
+            and candidate["identity"]["policy_version"] == freeze["policy_version"]
+            and candidate["identity"]["adapter_version"] == freeze["adapter_version"]
+            and binding["previous_luna_protocol"]["sha256"] == PROFILES[LUNA_R4].protocol_sha256
+            and previous["rubric"] == candidate["rubric"] == historical["rubric"]
+            and sources["candidate"] == binding["candidate"]
+            and binding["operational"] == candidate["operational"] == sources["operational"]
+            and binding["historical_data_freeze"] == historical["r2"]["freeze"]
+            and binding["final_cases"] == sources["final_cases"]
+            and binding["offline_approval"] == protocol["approval"]["source"]
+            and protocol["task"] == binding["task"] == "C05-R5"
+            and binding["new_final_human_case_approvals"] == 0
+            and binding["paid_execution_authorized"] is protocol["approval"]["paid_execution_authorized"]
+            is freeze["paid_execution_authorized_by_this_freeze"] is False,
+            "luna_freeze", "aprovação offline e origens R5")
+    source_path(binding["offline_approval"])
+    for path, pin in freeze["runtime_and_semantic_sources_sha256"].items():
+        source_path({"path": path, "sha256": pin})
+    for key, pin in freeze["shared_semantic_functions_ast_sha256"].items():
+        path, name = key.split("::")
+        definitions = [f for f in ast.parse((ROOT / path).read_text()).body
+                       if isinstance(f, ast.FunctionDef) and f.name == name]
+        require(len(definitions) == 1 and sha256(ast.dump(definitions[0]).encode()).hexdigest() == pin,
+                "luna_freeze", key)
+
+
 def profile_context(profile_name=LEGACY):
     profile = get_profile(profile_name)
     validation = validators(profile_name)
@@ -837,6 +892,13 @@ def verify_report(path, profile_name=None):
     args = profile_context(profile.name)
     bundle = load_bundle(args[0], path)
     verify_run(bundle, *args)
+    if profile.name == LUNA_R5:
+        report = bundle["report"]
+        if report["split"] == "control":
+            require(digest(path) == digest(profile.golden_path), "luna_fixture", "fixture estática de controles")
+        else:
+            from luna_r5.audit import verify_public_receipt
+            verify_public_receipt(path.resolve(), bundle, protocol=args[1], catalog=args[3], cases=args[4])
     return profile
 
 
