@@ -1,5 +1,6 @@
 """Vínculo local entre envelopes IPC originais, posições no plano e tempo do avaliador."""
 import json
+import re
 from types import SimpleNamespace
 
 from adapters.luna.r5.adapter import PROFILE_VERSION, replay_envelope
@@ -196,6 +197,37 @@ def verify(bundle):
             raise ValueError("envelope diverge da observação do avaliador")
 
 
+def verify_receipt_costs(receipt, candidates, reservation):
+    from adapters.qwen.adapter import numeric_cost
+    from budget import receipt_reference, total_usd, usd
+
+    costs = receipt.get("costs")
+    if not isinstance(costs, dict) or set(costs) != {obs["id"] for obs in candidates}:
+        raise ValueError("custos públicos divergem das observações da candidata")
+    ceiling = usd(reservation)
+    amounts = []
+    references = set()
+    for obs in candidates:
+        cost = costs[obs["id"]]
+        if not isinstance(cost, dict) or set(cost) != {"observed_usd", "receipt"}:
+            raise ValueError("custo público exige valor e referência por candidata")
+        amount = usd(cost["observed_usd"])
+        ref = receipt_reference(cost["receipt"])
+        if ref != cost["receipt"] or ref in references:
+            raise ValueError("referência financeira pública divergente ou duplicada")
+        samples = obs["request_usage"]
+        if obs["requests"] != 1 or len(samples) != 1 or samples[0]["observed_api_usd"] is None:
+            raise ValueError("chamada sem custo observado no IPC")
+        # O IPC preserva a projeção numérica do custo original. Uma correção pode elevá-lo.
+        if numeric_cost(amount) < samples[0]["observed_api_usd"] or amount > ceiling:
+            raise ValueError("custo público fora dos limites da observação ou da reserva")
+        amounts.append(amount)
+        references.add(ref)
+    if total_usd(*amounts) != usd(receipt.get("observed_usd")):
+        raise ValueError("total público diverge da soma exata dos custos")
+    return costs
+
+
 def verify_public_receipt(path, bundle, *, protocol, catalog, cases):
     """Verifica o recibo publicado. O comando verify-final também verifica o selo da conta informada."""
     report = bundle["report"]
@@ -213,20 +245,40 @@ def verify_public_receipt(path, bundle, *, protocol, catalog, cases):
     receipt = c01.read(output / filename)
     if (path.name != "report.json" or (output / "interruption.json").exists()
             or receipt["run_id"] != report["run_id"] or receipt["mode"] != report["identity"]["mode"]
-            or receipt["profile"] != c01.LUNA_R5 or receipt["stage"] != stage
+            or receipt.get("stage") != stage
             or not same_json(receipt["luna_evidence"], report["luna_evidence"])
-            or receipt["report_version"] != report["contract_version"]
+            or receipt.get("report_version") != report["contract_version"]
             or (stage == "final" and receipt.get("status") != report["eligibility"])):
         raise ValueError("recibo incompatível com relatório R5")
     for name in ("plan.json", "journal.jsonl", "invocation.json", "report.json", "inputs.jsonl",
                  "observations.jsonl", "decisions.jsonl", FILENAME):
         if c01.source_path(receipt["artifacts"][name]) != output / name:
             raise ValueError("recibo R5 referencia outro lote")
+    from luna_r5.round_spec import LUNA_R5
+    from r2.plan import canonical_digest
+
+    plan = c01.read(output / "plan.json")
+    binding = plan["binding"]
+    invocation = c01.read(output / "invocation.json")
+    for record in (receipt, plan, binding, invocation):
+        if any(record.get(k) != v for k, v in LUNA_R5.versions.items()):
+            raise ValueError("versões do recibo público, plano ou invocação incompatíveis")
+    manifest = receipt.get("manifest_sha256")
+    candidates = [obs for obs in bundle["observations"] if obs["origin"] == "candidate"]
+    if (receipt.get("binding_sha256") != canonical_digest(binding)
+            or not isinstance(manifest, str) or not re.fullmatch("[0-9a-f]{64}", manifest)
+            or manifest != invocation.get("manifest_sha256") or invocation.get("dry_run") is not False
+            or invocation.get("synthetic_transport") is not (receipt["mode"] == "fixture")
+            or binding.get("stage") != stage or invocation.get("stage") != stage
+            or plan.get("run_id") != report["run_id"] or binding.get("identity") != report["identity"]
+            or binding.get("git_revision") != report["git_revision"] or invocation.get("git_revision") != report["git_revision"]
+            or binding.get("candidate_ids") != [obs["id"] for obs in candidates]
+            or plan.get("input") != receipt["artifacts"]["inputs.jsonl"]
+            or binding.get("inputs_sha256") != plan["input"]["sha256"]):
+        raise ValueError("vínculos públicos do recibo divergem do plano ou da invocação")
+    costs = verify_receipt_costs(receipt, candidates, binding.get("reservation_usd"))
     if stage == "development":
         from r2.gate import assess
-        costs = receipt.get("costs")
-        if not isinstance(costs, dict) or set(costs) != {obs["id"] for obs in bundle["observations"]}:
-            raise ValueError("custos públicos não correspondem ao desenvolvimento")
         assessment = assess(SimpleNamespace(cases=cases, catalog=catalog, mode=report["identity"]["mode"],
                                             sources=c01.round_sources(protocol)), bundle, costs)
         if any(not same_json(receipt.get(k), v) for k, v in assessment.items()):

@@ -18,7 +18,7 @@ from luna import test_round as historic
 from luna_r5.audit import FILENAME, completed_timings, valid_interruption_tail
 from r2 import execute, gate, seal
 from r2.plan import Plan, gate_reference
-from budget import Account, BudgetError
+from budget import Account, BudgetError, total_usd
 from common import c01, decode, encode
 from journal import Journal
 import run
@@ -107,6 +107,7 @@ class R5Test(unittest.TestCase):
                                  "correct_completions", "integral_reviews", "raw_urgent", "errors")],
                                  ["fixture_ready", 8, 4, 3, 3, 1, 0])
                 self.check_receipt_status(report_path, dev_file, ("failed", "pass"))
+                self.check_receipt_finances(report_path, dev_file)
                 proof = ["--development-gate", dev_file]
                 self.check_tamper(output, report)
             else:
@@ -114,6 +115,8 @@ class R5Test(unittest.TestCase):
                 receipt_path = output / gate.FINAL_RECEIPT
                 receipt = c01.read(receipt_path)
                 self.check_receipt_status(report_path, receipt_path, ("pass", "fixture_ready"))
+                self.check_receipt_finances(report_path, receipt_path)
+                self.cli("verify-final", *args, "--output", output)
                 self.assertEqual((receipt["status"], receipt["luna_evidence"]), ("inconclusive", report["luna_evidence"]))
                 observations = c01.read_records(c01.source_path(report["artifacts"]["observations"]))
                 self.assertTrue(all(ch["reason"] == "explicit" for obs in observations if obs["origin"] == "candidate"
@@ -144,6 +147,53 @@ class R5Test(unittest.TestCase):
                 receipt_path.write_text(encode(changed))
                 with self.assertRaisesRegex(ValueError, "resultado público"):
                     c01.verify_report(report_path)
+        finally:
+            receipt_path.write_bytes(original)
+
+    def check_receipt_finances(self, report_path, receipt_path):
+        original = receipt_path.read_bytes()
+        receipt = decode(original)
+        first, second, *_ = receipt["costs"]
+        missing = object()
+        mutations = [
+            (("binding_sha256",), missing), (("binding_sha256",), "0" * 64),
+            (("manifest_sha256",), missing), (("manifest_sha256",), "0" * 64),
+            (("manifest_sha256",), "inválido"), (("report_version",), missing),
+            (("protocol_version",), missing), (("ipc_contract_version",), "0.0.0"),
+            (("profile",), missing), (("costs",), missing), (("costs", first), None),
+            (("costs", first), missing), (("observed_usd",), "0"),
+            (("observed_usd",), "-1"), (("observed_usd",), "NaN"),
+            (("observed_usd",), None), (("observed_usd",), 0),
+            (("costs", first, "observed_usd"), None), (("costs", first, "observed_usd"), "NaN"),
+            (("costs", first, "observed_usd"), "-1"), (("costs", first, "observed_usd"), 0),
+            (("costs", first, "receipt"), missing), (("costs", first, "receipt"), None),
+            (("costs", first, "receipt"), "gateway: "), (("costs", first, "receipt"), receipt["costs"][second]["receipt"]),
+        ]
+        try:
+            for path, value in mutations:
+                changed = deepcopy(receipt)
+                parent = changed
+                for key in path[:-1]:
+                    parent = parent[key]
+                if value is missing:
+                    del parent[path[-1]]
+                else:
+                    parent[path[-1]] = value
+                receipt_path.write_text(encode(changed))
+                with self.subTest(stage=receipt["stage"], field=path, value=value), self.assertRaises(ValueError):
+                    c01.verify_report(report_path)
+            for amount, valid in (("0.000546", False), ("100", False),
+                                  ("0.000547000000000000000000000001", True), ("0.001", True)):
+                changed = deepcopy(receipt)
+                changed["costs"][first] = dict(observed_usd=amount, receipt="correcao-fixture")
+                changed["observed_usd"] = str(total_usd(*(Decimal(row["observed_usd"]) for row in changed["costs"].values())))
+                receipt_path.write_text(encode(changed))
+                with self.subTest(stage=receipt["stage"], amount=amount):
+                    if valid:
+                        c01.verify_report(report_path)
+                    else:
+                        with self.assertRaisesRegex(ValueError, "limites"):
+                            c01.verify_report(report_path)
         finally:
             receipt_path.write_bytes(original)
 
