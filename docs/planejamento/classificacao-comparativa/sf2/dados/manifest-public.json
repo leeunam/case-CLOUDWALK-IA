@@ -4,15 +4,15 @@
   "files": {
     "train": {
       "path": "train.jsonl",
-      "sha256": "d95ce77652254fac8e9de7ebbc28153aed2bc46772762b2bd5c0d8d4e174af3e"
+      "sha256": "d10ebb37c4a00bbbe466d01558ff67eef0ed6002db65793f0bc97d50eed91e83"
     },
     "validation": {
       "path": "validation.jsonl",
-      "sha256": "f162b8d7e62b705a023831c0367e115a77bb19be7b6814d2f4c0badaa05f1154"
+      "sha256": "b7d78a8adca44b1165cbadb804cbd879a3573a5c73d6311a592887d70ef68fc9"
     },
     "annotations": {
       "path": "annotations-public.jsonl",
-      "sha256": "ed6b128ee5b36e5f68e7334549d84b98be2e46778e53c317ae1b9f9271b45549"
+      "sha256": "c5337b12df840821cf4a1acf810e718f4d04444e4584131932a68dcfad7a920f"
     }
   },
   "counts": {
@@ -21,5 +21,5 @@
   },
   "review_receipt_sha256": null,
   "token_lengths_sha256": null,
-  "limitations": "Dados sintéticos em português, com quotas planejadas. A auditoria de novidade e a adjudicação indicaram a substituição de 82 relatos do rascunho 50ee50a, registrados aqui com nova autoria e anotação A. Esses relatos aguardam revisão independente de novidade e uma nova anotação B. As leituras cegas anteriores permanecem vinculadas aos textos originais. Este manifesto aguarda conciliação e recibos definitivos de revisão e tokenização."
+  "limitations": "Dados sintéticos com quotas planejadas. O lote incorpora as 82 substituições da auditoria inicial, incluindo nova redação de quatro relatos após a primeira reauditoria. As anotações B anteriores permanecem vinculadas aos bytes que foram lidos. Os quatro substitutos desta revisão aguardam nova leitura cega B e revisão independente de novidade. O lote aguarda conciliação e recibos definitivos."
 }
