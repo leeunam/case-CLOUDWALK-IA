@@ -227,3 +227,5 @@ confundir citação literal com prova semântica. A nova candidata deve ser
 congelada antes de usar o conjunto final. A preparação não faz chamadas
 pagas nem altera a publicação fixture. C06/C07 continuam condicionadas à
 qualificação real e à decisão de adoção.
+
+O [subplano R5](classificacao-comparativa/rodada-5-implementacao.md) fixa o contrato privado e o veto local auditável. A frente candidata é isolada do final até o congelamento e não altera bytes históricos R3/R4. A preparação não mede qualidade do fornecedor nem faz chamadas pagas.
