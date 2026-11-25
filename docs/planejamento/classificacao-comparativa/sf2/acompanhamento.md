@@ -1,4 +1,4 @@
-# SF2 — acompanhamento da primeira onda
+# SF2 — acompanhamento das ondas
 
 Primeira onda autorizada pelo responsável em 25/11/2026. Base comum:
 `5c6cc6330a7247be6694be7cff8315d546824ab0`.
@@ -56,10 +56,22 @@ semântica detectou cenários reaproveitados. Os rascunhos e as primeiras
 anotações permanecem registrados; textos novos exigem anotações novas. O
 teste final continua reservado e não é mostrado aos autores dos modelos.
 
-## Próxima onda
+## Segunda onda — implementação em andamento
+
+Continuação autorizada após a conclusão de 00/01/02. Base comum dos agentes:
+`1f55d316f29afe7a749317ce136ebde28c2991be`.
+
+| Frente | Agente | Branch / worktree | Aceite desta onda |
+| --- | --- | --- | --- |
+| 03 · treino e adaptador | Sol, alto | `feat/sf2-treinamento` · `.worktrees/sf2-treinamento` | Pins/imports, export/reload e comportamento do worker com fixtures identificadas |
+| 04 · avaliador | Astra, alto | `feat/sf2-avaliador` · `.worktrees/sf2-avaliador` | Métricas, grade, auditoria/congelamento e execução com fixtures matemáticas e de processo |
 
 03 prepara o código de treino e o adaptador; 04 prepara o avaliador e a
 seleção da regra de revisão. Essas implementações podem trabalhar com fixtures
 em paralelo, consumindo a nova base integrada. O treino real continua em 05,
 depois do aceite de 03 e 04. Esta primeira onda não produziu pesos, métricas
 de classificação SF2 ou chamadas à API de classificador.
+
+A [interface local](interface-onda2.md) registra o transporte e a coleta única
+de validação. Neste chat, o integrador acompanha interfaces, revisões
+independentes e o aceite combinado antes de liberar o treino.
