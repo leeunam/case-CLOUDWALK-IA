@@ -229,3 +229,5 @@ pagas nem altera a publicação fixture. C06/C07 continuam condicionadas à
 qualificação real e à decisão de adoção.
 
 O [subplano R5](classificacao-comparativa/rodada-5-implementacao.md) fixa o contrato privado e o veto local auditável. A frente candidata é isolada do final até o congelamento e não altera bytes históricos R3/R4. A preparação não mede qualidade do fornecedor nem faz chamadas pagas.
+
+A R5-A foi implementada e aprovada na revisão por tarefa em `53b1131`, com 29 testes offline e 57 propostas sintéticas dirigidas do revisor. As fontes semânticas foram [congeladas](../evidencias/c05/r5-candidata/candidate-freeze.json). O veto projeta abstenção no IPC e mantém a proposta original na auditoria; mede-se a candidata Luna com a política, sem atribuir o veto a um acerto do modelo puro. Perfil/executor B, revisão ampla, avaliação real e C06/C07 continuam pendentes. Zero novas chamadas ao fornecedor nessa preparação.

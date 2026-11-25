@@ -1,0 +1,43 @@
+{
+  "version": "2.0.0",
+  "identity": {
+    "requested_model": "openai/gpt-5.6-luna",
+    "provider": "feita",
+    "fixture_provider": "simulador-c05-luna-r5",
+    "adapter_version": "2.0.0",
+    "policy_version": "2.0.0"
+  },
+  "request": {
+    "method": "POST",
+    "url": "https://api.feita.ai/gateway/v1/chat/completions",
+    "parameters": {
+      "model": "openai/gpt-5.6-luna",
+      "reasoning_effort": "none",
+      "max_completion_tokens": 384,
+      "stream": false
+    },
+    "instruction_order": ["prompt", "rubric"],
+    "context": ["text", "brand", "catalog", "missing", "received"],
+    "private_schema_version": "1.0.0",
+    "quote_max_unicode_characters": 160,
+    "requests_per_eligible_case": 1,
+    "bypass": ["complete", "invalid"]
+  },
+  "transport": {
+    "deadline": "Monotônico desde a entrada até a validação da observação e da auditoria, com margem de entrega do IPC.",
+    "preconnect": false,
+    "probes": false,
+    "retry": false,
+    "follow_redirects": false
+  },
+  "evidence": {
+    "profile_version": "1.0.0",
+    "ipc_version": "1.1.0",
+    "policy_sha256_source": "evidence.py"
+  },
+  "budget": {
+    "reservation": "Invocada com o tamanho do corpo em bytes antes de entregar o caso ao transporte.",
+    "billing": "A reserva máxima e a conciliação dos custos são responsabilidade do orçamento injetado. O limite pedido de tokens não reduz o teto faturável.",
+    "unknown_cost": "Registra uso disponível após despacho e deixa o custo sem confirmação para conciliação e parada no executor."
+  }
+}

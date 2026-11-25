@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://class-001.invalid/luna-r5/evidence-envelope.schema.json",
+  "type": "object",
+  "required": ["profile_version", "observation", "audit"],
+  "additionalProperties": false,
+  "if": {"properties": {"observation": {"properties": {"requests": {"const": 0}}}}},
+  "then": {
+    "properties": {
+      "observation": {"properties": {
+        "returned_model": {"type": "null"},
+        "weights_revision": {"type": "null"},
+        "request_usage": {"maxItems": 0}
+      }},
+      "audit": {"properties": {
+        "raw_content": {"type": "null"},
+        "finish_reason": {"type": "null"},
+        "refusal": {"type": "null"}
+      }}
+    }
+  },
+  "properties": {
+    "profile_version": {"const": "1.0.0"},
+    "observation": {"$ref": "https://class-001.invalid/v1/observation.schema.json"},
+    "audit": {
+      "type": "object",
+      "required": ["input_sha256", "policy_sha256", "raw_content", "finish_reason", "refusal", "fields"],
+      "additionalProperties": false,
+      "properties": {
+        "input_sha256": {"$ref": "#/$defs/digest"},
+        "policy_sha256": {"$ref": "#/$defs/digest"},
+        "raw_content": {"type": ["string", "null"]},
+        "finish_reason": {"type": ["string", "null"]},
+        "refusal": {"type": ["string", "null"]},
+        "fields": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": false,
+          "properties": {
+            "category": {"$ref": "#/$defs/evidence"},
+            "priority": {"$ref": "#/$defs/evidence"}
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "digest": {"type": "string", "minLength": 64, "maxLength": 64, "pattern": "^[a-f0-9]{64}$"},
+    "position": {"type": ["integer", "null"], "minimum": 0},
+    "evidence": {
+      "type": "object",
+      "required": ["value", "criterion", "quote", "start", "end", "verdict", "reason"],
+      "additionalProperties": false,
+      "properties": {
+        "value": {"type": ["string", "null"]},
+        "criterion": {"type": ["string", "null"]},
+        "quote": {"type": ["string", "null"]},
+        "start": {"$ref": "#/$defs/position"},
+        "end": {"$ref": "#/$defs/position"},
+        "verdict": {"enum": ["accepted", "explicit", "veto", "invalid", "error"]},
+        "reason": {"type": "string"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"start": {"type": "null"}}},
+          "then": {"properties": {"end": {"type": "null"}}},
+          "else": {"properties": {"end": {"type": "integer", "minimum": 1}}}
+        },
+        {
+          "if": {"properties": {"verdict": {"const": "accepted"}}},
+          "then": {"properties": {
+            "reason": {"const": "supported_relation"},
+            "value": {"type": "string", "minLength": 1},
+            "criterion": {"type": "string", "not": {"const": "none"}},
+            "quote": {"type": "string", "minLength": 1, "maxLength": 160, "pattern": "\\S"},
+            "start": {"type": "integer"}
+          }}
+        },
+        {
+          "if": {"properties": {"verdict": {"const": "explicit"}}},
+          "then": {"properties": {
+            "reason": {"const": "explicit_abstention"},
+            "value": {"const": "informacao_insuficiente"},
+            "criterion": {"const": "none"},
+            "quote": {"const": ""},
+            "start": {"type": "null"}
+          }}
+        },
+        {
+          "if": {"properties": {"verdict": {"const": "veto"}}},
+          "then": {"properties": {"reason": {
+            "enum": ["no_literal_span", "ambiguous_span", "unsupported_code", "criterion_mismatch",
+                     "insufficient_relation", "context_conflict", "provider_refusal"]
+          }}}
+        },
+        {
+          "if": {"properties": {"verdict": {"const": "invalid"}}},
+          "then": {"properties": {"reason": {"enum": ["missing_output", "invalid_output"]}}}
+        },
+        {
+          "if": {"properties": {"verdict": {"const": "error"}}},
+          "then": {"properties": {"reason": {"enum": ["timeout", "transport", "version_mismatch", "adapter_error"]}}}
+        }
+      ]
+    }
+  }
+}

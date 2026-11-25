@@ -1,0 +1,50 @@
+{
+  "task": "C05-R5-A",
+  "status": "candidate_frozen_after_task_review_before_R5_executor_final_data_access",
+  "candidate_commit": "53b11319c5450b7ab01bca64d98fb499f5fe9412",
+  "runtime_and_semantic_sources_sha256": {
+    "script/classification_comparison/adapters/luna/r5/adapter.py": "8ac5c50ace54a58293bd63c4147a262a6dfbfcb566a2f5be2aac3f3eb5dfeecf",
+    "script/classification_comparison/adapters/luna/r5/candidate.json": "f01fa3c2e4f566765e2e38ce9755eb6781ba32e420ccf1ad97d833df598f67d9",
+    "script/classification_comparison/adapters/luna/r5/evidence.py": "0a2c09f7d5429c2f0a5d140330f70e75257a14b264cb02482bccca9789d1c4eb",
+    "script/classification_comparison/adapters/luna/r5/evidence-envelope.schema.json": "c788f313a1c002f4c6e78b400a91120a2373d744184006b50725f91f7239f579",
+    "script/classification_comparison/adapters/luna/r5/operational.json": "e1272d763e140633ed7bc9670d4b31c3dd181d1cdf7d58deeda77409424a3d21",
+    "script/classification_comparison/adapters/luna/r5/prompt.txt": "fb4437c677a6b6eea2fb55d6fdebd7143b22c9738f273a561f4601cac38e1610",
+    "docs/planejamento/classificacao-comparativa/rubrica-comum.md": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac",
+    "script/f08/jev/catalog.json": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271",
+    "script/classification_comparison/adapters/luna/transport.py": "60673dff9db3f3dd8e16db409843ec6d073397053a66e664a5b65e2b98d03ea0",
+    "script/classification_comparison/adapters/qwen/adapter.py": "fefe1b4458d667bf9701e59ce2071d368a92169848ba14e6ccd516ab7d74c90f",
+    "script/classification_comparison/adapters/qwen/transport.py": "a93f322b347efe69096aa4fa1483ae003b2ef06a2e1e1077ed09cbcab4f030f2",
+    "script/classification_comparison/adapters/qwen/pilot.py": "5605c8cfc06af9acea2319aad2c9284c46ab381e3262362fbeda99e5e866c79b",
+    "script/classification_comparison/adapters/qwen/fixture.py": "7d0d2d3a86971481664652488afb4eb83bcd961be693b03dfdc1c1904b1a5dbf",
+    "script/classification_comparison/adapters/qwen/tarifas-publicas.json": "4494fc5d7d0f970521560697ae3facc16773fed8c38d7ef28df9b78686bf27cf",
+    "docs/planejamento/classificacao-comparativa/contratos/common.schema.json": "bc242132690bfef7504e0124a1758b56c9a336359ab9ffde038f8645a8cef0c3",
+    "docs/planejamento/classificacao-comparativa/contratos/input.schema.json": "2e943f5b228181366da189b9b51b463ffb1ea8140aabf01e701ad9e4232339fa",
+    "docs/planejamento/classificacao-comparativa/contratos/observation.schema.json": "0df9647efe7e57768904cdecf24c1e42a3ce2ce6e977a73a073b0b5169bc3d38"
+  },
+  "shared_semantic_functions_ast_sha256": {
+    "script/check_classification_contracts.py::normalize_input": "fe5d722f8824110f44cb2ea2a3883873baf68a13bf2dddee5f5a6819f7aa5daf",
+    "script/check_classification_contracts.py::structure": "a69521a7702aaed223a1475be12e3cec35a27fac015c6f1c37018c8daa2dab35",
+    "script/classification_comparison/common.py::decide": "17cef51ceb462ebac61e43d017ffc4bf0bf1ca02d2f2e45bb5697959a5cdb411",
+    "script/classification_comparison/metrics.py::canonical_summary": "be949971bc7c8bf1900f6b47ffdb041b895cff7cfb7694d73405a997e0f668cb",
+    "script/classification_comparison/metrics.py::apply_final_populations": "29a2009d297b3787a5ed7d7346cca1d2ab677f612f7f04b7607e96adfb79f4f2",
+    "script/classification_comparison/metrics.py::eligibility": "7613beba7fdeb125c77d3590b05ec6650308bee22cd88ff6b48585932850a6fa",
+    "script/classification_comparison/r2/gate.py::assess": "f0f4acb8c30e23766f18dafdaa6e123998f0d17d71eb0209c5d61cda4280a22e"
+  },
+  "full_executor_runtime_pin": "Pending task B. Full shared engine files will be bound after additive profile integration; semantic AST above must stay equal.",
+  "review": {
+    "spec": "approved",
+    "quality": "approved",
+    "report": "docs/evidencias/c05/r5-candidata/revisao.md",
+    "whole_R5_review": "pending task B"
+  },
+  "boundaries": {
+    "candidate_author_final_data_access_reported": false,
+    "R5_model_calls": 0,
+    "real_model_quality_measured": false,
+    "received_valid_fields_preserved": true,
+    "one_request_per_eligible_case": true,
+    "IPC_veto_is_post_policy_abstention": true,
+    "raw_provider_proposal_preserved_in_audit": true
+  },
+  "paid_execution_authorized_by_this_freeze": false
+}
