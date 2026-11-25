@@ -1,0 +1,8 @@
+{
+  "source_commit": "bce33eeadd262b91a7f85883ce50df86b8eebcd2",
+  "previous_commit": "50ee50a583c5c6e359ac075919fcb3a2944c805c",
+  "records": 82,
+  "input_sha256": "6bb13d6d4d6b886e8362bf1d6e11085f320dccc246605ef82a946d9f4bd01f96",
+  "rubric_sha256": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac",
+  "previous_b_reusable_only_unchanged_records": true
+}

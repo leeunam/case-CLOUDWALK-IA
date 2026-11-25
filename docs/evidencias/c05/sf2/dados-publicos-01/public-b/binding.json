@@ -1,0 +1,15 @@
+{
+  "source_commit": "50ee50a583c5c6e359ac075919fcb3a2944c805c",
+  "source_files_sha256": {
+    "train.jsonl": "9e09fea9ab9955ef745130f0ce3ab4ade4abf3a54fbb49bb807fc78e5e28ba8f",
+    "validation.jsonl": "08273671b6701ab55a12adbba7e969c1a1455d34f96d6fd2ebdbf564371e4512"
+  },
+  "records": 240,
+  "projection_sha256": "6bc4e53562cd243b67eb53267206cdb8ff9a72e176c266741e6f713948f5f621",
+  "projection_fields": [
+    "id",
+    "text"
+  ],
+  "rubric_sha256": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac",
+  "annotation_b_completed": false
+}

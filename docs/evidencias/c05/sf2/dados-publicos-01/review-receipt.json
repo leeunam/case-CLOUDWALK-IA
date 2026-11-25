@@ -1,0 +1,11 @@
+{
+  "files": {
+    "train": "d10ebb37c4a00bbbe466d01558ff67eef0ed6002db65793f0bc97d50eed91e83",
+    "validation": "b7d78a8adca44b1165cbadb804cbd879a3573a5c73d6311a592887d70ef68fc9",
+    "annotations": "2cde06b88e8993aad3d7a2e761cf0933896e7db2d20e63ff9b2c2858436b3005"
+  },
+  "reviewer": "sf2-public-spec-quality-astra-fix2-01",
+  "unresolved_disagreements": 0,
+  "semantic_review_completed": true,
+  "limitations": "Relatos sintéticos em português com distribuição planejada. Autoria, segunda leitura, conciliação e revisão foram realizadas por IA, sem validação humana. A revisão reutiliza a auditoria de novidade pública vinculada à mesma projeção e examina fronteiras da rubrica por amostragem. Não mede desempenho em tráfego real nem cobre o conjunto final privado."
+}

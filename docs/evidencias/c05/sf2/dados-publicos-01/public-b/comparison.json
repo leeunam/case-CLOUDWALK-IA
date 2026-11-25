@@ -1,0 +1,11 @@
+{
+  "source_a_commit": "50ee50a583c5c6e359ac075919fcb3a2944c805c",
+  "a_annotations_sha256": "55671a3bd5028b4ee6ed114121313b75fd2d40c61269bfed5abcfe4cd1cdcf7c",
+  "b_sha256": "f17c8515f903706191ec45c34a5b7c07db02423f83c015da6accc33c110059a8",
+  "total": 240,
+  "disagreements_by_field": {
+    "category": 0,
+    "priority": 0
+  },
+  "disagreements": []
+}
