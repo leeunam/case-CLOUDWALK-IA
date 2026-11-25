@@ -1,5 +1,7 @@
 # C05-R5 · Candidata Luna com evidência
 
+**Estado em 25/11/2026:** política 2.1.0 revisada e [congelada](evidencias/c05/r5-candidata-v2/candidate-freeze.json), com 33 testes offline e os quatro alvos positivos de desenvolvimento aceitos. A versão 2.0.0 e seu bloqueio ficam preservados no histórico. Executor, revisão ampla e qualidade real continuam pendentes; zero novas chamadas ao fornecedor nesta preparação.
+
 A candidata mantém o modelo Luna e faz uma chamada por caso elegível. O
 catálogo, o relato e os campos válidos do canal compõem a entrada. O modelo
 propõe código, critério e citação por campo ausente. O IPC 1.1.0 vai dentro de
