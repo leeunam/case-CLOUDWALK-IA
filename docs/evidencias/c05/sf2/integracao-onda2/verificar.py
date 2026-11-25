@@ -11,20 +11,17 @@ from unittest.mock import patch
 
 ROOT = Path.cwd()
 sys.path.insert(0, str(ROOT))
-from script.classification_comparison.setfit_sf2.adapter import _fixture_worker
-from script.classification_comparison.setfit_sf2.adapter.test_decide import FixturePackage
 from script.classification_comparison.setfit_sf2.contracts.core import FIELDS, LABELS, read, read_lines, sha256
-from script.classification_comparison.setfit_sf2.contracts.test_artifacts import ArtifactTest
 from script.classification_comparison.setfit_sf2.evaluation import runner, workflow
 from script.classification_comparison.setfit_sf2.training import fit, package
 from script.classification_comparison.setfit_sf2.training.scores import COLLECTION_POLICY
-from script.classification_comparison.setfit_sf2.training.test_package import PackageTests
 
 MOD = "script.classification_comparison.setfit_sf2"
 SF2 = Path("script/classification_comparison/setfit_sf2")
 SCRIPT = Path(__file__).resolve()
 PYTHON = [sys.executable, "-B"]
 COMMANDS = []
+HISTORIC_RECEIPT = "ce8d97b3a51109e11830ba9aeb0c7edbc9c643ea710628535bd155f000fb1297"
 
 
 def cli(module, args, expected=0):
@@ -36,6 +33,10 @@ def cli(module, args, expected=0):
 
 
 def observe_harness(trace_path, policy_path):
+    from script.classification_comparison.setfit_sf2.adapter.test_decide import FixturePackage
+
+    from script.classification_comparison.setfit_sf2.adapter import _fixture_worker
+
     # Espiões de leitura e de escrita delegam às mesmas streams. score() também executa normalmente.
     with trace_path.open("x") as trace:
         def event(kind, value):
@@ -103,6 +104,8 @@ def empty_real_worker(root, cfg):
 
 
 def transport(root):
+    from script.classification_comparison.setfit_sf2.adapter.test_decide import FixturePackage
+
     path = root / "policy-control.json"
     policy = {**COLLECTION_POLICY, "category": {"tau": 0.9, "delta": 0.0}}
     runner.save(path, policy)
@@ -137,6 +140,8 @@ def transport(root):
 
 
 def configuration(root, validation):
+    from script.classification_comparison.setfit_sf2.contracts.test_artifacts import ArtifactTest
+
     training, paths, _ = ArtifactTest()._training_case(root)
     inventory = fit.code_manifest()
     package.write_json(paths["training_code"], inventory)
@@ -178,6 +183,8 @@ def configuration(root, validation):
 
 @contextmanager
 def fixture_package():
+    from script.classification_comparison.setfit_sf2.training.test_package import PackageTests
+
     try:
         PackageTests.setUpClass()
         yield PackageTests
@@ -185,12 +192,12 @@ def fixture_package():
         PackageTests.doClassCleanups()
 
 
-def probe_sources(root, config):
+def probe_sources(root, config, validation, receipt):
     # O subprocesso resolve imports no espelho. Copiam-se só fontes, contratos e metadados.
     cfg = read(config)
     shadow = root/"mirror"
-    index = read(cfg["adapter"])["files"]
-    paths = {ROOT / key for key in index}
+    files = read(cfg["adapter"])["files"]
+    paths = {ROOT / key for key in files}
     paths.update(workflow.sources().values())
     paths.add(SF2.absolute()/"evaluation/__init__.py")
     paths.update(ROOT/entry["path"] for entry in workflow.PROTOCOL["sources"].values())
@@ -198,36 +205,73 @@ def probe_sources(root, config):
         dest = shadow/source.relative_to(ROOT)
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, dest)
-    probe = """
-import json, sys
-from pathlib import Path
-from script.classification_comparison.setfit_sf2.evaluation import workflow
-assert workflow.ROOT == Path.cwd()
-cfg, _ = workflow.public_setup(sys.argv[1])
-print(json.dumps(workflow.capture_receipt(cfg, cfg["capture_policy"])))
-"""
-    def preflight():
-        result = subprocess.run([*PYTHON, "-c", probe, str(config)], cwd=shadow, capture_output=True,
-                                text=True, check=True, timeout=30)
-        return json.loads(result.stdout)
 
-    baseline = preflight()
-    assert baseline == read(root/"validation/capture.json")
-    checks = []
-    for rel in ["adapter/decide.py", "adapter/__main__.py", "contracts/__init__.py", "contracts/ipc.py"]:
+    def invoke(*args):
+        return subprocess.run([*PYTHON, str(SCRIPT), "probe", *map(str, args)], cwd=shadow,
+                              capture_output=True, text=True, timeout=60)
+
+    def clean_preflight():
+        proc = invoke("preflight", config)
+        if proc.returncode:
+            raise ValueError(f"pré-voo da cópia íntegra recusado: {proc.stderr.strip()}")
+        return json.loads(proc.stdout)
+
+    reference = workflow.capture_receipt(cfg, cfg["capture_policy"])
+    historical = read(validation/"capture.json")
+    changed_roles = sorted(k for k in reference.keys() | historical.keys() if reference.get(k) != historical.get(k))
+    if changed_roles not in ([], ["evaluation/workflow.py"]):
+        raise ValueError(f"entradas da coleta divergentes do histórico: {changed_roles}")
+    if clean_preflight() != reference:
+        raise ValueError("pré-voo do espelho diverge do checkout")
+    receipt.update(index_sha256=sha256(cfg["adapter"]), argv_sha256=sha256(cfg["capture_command"]),
+                   historical_capture_sha256=sha256(validation/"capture.json"), changed_roles=changed_roles,
+                   workflow_sha256=reference["evaluation/workflow.py"], adapter_members=len(files),
+                   clean_preflight=True, source_checks=[])
+    positive = "contracts/ipc.py"
+    for n, rel in enumerate(("adapter/decide.py", "adapter/__main__.py", "contracts/__init__.py", positive)):
         key = str(SF2/rel)
         path = shadow/key
         previous = path.read_bytes()
         path.write_bytes(previous + b"\n# fixture de custodia\n")
         try:
-            changed = sha256(path)
-            assert changed != index[key]
-            after = preflight()
-            checks.append(dict(member=rel, original_sha256=index[key], changed_sha256=changed,
-                               capture_changed=[k for k in baseline if baseline[k] != after[k]]))
+            check = dict(member=rel, original_sha256=files[key], changed_sha256=sha256(path), stages={})
+            receipt["source_checks"].append(check)
+            if check["changed_sha256"] == files[key]:
+                raise ValueError(f"sonda não alterou {key}")
+            reason = "SHA-256 divergente no membro do adaptador: " + key
+            for stage, args in (("validate", [config, root/f"capture-{n}"]),
+                                ("freeze", [config, validation, root/f"release-{n}"])):
+                proc = invoke(stage, *args)
+                message = proc.stderr.strip()
+                check["stages"][stage] = dict(exit=proc.returncode, reason=message)
+                if proc.returncode != 1 or message != f"{stage}: {reason}" or proc.stdout:
+                    raise ValueError(f"{stage} deixou de recusar {rel} pelo SHA-256 esperado "
+                                     f"(saída {proc.returncode}, stderr={message!r}, stdout={proc.stdout.strip()!r})")
+            if (root/f"capture-{n}"/"run").exists() or (root/f"release-{n}").exists():
+                raise ValueError(f"execução ou liberação criada após divergência em {key}")
+            if sha256(cfg["adapter"]) != receipt["index_sha256"] or sha256(cfg["capture_command"]) != receipt["argv_sha256"]:
+                raise ValueError("índice ou argv mudou durante a sonda")
         finally:
             path.write_bytes(previous)
-    return checks
+    if clean_preflight() != reference:
+        raise ValueError("pré-voo não foi restabelecido após restaurar as fontes")
+    observed = {check["member"] for check in receipt["source_checks"] if len(check["stages"]) == 2}
+    if positive not in observed or len(observed) != 4:
+        raise ValueError("controle positivo de contracts/ipc.py ou sonda esperada ausente")
+    receipt.update(positive_control=positive, restored_preflight=True)
+
+
+def run_probe(args):
+    # Um eventual avanço indevido até o worker deve reprovar a prova sem repetir a inferência.
+    from script.classification_comparison.setfit_sf2.evaluation.__main__ import main as evaluate
+    if workflow.ROOT != Path.cwd():
+        raise ValueError("módulos carregados fora do espelho")
+    if args[0] == "preflight":
+        cfg, _ = workflow.public_setup(args[1])
+        print(json.dumps(workflow.capture_receipt(cfg, cfg["capture_policy"])))
+        return 0
+    with patch.object(workflow, "supervise", side_effect=AssertionError("tentativa de iniciar worker na sonda")):
+        return evaluate(args)
 
 
 def negative_checks(root, cfg_path, validation):
@@ -262,12 +306,14 @@ def negative_checks(root, cfg_path, validation):
     return checks
 
 
-def main(root):
-    root.mkdir(exist_ok=False)
+def offline(root):
     os.environ.update(HF_HUB_OFFLINE="1", TRANSFORMERS_OFFLINE="1", HF_DATASETS_OFFLINE="1",
                       HF_HUB_DISABLE_IMPLICIT_TOKEN="1", HF_HUB_DISABLE_TELEMETRY="1",
                       HF_HOME=str(root/"hf-cache"), XDG_CACHE_HOME=str(root/"cache"),
                       TOKENIZERS_PARALLELISM="false", PYTHONDONTWRITEBYTECODE="1")
+
+
+def main(root):
     sentinel = root/"sentinela-inventario-final"
     sentinel.write_text("fixture reservada")
     # O primeiro open do arquivo será observável até em montagens relatime.
@@ -332,20 +378,47 @@ def main(root):
                   vectors=sum(len(r["heads"]) for r in scores["rows"]), journal_entries=len(journal),
                   versions=model["versions"], model_sha256=model["model_sha256"],
                   scores03_sha256=sha256(root/"scores03.json"), equal_score_objects=True,
-                  adapter_members=len(read(cfg["adapter"])["files"]), source_checks=probe_sources(root, cfg_path),
+                  adapter_members=len(read(cfg["adapter"])["files"]),
                   sentinel_open_attempts=len(attempted), negative_checks=negative_checks(root, cfg_path, validation),
                   commands=COMMANDS,
                   worker_argv=read(cfg["capture_command"]))
-    package.write_json(root/"recibo.json", result)
-    print(root/"recibo.json")
-    missing = [item["member"] for item in result["source_checks"] if not item["capture_changed"]]
-    if missing:
-        print("Aceite bloqueado por fontes divergentes sem detecção: " + ", ".join(missing), file=sys.stderr)
-        return 2
-    return 0
+    return result, cfg_path, validation
+
+
+def verify(output, prior):
+    output.mkdir(exist_ok=False)
+    receipt = {"mode": "custody" if prior else "full_fixture"}
+    try:
+        if sys.flags.optimize:
+            raise ValueError("a prova exige as asserções habilitadas")
+        offline(output)
+        if prior:
+            config, validation = prior/"config.json", prior/"validation"
+            original = prior/"recibo.json"
+            receipt.update(source_fixture=str(prior), historical_receipt_sha256=sha256(original))
+            if receipt["historical_receipt_sha256"] != HISTORIC_RECEIPT:
+                raise ValueError("recibo da rodada histórica divergente")
+            old = read(original)
+            if read(validation/"capture.json") != old["capture"]:
+                raise ValueError("captura diferente da registrada na rodada histórica")
+            for role in ("predictions.jsonl", "timings.jsonl", "controls.jsonl"):
+                if sha256(validation/"run"/role) != old["run_seal"]["files"][role]:
+                    raise ValueError(f"evidência original divergente: {role}")
+        else:
+            measurements, config, validation = main(output)
+            receipt["fixture"] = measurements
+        probe_sources(output, config, validation, receipt)
+        receipt.update(status="passed", exit_code=0, reason="Pré-voo íntegro e restaurado. Quatro sondas recusadas nas duas etapas.")
+    except Exception as exc:
+        receipt.update(status="failed", exit_code=1, reason=f"{type(exc).__name__}: {exc}")
+    package.write_json(output/"recibo.json", receipt)
+    print(f"{receipt['status']}: {receipt['reason']}", file=sys.stderr if receipt["exit_code"] else sys.stdout)
+    return receipt["exit_code"]
 
 
 if __name__ == "__main__":
+    if sys.argv[1:2] == ["probe"]:
+        sys.exit(run_probe(sys.argv[2:]))
     if sys.argv[1:2] == ["observer"]:
         observe_harness(Path(sys.argv[2]), Path(sys.argv[3]))
     elif sys.argv[1:2] == ["observe-startup"]:
@@ -353,4 +426,6 @@ if __name__ == "__main__":
     else:
         parser = argparse.ArgumentParser(description=__doc__)
         parser.add_argument("output", type=Path, help="diretório novo de evidência temporária")
-        sys.exit(main(parser.parse_args().output.resolve()))
+        parser.add_argument("--fixture-anterior", type=Path, help="saída confiável do ensaio numérico de QA")
+        args = parser.parse_args()
+        sys.exit(verify(args.output.resolve(), args.fixture_anterior.resolve() if args.fixture_anterior else None))

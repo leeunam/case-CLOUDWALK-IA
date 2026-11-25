@@ -1,0 +1,81 @@
+{
+  "adapter_members": 17,
+  "argv_sha256": "deb5c98a40813b81f6001ba5aee0b58bee2920118d6f429b769366858ccd7066",
+  "changed_roles": [
+    "evaluation/workflow.py"
+  ],
+  "clean_preflight": true,
+  "exit_code": 0,
+  "historical_capture_sha256": "03b53a8a607f20a0f9ffe752879f9cab1554750cfc12acc9c2248118cd708509",
+  "historical_receipt_sha256": "ce8d97b3a51109e11830ba9aeb0c7edbc9c643ea710628535bd155f000fb1297",
+  "index_sha256": "60b16a6772f648055f572c9a8f96ca8e654972ae6bddee2ec4050304bc18ae69",
+  "mode": "custody",
+  "positive_control": "contracts/ipc.py",
+  "reason": "Pré-voo íntegro e restaurado. Quatro sondas recusadas nas duas etapas.",
+  "restored_preflight": true,
+  "source_checks": [
+    {
+      "changed_sha256": "613c551a74f4ae333b86346dfa43b1e9aebc49a33ef748fb9266e8299032e524",
+      "member": "adapter/decide.py",
+      "original_sha256": "6578db6a804d4dcd0bc9f43e5b469b81526ab96a99dcc51cdeda9a92f7970b0d",
+      "stages": {
+        "freeze": {
+          "exit": 1,
+          "reason": "freeze: SHA-256 divergente no membro do adaptador: script/classification_comparison/setfit_sf2/adapter/decide.py"
+        },
+        "validate": {
+          "exit": 1,
+          "reason": "validate: SHA-256 divergente no membro do adaptador: script/classification_comparison/setfit_sf2/adapter/decide.py"
+        }
+      }
+    },
+    {
+      "changed_sha256": "094a9643340c8e3d82b4a200c94599dafb738e8d808a216e1f33b8a98f65e7b4",
+      "member": "adapter/__main__.py",
+      "original_sha256": "ef4a9da8e08f935886c2b46669d626de758a72f19231053891136fa0b134ec54",
+      "stages": {
+        "freeze": {
+          "exit": 1,
+          "reason": "freeze: SHA-256 divergente no membro do adaptador: script/classification_comparison/setfit_sf2/adapter/__main__.py"
+        },
+        "validate": {
+          "exit": 1,
+          "reason": "validate: SHA-256 divergente no membro do adaptador: script/classification_comparison/setfit_sf2/adapter/__main__.py"
+        }
+      }
+    },
+    {
+      "changed_sha256": "c336f6eb6f1e340932a769e8a8d52b85875222da5144cbc8ed3188f5fff1854c",
+      "member": "contracts/__init__.py",
+      "original_sha256": "01e4ca572a847cc20f7130abb625898c0a28f8daa0f914cd4f13cde30cd8bc32",
+      "stages": {
+        "freeze": {
+          "exit": 1,
+          "reason": "freeze: SHA-256 divergente no membro do adaptador: script/classification_comparison/setfit_sf2/contracts/__init__.py"
+        },
+        "validate": {
+          "exit": 1,
+          "reason": "validate: SHA-256 divergente no membro do adaptador: script/classification_comparison/setfit_sf2/contracts/__init__.py"
+        }
+      }
+    },
+    {
+      "changed_sha256": "4b5a0b190433c102e862c640b607040bbf0aa79fda9cacd9e848866d97292d68",
+      "member": "contracts/ipc.py",
+      "original_sha256": "d272c56cb4dfaf9738a8e1faa704773fda85bf47260b0e5b0b2b0556367d1e0f",
+      "stages": {
+        "freeze": {
+          "exit": 1,
+          "reason": "freeze: SHA-256 divergente no membro do adaptador: script/classification_comparison/setfit_sf2/contracts/ipc.py"
+        },
+        "validate": {
+          "exit": 1,
+          "reason": "validate: SHA-256 divergente no membro do adaptador: script/classification_comparison/setfit_sf2/contracts/ipc.py"
+        }
+      }
+    }
+  ],
+  "source_fixture": "/tmp/sf2-onda2-integracao-237df80-b",
+  "status": "passed",
+  "workflow_sha256": "951feaf647ba124c3559f3b46da9da559bfc4d2cfa8fc139fa60d0d3e35e3f09"
+}
