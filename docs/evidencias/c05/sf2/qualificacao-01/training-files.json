@@ -1,0 +1,17 @@
+{
+  "annotations": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/docs/planejamento/classificacao-comparativa/sf2/dados/annotations-public.jsonl",
+  "arguments": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_sf2/.cache/qualificacao-01/arguments.json",
+  "catalog": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/f08/jev/catalog.json",
+  "contracts": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/docs/planejamento/classificacao-comparativa/sf2/contratos/sf2.schema.json",
+  "final_seal": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/docs/planejamento/classificacao-comparativa/sf2/dados/final-seal.json",
+  "model_lock": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_pilot/model-lock.json",
+  "protocol": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/docs/planejamento/classificacao-comparativa/sf2/protocolo.json",
+  "public_manifest": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/docs/planejamento/classificacao-comparativa/sf2/dados/manifest-public.json",
+  "requirements": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_pilot/requirements.txt",
+  "review_receipt": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/docs/evidencias/c05/sf2/dados-publicos-01/review-receipt.json",
+  "rubric": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/docs/planejamento/classificacao-comparativa/rubrica-comum.md",
+  "token_lengths": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/docs/evidencias/c05/sf2/dados-publicos-01/token-lengths.json",
+  "train": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/docs/planejamento/classificacao-comparativa/sf2/dados/train.jsonl",
+  "training_code": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_sf2/.cache/qualificacao-01/training-code.json",
+  "validation": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/docs/planejamento/classificacao-comparativa/sf2/dados/validation.jsonl"
+}

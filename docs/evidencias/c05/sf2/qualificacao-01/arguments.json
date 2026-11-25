@@ -1,0 +1,32 @@
+{
+  "aggregate_training_limit_seconds": 1800,
+  "batch_size": 8,
+  "body_learning_rate": 2e-05,
+  "device": "cpu",
+  "head": {
+    "C": 1.0,
+    "class": "LogisticRegression",
+    "class_weight": "balanced",
+    "max_iter": 1000,
+    "random_state": 42,
+    "solver": "lbfgs",
+    "tol": 0.0001
+  },
+  "hyperparameter_or_seed_search": false,
+  "independent_encoders": true,
+  "max_sequence_length": 128,
+  "model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+  "num_epochs": 1,
+  "num_iterations": 5,
+  "provision_limit_seconds": 1800,
+  "reload_score_absolute_tolerance": 1e-06,
+  "revision": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
+  "seed": 42,
+  "silent_truncation": false,
+  "targets": [
+    "category",
+    "priority"
+  ],
+  "torch_interop_threads": 2,
+  "torch_intraop_threads": 2
+}

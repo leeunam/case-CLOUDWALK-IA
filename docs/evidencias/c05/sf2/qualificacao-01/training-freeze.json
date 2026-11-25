@@ -1,0 +1,20 @@
+{
+  "contract_version": "sf2-ipc/1.0",
+  "files": {
+    "annotations": "2cde06b88e8993aad3d7a2e761cf0933896e7db2d20e63ff9b2c2858436b3005",
+    "arguments": "27d1ed81103598cedb32118c824d0f6b6bdfca2deccf449754cc1e52c222b7f5",
+    "catalog": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271",
+    "contracts": "114d25188c4ab7ab5522ee9e9c3a22eddac7dc386ec5df40886ac8cedcd5c1d5",
+    "model_lock": "a4dfd95949bbc1fd75ea46e5e3fe18f850dbd518bb2ec426a52bc628ebb455a0",
+    "protocol": "c0efd6d42ee50fd7775ff9db5ffcb9119db5861fd19c9b198b73ca01ce0eecaf",
+    "public_manifest": "36cbb5dab996775391a0c59802892a2b30d558fbf35b13e2620f0e7950d01ec9",
+    "requirements": "14bf9aeefaf8e8275de3b014ea63b10dea42246a0e80736220098fa546091b97",
+    "review_receipt": "11b65d96576176808d7262a2ed917f52a1bb4f8b55e453a48dc42ec778005ef4",
+    "rubric": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac",
+    "token_lengths": "98ef16ed8f9f8428302cc2bd5a20a7d4fbd4b72b729fef7ca2c3ea7b6b3d197c",
+    "train": "d10ebb37c4a00bbbe466d01558ff67eef0ed6002db65793f0bc97d50eed91e83",
+    "training_code": "599cda69dd60125dc5c55840dde7c4db3927b4029e9a417fc834f7ce254fb67b",
+    "validation": "b7d78a8adca44b1165cbadb804cbd879a3573a5c73d6311a592887d70ef68fc9"
+  },
+  "final_seal_sha256": "71bea26395321246ef00c4374465c6cd8bd3320252a7729429cfad5e3c2263a4"
+}

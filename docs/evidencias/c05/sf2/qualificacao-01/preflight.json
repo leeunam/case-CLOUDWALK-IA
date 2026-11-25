@@ -1,0 +1,90 @@
+{
+  "branch": "feat/sf2-qualificacao",
+  "checked_at_utc": "2026-11-25T20:59:34.466650+00:00",
+  "commit_base": "99885274faef5b5ee281ca4d87b9d840f85550ac",
+  "cwd": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao",
+  "environment_allowlist": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "DO_NOT_TRACK": "1",
+    "HF_DATASETS_OFFLINE": "1",
+    "HF_HOME": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_sf2/.cache/qualificacao-01/hf",
+    "HF_HUB_DISABLE_IMPLICIT_TOKEN": "1",
+    "HF_HUB_DISABLE_TELEMETRY": "1",
+    "HF_HUB_OFFLINE": "1",
+    "LANG": "C.UTF-8",
+    "MKL_NUM_THREADS": "2",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2",
+    "PATH": "/usr/bin:/bin",
+    "TMPDIR": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_sf2/.cache/qualificacao-01/tmp",
+    "TOKENIZERS_PARALLELISM": "false",
+    "TRANSFORMERS_OFFLINE": "1",
+    "XDG_CACHE_HOME": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_sf2/.cache/qualificacao-01/xdg"
+  },
+  "environment_sha256": "d1372330105671e740d6c702b09f645867d7a09bd9edc60d66936b619739e06f",
+  "final_public_seal_sha256": "71bea26395321246ef00c4374465c6cd8bd3320252a7729429cfad5e3c2263a4",
+  "public_contract_result": {
+    "accepted": true,
+    "counts": {
+      "train": 150,
+      "validation": 90
+    },
+    "stage": "accepted"
+  },
+  "public_final_counts": {
+    "classifiable": 96,
+    "expected_review": 24,
+    "total": 120,
+    "urgent_targets": 17
+  },
+  "public_tokenization": {
+    "count": 240,
+    "equal_to_accepted_receipt": true,
+    "maximum": 78,
+    "minimum": 14
+  },
+  "resources": {
+    "disk_free_bytes": 12522991616,
+    "memory_bytes": {
+      "MemAvailable": 5425238016,
+      "MemTotal": 16433438720,
+      "SwapFree": 2507870208
+    }
+  },
+  "stage": "passed",
+  "task": "SF2-05A",
+  "training_argv": [
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-treinamento/script/classification_comparison/setfit_sf2/.cache/verification/.venv/bin/python",
+    "-B",
+    "-m",
+    "script.classification_comparison.setfit_sf2.training",
+    "train",
+    "--snapshot",
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-treinamento/script/classification_comparison/setfit_sf2/.cache/verification/model",
+    "--training-freeze",
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_sf2/.cache/qualificacao-01/training-freeze.json",
+    "--arguments",
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_sf2/.cache/qualificacao-01/arguments.json",
+    "--training-code",
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_sf2/.cache/qualificacao-01/training-code.json",
+    "--train",
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/docs/planejamento/classificacao-comparativa/sf2/dados/train.jsonl",
+    "--validation",
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/docs/planejamento/classificacao-comparativa/sf2/dados/validation.jsonl",
+    "--annotations",
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/docs/planejamento/classificacao-comparativa/sf2/dados/annotations-public.jsonl",
+    "--public-manifest",
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/docs/planejamento/classificacao-comparativa/sf2/dados/manifest-public.json",
+    "--review-receipt",
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/docs/evidencias/c05/sf2/dados-publicos-01/review-receipt.json",
+    "--token-lengths",
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/docs/evidencias/c05/sf2/dados-publicos-01/token-lengths.json",
+    "--final-seal",
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/docs/planejamento/classificacao-comparativa/sf2/dados/final-seal.json",
+    "--output",
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao/script/classification_comparison/setfit_sf2/.cache/qualificacao-01/training-01"
+  ],
+  "training_freeze_sha256": "1a3a3baa405cf2cd45a15cc3e4ca3a0a654e6ac978f4d280c8b5cb301113112a",
+  "training_inventory_sha256": "aed757ed507e5ae66967395a931e82082cca84746e70787dedf53cc23bfc8d70",
+  "tree": "8944e7a0f2bd7c1e299a344eafb2ee0d12c24173"
+}
