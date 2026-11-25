@@ -1,0 +1,39 @@
+{
+  "task": "F10-A/mobile-human-acceptance",
+  "case_id": "51cdd26f-f9f1-47df-84b4-5c03de2f8033",
+  "origin": "https://jason-dollar-lcd-bought.trycloudflare.com",
+  "case_url": "https://jason-dollar-lcd-bought.trycloudflare.com/?case=51cdd26f-f9f1-47df-84b4-5c03de2f8033",
+  "recorded_at_utc": "2026-11-25T17:55:22.180733+00:00",
+  "case_identification": {
+    "method": "current open conversation URL, exact customer text, Aurora terminal/advanced and human_active checked in publication",
+    "requested_marker_present": false,
+    "first_customer_message_id": "dec985e2-2a18-4a58-9550-711e04be9d4d"
+  },
+  "operator_execution": {
+    "actor": "Alex",
+    "point_of_observation": "original_computer",
+    "record": "human-51cdd26f-f9f1-47df-84b4-5c03de2f8033.json",
+    "record_sha256": "1a97d827deb654c41b986fd0491a4e2b9ac057f0c91e828a7657b20b17cd7991",
+    "reply_http_status": 201,
+    "resolve_http_status": 200,
+    "final_status": "resolved",
+    "final_version": 8,
+    "final_message_count": 3
+  },
+  "customer_confirmation": {
+    "source": "explicit user response in central chat",
+    "requested_observation": "same conversation on phone with Wi-Fi disabled: reply appeared without reload, then remained after reload, status Resolvido",
+    "exact_user_reply": "Apareceu automaticamente, permaneceu após recarregar e está Resolvido",
+    "point_of_observation": "mobile network, reported by user",
+    "automatic_reply_observed": true,
+    "reply_persisted_after_reload": true,
+    "resolved_status_confirmed": true,
+    "transport_mechanism": "WebSocket versus fallback polling not distinguished by this observation"
+  },
+  "acceptance": {
+    "human_handoff_mobile": "passed_with_user_confirmation",
+    "external_brand_isolation": "pending",
+    "real_classifier": "standby"
+  },
+  "paid_model_requests": 0
+}
