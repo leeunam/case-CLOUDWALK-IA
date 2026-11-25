@@ -1,0 +1,1010 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cloudwalk:sf2:ipc:1.0",
+  "$defs": {
+    "text": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$", "minLength": 64, "maxLength": 64},
+    "partition": {"enum": ["train", "validation", "final"]},
+    "received": {
+      "type": "object",
+      "properties": {"category": {}, "priority": {}},
+      "required": [],
+      "additionalProperties": false
+    },
+    "mask": {"type": "array", "items": {"enum": ["category", "priority"]}, "uniqueItems": true},
+    "id": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "labels": {
+      "type": "object",
+      "properties": {
+        "category": {"enum": ["pix", "payouts", "terminal", "informacao_insuficiente"]},
+        "priority": {"enum": ["basic", "intermediate", "advanced", "urgent", "informacao_insuficiente"]}
+      },
+      "required": ["category", "priority"],
+      "additionalProperties": false
+    },
+    "rubricSource": {
+      "type": "object",
+      "properties": {
+        "version": {"const": "1.0.0"},
+        "sha256": {"const": "ac497f8d36af1aceb4eac39648ca7fe2c1e291d16cf512f27894b40e113ed4ac"}
+      },
+      "required": ["version", "sha256"],
+      "additionalProperties": false
+    },
+    "catalogSource": {
+      "type": "object",
+      "properties": {
+        "version": {"const": "1.0.0"},
+        "sha256": {"const": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271"}
+      },
+      "required": ["version", "sha256"],
+      "additionalProperties": false
+    },
+    "record": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {"$ref": "#/$defs/id"},
+            "family_id": {"type": "string", "minLength": 1, "pattern": "\\S"},
+            "partition": {"const": "train"},
+            "text": {"type": "string", "minLength": 1, "pattern": "\\S"},
+            "gold": {"$ref": "#/$defs/labels"},
+            "author": {"type": "string", "minLength": 1, "pattern": "\\S"}
+          },
+          "required": ["id", "family_id", "partition", "text", "gold", "author"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {"$ref": "#/$defs/id"},
+            "family_id": {"type": "string", "minLength": 1, "pattern": "\\S"},
+            "partition": {"enum": ["validation", "final"]},
+            "text": {"type": "string", "minLength": 1, "pattern": "\\S"},
+            "gold": {"$ref": "#/$defs/labels"},
+            "author": {"type": "string", "minLength": 1, "pattern": "\\S"},
+            "missing_fields": {"$ref": "#/$defs/mask"},
+            "received": {"$ref": "#/$defs/received"}
+          },
+          "required": ["id", "family_id", "partition", "text", "gold", "author", "missing_fields", "received"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "annotation": {
+      "type": "object",
+      "properties": {
+        "annotator": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "origin": {"enum": ["ai", "human"]},
+        "labels": {"$ref": "#/$defs/labels"},
+        "rationale": {
+          "type": "object",
+          "properties": {
+            "category": {"type": "string", "minLength": 1, "pattern": "\\S"},
+            "priority": {"type": "string", "minLength": 1, "pattern": "\\S"}
+          },
+          "required": ["category", "priority"],
+          "additionalProperties": false
+        },
+        "evidence": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "type": "array",
+              "items": {"type": "string", "minLength": 1, "pattern": "\\S"},
+              "uniqueItems": true
+            },
+            "priority": {
+              "type": "array",
+              "items": {"type": "string", "minLength": 1, "pattern": "\\S"},
+              "uniqueItems": true
+            }
+          },
+          "required": ["category", "priority"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["annotator", "origin", "labels", "rationale", "evidence"],
+      "additionalProperties": false
+    },
+    "annotationRecord": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "text_sha256": {"$ref": "#/$defs/hash"},
+        "annotations": {"type": "array", "items": {"$ref": "#/$defs/annotation"}, "minItems": 1, "maxItems": 2},
+        "reconciliation": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "by": {"type": "string", "minLength": 1, "pattern": "\\S"},
+                "labels": {"$ref": "#/$defs/labels"},
+                "reason": {"type": "string", "minLength": 1, "pattern": "\\S"}
+              },
+              "required": ["by", "labels", "reason"],
+              "additionalProperties": false
+            },
+            {"type": "null"}
+          ]
+        },
+        "rubric": {"$ref": "#/$defs/rubricSource"},
+        "catalog": {"$ref": "#/$defs/catalogSource"}
+      },
+      "required": ["id", "text_sha256", "annotations", "reconciliation", "rubric", "catalog"],
+      "additionalProperties": false
+    },
+    "catalog": {
+      "type": "object",
+      "properties": {
+        "version": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "category": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1, "pattern": "\\S"}},
+        "priority": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1, "pattern": "\\S"}}
+      },
+      "required": ["version", "category", "priority"],
+      "additionalProperties": false
+    },
+    "input": {
+      "type": "object",
+      "properties": {
+        "contract_version": {"const": "sf2-ipc/1.0"},
+        "id": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "text": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "received": {"$ref": "#/$defs/received"},
+        "catalog": {"$ref": "#/$defs/catalog"},
+        "missing_fields": {"$ref": "#/$defs/mask"}
+      },
+      "required": ["contract_version", "id", "text", "received", "catalog", "missing_fields"],
+      "additionalProperties": false
+    },
+    "cut": {
+      "type": "object",
+      "properties": {"tau": {"enum": [0.5, 0.6, 0.7, 0.8, 0.9]}, "delta": {"enum": [0.0, 0.1, 0.2]}},
+      "required": ["tau", "delta"],
+      "additionalProperties": false
+    },
+    "policy": {
+      "type": "object",
+      "properties": {
+        "contract_version": {"const": "sf2-ipc/1.0"},
+        "category": {"$ref": "#/$defs/cut"},
+        "priority": {"$ref": "#/$defs/cut"}
+      },
+      "required": ["contract_version", "category", "priority"],
+      "additionalProperties": false
+    },
+    "classes": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "array",
+          "items": {"enum": ["pix", "payouts", "terminal", "informacao_insuficiente"]},
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true
+        },
+        "priority": {
+          "type": "array",
+          "items": {"enum": ["basic", "intermediate", "advanced", "urgent", "informacao_insuficiente"]},
+          "minItems": 5,
+          "maxItems": 5,
+          "uniqueItems": true
+        }
+      },
+      "required": ["category", "priority"],
+      "additionalProperties": false
+    },
+    "scoreVector": {
+      "type": "object",
+      "properties": {
+        "classes": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1, "pattern": "\\S"},
+          "minItems": 2,
+          "uniqueItems": true
+        },
+        "scores": {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 2}
+      },
+      "required": ["classes", "scores"],
+      "additionalProperties": false
+    },
+    "scoreRow": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "heads": {
+          "type": "object",
+          "properties": {"category": {"$ref": "#/$defs/scoreVector"}, "priority": {"$ref": "#/$defs/scoreVector"}},
+          "required": [],
+          "additionalProperties": false
+        },
+        "errors": {
+          "type": "object",
+          "properties": {
+            "category": {"type": "string", "minLength": 1, "pattern": "\\S"},
+            "priority": {"type": "string", "minLength": 1, "pattern": "\\S"}
+          },
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      "required": ["id", "heads", "errors"],
+      "additionalProperties": false
+    },
+    "scorePackage": {
+      "type": "object",
+      "properties": {
+        "contract_version": {"const": "sf2-ipc/1.0"},
+        "partition": {"enum": ["validation", "final"]},
+        "dataset_sha256": {"$ref": "#/$defs/hash"},
+        "package_sha256": {"$ref": "#/$defs/hash"},
+        "model_sha256": {
+          "type": "object",
+          "properties": {"category": {"$ref": "#/$defs/hash"}, "priority": {"$ref": "#/$defs/hash"}},
+          "required": ["category", "priority"],
+          "additionalProperties": false
+        },
+        "class_order": {"$ref": "#/$defs/classes"},
+        "rows": {"type": "array", "items": {"$ref": "#/$defs/scoreRow"}, "minItems": 1}
+      },
+      "required": [
+        "contract_version",
+        "partition",
+        "dataset_sha256",
+        "package_sha256",
+        "model_sha256",
+        "class_order",
+        "rows"
+      ],
+      "additionalProperties": false
+    },
+    "fieldResult": {
+      "type": "object",
+      "properties": {
+        "vector": {"anyOf": [{"$ref": "#/$defs/scoreVector"}, {"type": "null"}]},
+        "raw": {"anyOf": [{"type": "string", "minLength": 1, "pattern": "\\S"}, {"type": "null"}]},
+        "margin": {"anyOf": [{"type": "number", "minimum": 0, "maximum": 1}, {"type": "null"}]},
+        "cut": {"anyOf": [{"$ref": "#/$defs/cut"}, {"type": "null"}]},
+        "decision": {"enum": ["accept", "review", "error", "provided", "invalid", "not_requested"]},
+        "reason": {
+          "enum": [
+            "accepted",
+            "raw_review",
+            "below_tau",
+            "low_margin",
+            "inactive_label",
+            "error",
+            "timeout",
+            "invalid_score",
+            "invalid_input",
+            "invalid_catalog",
+            "too_long",
+            "provided",
+            "not_requested"
+          ]
+        }
+      },
+      "required": ["vector", "raw", "margin", "cut", "decision", "reason"],
+      "additionalProperties": false
+    },
+    "decision": {
+      "type": "object",
+      "properties": {
+        "contract_version": {"const": "sf2-ipc/1.0"},
+        "id": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "outcome": {"enum": ["complete", "review", "error"]},
+        "received": {"$ref": "#/$defs/received"},
+        "applied": {
+          "type": "object",
+          "properties": {
+            "category": {"type": "string", "minLength": 1, "pattern": "\\S"},
+            "priority": {"type": "string", "minLength": 1, "pattern": "\\S"}
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "fields": {
+          "type": "object",
+          "properties": {"category": {"$ref": "#/$defs/fieldResult"}, "priority": {"$ref": "#/$defs/fieldResult"}},
+          "required": ["category", "priority"],
+          "additionalProperties": false
+        },
+        "calls": {
+          "type": "object",
+          "properties": {"category": {"enum": [0, 1]}, "priority": {"enum": [0, 1]}},
+          "required": ["category", "priority"],
+          "additionalProperties": false
+        },
+        "package_sha256": {"$ref": "#/$defs/hash"},
+        "model_sha256": {
+          "type": "object",
+          "properties": {"category": {"$ref": "#/$defs/hash"}, "priority": {"$ref": "#/$defs/hash"}},
+          "required": ["category", "priority"],
+          "additionalProperties": false
+        },
+        "policy_sha256": {"$ref": "#/$defs/hash"},
+        "elapsed_ms": {"type": "number", "minimum": 0}
+      },
+      "required": [
+        "contract_version",
+        "id",
+        "outcome",
+        "received",
+        "applied",
+        "fields",
+        "calls",
+        "package_sha256",
+        "model_sha256",
+        "policy_sha256",
+        "elapsed_ms"
+      ],
+      "additionalProperties": false
+    },
+    "publicManifest": {
+      "type": "object",
+      "properties": {
+        "contract_version": {"const": "sf2-ipc/1.0"},
+        "stage": {"enum": ["draft", "accepted"]},
+        "files": {
+          "type": "object",
+          "properties": {
+            "train": {
+              "type": "object",
+              "properties": {"path": {"const": "train.jsonl"}, "sha256": {"$ref": "#/$defs/hash"}},
+              "required": ["path", "sha256"],
+              "additionalProperties": false
+            },
+            "validation": {
+              "type": "object",
+              "properties": {"path": {"const": "validation.jsonl"}, "sha256": {"$ref": "#/$defs/hash"}},
+              "required": ["path", "sha256"],
+              "additionalProperties": false
+            },
+            "annotations": {
+              "type": "object",
+              "properties": {"path": {"const": "annotations-public.jsonl"}, "sha256": {"$ref": "#/$defs/hash"}},
+              "required": ["path", "sha256"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["train", "validation", "annotations"],
+          "additionalProperties": false
+        },
+        "counts": {
+          "type": "object",
+          "properties": {"train": {"const": 150}, "validation": {"const": 90}},
+          "required": ["train", "validation"],
+          "additionalProperties": false
+        },
+        "review_receipt_sha256": {"anyOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]},
+        "token_lengths_sha256": {"anyOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]},
+        "limitations": {"type": "string", "minLength": 1, "pattern": "\\S"}
+      },
+      "required": [
+        "contract_version",
+        "stage",
+        "files",
+        "counts",
+        "review_receipt_sha256",
+        "token_lengths_sha256",
+        "limitations"
+      ],
+      "additionalProperties": false
+    },
+    "finalSeal": {
+      "type": "object",
+      "properties": {
+        "contract_version": {"const": "sf2-ipc/1.0"},
+        "stage": {"const": "accepted"},
+        "files": {
+          "type": "object",
+          "properties": {
+            "final": {
+              "type": "object",
+              "properties": {"path": {"const": "final.jsonl"}, "sha256": {"$ref": "#/$defs/hash"}},
+              "required": ["path", "sha256"],
+              "additionalProperties": false
+            },
+            "annotations": {
+              "type": "object",
+              "properties": {"path": {"const": "annotations-final.jsonl"}, "sha256": {"$ref": "#/$defs/hash"}},
+              "required": ["path", "sha256"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["final", "annotations"],
+          "additionalProperties": false
+        },
+        "counts": {
+          "type": "object",
+          "properties": {
+            "total": {"const": 120},
+            "classifiable": {"const": 96},
+            "expected_review": {"const": 24},
+            "urgent_targets": {"const": 17}
+          },
+          "required": ["total", "classifiable", "expected_review", "urgent_targets"],
+          "additionalProperties": false
+        },
+        "review_receipt_sha256": {"$ref": "#/$defs/hash"},
+        "token_lengths_sha256": {"$ref": "#/$defs/hash"}
+      },
+      "required": ["contract_version", "stage", "files", "counts", "review_receipt_sha256", "token_lengths_sha256"],
+      "additionalProperties": false
+    },
+    "trainingFreeze": {
+      "type": "object",
+      "properties": {
+        "contract_version": {"const": "sf2-ipc/1.0"},
+        "files": {
+          "type": "object",
+          "properties": {
+            "rubric": {"$ref": "#/$defs/hash"},
+            "catalog": {"$ref": "#/$defs/hash"},
+            "model_lock": {"$ref": "#/$defs/hash"},
+            "requirements": {"$ref": "#/$defs/hash"},
+            "protocol": {"$ref": "#/$defs/hash"},
+            "contracts": {"$ref": "#/$defs/hash"},
+            "train": {"$ref": "#/$defs/hash"},
+            "validation": {"$ref": "#/$defs/hash"},
+            "annotations": {"$ref": "#/$defs/hash"},
+            "arguments": {"$ref": "#/$defs/hash"},
+            "training_code": {"$ref": "#/$defs/hash"},
+            "public_manifest": {"$ref": "#/$defs/hash"}
+          },
+          "required": [
+            "rubric",
+            "catalog",
+            "model_lock",
+            "requirements",
+            "protocol",
+            "contracts",
+            "train",
+            "validation",
+            "annotations",
+            "arguments",
+            "training_code",
+            "public_manifest"
+          ],
+          "additionalProperties": false
+        },
+        "final_seal_sha256": {"$ref": "#/$defs/hash"}
+      },
+      "required": ["contract_version", "files", "final_seal_sha256"],
+      "additionalProperties": false
+    },
+    "fileHashes": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"type": "string", "minLength": 1, "pattern": "\\S"},
+      "additionalProperties": {"$ref": "#/$defs/hash"}
+    },
+    "modelManifest": {
+      "type": "object",
+      "properties": {
+        "contract_version": {"const": "sf2-ipc/1.0"},
+        "training_freeze_sha256": {"$ref": "#/$defs/hash"},
+        "class_order": {"$ref": "#/$defs/classes"},
+        "model_sha256": {
+          "type": "object",
+          "properties": {"category": {"$ref": "#/$defs/hash"}, "priority": {"$ref": "#/$defs/hash"}},
+          "required": ["category", "priority"],
+          "additionalProperties": false
+        },
+        "versions": {
+          "type": "object",
+          "additionalProperties": {"type": "string", "minLength": 1, "pattern": "\\S"},
+          "minProperties": 1
+        },
+        "arguments_sha256": {"$ref": "#/$defs/hash"},
+        "models": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "type": "object",
+              "properties": {
+                "base_encoder": {"$ref": "#/$defs/hash"},
+                "encoder": {"$ref": "#/$defs/hash"},
+                "head": {"$ref": "#/$defs/hash"},
+                "tokenizer": {"$ref": "#/$defs/hash"},
+                "training_evidence": {"$ref": "#/$defs/hash"}
+              },
+              "required": ["base_encoder", "encoder", "head", "tokenizer", "training_evidence"],
+              "additionalProperties": false
+            },
+            "priority": {
+              "type": "object",
+              "properties": {
+                "base_encoder": {"$ref": "#/$defs/hash"},
+                "encoder": {"$ref": "#/$defs/hash"},
+                "head": {"$ref": "#/$defs/hash"},
+                "tokenizer": {"$ref": "#/$defs/hash"},
+                "training_evidence": {"$ref": "#/$defs/hash"}
+              },
+              "required": ["base_encoder", "encoder", "head", "tokenizer", "training_evidence"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["category", "priority"],
+          "additionalProperties": false
+        },
+        "files": {"$ref": "#/$defs/fileHashes"}
+      },
+      "required": [
+        "contract_version",
+        "training_freeze_sha256",
+        "class_order",
+        "model_sha256",
+        "versions",
+        "arguments_sha256",
+        "models",
+        "files"
+      ],
+      "additionalProperties": false
+    },
+    "freeze": {
+      "type": "object",
+      "properties": {
+        "contract_version": {"const": "sf2-ipc/1.0"},
+        "files": {
+          "type": "object",
+          "properties": {
+            "training_freeze": {"$ref": "#/$defs/hash"},
+            "model_manifest": {"$ref": "#/$defs/hash"},
+            "adapter": {"$ref": "#/$defs/hash"},
+            "policy": {"$ref": "#/$defs/hash"},
+            "validation_scores": {"$ref": "#/$defs/hash"},
+            "validation_report": {"$ref": "#/$defs/hash"},
+            "final_seal": {"$ref": "#/$defs/hash"},
+            "command": {"$ref": "#/$defs/hash"},
+            "versions": {"$ref": "#/$defs/hash"},
+            "train": {"$ref": "#/$defs/hash"},
+            "validation": {"$ref": "#/$defs/hash"},
+            "final": {"$ref": "#/$defs/hash"}
+          },
+          "required": [
+            "training_freeze",
+            "model_manifest",
+            "adapter",
+            "policy",
+            "validation_scores",
+            "validation_report",
+            "final_seal",
+            "command",
+            "versions",
+            "train",
+            "validation",
+            "final"
+          ],
+          "additionalProperties": false
+        },
+        "model_sha256": {
+          "type": "object",
+          "properties": {"category": {"$ref": "#/$defs/hash"}, "priority": {"$ref": "#/$defs/hash"}},
+          "required": ["category", "priority"],
+          "additionalProperties": false
+        },
+        "class_order": {"$ref": "#/$defs/classes"},
+        "validation_eligible": {"const": true}
+      },
+      "required": ["contract_version", "files", "model_sha256", "class_order", "validation_eligible"],
+      "additionalProperties": false
+    },
+    "ratio": {
+      "type": "object",
+      "properties": {
+        "numerator": {"type": "integer", "minimum": 0},
+        "denominator": {"type": "integer", "minimum": 0},
+        "wilson95": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {"type": "number", "minimum": 0, "maximum": 1},
+              "minItems": 2,
+              "maxItems": 2
+            },
+            {"type": "null"}
+          ]
+        }
+      },
+      "required": ["numerator", "denominator", "wilson95"],
+      "additionalProperties": false
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "preservation": {"$ref": "#/$defs/ratio"},
+        "control_calls": {"type": "integer", "minimum": 0},
+        "partial_applications": {"type": "integer", "minimum": 0},
+        "wrong_expected_review": {"$ref": "#/$defs/ratio"},
+        "nonurgent_on_urgent": {"type": "integer", "minimum": 0},
+        "applied_accuracy": {
+          "type": "object",
+          "properties": {"category": {"$ref": "#/$defs/ratio"}, "priority": {"$ref": "#/$defs/ratio"}},
+          "required": ["category", "priority"],
+          "additionalProperties": false
+        },
+        "automatic_coverage": {"$ref": "#/$defs/ratio"},
+        "correct_coverage": {"$ref": "#/$defs/ratio"},
+        "raw_urgent": {"$ref": "#/$defs/ratio"},
+        "applied_urgent": {"$ref": "#/$defs/ratio"},
+        "review_by_field": {
+          "type": "object",
+          "properties": {"category": {"$ref": "#/$defs/ratio"}, "priority": {"$ref": "#/$defs/ratio"}},
+          "required": ["category", "priority"],
+          "additionalProperties": false
+        },
+        "review_by_case": {"$ref": "#/$defs/ratio"},
+        "by_class": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "type": "object",
+              "properties": {
+                "pix": {
+                  "type": "object",
+                  "properties": {
+                    "precision": {"$ref": "#/$defs/ratio"},
+                    "recall": {"$ref": "#/$defs/ratio"},
+                    "f1": {"anyOf": [{"type": "number", "minimum": 0, "maximum": 1}, {"type": "null"}]},
+                    "support": {"type": "integer", "minimum": 0}
+                  },
+                  "required": ["precision", "recall", "f1", "support"],
+                  "additionalProperties": false
+                },
+                "payouts": {
+                  "type": "object",
+                  "properties": {
+                    "precision": {"$ref": "#/$defs/ratio"},
+                    "recall": {"$ref": "#/$defs/ratio"},
+                    "f1": {"anyOf": [{"type": "number", "minimum": 0, "maximum": 1}, {"type": "null"}]},
+                    "support": {"type": "integer", "minimum": 0}
+                  },
+                  "required": ["precision", "recall", "f1", "support"],
+                  "additionalProperties": false
+                },
+                "terminal": {
+                  "type": "object",
+                  "properties": {
+                    "precision": {"$ref": "#/$defs/ratio"},
+                    "recall": {"$ref": "#/$defs/ratio"},
+                    "f1": {"anyOf": [{"type": "number", "minimum": 0, "maximum": 1}, {"type": "null"}]},
+                    "support": {"type": "integer", "minimum": 0}
+                  },
+                  "required": ["precision", "recall", "f1", "support"],
+                  "additionalProperties": false
+                },
+                "informacao_insuficiente": {
+                  "type": "object",
+                  "properties": {
+                    "precision": {"$ref": "#/$defs/ratio"},
+                    "recall": {"$ref": "#/$defs/ratio"},
+                    "f1": {"anyOf": [{"type": "number", "minimum": 0, "maximum": 1}, {"type": "null"}]},
+                    "support": {"type": "integer", "minimum": 0}
+                  },
+                  "required": ["precision", "recall", "f1", "support"],
+                  "additionalProperties": false
+                }
+              },
+              "required": ["pix", "payouts", "terminal", "informacao_insuficiente"],
+              "additionalProperties": false
+            },
+            "priority": {
+              "type": "object",
+              "properties": {
+                "basic": {
+                  "type": "object",
+                  "properties": {
+                    "precision": {"$ref": "#/$defs/ratio"},
+                    "recall": {"$ref": "#/$defs/ratio"},
+                    "f1": {"anyOf": [{"type": "number", "minimum": 0, "maximum": 1}, {"type": "null"}]},
+                    "support": {"type": "integer", "minimum": 0}
+                  },
+                  "required": ["precision", "recall", "f1", "support"],
+                  "additionalProperties": false
+                },
+                "intermediate": {
+                  "type": "object",
+                  "properties": {
+                    "precision": {"$ref": "#/$defs/ratio"},
+                    "recall": {"$ref": "#/$defs/ratio"},
+                    "f1": {"anyOf": [{"type": "number", "minimum": 0, "maximum": 1}, {"type": "null"}]},
+                    "support": {"type": "integer", "minimum": 0}
+                  },
+                  "required": ["precision", "recall", "f1", "support"],
+                  "additionalProperties": false
+                },
+                "advanced": {
+                  "type": "object",
+                  "properties": {
+                    "precision": {"$ref": "#/$defs/ratio"},
+                    "recall": {"$ref": "#/$defs/ratio"},
+                    "f1": {"anyOf": [{"type": "number", "minimum": 0, "maximum": 1}, {"type": "null"}]},
+                    "support": {"type": "integer", "minimum": 0}
+                  },
+                  "required": ["precision", "recall", "f1", "support"],
+                  "additionalProperties": false
+                },
+                "urgent": {
+                  "type": "object",
+                  "properties": {
+                    "precision": {"$ref": "#/$defs/ratio"},
+                    "recall": {"$ref": "#/$defs/ratio"},
+                    "f1": {"anyOf": [{"type": "number", "minimum": 0, "maximum": 1}, {"type": "null"}]},
+                    "support": {"type": "integer", "minimum": 0}
+                  },
+                  "required": ["precision", "recall", "f1", "support"],
+                  "additionalProperties": false
+                },
+                "informacao_insuficiente": {
+                  "type": "object",
+                  "properties": {
+                    "precision": {"$ref": "#/$defs/ratio"},
+                    "recall": {"$ref": "#/$defs/ratio"},
+                    "f1": {"anyOf": [{"type": "number", "minimum": 0, "maximum": 1}, {"type": "null"}]},
+                    "support": {"type": "integer", "minimum": 0}
+                  },
+                  "required": ["precision", "recall", "f1", "support"],
+                  "additionalProperties": false
+                }
+              },
+              "required": ["basic", "intermediate", "advanced", "urgent", "informacao_insuficiente"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["category", "priority"],
+          "additionalProperties": false
+        },
+        "confusion": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "type": "object",
+              "properties": {
+                "pix": {
+                  "type": "object",
+                  "properties": {
+                    "pix": {"type": "integer", "minimum": 0},
+                    "payouts": {"type": "integer", "minimum": 0},
+                    "terminal": {"type": "integer", "minimum": 0},
+                    "informacao_insuficiente": {"type": "integer", "minimum": 0},
+                    "error": {"type": "integer", "minimum": 0}
+                  },
+                  "required": ["pix", "payouts", "terminal", "informacao_insuficiente", "error"],
+                  "additionalProperties": false
+                },
+                "payouts": {
+                  "type": "object",
+                  "properties": {
+                    "pix": {"type": "integer", "minimum": 0},
+                    "payouts": {"type": "integer", "minimum": 0},
+                    "terminal": {"type": "integer", "minimum": 0},
+                    "informacao_insuficiente": {"type": "integer", "minimum": 0},
+                    "error": {"type": "integer", "minimum": 0}
+                  },
+                  "required": ["pix", "payouts", "terminal", "informacao_insuficiente", "error"],
+                  "additionalProperties": false
+                },
+                "terminal": {
+                  "type": "object",
+                  "properties": {
+                    "pix": {"type": "integer", "minimum": 0},
+                    "payouts": {"type": "integer", "minimum": 0},
+                    "terminal": {"type": "integer", "minimum": 0},
+                    "informacao_insuficiente": {"type": "integer", "minimum": 0},
+                    "error": {"type": "integer", "minimum": 0}
+                  },
+                  "required": ["pix", "payouts", "terminal", "informacao_insuficiente", "error"],
+                  "additionalProperties": false
+                },
+                "informacao_insuficiente": {
+                  "type": "object",
+                  "properties": {
+                    "pix": {"type": "integer", "minimum": 0},
+                    "payouts": {"type": "integer", "minimum": 0},
+                    "terminal": {"type": "integer", "minimum": 0},
+                    "informacao_insuficiente": {"type": "integer", "minimum": 0},
+                    "error": {"type": "integer", "minimum": 0}
+                  },
+                  "required": ["pix", "payouts", "terminal", "informacao_insuficiente", "error"],
+                  "additionalProperties": false
+                }
+              },
+              "required": ["pix", "payouts", "terminal", "informacao_insuficiente"],
+              "additionalProperties": false
+            },
+            "priority": {
+              "type": "object",
+              "properties": {
+                "basic": {
+                  "type": "object",
+                  "properties": {
+                    "basic": {"type": "integer", "minimum": 0},
+                    "intermediate": {"type": "integer", "minimum": 0},
+                    "advanced": {"type": "integer", "minimum": 0},
+                    "urgent": {"type": "integer", "minimum": 0},
+                    "informacao_insuficiente": {"type": "integer", "minimum": 0},
+                    "error": {"type": "integer", "minimum": 0}
+                  },
+                  "required": ["basic", "intermediate", "advanced", "urgent", "informacao_insuficiente", "error"],
+                  "additionalProperties": false
+                },
+                "intermediate": {
+                  "type": "object",
+                  "properties": {
+                    "basic": {"type": "integer", "minimum": 0},
+                    "intermediate": {"type": "integer", "minimum": 0},
+                    "advanced": {"type": "integer", "minimum": 0},
+                    "urgent": {"type": "integer", "minimum": 0},
+                    "informacao_insuficiente": {"type": "integer", "minimum": 0},
+                    "error": {"type": "integer", "minimum": 0}
+                  },
+                  "required": ["basic", "intermediate", "advanced", "urgent", "informacao_insuficiente", "error"],
+                  "additionalProperties": false
+                },
+                "advanced": {
+                  "type": "object",
+                  "properties": {
+                    "basic": {"type": "integer", "minimum": 0},
+                    "intermediate": {"type": "integer", "minimum": 0},
+                    "advanced": {"type": "integer", "minimum": 0},
+                    "urgent": {"type": "integer", "minimum": 0},
+                    "informacao_insuficiente": {"type": "integer", "minimum": 0},
+                    "error": {"type": "integer", "minimum": 0}
+                  },
+                  "required": ["basic", "intermediate", "advanced", "urgent", "informacao_insuficiente", "error"],
+                  "additionalProperties": false
+                },
+                "urgent": {
+                  "type": "object",
+                  "properties": {
+                    "basic": {"type": "integer", "minimum": 0},
+                    "intermediate": {"type": "integer", "minimum": 0},
+                    "advanced": {"type": "integer", "minimum": 0},
+                    "urgent": {"type": "integer", "minimum": 0},
+                    "informacao_insuficiente": {"type": "integer", "minimum": 0},
+                    "error": {"type": "integer", "minimum": 0}
+                  },
+                  "required": ["basic", "intermediate", "advanced", "urgent", "informacao_insuficiente", "error"],
+                  "additionalProperties": false
+                },
+                "informacao_insuficiente": {
+                  "type": "object",
+                  "properties": {
+                    "basic": {"type": "integer", "minimum": 0},
+                    "intermediate": {"type": "integer", "minimum": 0},
+                    "advanced": {"type": "integer", "minimum": 0},
+                    "urgent": {"type": "integer", "minimum": 0},
+                    "informacao_insuficiente": {"type": "integer", "minimum": 0},
+                    "error": {"type": "integer", "minimum": 0}
+                  },
+                  "required": ["basic", "intermediate", "advanced", "urgent", "informacao_insuficiente", "error"],
+                  "additionalProperties": false
+                }
+              },
+              "required": ["basic", "intermediate", "advanced", "urgent", "informacao_insuficiente"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["category", "priority"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "preservation",
+        "control_calls",
+        "partial_applications",
+        "wrong_expected_review",
+        "nonurgent_on_urgent",
+        "applied_accuracy",
+        "automatic_coverage",
+        "correct_coverage",
+        "raw_urgent",
+        "applied_urgent",
+        "review_by_field",
+        "review_by_case",
+        "by_class",
+        "confusion"
+      ],
+      "additionalProperties": false
+    },
+    "report": {
+      "type": "object",
+      "properties": {
+        "contract_version": {"const": "sf2-ipc/1.0"},
+        "policy_sha256": {"$ref": "#/$defs/hash"},
+        "score_package_sha256": {"$ref": "#/$defs/hash"},
+        "partition": {"enum": ["validation", "final"]},
+        "status": {"enum": ["eligible", "failed", "inconclusive"]},
+        "counts": {
+          "type": "object",
+          "properties": {"planned": {"type": "integer", "minimum": 0}, "observed": {"type": "integer", "minimum": 0}},
+          "required": ["planned", "observed"],
+          "additionalProperties": false
+        },
+        "predictions_sha256": {"anyOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]},
+        "unexecuted_ids": {"type": "array", "items": {"type": "string", "minLength": 1, "pattern": "\\S"}, "uniqueItems": true},
+        "metrics": {"anyOf": [{"$ref": "#/$defs/metrics"}, {"type": "null"}]},
+        "latency_ms": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "n": {"type": "integer", "minimum": 0},
+                "p50": {"type": "number", "minimum": 0},
+                "p95": {"type": "number", "minimum": 0},
+                "maximum": {"type": "number", "minimum": 0}
+              },
+              "required": ["n", "p50", "p95", "maximum"],
+              "additionalProperties": false
+            },
+            {"type": "null"}
+          ]
+        },
+        "resources": {
+          "type": "object",
+          "properties": {
+            "startup_ms": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
+            "download_ms": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
+            "training_ms": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
+            "peak_ram_bytes": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+            "peak_cpu_percent": {"anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
+            "classifier_api_calls": {"const": 0}
+          },
+          "required": [
+            "startup_ms",
+            "download_ms",
+            "training_ms",
+            "peak_ram_bytes",
+            "peak_cpu_percent",
+            "classifier_api_calls"
+          ],
+          "additionalProperties": false
+        },
+        "reason": {"type": "string", "minLength": 1, "pattern": "\\S"}
+      },
+      "required": [
+        "contract_version",
+        "policy_sha256",
+        "score_package_sha256",
+        "partition",
+        "status",
+        "counts",
+        "predictions_sha256",
+        "unexecuted_ids",
+        "metrics",
+        "latency_ms",
+        "resources",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "tokenLengths": {
+      "type": "object",
+      "properties": {
+        "files": {"$ref": "#/$defs/fileHashes"},
+        "revision": {"const": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42"},
+        "lengths": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {"type": "integer", "minimum": 1, "maximum": 128}
+        }
+      },
+      "required": ["files", "revision", "lengths"],
+      "additionalProperties": false
+    },
+    "reviewReceipt": {
+      "type": "object",
+      "properties": {
+        "files": {"$ref": "#/$defs/fileHashes"},
+        "reviewer": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "unresolved_disagreements": {"const": 0},
+        "semantic_review_completed": {"const": true},
+        "limitations": {"type": "string", "minLength": 1, "pattern": "\\S"}
+      },
+      "required": ["files", "reviewer", "unresolved_disagreements", "semantic_review_completed", "limitations"],
+      "additionalProperties": false
+    }
+  }
+}

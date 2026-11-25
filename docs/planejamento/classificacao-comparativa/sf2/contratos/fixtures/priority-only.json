@@ -1,0 +1,121 @@
+{
+  "input": {
+    "contract_version": "sf2-ipc/1.0",
+    "id": "controle-01",
+    "text": "Quero aprender a fazer um Pix para uma venda futura.",
+    "received": {
+      "category": "pix",
+      "priority": " "
+    },
+    "catalog": {
+      "version": "1.0.0",
+      "category": {
+        "payouts": "Repasse, recebimento ou liquidação de valores de vendas.",
+        "pix": "Transferência ou pagamento por Pix, prazo, estorno ou falha.",
+        "terminal": "Instalação, uso ou defeito da maquininha de cartão."
+      },
+      "priority": {
+        "basic": "Orientação de rotina, sem operação prejudicada.",
+        "intermediate": "Impacto moderado com operação ainda disponível.",
+        "advanced": "Impacto relevante sem necessidade de ação imediata.",
+        "urgent": "Necessidade de ação imediata, como operação totalmente interrompida."
+      }
+    },
+    "missing_fields": [
+      "priority"
+    ]
+  },
+  "decision": {
+    "contract_version": "sf2-ipc/1.0",
+    "id": "controle-01",
+    "outcome": "complete",
+    "received": {
+      "category": "pix",
+      "priority": " "
+    },
+    "applied": {
+      "priority": "basic"
+    },
+    "fields": {
+      "category": {
+        "vector": null,
+        "raw": null,
+        "margin": null,
+        "cut": null,
+        "decision": "provided",
+        "reason": "provided"
+      },
+      "priority": {
+        "vector": {
+          "classes": [
+            "advanced",
+            "basic",
+            "informacao_insuficiente",
+            "intermediate",
+            "urgent"
+          ],
+          "scores": [
+            0,
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        "raw": "basic",
+        "margin": 1,
+        "cut": {
+          "tau": 0.6,
+          "delta": 0.1
+        },
+        "decision": "accept",
+        "reason": "accepted"
+      }
+    },
+    "calls": {
+      "category": 0,
+      "priority": 1
+    },
+    "elapsed_ms": 1,
+    "package_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "model_sha256": {
+      "category": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "priority": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    "policy_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  },
+  "policy": {
+    "contract_version": "sf2-ipc/1.0",
+    "category": {
+      "tau": 0.6,
+      "delta": 0.1
+    },
+    "priority": {
+      "tau": 0.6,
+      "delta": 0.1
+    }
+  },
+  "identities": {
+    "package_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "model_sha256": {
+      "category": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "priority": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    "policy_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  },
+  "class_order": {
+    "category": [
+      "informacao_insuficiente",
+      "payouts",
+      "pix",
+      "terminal"
+    ],
+    "priority": [
+      "advanced",
+      "basic",
+      "informacao_insuficiente",
+      "intermediate",
+      "urgent"
+    ]
+  }
+}
