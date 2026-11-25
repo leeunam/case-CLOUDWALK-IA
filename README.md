@@ -65,8 +65,9 @@ O mesmo roteiro cobre como parar, retomar e restaurar a demonstração.
 
 ## Arquitetura
 
-1. React envia a mensagem ao Rails pelo proxy do Vite. A API persiste o caso
-   no PostgreSQL e devolve o recibo idempotente.
+1. React envia a mensagem ao Rails pelo proxy do Vite na demonstração local
+   e pelo Caddy na publicação. A API persiste o caso no PostgreSQL e devolve
+   o recibo idempotente.
 2. A classificação completa recebida segue direto para o atendimento. Para
    campos ausentes, Solid Queue executa o complemento fixture. Casos sem
    informação suficiente aguardam correção da supervisão.
