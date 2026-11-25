@@ -21,6 +21,10 @@ SF2 = Path("script/classification_comparison/setfit_sf2")
 SCRIPT = Path(__file__).resolve()
 PYTHON = [sys.executable, "-B"]
 COMMANDS = []
+WORKFLOW_CHANGE = ("5f289573b5f90263f533554acca28595d571319160c90f7dd0852473abe2b351",
+                   "951feaf647ba124c3559f3b46da9da559bfc4d2cfa8fc139fa60d0d3e35e3f09")
+# Inicializador público da base de QA, fora dos papéis da captura.
+EVALUATION_INIT_SHA256 = "09d616613e32bb83a907fb19f7d0fffa1942706f5e265b98ee6a26bedbce84f5"
 HISTORIC_RECEIPT = "ce8d97b3a51109e11830ba9aeb0c7edbc9c643ea710628535bd155f000fb1297"
 
 
@@ -172,13 +176,17 @@ def configuration(root, validation):
         runner.save(root/(phase+"-cmd.json"), [*PYTHON, "-m", MOD+".adapter", "--package", str(pkg),
                                                "--package-sha256", digest, "--policy", str(p)])
     config = root/"config.json"
-    runner.save(config, dict(training_files={k: str(v) for k, v in paths.items()},
-                             model_files={k: str(v) for k, v in model_files.items()},
-                             model_manifest=str(pkg/"manifest.json"), adapter=str(adapter),
-                             versions=str(root/"versions.json"), costs=str(root/"costs.json"),
-                             capture_policy=str(policy), capture_command=str(root/"capture-cmd.json"),
-                             final_command=str(root/"final-cmd.json"), startup_seconds=90))
+    runner.save(config, fixture_config(root, paths, model_files))
     return config
+
+
+def fixture_config(root, training_files, model_files):
+    return dict(training_files={k: str(v) for k, v in training_files.items()},
+                model_files={k: str(v) for k, v in model_files.items()},
+                model_manifest=str(root/"package/manifest.json"), adapter=str(root/"adapter-code.json"),
+                versions=str(root/"versions.json"), costs=str(root/"costs.json"),
+                capture_policy=str(root/"capture-policy.json"), capture_command=str(root/"capture-cmd.json"),
+                final_command=str(root/"final-cmd.json"), startup_seconds=90)
 
 
 @contextmanager
@@ -192,19 +200,71 @@ def fixture_package():
         PackageTests.doClassCleanups()
 
 
-def probe_sources(root, config, validation, receipt):
-    # O subprocesso resolve imports no espelho. Copiam-se só fontes, contratos e metadados.
-    cfg = read(config)
+def contained(base, name, *, existing=False):
+    member = Path(name)
+    if (not member.parts or member.is_absolute() or ".." in member.parts or
+            member.as_posix() != name or "\\" in name):
+        raise ValueError(f"caminho relativo não canônico: {name}")
+    path = base/member
+    if base.resolve() != base or path.resolve() != path:
+        raise ValueError(f"caminho redirecionado fora do local autorizado: {path}")
+    if existing and not path.is_file():
+        raise ValueError(f"arquivo regular ausente: {path}")
+    return path
+
+
+def prepare_mirror(root, config, historical):
+    # Os nomes do pacote e dos arquivos da fixture vêm da factory. Config não autoriza novos caminhos.
+    fixture = config.parent
+    model = package.read_hashed(contained(fixture, "package/manifest.json", existing=True), historical["package"])
+    model_files = package.package_paths(fixture/"package", model)
+    files = package.read_hashed(contained(fixture, "adapter-code.json", existing=True), historical["adapter"])["files"]
+    sources = workflow.sources()
+    protocol_path = contained(ROOT, sources["protocol"].relative_to(ROOT).as_posix(), existing=True)
+    protocol = package.read_hashed(protocol_path, historical["protocol"])
+    metadata = {k: contained(ROOT, entry["path"], existing=True) for k, entry in protocol["sources"].items()}
+    metadata.update(protocol=protocol_path, contracts=sources["schema"])
+    generated = dict(train="train.jsonl", validation="validation.jsonl", annotations="annotations-public.jsonl",
+                     review_receipt="review_receipt.json", token_lengths="token_lengths.json", training_code="code.json",
+                     arguments="arguments.json", public_manifest="public.json", final_seal="seal.json")
+    training = {**metadata, **{k: fixture/v for k, v in generated.items()}}
+    cfg = read(contained(fixture, "config.json", existing=True))
+    if cfg != fixture_config(fixture, training, model_files):
+        raise ValueError("configuração fora dos papéis e caminhos autorizados da fixture")
+    fixture_paths = list(model_files.values()) + [fixture/name for name in generated.values()]
+    fixture_paths.extend(Path(value) for value in cfg.values() if isinstance(value, str))
+    for path in fixture_paths:
+        contained(fixture, path.relative_to(fixture).as_posix(), existing=True)
+
+    # Prepare a lista inteira antes da primeira cópia, inclusive os destinos ainda inexistentes.
+    names = set(files)
+    names.update(path.relative_to(ROOT).as_posix() for path in [*sources.values(), *metadata.values()])
+    initializer = (SF2/"evaluation/__init__.py").as_posix()
+    names.add(initializer)
     shadow = root/"mirror"
-    files = read(cfg["adapter"])["files"]
-    paths = {ROOT / key for key in files}
-    paths.update(workflow.sources().values())
-    paths.add(SF2.absolute()/"evaluation/__init__.py")
-    paths.update(ROOT/entry["path"] for entry in workflow.PROTOCOL["sources"].values())
-    for source in sorted(paths):
-        dest = shadow/source.relative_to(ROOT)
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(source, dest)
+    copies = [(contained(ROOT, name, existing=True), contained(shadow, name)) for name in sorted(names)]
+    for _, destination in copies:
+        if destination.exists():
+            raise ValueError(f"destino do espelho já existe: {destination}")
+    for role, entry in protocol["sources"].items():
+        if sha256(metadata[role]) != entry["sha256"]:
+            raise ValueError(f"metadado público divergente: {role}")
+    if sha256(ROOT/initializer) != EVALUATION_INIT_SHA256:
+        raise ValueError("inicializador público do avaliador divergente")
+    reference = workflow.capture_receipt(cfg, cfg["capture_policy"])
+    changed_roles = sorted(k for k in reference.keys() | historical.keys() if reference.get(k) != historical.get(k))
+    workflow_change = (historical.get("evaluation/workflow.py"), reference.get("evaluation/workflow.py"))
+    if changed_roles and (changed_roles != ["evaluation/workflow.py"] or workflow_change != WORKFLOW_CHANGE):
+        raise ValueError(f"entradas da coleta divergentes do histórico: {changed_roles}")
+    for source, destination in copies:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, destination)
+    return cfg, files, reference, changed_roles
+
+
+def probe_sources(root, config, validation, receipt, historical):
+    shadow = root/"mirror"
+    cfg, files, reference, changed_roles = prepare_mirror(root, config, historical)
 
     def invoke(*args):
         return subprocess.run([*PYTHON, str(SCRIPT), "probe", *map(str, args)], cwd=shadow,
@@ -216,11 +276,6 @@ def probe_sources(root, config, validation, receipt):
             raise ValueError(f"pré-voo da cópia íntegra recusado: {proc.stderr.strip()}")
         return json.loads(proc.stdout)
 
-    reference = workflow.capture_receipt(cfg, cfg["capture_policy"])
-    historical = read(validation/"capture.json")
-    changed_roles = sorted(k for k in reference.keys() | historical.keys() if reference.get(k) != historical.get(k))
-    if changed_roles not in ([], ["evaluation/workflow.py"]):
-        raise ValueError(f"entradas da coleta divergentes do histórico: {changed_roles}")
     if clean_preflight() != reference:
         raise ValueError("pré-voo do espelho diverge do checkout")
     receipt.update(index_sha256=sha256(cfg["adapter"]), argv_sha256=sha256(cfg["capture_command"]),
@@ -386,7 +441,7 @@ def main(root):
 
 
 def verify(output, prior):
-    output.mkdir(exist_ok=False)
+    output.mkdir(mode=0o700, exist_ok=False)
     receipt = {"mode": "custody" if prior else "full_fixture"}
     try:
         if sys.flags.optimize:
@@ -394,20 +449,20 @@ def verify(output, prior):
         offline(output)
         if prior:
             config, validation = prior/"config.json", prior/"validation"
-            original = prior/"recibo.json"
-            receipt.update(source_fixture=str(prior), historical_receipt_sha256=sha256(original))
-            if receipt["historical_receipt_sha256"] != HISTORIC_RECEIPT:
-                raise ValueError("recibo da rodada histórica divergente")
-            old = read(original)
-            if read(validation/"capture.json") != old["capture"]:
+            original = contained(prior, "recibo.json", existing=True)
+            old = package.read_hashed(original, HISTORIC_RECEIPT)
+            receipt.update(source_fixture=str(prior), historical_receipt_sha256=HISTORIC_RECEIPT)
+            historical = old["capture"]
+            if read(contained(prior, "validation/capture.json", existing=True)) != historical:
                 raise ValueError("captura diferente da registrada na rodada histórica")
             for role in ("predictions.jsonl", "timings.jsonl", "controls.jsonl"):
-                if sha256(validation/"run"/role) != old["run_seal"]["files"][role]:
+                if sha256(contained(prior, "validation/run/"+role, existing=True)) != old["run_seal"]["files"][role]:
                     raise ValueError(f"evidência original divergente: {role}")
         else:
             measurements, config, validation = main(output)
             receipt["fixture"] = measurements
-        probe_sources(output, config, validation, receipt)
+            historical = measurements["capture"]
+        probe_sources(output, config, validation, receipt, historical)
         receipt.update(status="passed", exit_code=0, reason="Pré-voo íntegro e restaurado. Quatro sondas recusadas nas duas etapas.")
     except Exception as exc:
         receipt.update(status="failed", exit_code=1, reason=f"{type(exc).__name__}: {exc}")
