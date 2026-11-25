@@ -55,8 +55,10 @@ interface e o tema inspirado na CloudWalk foram aceitos e publicados.
 A [última URL verificada](https://tribal-louisville-container-bind.trycloudflare.com/)
 é a da UX02. O endereço depende do computador e do túnel ligados e muda ao
 recriar o túnel. O serviço limita a 200 requisições simultâneas em voo e não
-garante disponibilidade. O teste por dados móveis foi registrado no endereço
-anterior. [Evidências da publicação](docs/f10-resultado.md).
+garante disponibilidade. Na URL anterior, o acesso por dados móveis confirmou
+a abertura da página com marcas e canais visíveis. A verificação de todo o
+fluxo a partir de outra rede continua pendente.
+[Evidências da publicação](docs/f10-resultado.md).
 
 O [roteiro de publicação](docs/f10.md) orienta a escolher um projeto exclusivo
 e executar `init`, `up` e `check` com `script/publish.py` antes de `prepare` e
@@ -119,12 +121,36 @@ verificação da imagem Python.
 
 ## Resultados e limites
 
-A referência de carga F08 teve cinco das seis rodadas aprovadas. Na
-rodada que reprovou após a interrupção do Kafka, 1.199 entradas ficaram sem
-primeira resposta. A R01 confirmou a recuperação em um ensaio controlado
-posterior. A R02 corrigiu o analisador e reprocessou as evidências preservadas.
-A falha original permanece no resultado. O ensaio exploratório de dez mil
-conexões de chat segue sem medição. [Resultados F08](docs/f08.md).
+### Experimento de carga F08
+
+**Hipótese.** O outbox preserva os pedidos aceitos durante uma parada do
+Kafka, e a aplicação escoa o trabalho após a retomada sem perder nem duplicar
+efeitos, inclusive quando há reentrega.
+
+**Método.** O k6 ofereceu 5 novos casos/s em seis rodadas isoladas de cinco
+minutos, três com Kafka disponível e três com parada programada de 30 s.
+Cada rodada planejou 1.500 entradas sintéticas em duas marcas e três canais,
+com segundo turno em 20% dos casos e mais 120 s de observação após a carga.
+As entradas já tinham classificação válida e o atendente era o mock
+determinístico.
+
+**Métricas.** O ensaio mediu p50 e p95 do aceite HTTP e da primeira resposta
+persistida, vazão, erros, pendências, tempo de escoamento e uso de CPU e RAM.
+A reconciliação cruzou recibos HTTP `202`, registros e offsets Kafka e efeitos
+no PostgreSQL para distinguir trabalho pendente, efeitos duplicados e perdas
+comprovadas. A identificação de uma reentrega exige evidência do consumidor.
+[Método e reprodução](docs/f08-carga.md).
+
+Cinco rodadas passaram. Das 9.000 entradas aceitas, 7.801 tiveram primeira
+resposta persistida. As 1.199 sem resposta pertencem à rodada que reprovou na
+recuperação após a interrupção. A R01 demonstrou a recuperação em um ensaio
+controlado posterior, e a R02 corrigiu o analisador e conferiu os dados
+arquivados. A matriz de referência preserva a falha e segue sem repetição
+após a correção. O ensaio exploratório de dez mil conexões de chat ainda está
+sem medição.
+[Resultados F08](docs/f08.md) · [R01](docs/r01.md) · [R02](docs/r02.md).
+
+### Classificação
 
 A Luna acertou 7 de 8 campos em seis chamadas de desenvolvimento na C05-R4,
 com zero erros técnicos e p95 de 1.762,223 ms. A atribuição de categoria a
@@ -133,10 +159,13 @@ finais. O custo conservador acumulado até essa rodada foi de US$ 0,03093512.
 [Resultado C05-R4](docs/c05-luna-r4-resultado.md).
 
 A R5, que mantém a Luna e acrescenta evidência verificável com validação
-conservadora, está em preparação. A integração do classificador real (C06)
-aguarda qualificação e decisão de adoção. A validação final (C07/F09) também
-segue pendente. O atendente conversacional real (E01) fica como evolução
-posterior e opcional.
+conservadora, tem a candidata com política 2.1.0 congelada após testes offline.
+O executor e a reprodução com fixture estão em revisão ampla e a qualidade
+real da R5 segue sem medição. A integração do classificador (C06) aguarda
+qualificação e decisão de adoção. A validação final (C07/F09) também está
+pendente. O atendente conversacional real (E01) fica como evolução posterior
+e opcional.
+[Candidata R5](docs/c05-luna-r5-candidata.md) ·
 [Preparação R5](docs/planejamento/classificacao-comparativa/rodada-5-implementacao.md) ·
 [Plano de conclusão](docs/planejamento/conclusao-projeto.md).
 

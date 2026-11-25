@@ -1,6 +1,6 @@
 # Plano de execução e verificação do MVP
 
-Este backlog usa a [especificação](especificacao-mvp.md) como contrato de produto. O horizonte de quatro semanas segue a estimativa do TAPI. Datas e dedicação semanal serão ajustadas à agenda real. Os checkpoints semanais são internos. A primeira entrega apresentável inclui atendente simulado via broker, complemento pelo Jev, experimento e resultados documentados.
+Este backlog usa a [especificação](especificacao-mvp.md) como contrato de produto. O horizonte de quatro semanas segue a estimativa do TAPI. Datas e dedicação semanal serão ajustadas à agenda real. Os checkpoints semanais são internos. A demonstração inclui atendente simulado via broker, complemento da classificação em fixture, experimento e resultados documentados.
 
 F01–F03 estão integradas e verificadas localmente. A rodada de conclusão
 F04/F05 integra jobs persistidos, correção auditada, sessão e catálogo do
@@ -12,8 +12,8 @@ A F05 passou no navegador com três canais, duas marcas, handoff, resposta
 humana, espera, retomada, resolução, reentrega após resposta perdida, conflito
 de versão e recuperação após reiniciar a API. A
 [integração F04/F05](../integracao-f04-f05.md) registra evidências e limites.
-A F04 tem implementação e verificação local concluídas; seu aceite ao vivo
-ainda depende da credencial.
+A F04 concluiu a implementação e verificação local. A chamada ao vivo com
+Jev ficou pendente naquela etapa. A qualificação real passou ao CLASS-001.
 
 A F06 está implementada e verificada localmente, incluindo configuração,
 supervisão, migração e duas corridas de configuração no PostgreSQL. A base
@@ -24,16 +24,16 @@ registra os resultados e a complementação administrativa da F07, incluindo
 revogação com uma sessão WebSocket já aberta. F06 e F07 têm aceite local
 concluído. A F08 executou a referência de carga: cinco rodadas aprovadas e
 uma reprovada por encerramento dos consumidores após a retomada do Kafka.
-O [relatório F08](../f08.md) conserva os resultados e o diagnóstico. A avaliação real do classificador e a publicação seguem pendentes. A correção
-de recuperação tem seu aceite controlado separado, sem reinterpretar a carga antiga.
-A R02 resolveu os dois casos limite do analisador: carimbo ausente junto de
-publicação tardia e atribuição SQL de escrita de chat após timeout HTTP. Seu
-aceite local registrou 49 testes e preservação dos sete históricos e das
-12.600 linhas, conforme a [issue #9](https://github.com/leeunam/case-CLOUDWALK-IA/issues/9).
+O [relatório F08](../f08.md) conserva os resultados e o diagnóstico.
+A R02 resolveu dois casos limite do analisador, o carimbo ausente com
+publicação tardia e a atribuição SQL de escrita de chat após timeout HTTP.
+Seu aceite local registrou 49 testes e preservação dos sete históricos e
+das 12.600 linhas. [Relatório R02](../r02.md) · [Issue #9](https://github.com/leeunam/case-CLOUDWALK-IA/issues/9).
 A R01 foi aceita e integrada localmente após revisão e ensaio real controlado:
 os dois consumidores retomaram em cerca de 12 segundos, com lag zero e
 recuperação canônica aprovada. O [relatório R01](../r01.md) conserva as evidências.
-Os resultados históricos permanecem publicados sem alteração.
+O ensaio controlado é posterior à referência. A matriz histórica preserva
+a reprovação e segue sem repetição após a correção.
 
 A [passagem da F08](passagem-f08.md) separa o gerador/observador de carga
 do dataset/avaliador Jev, com arquivos próprios e a mesma base Git. A execução
@@ -63,22 +63,23 @@ Os contratos v1.1.0 passaram na verificação local, conforme o
 após a manutenção de integração e reprodução fixture do código aprovado.
 A C03 foi integrada com 30 testes e piloto real mínimo aceito: uma requisição
 completou `pix` e `urgent` em 1,826 s, com cobrança exibida de aproximadamente
-US$ 0,000518. O comparativo final permanece pendente. A C04 tem código revisado e dez lotes reais adicionais de
+US$ 0,000518. Naquele momento, o comparativo final ainda estava pendente.
+A C04 teve código revisado e dez lotes reais adicionais de
 desenvolvimento, incluindo falhas por prazo e um rebaixamento de urgência.
-Sua configuração não está aprovada para C05. A [passagem atual](classificacao-comparativa/passagem-autonoma.md)
-registra as evidências e as decisões pendentes. O teto de US$ 10 foi aprovado
+Sua configuração não foi aprovada para C05. A [passagem da frente](classificacao-comparativa/passagem-autonoma.md)
+registra as evidências e decisões daquela etapa. O teto de US$ 10 foi aprovado
 para o piloto Qwen, com mínimo de requisições; uma chamada foi suficiente.
 Depois da investigação, o responsável aprovou focar na avaliação do Qwen e
 encerrar novos ajustes do GLiClass nesta entrega. C04 deixa de bloquear C05;
 a qualificação usa os mesmos critérios e os 36 casos finais, sem comparação
-pareada final. A configuração de execução e a escolha operacional continuam
-pendentes. [Plano vigente](classificacao-comparativa/qualificacao-qwen.md).
+pareada final. Naquele momento, faltavam configurar a execução e decidir
+pela adoção. [Plano da qualificação Qwen](classificacao-comparativa/qualificacao-qwen.md).
 O reteste C03-P2 autorizado usou uma chamada adicional no mesmo caso e foi
 confirmado em recibo separado; não avalia o conjunto final. C05-E adiciona
 o executor final e a contabilidade cumulativa, aceitos em `e4ce14c` com 37 testes
 offline e revisão independente aprovada. A primeira conta suportada é a versão 4,
 preservando as regressões anteriores e o teto total de US$ 10. O lote real
-permanece condicionado ao manifesto e à decisão próprios.
+ficou condicionado ao manifesto e à decisão próprios.
 Criar os cards não equivale a autorizar inferência paga nem escolher o fornecedor.
 
 A atualização C01-L/C02-L foi aceita e integrada em `933836e`. As próximas
@@ -93,8 +94,8 @@ Em 24/11/2026, o primeiro lote final autorizado da C05 foi concluído:
 com pilotos US$ 0,02300927. Resultado técnico **não elegível**: 3/7 conclusões
 onde era obrigatória revisão e 19/22 categorias aplicadas corretas (86,36%).
 O p95 de 2.493,510 ms e o reconhecimento de 6/6 urgentes passaram. As auditorias
-independentes conferiram qualidade e finanças. C05 aguarda deliberação humana;
-C06 continua bloqueada, sem modelo adotado. A autorização do lote foi consumida.
+independentes conferiram qualidade e finanças. O resultado bloqueou a adoção
+na C06. A autorização do lote foi consumida.
 [Resultado e verificações sem API](../c05-resultado.md).
 
 O responsável escolheu a opção A da **C05-R2**: instruções mais conservadoras
@@ -113,14 +114,25 @@ aprovadas, até 44 do final/controles. As seis foram executadas em 24/11/2026:
 p95 de 4.995,002 ms e um timeout. O development foi interrompido e o final
 ficou bloqueado, sem repetição. O custo conservador da R2 é US$ 0,00386478,
 com acumulado US$ 0,02687405 e nenhuma reserva pendente após conciliação
-tardia. Isso não representa saldo do fornecedor. C06/C07 permanecem
-bloqueados até nova decisão. [Resultado e auditoria R2](../c05-r2-resultado.md).
-F09 e a publicação gratuita da demonstração seguem em preparação, sem
-atribuir qualidade real ao modo fixture.
+tardia. Isso não representa saldo do fornecedor. C06/C07 ficaram bloqueadas
+naquela etapa. [Resultado e auditoria R2](../c05-r2-resultado.md).
 
-Ordem vigente: C01 → C02 → C03 → C05 → C06 → C07; C04 foi investigada em
-paralelo com C03 e seus ajustes foram encerrados nesta entrega. R01 e R02 podem
-andar independentemente e bloqueiam o fechamento da demonstração C07.
+#### Estado em 25/11/2026
+
+A última medição real registrada era a R4. A Luna acertou 7/8 campos em
+seis chamadas, com zero erros técnicos e p95 de 1.762,223 ms. O gate reprovou
+e bloqueou as 44 chamadas finais. A candidata R5-A com política 2.1.0 foi
+congelada após testes offline. O executor R5-B passou em nove testes offline,
+incluindo as etapas sintéticas de seis chamadas de desenvolvimento e 44 de
+final, e segue em revisão ampla. A qualidade real da R5 segue sem medição.
+[Resultado R4](../c05-luna-r4-resultado.md) ·
+[Candidata R5](../c05-luna-r5-candidata.md).
+
+A sequência da qualificação é C01 → C02 → C03 → C05 → C06 → C07. Os ajustes
+da C04 foram encerrados nesta entrega, e R01 e R02 tiveram aceite independente.
+C06 aguarda qualificação e decisão de adoção. C07/F09 final aguarda integração
+e verificação em instalação limpa. A preparação F09-A já foi verificada, e a
+demonstração F10 foi publicada em modo fixture. [Plano de conclusão](conclusao-projeto.md).
 O [guia dos chats](classificacao-comparativa/guia-dos-chats.md) explica base Git,
 isolamento, propriedade, modelos sugeridos, revisão e exercícios de aprendizagem.
 
@@ -224,12 +236,25 @@ Evidências mínimas incluem testes automatizados do domínio e integração, ro
 - Scripts de carga, dados sintéticos, resultados, gráficos ou tabelas e metodologia para reproduzir.
 - README com problema, escopo, arquitetura, instalação, execução, modelos e configuração, método experimental, resultados, limitações e evolução.
 
-A versão do Jev e as credenciais necessárias ao ensaio ao vivo têm verificação própria em F04/F08. A aplicação local e o experimento de carga de referência rodam com os campos de entrada válidos ou o modo de teste, conforme a evidência desejada. Os resultados de carga estão em [F08](../f08.md); a qualidade, a latência e o custo reais do Jev ainda não foram medidos. Os cenários exploratórios de aumento de taxa, atendimento humano e dez mil conexões permanecem preparados, sem resultado de capacidade.
+A aplicação local admite o complemento em fixture. O ensaio de carga de
+referência usou campos válidos na entrada e atendente simulado. Os cenários
+exploratórios de aumento de taxa, atendimento humano e dez mil conexões
+continuam sem medição. A avaliação com Jev na F08 foi offline. A qualificação
+real seguiu para CLASS-001. [Resultados de carga](../f08.md) · [Plano de conclusão](conclusao-projeto.md).
 
 ### Publicação da demonstração por URL
 
-F09 comprova a entrega local reproduzível. Se a apresentação exigir acesso remoto, F10 entrega uma instância de demonstração com URL HTTPS, login e dados sintéticos. A proposta é executar o mesmo conjunto de serviços do Compose em um servidor. O provedor, o endereço, o orçamento e o período de disponibilidade são entradas da tarefa.
+A preparação F09-A comprovou a reprodução local com fixture. A F10 publicou
+a demonstração com login e dados sintéticos sobre um túnel HTTPS temporário
+do computador local. O reinício e a restauração foram verificados. A última
+URL verificada é a da UX02, com conversa de dois turnos pelo integrador. No
+endereço anterior, o responsável abriu a página por dados móveis e confirmou
+que marcas e canais estavam visíveis. O fluxo completo por outra rede segue
+pendente.
+[F09-A](../f09.md) · [Resultado F10](../f10-resultado.md) · [UX02](../ux02.md).
+
+O plano de aceite da publicação prevê os seguintes passos.
 
 - Configurar os serviços de aplicação e a origem HTTPS para React, API e WebSocket. Manter PostgreSQL, Kafka e a ponte na rede interna, com volumes persistentes e segredos no ambiente do servidor.
 - Documentar inicialização, migrações, carga de dados, atualização, reinício, consulta de logs e restauração da demonstração. Verificar que a aplicação se recupera de um reinício com casos e histórico preservados.
-- Entregar URL e acesso de demonstração ao responsável, com perfis de cliente e analista. Validar de outra rede a conversa com a IA, o handoff, o acesso por marca e a atualização do chat. Se o roteiro incluir Jev ao vivo, configurar a credencial no servidor e registrar o resultado do teste antes da apresentação.
+- Entregar URL e acesso de demonstração ao responsável, com perfis de cliente e analista. Validar de outra rede a conversa com a IA, o handoff, o acesso por marca e a atualização do chat. Se o roteiro incluir o classificador real, validar sua configuração após a adoção em C06 e registrar o resultado antes da apresentação.
