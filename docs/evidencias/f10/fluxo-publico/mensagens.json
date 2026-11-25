@@ -1,0 +1,20 @@
+{
+  "origin": "Brave no computador de origem via HTTPS público",
+  "method": "Formulário, histórico após recarga e GET /api/v1/simulator/cases/{id}/messages com a sessão do simulador",
+  "cases": {
+    "ad4a4699-5d96-4cce-a248-96b3568447fc": [
+      {"sequence": 1, "author": "customer", "created_at": "2026-11-25T16:30:28.221851Z", "text": "F10-CLIENTE: qual é o prazo de confirmação de um Pix?"},
+      {"sequence": 2, "author": "ai", "created_at": "2026-11-25T16:30:28.450147Z", "text": "Consulte o comprovante no histórico para conferir a confirmação."},
+      {"sequence": 3, "author": "customer", "created_at": "2026-11-25T16:30:33.696941Z", "text": "F10-CLIENTE: funcionou, obrigado!"},
+      {"sequence": 4, "author": "ai", "created_at": "2026-11-25T16:30:33.892149Z", "text": "Certo. Vou encerrar este atendimento."}
+    ],
+    "fdb5f11f-2401-41bf-b26d-8cecb76f03bc": [
+      {"id": "eb55d79a-16dc-4a50-b459-09195f683395", "sequence": 1, "author": "customer", "created_at": "2026-11-25T16:31:01.116263Z", "text": "F10-HUMANO: o visor da maquininha apagou desde a troca de bateria."},
+      {"sequence": 2, "author": "ai", "created_at": "2026-11-25T16:31:01.443471Z", "text": "Vou encaminhar para a equipe que atende maquininhas."}
+    ],
+    "32ab943b-2bea-428f-adb7-a802fe53bfaf": [
+      {"sequence": 1, "author": "customer", "created_at": "2026-11-25T16:29:53.404730Z", "text": "F10-HORIZONTE: qual é o prazo de confirmação de um Pix?"},
+      {"sequence": 2, "author": "ai", "created_at": "2026-11-25T16:29:53.828617Z", "text": "Consulte o comprovante no histórico para conferir a confirmação."}
+    ]
+  }
+}
