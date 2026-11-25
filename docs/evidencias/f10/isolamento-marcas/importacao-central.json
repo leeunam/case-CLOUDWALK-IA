@@ -1,0 +1,12 @@
+{
+  "reported_source_commit": "a363741468d7071779c8611c8ee6a8acd6ba77e9",
+  "reported_bundle_path": "/tmp/cloudwalk-f10-b.U203IFn6/f10-b.bundle",
+  "bundle_available_on_origin_host": false,
+  "method": "Faithful snapshot of the three delivery files visible in the shared worktree; original commit not imported or claimed verified locally.",
+  "source_worktree_preserved": true,
+  "source_files_sha256": {
+    "docs/f10-isolamento-marcas.md": "1f873bf38869db5092e98f5c661ff57cd2d49e9a8aac5b75f9d1845264be4bb8",
+    "docs/evidencias/f10/isolamento-marcas/verificacoes.md": "9734cfc44eb5946354a7698e537362a8ae0ae9d773ab1932fa32df085260a97c",
+    "script/f10/isolation/verificar.py": "f6d8cb10192f36228842f2efa094f721ca2d08f408465c3629c639008cc9b01b"
+  }
+}
