@@ -1,7 +1,6 @@
 """Executa as quatro divisões predefinidas, com inferência local em CPU."""
 
 import argparse
-from datetime import datetime, timezone
 import gc
 import hashlib
 from importlib.metadata import distributions
@@ -9,14 +8,14 @@ import json
 import os
 from pathlib import Path
 import platform
-import signal
+import socket
 import time
 
-from protocol import FOLD_COUNT, LABELS, REVIEW, SEED, select_data, summarize, write_json
-from provision import CACHE, HERE, MODEL_DIR, verify_model
+from protocol import FOLD_COUNT, LABELS, REVIEW, SEED, select_data, summarize
+from provision import CACHE, HERE, MODEL_DIR, verify_model, write_json
+from supervise import TRAIN_LIMIT, timestamp
 
 THREADS = 2
-TRAIN_LIMIT = 15 * 60
 PARAMETERS = {
     "num_epochs": 1,
     "num_iterations": 5,
@@ -29,14 +28,6 @@ PARAMETERS = {
     "show_progress_bar": False,
     "report_to": "none",
 }
-
-
-def timestamp():
-    return datetime.now(timezone.utc).isoformat()
-
-
-def training_timeout(signum, frame):
-    raise TimeoutError("Prazo total de treinamento (15 minutos) excedido")
 
 
 def observe(model, text, classes):
@@ -56,7 +47,7 @@ def observe(model, text, classes):
     }
 
 
-def run(output, report):
+def run(output, report, control):
     import torch
     from datasets import Dataset
     from sentence_transformers import SentenceTransformer
@@ -68,7 +59,6 @@ def run(output, report):
     torch.set_num_interop_threads(THREADS)
     if torch.version.cuda is not None or torch.version.hip is not None:
         raise ValueError("O piloto requer wheel PyTorch para CPU")
-    signal.signal(signal.SIGALRM, training_timeout)
 
     records, data = select_data()
     write_json(output / "data.json", data)
@@ -76,6 +66,7 @@ def run(output, report):
         "training": PARAMETERS,
         "head": {"class": "LogisticRegression", **LogisticRegression(random_state=SEED).get_params()},
         "training_total_limit_seconds": TRAIN_LIMIT,
+        "training_deadline": "external supervisor, accumulated trainer.train calls",
         "device": "cpu",
         "torch_intraop_threads": torch.get_num_threads(),
         "torch_interop_threads": torch.get_num_interop_threads(),
@@ -148,20 +139,17 @@ def run(output, report):
         write_json(output / "run.json", report)
         print(f"Divisão {number}/{FOLD_COUNT}: treino iniciado", flush=True)
 
-        remaining = TRAIN_LIMIT - train_total
-        if remaining <= 0:
-            training_timeout(None, None)
+        control.sendall(b"S")
+        if control.recv(1) != b"K":
+            raise RuntimeError("O supervisor não confirmou o início do treino")
         start_train = time.perf_counter()
-        signal.setitimer(signal.ITIMER_REAL, remaining)
         try:
             trainer.train()
         finally:
-            signal.setitimer(signal.ITIMER_REAL, 0)
             fold_report["train_seconds"] = time.perf_counter() - start_train
+            control.sendall(b"E")
             train_total += fold_report["train_seconds"]
             report["train_total_seconds"] = train_total
-        if train_total > TRAIN_LIMIT:
-            training_timeout(None, None)
 
         fold_report["encoder_parameter_sha256_after"] = hashlib.sha256(weight.detach().numpy().tobytes()).hexdigest()
         fold_report["optimizer_steps"] = trainer.st_trainer.state.global_step
@@ -197,9 +185,9 @@ def run(output, report):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True, help="Novo diretório de evidências")
+    parser.add_argument("--control-fd", type=int, required=True)
     arguments = parser.parse_args()
     output = arguments.output
-    output.mkdir(parents=True)
     started = time.perf_counter()
     cpu = next(line.partition(":")[2].strip()
                for line in Path("/proc/cpuinfo").read_text().splitlines() if line.startswith("model name"))
@@ -220,14 +208,16 @@ def main():
             name: hashlib.sha256((HERE / name).read_bytes()).hexdigest()
             for name in (
                 "install.sh", "model-lock.json", "protocol.py", "provision.py",
-                "requirements.txt", "run.py", "run.sh",
+                "requirements.txt", "run.py", "run.sh", "supervise.py",
             )
         },
         "folds": [],
     }
     write_json(output / "run.json", report)
     try:
-        run(output, report)
+        with socket.socket(fileno=arguments.control_fd) as control:
+            control.set_inheritable(False)
+            run(output, report, control)
         report["status"] = "complete"
     except (Exception, KeyboardInterrupt) as error:
         report["status"] = "interrupted"

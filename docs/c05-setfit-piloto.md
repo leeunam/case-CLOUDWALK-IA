@@ -87,15 +87,61 @@ uma lista fechada de arquivos públicos do
 `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` na revisão
 `e8f8c211226b894fcb81acc59f3b34ba3efd5f42`. O modelo é carregado localmente
 com Safetensors. A execução roda offline em CPU com duas threads configuradas.
-O prazo do instalador é de 30 minutos. O treino tem um teto acumulado de
-15 minutos. Informe um diretório novo para preservar as evidências existentes.
+Informe um diretório novo para cada execução.
+
+O instalador tem 30 minutos e registra cada tentativa no caminho
+`.cache/installs/attempt-*` dentro de `setfit_pilot`. O `status.json`
+indica a etapa, o resultado e o código de saída. O `commands.log` reúne as
+mensagens dos comandos. Uma falha pode ser localizada na preparação do
+ambiente, na instalação e checagem das dependências, no download ou na
+verificação do modelo. Cada tentativa mantém seu próprio registro.
+
+Um processo separado controla os 15 minutos acumulados das quatro chamadas
+de treino. A carga dos modelos e as inferências ficam fora desse relógio.
+Se o prazo vencer ou houver cancelamento, esse processo encerra o grupo
+do executor e grava a interrupção em `run.json`, preservando as divisões e
+previsões já gravadas. O vencimento do prazo tem código `124` e o
+cancelamento por Ctrl+C tem código `130`.
 
 Na execução registrada, pip e o provisionador rodaram em processos separados
-na worktree do piloto. Depois da instalação,
-as versões observadas foram congeladas em `requirements.txt`. O `pip check`,
-os imports e a checagem de sintaxe passaram. Uma conferência independente
-recalculou as métricas e os percentis a partir das 16 decisões, validou os
-hashes das fontes e confirmou a separação de treino e validação.
+na worktree do piloto. Depois da instalação, as versões observadas foram
+congeladas em `requirements.txt`. O `pip check`, os imports e a checagem
+de sintaxe passaram. Uma conferência independente recalculou as métricas
+e os percentis a partir das 16 decisões, validou os hashes das fontes e
+confirmou a separação de treino e validação. A instalação limpa com o
+script agregado segue pendente. Os controles de interrupção foram
+verificados separadamente com subprocessos locais simulados.
+
+```sh
+rtk proxy python3 -B script/classification_comparison/setfit_pilot/test_supervise.py -v
+```
+
+### Conferência das evidências registradas
+
+O código do commit `bfa67b45a40afa09a9ff2eb29089b1841045e87a` gerou os
+quatro arquivos de evidências. A versão atual inclui a correção dos
+controles de interrupção. Confira os hashes do executor registrado
+contra o conteúdo do commit histórico.
+
+```sh
+rtk proxy python3 -B - <<'PY'
+from hashlib import sha256
+import json
+from pathlib import Path
+import subprocess
+
+commit = "bfa67b45a40afa09a9ff2eb29089b1841045e87a"
+runner = "script/classification_comparison/setfit_pilot"
+evidence = Path("docs/evidencias/c05/setfit-piloto-01/run.json")
+recorded = json.loads(evidence.read_bytes())["runner_sha256"]
+for name, expected in recorded.items():
+    source = subprocess.check_output(["rtk", "proxy", "git", "show", f"{commit}:{runner}/{name}"])
+    if sha256(source).hexdigest() != expected:
+        raise SystemExit(f"Hash histórico divergente: {name}")
+print(f"OK: {len(recorded)} hashes históricos conferem")
+PY
+rtk proxy git diff --exit-code bfa67b4 -- docs/evidencias/c05/setfit-piloto-01
+```
 
 [Especificação do experimento](planejamento/classificacao-comparativa/setfit-piloto.md) ·
 [Lista congelada de arquivos](../script/classification_comparison/setfit_pilot/model-lock.json) ·

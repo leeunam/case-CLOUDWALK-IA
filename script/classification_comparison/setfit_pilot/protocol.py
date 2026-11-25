@@ -19,12 +19,6 @@ SEED = 42
 FOLD_COUNT = 4
 
 
-def write_json(destination, value):
-    temporary = destination.with_suffix(".tmp")
-    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8")
-    temporary.replace(destination)
-
-
 def normalized(text):
     return " ".join(normalize("NFKC", text).casefold().split())
 
