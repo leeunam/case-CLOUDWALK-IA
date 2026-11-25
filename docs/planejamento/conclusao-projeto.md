@@ -269,9 +269,9 @@ A demonstração pública segue em fixture, e E01 permanece posterior/opcional.
 ### Piloto SetFit e pausa da classificação — 25/11/2026
 
 O responsável autorizou testar SetFit em CPU e propôs adiar a categorização
-para avançar nas frentes independentes. O C05-SF1 está em execução
-exploratória, restrita à categoria. Após o piloto, escolha e calibração do
-classificador, integração e validação do complemento real ficam em espera
+para avançar nas frentes independentes. O C05-SF1 concluiu a avaliação
+exploratória de categoria. A escolha e a calibração do classificador, a
+integração e a validação do complemento real ficam em espera
 até retomada explícita. O requisito de classificação real e seus critérios
 de aceite continuam no plano de conclusão. C06 ainda requer qualificação
 e decisão de adoção. C07/F09 final requer a integração e a reprodução do

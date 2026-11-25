@@ -135,8 +135,8 @@ para a última tentativa. Novas chamadas estão suspensas.
 A sequência da qualificação é C01 → C02 → C03 → C05 → C06 → C07. Os ajustes
 da C04 foram encerrados nesta entrega, e R01 e R02 tiveram aceite independente.
 O responsável autorizou o piloto local SetFit (C05-SF1) e propôs adiar a
-categorização para avançar nas outras frentes. O piloto é exploratório e mede
-categoria. Após essa etapa, a escolha e a calibração do classificador (C05),
+categorização para avançar nas outras frentes. O piloto concluiu a avaliação
+exploratória de categoria. A escolha e a calibração do classificador (C05),
 a integração (C06) e o complemento real em instalação limpa (C07/F09 final)
 ficam em espera até retomada explícita. O requisito de classificação real
 continua no plano. A preparação F09-A já foi verificada com fixture, e o

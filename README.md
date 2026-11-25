@@ -167,10 +167,10 @@ transporte sem custo conciliável. No prefixo, o filtro permitiu apenas 1/26
 conclusões em casos classificáveis: a candidata não está apta para adoção.
 O custo confirmado da R5 foi US$ 0,00992557; uma reserva de US$ 1,239 permanece
 pendente e não representa cobrança confirmada. Não houve repetição. Novas
-chamadas pagas estão suspensas. O piloto local SetFit (C05-SF1) está em
-execução exploratória e cobre categoria. Após o piloto, a qualificação
-(C05), a integração (C06) e a validação do complemento real (C07/F09 final)
-ficam em espera até retomada explícita. A demonstração segue com fixture.
+chamadas pagas estão suspensas. O piloto local SetFit (C05-SF1) concluiu a
+avaliação exploratória de categoria. A qualificação (C05), a integração
+(C06) e a validação do complemento real (C07/F09 final) ficam em espera até
+retomada explícita. A demonstração segue com fixture.
 O atendente conversacional real (E01) fica como evolução posterior e opcional.
 [Resultado real R5](docs/c05-luna-r5-resultado.md) ·
 [Candidata R5](docs/c05-luna-r5-candidata.md) ·
