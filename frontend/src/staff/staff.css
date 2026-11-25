@@ -7,7 +7,8 @@
 .rail-group button:hover, .rail-bottom a:hover, .account button:hover { background: var(--surface-raised); }
 .rail-group button[aria-current] { background: var(--navigation-selected); color: #fff; box-shadow: inset 3px 0 var(--focus); }
 @media (forced-colors: active) {
-  .rail-group button[aria-current] { box-shadow: none; outline: 2px solid Highlight; outline-offset: -3px; }
+  .rail-group button[aria-current] { box-shadow: none; position: relative; }
+  .rail-group button[aria-current]::before { content: ''; position: absolute; inset: 2px; border: 2px solid Highlight; pointer-events: none; }
 }
 .rail-group svg, .rail-bottom svg { width: 1.1rem; }
 .rail-bottom { margin-top: auto; }

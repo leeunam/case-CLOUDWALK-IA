@@ -179,8 +179,9 @@ mantêm cantos menores.
   contorno e visto próprio.
 - **Estado.** Espera, falha, sucesso e estado neutro mantêm rótulos textuais.
 - **Painel.** Fundo de superfície, divisória discreta e cantos arredondados.
-- **Cores forçadas.** A navegação e a aba ativas usam contorno com cor do
-  sistema, preservando o indicador quando sombras são removidas.
+- **Cores forçadas.** Navegação e aba ativas usam borda em pseudo-elemento com
+  cor do sistema quando sombras são removidas. O outline continua reservado
+  para o foco do teclado.
 
 ## Do's and Don'ts
 

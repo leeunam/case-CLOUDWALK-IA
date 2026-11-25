@@ -41,7 +41,7 @@
       "refersTo": "navigation-active",
       "description": "Área selecionada com faixa interna clara e fundo grafite.",
       "html": "<button class=\"ds-nav-active\" aria-current=\"page\">Analista</button>",
-      "css": ".ds-nav-active { width: 100%; min-height: 2.5rem; padding: .6rem; border: 0; border-radius: .45rem; background: var(--navigation-selected); color: #fff; box-shadow: inset 3px 0 var(--focus); font: 550 .8125rem/1.48 Gabarito, sans-serif; text-align: left; cursor: pointer; } .ds-nav-active:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; } @media (forced-colors: active) { .ds-nav-active { box-shadow: none; outline: 2px solid Highlight; outline-offset: -3px; } }"
+      "css": ".ds-nav-active { width: 100%; min-height: 2.5rem; padding: .6rem; border: 0; border-radius: .45rem; background: var(--navigation-selected); color: #fff; box-shadow: inset 3px 0 var(--focus); font: 550 .8125rem/1.48 Gabarito, sans-serif; text-align: left; cursor: pointer; } .ds-nav-active:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; } @media (forced-colors: active) { .ds-nav-active { box-shadow: none; position: relative; } .ds-nav-active::before { content: ''; position: absolute; inset: 2px; border: 2px solid Highlight; pointer-events: none; } }"
     },
     {
       "name": "Item de lista selecionável",
