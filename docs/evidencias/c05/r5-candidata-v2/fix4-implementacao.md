@@ -70,4 +70,3 @@ rtk git diff --check b474570 f2c2056
 Para reproduzir os três casos, selecione apenas os IDs da tabela no arquivo `docs/evidencias/c05/luna-r4-ensaio-real-01/development/inputs.jsonl`. Passe a `EvidenceTests.classify` o item intacto e um objeto por campo ausente com a citação acima, o código e o critério respectivos (`sales_settlement`, `immediate_harm`, `terminal_operation`, `routine`). O helper injeta o gateway e reproduz a auditoria. Use `decide(item, envelope["observation"], item["catalog"], RUN_ID)` para conferir o resultado aplicado.
 
 **Exercício.** No teste de paralisação, compare a saída ao acrescentar “Mas os clientes já conseguem pagar por Pix.” e manter a mesma citação. A posição conserva a origem do trecho e o campo de veredicto registra a mudança provocada pela alternativa.
-
