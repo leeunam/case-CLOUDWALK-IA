@@ -13,16 +13,15 @@ o piloto SetFit e propôs adiar a categorização para avançar nas demais frent
 | F01–F07 | Implementadas e aceitas localmente. A operação percorre três canais e duas marcas, com classificação fixture, revisão humana, atendente simulado via Kafka, handoff, isolamento e reentrega. A qualificação real do classificador passou ao CLASS-001. [Plano de execução](planejamento/plano-de-execucao.md) · [F04/F05](integracao-f04-f05.md) · [F06/F07](integracao-f06-f07.md). |
 | F08, R01 e R02 | O experimento de referência teve cinco rodadas aprovadas e uma reprovada por falha de recuperação após a parada do Kafka. A R01 foi aceita com recuperação em ensaio controlado posterior. A R02 foi aceita com a correção do analisador e a conferência dos dados arquivados. A matriz de referência preserva a reprovação e segue sem nova execução após as correções. [F08](f08.md) · [R01](r01.md) · [R02](r02.md). |
 | F09-A | A instalação limpa com fixture comprovou dois turnos, reentrega, três canais, duas marcas, handoff, revisão humana e persistência. O trecho com complemento real pertence à C07/F09 final. [Roteiro e evidências F09](f09.md). |
-| F10 e UX02 | A publicação temporária em HTTPS usa fixture. Reinício com persistência e restauração em instalação isolada foram verificados. Na primeira URL da F10, o teste por dados móveis cobriu a abertura da página e a exibição de marcas e canais. [Resultado F10](f10-resultado.md) · [Aceite UX02](ux02.md). |
+| F10 e UX02 | A publicação temporária em HTTPS usa fixture e atendente simulado. Reinício com persistência e restauração em instalação isolada foram verificados. A conversa simulada persistiu após recarga por dados móveis na URL anterior. Na origem atual, 36 verificações de acesso por marca e a conclusão de um caso humano passaram no computador de origem. [Aceite integrado](f10-aceite-integrado.md) · [Histórico da publicação](f10-resultado.md) · [Aceite UX02](ux02.md). |
 
-Para completar o aceite externo da F10, usar o endereço ativo por outra
-rede com os perfis sintéticos de cliente e analista. Verificar atualização
-do chat, resposta do atendente simulado, handoff com histórico e isolamento
-por marca. A [última URL verificada](https://newbie-aqua-stem-reveal.trycloudflare.com/)
-é do túnel reaberto em 25/11/2026, com verificação da saúde da API em HTTPS.
-O responsável confirmou a abertura da página nesse endereço. O acesso
-depende do computador e do túnel ativos e o endereço muda ao recriar o túnel.
-[Resultado F10](f10-resultado.md) · [Roteiro F10](f10.md).
+A [URL temporária](https://jason-dollar-lcd-bought.trycloudflare.com/) foi
+verificada em HTTPS quando o túnel reabriu em 25/11/2026. O acesso depende do
+computador e do túnel ativos. O responsável viu “Com a equipe de suporte” no
+celular. Ainda falta identificar esse caso, conferir o resumo e a referência,
+registrar a resposta e a resolução do analista e confirmar a persistência no
+celular. Também falta comparar Bia e Cris no mesmo caso Horizonte por outra
+rede. [Roteiro do aceite externo](f10-aceite-integrado.md#pendências-externas).
 
 Repetir a matriz F08 nas mesmas condições reforçaria a evidência sob carga
 após as correções. Aumento progressivo de taxa, carga de atendimento humano

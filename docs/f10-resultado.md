@@ -2,26 +2,30 @@
 
 ## Endereço atual
 
-Em 25/11/2026, às 12h44 de Brasília, o integrador renovou o túnel após a
-expiração da URL da UX02. A verificação da
-[nova URL temporária](https://newbie-aqua-stem-reveal.trycloudflare.com/)
-confirmou a saúde da API em HTTPS. O acesso depende do computador e do túnel
-ativos.
-[Evidência da renovação](evidencias/f10/integrator-f10-renewal-2026-11-25.json).
+Em 25/11/2026, às 14h16 de Brasília, o integrador reabriu o túnel. A verificação
+da [URL temporária](https://jason-dollar-lcd-bought.trycloudflare.com/) confirmou
+a saúde da API em HTTPS. As imagens de API e web e os volumes foram preservados.
+O acesso depende do computador e do túnel ativos.
+[Registro do restabelecimento](evidencias/f10/aceite-integrado/restabelecimento.json).
 
-O responsável confirmou que abriu a página no novo endereço. Conversa,
-histórico após recarregar, handoff, acesso do analista e isolamento por marca
-seguem pendentes de verificação por outra rede.
-[Confirmação da abertura da página](evidencias/f10/integrator-f10-mobile-2026-11-25.json).
+## Registro da renovação anterior
+
+Em 25/11/2026, às 12h44 de Brasília, a renovação após a expiração do endereço
+da UX02 publicou a demonstração em `newbie-aqua-stem-reveal.trycloudflare.com`.
+A saúde da API passou em HTTPS. O responsável confirmou a abertura e, mais
+tarde, dois retornos automáticos e quatro mensagens em ordem após recarregar
+pelo celular em dados móveis.
+[Renovação](evidencias/f10/integrator-f10-renewal-2026-11-25.json) ·
+[Abertura da página](evidencias/f10/integrator-f10-mobile-2026-11-25.json) ·
+[Conversa móvel F10-A](f10-aceite-fluxo.md).
 
 ## Registro da publicação UX02
 
 A demonstração foi reaberta na entrega UX02 em
 [tribal-louisville-container-bind.trycloudflare.com](https://tribal-louisville-container-bind.trycloudflare.com/).
 O tema `8ac8a00` foi publicado e verificado em HTTPS, com conversa de dois turnos
-pela API e atendente simulado. O túnel anterior estava parado; os volumes foram
-preservados. A confirmação por dados móveis registrada abaixo pertence ao
-endereço anterior, não constitui um novo teste externo deste link.
+pela API e atendente simulado. O túnel anterior estava parado e os volumes
+foram preservados.
 [Evidências UX02](ux02.md).
 
 ## Registro da primeira publicação
@@ -31,6 +35,11 @@ Em 24/11/2026 o integrador publicou a demonstração em
 isolado `cloudwalk_publish_integrator`. A URL é temporária e depende do computador
 e do processo ligados. O código integrado da aplicação foi verificado na revisão
 `7f04b9b3b2e75c3db4993bcaf0ce82140a86f96f`.
+
+O responsável abriu a página por dados móveis e confirmou a exibição de marcas
+e canais. As sondas e o navegador do integrador usaram o endereço público a
+partir do computador de origem. Uma ferramenta remota de consulta falhou ao
+acessar aquele endereço.
 
 ## Verificações realizadas
 
@@ -54,15 +63,12 @@ Nenhum segredo ou arquivo privado de backup foi versionado.
 ## Limitações e continuidade
 
 A classificação publicada usa fixture determinística e o atendente usa mock.
-Essas verificações fizeram zero chamadas de IA. A preparação offline da Luna
-continua separada da qualificação real, da decisão de adoção e da integração C06.
-A publicação da demonstração não conclui esses marcos.
+O aceite da publicação fez zero novas chamadas pagas. A qualificação (C05), a
+integração (C06) e a validação do complemento real (C07/F09 final) ficam em
+espera até retomada explícita.
 
-As sondas e o navegador usaram o endereço público a partir do computador de
-origem. A ferramenta remota de consulta não conseguiu acessar esse endereço.
-Na primeira URL da F10, o responsável abriu a página pelo celular usando
-dados móveis e confirmou a exibição de marcas e canais. A conversa, o handoff
-e o isolamento por marca ainda precisam ser verificados a partir de outra rede.
-Não há servidor permanente nem compromisso de disponibilidade. As condições do
-Quick Tunnel e os procedimentos para obter credenciais em terminal privado,
-parar, reabrir e restaurar estão no [roteiro F10](f10.md).
+A matriz de acesso por marca e a conclusão de um caso pelo analista passaram
+no computador de origem pelo endereço público. O aceite externo ainda depende
+do handoff identificado e concluído no celular e da comparação entre Bia e
+Cris para o mesmo caso Horizonte por outra rede.
+[Aceite integrado](f10-aceite-integrado.md) · [Roteiro de publicação](f10.md).

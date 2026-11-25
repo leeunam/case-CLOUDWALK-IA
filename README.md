@@ -51,17 +51,22 @@ A demonstração da F10 foi publicada em HTTPS com classificação fixture e
 atendente simulado. O reinício preservou os atendimentos, e a restauração da
 cópia em uma instalação isolada recuperou o mesmo caso. A reorganização da
 interface e o tema inspirado na CloudWalk foram aceitos e publicados.
-[Resultado F10](docs/f10-resultado.md) ·
+[Histórico da publicação](docs/f10-resultado.md) ·
 [Aceite UX01](docs/ux01.md) · [Aceite UX02](docs/ux02.md).
 
-A [última URL verificada](https://newbie-aqua-stem-reveal.trycloudflare.com/)
-é do túnel reaberto em 25/11/2026, com verificação da saúde da API em HTTPS.
-O endereço depende do computador e do túnel ligados e muda ao recriar o
-túnel. O serviço limita a 200 requisições simultâneas em voo e não garante
-disponibilidade. Na primeira URL da F10, o acesso por dados móveis confirmou
-a abertura da página com marcas e canais visíveis. A verificação de todo o
-fluxo a partir de outra rede continua pendente.
-[Evidências da publicação](docs/f10-resultado.md).
+A [URL temporária](https://jason-dollar-lcd-bought.trycloudflare.com/) foi
+verificada em HTTPS após a reabertura do túnel em 25/11/2026. O endereço depende
+do computador e do túnel ativos e muda quando o túnel é recriado.
+O serviço limita a 200 requisições simultâneas em voo e a disponibilidade pode
+variar. [Roteiro e limites da publicação](docs/f10.md).
+
+Na URL anterior, o responsável confirmou por dados móveis dois retornos
+automáticos e quatro mensagens após recarregar. No endereço atual, o
+computador de origem verificou a resposta e a resolução pelo analista e
+passou nas 36 verificações de acesso por marca. O aceite externo ainda
+depende de concluir o handoff no celular e comparar o acesso de Bia e Cris
+ao mesmo caso Horizonte por outra rede.
+[Aceite integrado e roteiro das pendências](docs/f10-aceite-integrado.md).
 
 O [roteiro de publicação](docs/f10.md) orienta a escolher um projeto exclusivo
 e executar `init`, `up` e `check` com `script/publish.py` antes de `prepare` e

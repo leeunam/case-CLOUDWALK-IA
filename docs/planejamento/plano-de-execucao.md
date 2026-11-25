@@ -256,13 +256,15 @@ real seguiu para CLASS-001. [Resultados de carga](../f08.md) · [Plano de conclu
 
 A preparação F09-A comprovou a reprodução local com fixture. A F10 publicou
 a demonstração com login e dados sintéticos sobre um túnel HTTPS temporário
-do computador local. O reinício e a restauração foram verificados. O
-integrador comprovou uma conversa de dois turnos na publicação da UX02. Na
-primeira URL da F10, o responsável abriu a página por dados móveis e confirmou
-que marcas e canais estavam visíveis. A renovação de 25/11/2026 verificou a
-saúde da API em HTTPS no novo endereço. O fluxo completo por outra rede
-segue pendente.
-[F09-A](../f09.md) · [Resultado F10](../f10-resultado.md) · [UX02](../ux02.md).
+do computador local. O reinício e a restauração foram verificados. Na URL
+anterior, o responsável confirmou dois retornos automáticos e quatro mensagens
+após recarga por dados móveis. Após a reabertura do túnel em 25/11/2026, o
+computador de origem verificou o handoff até a resolução pelo analista e
+passou nas 36 verificações de acesso por marca. O aceite externo ainda depende
+da conclusão do handoff no celular e da comparação de Bia e Cris para o mesmo
+caso Horizonte por outra rede.
+[F09-A](../f09.md) · [Aceite integrado F10](../f10-aceite-integrado.md) ·
+[Histórico da publicação](../f10-resultado.md) · [UX02](../ux02.md).
 
 O plano de aceite da publicação prevê os seguintes passos.
 
