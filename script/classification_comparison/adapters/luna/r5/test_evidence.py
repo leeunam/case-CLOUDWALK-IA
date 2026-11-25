@@ -353,6 +353,48 @@ class EvidenceTests(unittest.TestCase):
         self.assert_field(entry, prediction("urgent", "immediate_harm", loss), status="predicted")
         self.assert_field(entry, prediction("urgent", "immediate_harm", denied), status="abstained")
 
+    def test_pergunta_de_orientacao_preserva_dano_afirmado_entre_pontuacoes(self):
+        effects = ("Estamos perdendo vendas a cada minuto",
+                   "Todos os clientes estão sendo debitados duas vezes agora",
+                   "Serei multado hoje")
+        questions = ("como posso configurar a maquininha?", "como resolvo isso?")
+        for effect in effects:
+            alone = item(effect + ".", requested=("priority",))
+            self.assert_field(alone, prediction("urgent", "immediate_harm", effect), status="predicted")
+            self.assert_field(alone, prediction("basic", "routine", effect), status="abstained")
+            for punctuation in (".", ":", ",", ";"):
+                for question in questions:
+                    with self.subTest(effect=effect, punctuation=punctuation, question=question):
+                        entry = item(effect + punctuation + " " + question, requested=("priority",))
+                        self.assert_field(entry, prediction("urgent", "immediate_harm", effect), status="predicted")
+                        self.assert_field(entry, prediction("basic", "routine", question), status="abstained")
+
+    def test_pergunta_de_orientacao_com_negacao_consulta_e_fronteira_incerta(self):
+        routine = "como posso configurar a maquininha?"
+        effects = ("Não estamos perdendo vendas a cada minuto",
+                   "Nenhuma cliente está sendo debitada duas vezes agora",
+                   "Quero confirmar se os clientes estão sendo debitados duas vezes agora",
+                   "Se der erro, os clientes são debitados duas vezes a cada tentativa")
+        for effect in effects:
+            for punctuation in (".", ":", ",", ";"):
+                with self.subTest(effect=effect, punctuation=punctuation):
+                    entry = item(effect + punctuation + " " + routine, requested=("priority",))
+                    self.assert_field(entry, prediction("urgent", "immediate_harm", effect), status="abstained")
+                    self.assert_field(entry, prediction("basic", "routine", routine), status="predicted")
+
+        uncertainty = "Estamos perdendo vendas a cada minuto, é essa a situação?"
+        entry = item(routine + " " + uncertainty, requested=("priority",))
+        self.assert_field(entry, prediction("urgent", "immediate_harm", uncertainty), status="abstained")
+        self.assert_field(entry, prediction("basic", "routine", routine), status="abstained")
+        effect = "Estamos perdendo vendas a cada minuto"
+        unpunctuated = item(effect + " " + routine, requested=("priority",))
+        self.assert_field(unpunctuated, prediction("urgent", "immediate_harm", effect), status="abstained")
+        self.assert_field(unpunctuated, prediction("basic", "routine", routine), status="abstained")
+
+        normal = item(routine, requested=("priority",))
+        self.assert_field(normal, prediction("urgent", "immediate_harm", routine), status="abstained")
+        self.assert_field(normal, prediction("basic", "routine", routine), status="predicted")
+
     def test_familias_localizadas_e_retrabalho_abrangente(self):
         local = "Só uma das três leitoras parou;"
         broad = "As divergências de todos os caixas exigem refazer o fechamento inteiro há dias;"

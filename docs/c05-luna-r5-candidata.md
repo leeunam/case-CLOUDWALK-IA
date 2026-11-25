@@ -42,6 +42,9 @@ As regras de urgência verificam se o efeito foi afirmado. Uma pergunta
 sobre a ocorrência, uma hipótese genérica e uma negação do efeito levam a
 veto. Uma falha declarada como “nenhuma venda passa” pode sustentar
 paralisação. O trecho precisa conter a ocorrência usada pela regra.
+Uma pergunta de orientação posterior pode ser uma proposição separada,
+mesmo depois de vírgula ou dois-pontos. Se houver possível dano e o escopo
+da pergunta ficar incerto, a política impede rotina e mantém o caso em revisão.
 Os prazos numéricos em minutos cobrem de 1 a 60. O catálogo só habilita
 predição para definições reconhecidas textualmente. Novos códigos e
 definições diferentes vão para revisão quando preditos.

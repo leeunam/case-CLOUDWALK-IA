@@ -132,6 +132,13 @@ CATEGORY_RELATIONS = {
 
 SENTENCE = re.compile(r"[^.!?;\n]+[.!?;]*")
 TRANSITION = re.compile(r"\b(?:mas|porém|porem|contudo|no entanto|só que|so que)\b", re.I)
+GUIDANCE_QUESTION = (
+    r"(?:como|o que)\s+(?:(?:eu|n[oó]s)\s+)?"
+    r"(?:posso|podemos|devo|devemos|preciso|fa[çc]o|fazemos|resolvo|resolvemos|"
+    r"configuro|configuramos|[^\W\d_]+(?:ar|er|ir))\b"
+)
+REQUEST_START = re.compile(rf"[:,]\s*(?=(?:e\s+)?{GUIDANCE_QUESTION})", re.I)
+POSSIBLE_QUESTION_BOUNDARY = re.compile(rf"[:,]|\b{GUIDANCE_QUESTION}", re.I)
 HYPOTHETICAL = re.compile(r"^\s*[,:\s]*(?:se\b|caso\b|supondo\b|na hipotese\b)")
 UNCERTAINTY = re.compile(
     r"\b(?:talvez|possivelmente|hipoteticamente|pode ser que|pode ser|"
@@ -190,12 +197,17 @@ class Clause:
         return self.text[self.quote_start:self.quote_end]
 
 
-def clauses(text, start, end):
+def clauses(text, start, end, *, priority=False):
     """Mapeia o recorte para a mesma oração usada no casamento de padrões."""
     for sentence in SENTENCE.finditer(text):
         left, right = sentence.span()
-        cuts = [left, *(m.start() for m in TRANSITION.finditer(text, left, right) if m.start() > left), right]
-        for begin, stop in zip(cuts, cuts[1:]):
+        cuts = {left, right, *(m.start() for m in TRANSITION.finditer(text, left, right))}
+        if priority and "?" in sentence.group():
+            # Vírgula e dois-pontos só separam aqui quando iniciam um pedido
+            # de orientação reconhecível. Uma condição mantém a própria oração.
+            cuts.update(m.end() for m in REQUEST_START.finditer(text, left, right))
+        ordered_cuts = sorted(cuts)
+        for begin, stop in zip(ordered_cuts, ordered_cuts[1:]):
             original = text[begin:stop]
             normal = normalized(original)
             body = normal.strip(" ,:")
@@ -433,9 +445,8 @@ def any_match(patterns, text):
     return any(pattern.search(text) for pattern in patterns)
 
 
-def asserted_matches(pattern, clause, *, offset=0):
+def asserted_matches(pattern, text, *, offset=0):
     """Só usa efeitos declarados. Negações internas podem afirmar uma falha."""
-    text = clause.text
     if "?" in text or any(marker.search(text, offset) for marker in (UNCERTAINTY, UNASSERTED_SCOPE)):
         return ()
     # Para prazos em ordem inversa, o prazo pode vir antes de um negador.
@@ -450,7 +461,20 @@ def pending_consequences(clause):
     offset = condition.end() if condition else 0
     if LATER_DEADLINE.search(clause.text, offset):
         return ()
-    return asserted_matches(IMMEDIATE_CONSEQUENCE, clause, offset=offset)
+    return asserted_matches(IMMEDIATE_CONSEQUENCE, clause.text, offset=offset)
+
+
+def ambiguous_impact(text):
+    """Uma afirmação possível numa pergunta mista já impede classificar rotina."""
+    if "?" not in text:
+        return False
+    for pattern in URGENT_PATTERNS:
+        match = pattern.search(text)
+        if match is not None:
+            cut = POSSIBLE_QUESTION_BOUNDARY.search(text, match.end())
+            if cut and asserted_matches(pattern, text[:cut.start()]):
+                return True
+    return False
 
 
 def priority_reason(criterion, context):
@@ -466,23 +490,23 @@ def priority_reason(criterion, context):
     # Orientação futura é suporte de rotina. Fatos futuros por si sós não são
     # prova de prejuízo atual. Um prazo futuro explícito pode ser imediato.
     pending = active[recovery + 1:]
-    handled = max((i for i, clause in enumerate(pending) if asserted_matches(HANDLED_DEADLINE, clause)), default=-1)
+    handled = max((i for i, clause in enumerate(pending) if asserted_matches(HANDLED_DEADLINE, clause.text)), default=-1)
     immediate = [(clause, match) for clause in pending[handled + 1:] for match in pending_consequences(clause)]
-    no_impact = any(asserted_matches(NEGATED_IMPACT, clause) for clause in current)
-    alternative = any(asserted_matches(ALTERNATIVE, clause) and not asserted_matches(NO_ALTERNATIVE, clause)
+    no_impact = any(asserted_matches(NEGATED_IMPACT, clause.text) for clause in current)
+    alternative = any(asserted_matches(ALTERNATIVE, clause.text) and not asserted_matches(NO_ALTERNATIVE, clause.text)
                       for clause in current)
-    no_alternative = any(asserted_matches(NO_ALTERNATIVE, clause) for clause in current)
-    total = [(clause, match) for clause in current for match in asserted_matches(TOTAL_STOP, clause)]
+    no_alternative = any(asserted_matches(NO_ALTERNATIVE, clause.text) for clause in current)
+    total = [(clause, match) for clause in current for match in asserted_matches(TOTAL_STOP, clause.text)]
     total_without_alternative = total if no_alternative and not alternative else []
     payment_damage = False
-    loss = [(clause, match) for clause in current for match in asserted_matches(IMMEDIATE_LOSS, clause)]
+    loss = [(clause, match) for clause in current for match in asserted_matches(IMMEDIATE_LOSS, clause.text)]
     for index, clause in enumerate(current):
-        damage = asserted_matches(PAYMENT_HARM, clause)
-        if not damage or asserted_matches(PAYMENT_HARM_RESOLVED, clause):
+        damage = asserted_matches(PAYMENT_HARM, clause.text)
+        if not damage or asserted_matches(PAYMENT_HARM_RESOLVED, clause.text):
             continue
         payment_damage = True
         if (REPEATED_OR_CURRENT.search(clause.text)
-                or any(asserted_matches(DAMAGE_CONTINUATION, c) for c in current[index + 1:index + 2])):
+                or any(asserted_matches(DAMAGE_CONTINUATION, c.text) for c in current[index + 1:index + 2])):
             loss.extend((clause, match) for match in damage)
     urgent = [] if no_impact else loss + immediate + total_without_alternative
     broad = [clause for clause in current if BROAD.search(clause.text) and not NEGATED_IMPACT.search(clause.text)]
@@ -498,7 +522,8 @@ def priority_reason(criterion, context):
     elif local and alternative and not total and not broad and not no_alternative:
         found, support = "localized_impact", local
     elif not (local or total or broad or loss or immediate or payment_damage
-              or any(CURRENT_PROBLEM.search(c.text) or asserted_matches(CURRENT_LOSS, c) for c in current)):
+              or any(CURRENT_PROBLEM.search(c.text) or asserted_matches(CURRENT_LOSS, c.text) for c in current)
+              or any(ambiguous_impact(c.text) for c in context)):
         routine = [clause for clause in active[max(0, recovery):]
                    if any_match(PRIORITY_EVIDENCE["routine"], clause.text)]
         found, support = "routine", routine
@@ -561,7 +586,7 @@ def verdict(item, field, data, span_error):
     if span_error is not None:
         return "veto", span_error
 
-    context = list(clauses(item["text"], data["start"], data["end"]))
+    context = list(clauses(item["text"], data["start"], data["end"], priority=field == "priority"))
     semantic_check = category_reason if field == "category" else priority_reason
     reason = semantic_check(criterion, context)
     return ("accepted" if reason == "supported_relation" else "veto"), reason
