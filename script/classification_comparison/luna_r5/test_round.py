@@ -8,7 +8,7 @@ from io import BytesIO
 import os
 import time
 from types import SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 import sys
 import unittest
 
@@ -20,6 +20,8 @@ from r2 import execute, gate, seal
 from r2.plan import Plan, gate_reference
 from budget import Account, BudgetError
 from common import c01, decode, encode
+from journal import Journal
+import run
 from run import exchange
 
 
@@ -104,12 +106,14 @@ class R5Test(unittest.TestCase):
                 self.assertEqual([result[k] for k in ("status", "correct_targets", "preserved_fields",
                                  "correct_completions", "integral_reviews", "raw_urgent", "errors")],
                                  ["fixture_ready", 8, 4, 3, 3, 1, 0])
+                self.check_receipt_status(report_path, dev_file, ("failed", "pass"))
                 proof = ["--development-gate", dev_file]
                 self.check_tamper(output, report)
             else:
                 self.cli("verify-final", *args, "--output", output)
                 receipt_path = output / gate.FINAL_RECEIPT
                 receipt = c01.read(receipt_path)
+                self.check_receipt_status(report_path, receipt_path, ("pass", "fixture_ready"))
                 self.assertEqual((receipt["status"], receipt["luna_evidence"]), ("inconclusive", report["luna_evidence"]))
                 observations = c01.read_records(c01.source_path(report["artifacts"]["observations"]))
                 self.assertTrue(all(ch["reason"] == "explicit" for obs in observations if obs["origin"] == "candidate"
@@ -121,6 +125,82 @@ class R5Test(unittest.TestCase):
         snapshot = account.status()
         self.assertEqual([row["state"] for row in snapshot["reservations"]], ["settled"] * 50)
         self.assertEqual(Decimal(snapshot["accounted_usd"]), Decimal("0.02735"))
+
+    def check_receipt_status(self, report_path, receipt_path, contradictory):
+        original = receipt_path.read_bytes()
+        try:
+            for status in (None, *contradictory):
+                changed = decode(original)
+                if status is None:
+                    del changed["status"]
+                else:
+                    changed["status"] = status
+                receipt_path.write_text(encode(changed))
+                with self.subTest(status=status), self.assertRaises(ValueError):
+                    c01.verify_report(report_path)
+            if receipt_path.name == gate.FILENAME:
+                changed = decode(original)
+                changed["preserved_fields"] -= 1
+                receipt_path.write_text(encode(changed))
+                with self.assertRaisesRegex(ValueError, "resultado público"):
+                    c01.verify_report(report_path)
+        finally:
+            receipt_path.write_bytes(original)
+
+    def test_prefix_checks_original_journal_and_pending_phase(self):
+        for validated in (False, True):
+            account = self.account(str(validated))
+            args = self.args(str(validated), account)
+            calls = 0
+            owner, method = (Journal, "complete") if validated else (run, "exchange")
+            original = getattr(owner, method)
+
+            def interrupt(*args, **kwargs):
+                nonlocal calls
+                calls += 1
+                if calls == 2:
+                    if not validated:
+                        original(*args, **kwargs)  # Envelope recebido, antes de guardar a observação validada.
+                    raise KeyboardInterrupt
+                return original(*args, **kwargs)
+
+            with patch.object(owner, method, interrupt), self.assertRaises(KeyboardInterrupt):
+                execute.run_evaluation(args, round_spec=LUNA_R5)
+            prefix = args.output / "prefix-report.json"
+            manifest = args.output / "interruption.json"
+            original_manifest = manifest.read_bytes()
+            doc = decode(original_manifest)
+            self.assertEqual(len(doc["completed_ids"]), 1)
+            self.assertEqual(doc["luna_evidence"]["count"], 2)
+            self.assertIsNotNone(doc["interrupted_id"])
+            self.assertEqual(doc["interrupted_observation"] is not None, validated)
+            c01.verify_report(prefix)
+            journal = args.output / "journal.jsonl"
+            moved = journal.rename(args.output / "oculto")
+            try:
+                with self.assertRaisesRegex(ValueError, "luna_evidence"):
+                    c01.verify_report(prefix)
+            finally:
+                moved.rename(journal)
+            journal_bytes = journal.read_bytes()
+            forged_journal = [r for r in map(decode, journal_bytes.splitlines()) if r["event"] != "completed"]
+            journal.write_text("".join(encode(r) + "\n" for r in forged_journal))
+            forged = deepcopy(doc)
+            forged["artifacts"]["journal.jsonl"]["sha256"] = c01.digest(journal)
+            manifest.write_text(encode(forged))
+            with self.assertRaisesRegex(ValueError, "luna_evidence"):
+                c01.verify_report(prefix)
+            journal.write_bytes(journal_bytes)
+            wrong = [("completed_ids", []), ("dispatched_ids", []), ("not_started_ids", []),
+                     ("delivery", "not_sent"), ("artifacts", {})]
+            if validated:
+                wrong.append(("interrupted_observation", None))
+            for name, value in wrong:
+                manifest.write_text(encode(dict(doc, **{name: value})))
+                with self.subTest(name=name, validated=validated), self.assertRaisesRegex(ValueError, "luna_evidence"):
+                    c01.verify_report(prefix)
+            manifest.write_bytes(original_manifest)
+            c01.verify_report(prefix)
 
     def check_tamper(self, output, report):
         path = output / FILENAME
@@ -226,6 +306,14 @@ class R5Test(unittest.TestCase):
 
     def test_failed_gate_then_tamper_rejected(self):
         historic.LunaTest.test_failed_gate_then_tamper_rejected(self)
+        report = self.output / "wrong/report.json"
+        proof = report.with_name(gate.FILENAME)
+        forged = c01.read(proof)  # O cenário histórico substitui o status failed pela alegação fixture_ready.
+        self.assertEqual(forged["status"], "fixture_ready")
+        with self.assertRaisesRegex(ValueError, "resultado público"):
+            c01.verify_report(report)
+        proof.write_text(encode(dict(forged, status="failed")))
+        c01.verify_report(report)
 
 
 if __name__ == "__main__":

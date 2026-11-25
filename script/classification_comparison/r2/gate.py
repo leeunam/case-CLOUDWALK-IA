@@ -73,6 +73,19 @@ def settled_costs(snapshot, observations, run_id, reservation):
     return costs
 
 
+def completed_events(decisions, candidates, *, include_timings):
+    indexed = {obs["id"]: obs for obs in candidates}
+    for decision in decisions:
+        case_id = decision["id"]
+        timing = {}
+        if case_id in indexed:
+            for event in ("dispatch_started", "dispatched"):
+                yield dict(event=event, id=case_id, attempt=1)
+            if include_timings:
+                timing["elapsed_ms"] = indexed[case_id]["elapsed_ms"]
+        yield dict(event="completed", id=case_id, attempts=decision["attempts"], **timing)
+
+
 def collect(output, plan, account, cap, *, original_hashes=None, development_gate=None):
     if any((output / name).exists() for name in ("interruption.json", "prefix-report.json", "prefix-report.md")):
         raise BudgetError("prefixo interrompido não comprova development concluído")
@@ -118,15 +131,7 @@ def collect(output, plan, account, cap, *, original_hashes=None, development_gat
 
     expected_events = [dict(event="planned", plan=artifacts["plan.json"], **plan.round.versions,
                             contract_version=plan.round.profile.report_version)]
-    indexed = {obs["id"]: obs for obs in candidates}
-    for decision in bundle["decisions"]:
-        case_id = decision["id"]
-        timing = {}
-        if case_id in indexed:
-            expected_events.extend(dict(event=event, id=case_id, attempt=1) for event in ("dispatch_started", "dispatched"))
-            if audited and plan.mode == "real":
-                timing["elapsed_ms"] = indexed[case_id]["elapsed_ms"]
-        expected_events.append(dict(event="completed", id=case_id, attempts=decision["attempts"], **timing))
+    expected_events.extend(completed_events(bundle["decisions"], candidates, include_timings=audited and plan.mode == "real"))
     expected_events.append(dict(event="finished", decisions=len(bundle["decisions"])))
     if canonical_digest(list(map(decode, BytesIO(published["journal.jsonl"])))) != canonical_digest(
             [dict(event, run_id=run_id) for event in expected_events]):

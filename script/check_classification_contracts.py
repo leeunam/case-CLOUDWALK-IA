@@ -898,7 +898,7 @@ def verify_report(path, profile_name=None):
             require(digest(path) == digest(profile.golden_path), "luna_fixture", "fixture estática de controles")
         else:
             from luna_r5.audit import verify_public_receipt
-            verify_public_receipt(path.resolve(), report)
+            verify_public_receipt(path.resolve(), bundle, protocol=args[1], catalog=args[3], cases=args[4])
     return profile
 
 

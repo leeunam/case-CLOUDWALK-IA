@@ -1,4 +1,5 @@
 """Evidência local de execução, independente do formato congelado das observações."""
+import json
 import os
 import signal
 from contextlib import ExitStack
@@ -28,6 +29,25 @@ def records(path):
 
 def inventory(path):
     return {"path": str(path.relative_to(c01.ROOT)), "sha256": c01.digest(path)}
+
+
+def observation_digest(obs):
+    return sha256(json.dumps(obs, sort_keys=True, separators=(",", ":")).encode()).hexdigest() if obs is not None else None
+
+
+def interrupted_usage(active, delivery, pending):
+    pending_samples = usage([pending]) if pending is not None else None
+    pending_usage = None
+    if active is not None:
+        pending_usage = {k: None for k in ("requests", "questions", "input_tokens", "output_tokens",
+                                            "observed_api_usd", "estimated_api_usd")}
+        if pending_samples:
+            for key, value in pending_samples.items():
+                if key in pending_usage and value["state"] == "measured":
+                    pending_usage[key] = value["value"]
+        elif delivery == "not_sent":
+            pending_usage.update(requests=0, questions=0)
+    return pending_samples, pending_usage
 
 
 def sync_directory(path):
@@ -130,9 +150,16 @@ class Journal:
                 delivery = "not_sent"
             else:
                 delivery = "unknown"
-        self.event("interrupted", id=active, delivery=delivery, error=type(error).__name__, reason=str(error))
-
+        stopped = dict(id=active, delivery=delivery, error=type(error).__name__, reason=str(error))
+        if not self.audited:
+            self.event("interrupted", **stopped)
         observations = records(self.output / "observations.jsonl")
+        pending = next((o for o in observations if o["id"] == active), None)
+        if pending is None and self.pending_observation and self.pending_observation["id"] == active:
+            pending = self.pending_observation
+        if self.audited:
+            self.event("interrupted", **stopped, validated_observation_sha256=observation_digest(pending))
+
         prefix_obs = [o for o in observations if o["id"] in finished]
         prefix_decisions = [d for d in records(self.output / "decisions.jsonl") if d["id"] in finished]
         prefix_inputs = [i for i in self.inputs if i["id"] in finished]
@@ -155,20 +182,7 @@ class Journal:
                 os.fsync(stream.fileno())
             files.append(filename)
 
-        pending = next((o for o in observations if o["id"] == active), None)
-        if pending is None and self.pending_observation and self.pending_observation["id"] == active:
-            pending = self.pending_observation
-        pending_samples = usage([pending]) if pending is not None else None
-        pending_usage = None
-        if active is not None:
-            pending_usage = {k: None for k in ("requests", "questions", "input_tokens", "output_tokens",
-                                                "observed_api_usd", "estimated_api_usd")}
-            if pending_samples:
-                for key, value in pending_samples.items():
-                    if key in pending_usage and value["state"] == "measured":
-                        pending_usage[key] = value["value"]
-            elif delivery == "not_sent":
-                pending_usage.update(requests=0, questions=0)
+        pending_samples, pending_usage = interrupted_usage(active, delivery, pending)
         injected = [o["id"] for o in prefix_obs if o["origin"] == "injected_control"]
         inventory_fields = dict(self.planned_injections) if injected else {}
         inventory_fields.update(ids=injected, count=len(injected))
