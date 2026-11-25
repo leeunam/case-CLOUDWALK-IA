@@ -1,0 +1,30 @@
+{
+  "contract_version": "sf2-ipc/1.0",
+  "stage": "draft",
+  "files": {
+    "train": {
+      "path": "train.jsonl",
+      "sha256": "9e09fea9ab9955ef745130f0ce3ab4ade4abf3a54fbb49bb807fc78e5e28ba8f"
+    },
+    "validation": {
+      "path": "validation.jsonl",
+      "sha256": "08273671b6701ab55a12adbba7e969c1a1455d34f96d6fd2ebdbf564371e4512"
+    },
+    "annotations": {
+      "path": "annotations-public.jsonl",
+      "sha256": "55671a3bd5028b4ee6ed114121313b75fd2d40c61269bfed5abcfe4cd1cdcf7c"
+    }
+  },
+  "counts": {
+    "train": 150,
+    "validation": 90
+  },
+  "review_receipt_sha256": null,
+  "token_lengths_sha256": null,
+  "limitations": [
+    "Dados sintéticos em português, escritos e anotados inicialmente pelo mesmo agente de IA. As quotas foram planejadas e não representam frequências reais.",
+    "Aguardando anotação independente B e conciliação pela rubrica. O gold deste rascunho corresponde à anotação A.",
+    "Aguardando validação pelo contrato integrado SF2-00 e registro dos comprimentos no formato definitivo.",
+    "A autoria não consultou relatos históricos ou reservados. A auditoria semântica independente de novidade segue o protocolo aprovado."
+  ]
+}
