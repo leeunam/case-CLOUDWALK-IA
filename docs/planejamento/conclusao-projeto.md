@@ -175,3 +175,15 @@ zero medição de qualidade real R4. [Guia R4](../c05-luna-r4.md).
 C05 real, decisão de adoção, C06 e C07/F09 final permanecem pendentes.
 Um novo ensaio R4 exige pré-voo e autorização de consumo próprios. A publicação
 fixture e o aceite visual não encerram o projeto nem habilitam o modelo real.
+
+### UX02 — linguagem visual CloudWalk
+
+Por pedido explícito do responsável, o tema da UX01 passou a usar preto/grafite,
+branco quente e tipografia geométrica, sem logo CloudWalk. Gabarito OFL local é
+uma aproximação gratuita da Cera Pro licenciada do site de referência. A organização
+dos painéis, as funções e os contratos foram preservados.
+
+Entrega `1adc941..8ac8a00`, branch `feat/estilo-cloudwalk`, aceita nas revisões
+por tarefa e ampla, com 34 testes, build e inspeção desktop/móvel. A publicação
+foi reaberta em novo endereço temporário; [UX02](../ux02.md) contém URL vigente,
+provas, limites e roteiro. C05 real/C06/C07 continuam pendentes e independentes.

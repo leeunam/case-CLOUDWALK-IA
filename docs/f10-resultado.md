@@ -1,5 +1,17 @@
 # F10 · Resultado da publicação de demonstração
 
+## Endereço atual
+
+A demonstração foi reaberta na entrega UX02 em
+[tribal-louisville-container-bind.trycloudflare.com](https://tribal-louisville-container-bind.trycloudflare.com/).
+O tema `8ac8a00` foi publicado e verificado em HTTPS, com conversa de dois turnos
+pela API e atendente simulado. O túnel anterior estava parado; os volumes foram
+preservados. A confirmação por dados móveis registrada abaixo pertence ao
+endereço anterior, não constitui um novo teste externo deste link.
+[Evidências UX02](ux02.md).
+
+## Registro da primeira publicação
+
 Em 24/11/2026 o integrador publicou a demonstração em
 <https://mirrors-labour-crafts-characteristic.trycloudflare.com>, usando o projeto
 isolado `cloudwalk_publish_integrator`. A URL é temporária e depende do computador
