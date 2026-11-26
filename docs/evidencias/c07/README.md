@@ -23,13 +23,15 @@ No e-mail da Horizonte, o canal informou Pix e o serviço inferiu Urgente em uma
 | Pedido em agent.requests, versão 1.1 | `c231130b-7dcd-479c-bda7-ac154dfbe2a8` |
 | Resultado em agent.events, versão 1.0 | `eb1c38a4-6de2-5c05-a3f9-b66912660d06` |
 
-A verificação usou `down` e `up` com as mesmas credenciais e volumes. Nova sessão da supervisão leu os três IDs e contagens originais de 3, 2 e 2 mensagens. Os registros de banco, incluindo classificações, tentativas, auditorias e IDs dos eventos, coincidiram com a captura antes do reinício. [Resultado do reinício](reinicio.json).
+A verificação usou `down` e `up` com as mesmas credenciais e volumes. A API da supervisão devolveu o mesmo estado e os mesmos IDs de mensagens em cada caso, com contagens de 3, 2 e 2. No PostgreSQL coincidiu o conjunto de campos selecionados pela [consulta do ensaio](../../../script/c06/case_snapshot.sql), incluindo classificação, tentativas, eventos Kafka, campos da auditoria e, para cada mensagem, ID, tipo de autor e sequência. [Resultado do reinício](reinicio.json).
 
 O controle com diretório inexistente terminou em código 1 antes de iniciar os serviços. A imagem da própria C07, iniciada sem pacote e sem acesso à rede externa, respondeu à consulta de prontidão com `503 {"ready":false,"worker_pid":null,"counts":{"session_failures":2}}`. O processo com o pacote aprovado informou `ready: true`, com manifesto igual ao pin e montagem de `/model` com `RW=false`. O build desta instalação utilizou camadas já existentes no Docker do host.
 
 ## Repetir os verificadores
 
-O [guia de instalação](../../c07.md) funciona com o código da aplicação da base registrada. O [verificador C07](../../../script/c07/reproduzir.py) acompanha esta entrega documental posterior. Salve uma cópia desse arquivo fora do clone de teste. Para a prova automatizada, instale `requests`, `playwright` e um navegador no Python de trabalho. O ensaio usou requests 2.32.5 e Playwright 1.61.0 com Chrome. Sem Chrome instalado, use o Chromium do Playwright.
+O [guia de instalação](../../c07.md) funciona com o código da aplicação da base registrada. O [verificador C07](../../../script/c07/reproduzir.py) acompanha esta entrega documental posterior. Para a prova automatizada, instale `requests`, `playwright` e um navegador no Python de trabalho. O ensaio usou requests 2.32.5 e Playwright 1.61.0 com Chrome. Sem Chrome instalado, use o Chromium do Playwright.
+
+A coleta automática de memória e CPU requer **cgroup v2** no daemon Docker. Confira se `docker info --format '{{.CgroupVersion}}'` mostra `2`. Os contêineres da demo precisam expor `memory.current`, `memory.peak` e `cpu.stat` com `usage_usec` em `/sys/fs/cgroup`. Depois da subida, é possível conferir, por exemplo, com `docker exec "$PROJETO-worker-1" cat /sys/fs/cgroup/memory.current /sys/fs/cgroup/memory.peak /sys/fs/cgroup/cpu.stat`. Esse requisito se aplica ao verificador que produz o relatório de recursos.
 
 Para preparar essas dependências em um Python isolado, use os comandos abaixo. A linha de instalação do Chromium serve para hosts sem Chrome.
 
@@ -40,17 +42,55 @@ python -m pip install requests==2.32.5 playwright==1.61.0
 python -m playwright install chromium
 ```
 
-A partir do clone novo, use um diretório de resultados vazio. Se o repositório recebido já contém o commit do verificador, a extração abaixo recupera só esse arquivo. Caso o custodiante tenha fornecido o arquivo separadamente, aponte `VERIFICADOR` para a cópia recebida. Use a mesma sessão de shell do guia para executar os comandos abaixo.
+Na raiz do clone da aplicação, use a mesma sessão de shell do guia de instalação. Escolha **uma** das duas fontes abaixo.
+
+**Arquivo externo.** Indique a cópia recebida do custodiante. A função apenas lê o arquivo.
 
 ```sh
+VERIFICADOR=/caminho/recebido/reproduzir.py
+obter_verificador() { cat -- "$VERIFICADOR"; }
+```
+
+**Arquivo no Git.** Use o repositório da entrega e uma revisão que contenha `script/c07/reproduzir.py`. Se o arquivo veio de um squash ou cherry-pick, use a revisão que o incorporou. O clone da aplicação pode conter somente a revisão antiga.
+
+```sh
+REPO_VERIFICADOR=/caminho/do/repositorio/da/entrega
+REVISAO_VERIFICADOR=5b7d1325829151dc561e9a72074a97a5993f0014
+obter_verificador() { git -C "$REPO_VERIFICADOR" show "${REVISAO_VERIFICADOR}:script/c07/reproduzir.py"; }
+```
+
+Execute o bloco comum inteiro. Ele mostra o diretório novo dos resultados e encerra a sequência ao primeiro erro. A cópia para execução só recebe seu nome definitivo após a leitura e a conferência do tamanho.
+
+```sh
+(
+set -eu
 SAIDA=$(mktemp -d)
-VERIFICADOR="$SAIDA/reproduzir.py"
-git show 5b7d1325829151dc561e9a72074a97a5993f0014:script/c07/reproduzir.py > "$VERIFICADOR"
+printf 'Diretório dos resultados: %s\n' "$SAIDA"
+obter_verificador > "$SAIDA/verificador.tmp"
+test -s "$SAIDA/verificador.tmp" || { echo 'Arquivo do verificador vazio.' >&2; exit 1; }
+mv "$SAIDA/verificador.tmp" "$SAIDA/reproduzir.py"
+
+verificar_casos() {
+  relatorio="$SAIDA/$1"
+  shift
+  PYTHONPATH="$PWD" python3 -B "$SAIDA/reproduzir.py" "$@" --output "$relatorio"
+  python3 -c '
+import json, sys
+from pathlib import Path
+arquivo = Path(sys.argv[1])
+if not arquivo.is_file() or not arquivo.stat().st_size:
+    sys.exit(f"Relatório ausente ou vazio: {arquivo}")
+casos = json.loads(arquivo.read_text())["cases"]
+if not isinstance(casos, dict) or set(casos) != {"direto", "complemento", "revisao"}:
+    sys.exit(f"Relatório sem os três casos esperados: {arquivo}")
+' "$relatorio"
+}
+
 demo_real up
-PYTHONPATH="$PWD" python3 -B "$VERIFICADOR" --project "$PROJETO" --classifier setfit --output "$SAIDA/setfit.json"
+verificar_casos setfit.json --project "$PROJETO" --classifier setfit
 demo_real down
 demo_real up
-PYTHONPATH="$PWD" python3 -B "$VERIFICADOR" --project "$PROJETO" --classifier setfit --after-restart "$SAIDA/setfit.json" --output "$SAIDA/reinicio.json"
+verificar_casos reinicio.json --project "$PROJETO" --classifier setfit --after-restart "$SAIDA/setfit.json"
 demo_real down
 
 FIXTURE=cloudwalk_demo_minhafixture
@@ -58,7 +98,7 @@ demo_fixture() {
   python3 -B script/demo.py --project "$FIXTURE" --api-port 43348 --web-port 45348 --classifier fixture "$@"
 }
 demo_fixture up
-PYTHONPATH="$PWD" python3 -B "$VERIFICADOR" --project "$FIXTURE" --classifier fixture --output "$SAIDA/fixture.json"
+verificar_casos fixture.json --project "$FIXTURE" --classifier fixture
 demo_fixture check
 demo_fixture down
 
@@ -66,6 +106,7 @@ python3 -B script/r01/run.py > "$SAIDA/r01.jsonl" 2> "$SAIDA/r01.log"
 python3 -B -m unittest discover -s script/f08/load -v
 python3 -B script/f08/load/reanalyze_r02.py > "$SAIDA/r02.json"
 cmp "$SAIDA/r02.json" docs/evidencias/r02/comparacao-revisao-1.json
+)
 ```
 
 Cada execução do verificador cria novos casos. A etapa de reinício apenas lê os registrados no arquivo anterior. O runner R01 cria um projeto próprio e libera seus volumes ao final. Na C07, o veredito foi aprovado e o processo terminou com código 0. O caso de retomada descartou o resultado expirado e aplicou a nova resposta uma vez. O caso de handoff descartou o resultado expirado e preservou o humano. A R02 usa os arquivos de carga arquivados. O F08 mantém cinco aprovações e uma reprovação na referência selecionada e um registro histórico bloqueado por falta de captura final. A hipótese de dez mil conexões simultâneas segue sem medição. [Referência de carga](../../f08.md) · [Método de recuperação](../../r01.md) · [Método de reanálise](../../r02.md).
