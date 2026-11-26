@@ -1,9 +1,0 @@
-# C05-R3 — auditoria independente do desenvolvimento real
-
-Leia AGENTS/RTK, docs/c05-luna.md e protocolo Luna. Somente leitura: sem .env/chaves/conta financeira real, sem API/rede/inferência, sem subagentes/mutações de Git/código. Tarefa de auditoria de resultados, não nova implementação/revisão de código nem ajuste de candidata. Checkout de execução: .worktrees/r3-luna-avaliador, branchfeat/avaliador-luna, fonte e8434bb8ed7a01ec564f8bf3b02aa35d7bde1575.
-
-Usuário autorizouaté6+44somentesegatepassar,teto10cumulativo. Rootexecutouexatamente6emdocs/evidencias/c05/luna-ensaio-real-01/development/. SãonovasfontesautorizaçãopreflightmanifestosnaWT. FinalNÃOexecutado. Conta global somente root; snapshots filtrados development-finance-before/after.jsonna pasta evidências substituem leitura da conta. NuncaabraSQLite/.env.
-
-Refaça deterministicamente métricas dos seis (via report/checker ou parsing dos artefatos), vínculos de identidade/fontes/hash/commit/journal, custoobservado6recibos vs snapshots56settled/semreserva. Validar que o gatelegítimofailed realmente impede44nãoenviadas. Sem modificar originais/gate/selo. Resultado root:7/8alvos,4/4fornecidos,3/3completoscorretos,2/3revisõesintegrais,1/1urgente,0erro, p95nearest-rank2635.458529999596ms,n6, mediana1383.625ms. Custoreal.00181827,contabilizadoglobal.02869232,56settled,0pending. Uma conclusão indevida,aparentementejev013categoria payouts. Distinguir reporteligibilityinconclusive (dev) de reprovação real do gate, e finished do lote de sucesso de qualificação.
-
-Nãoinspecionefinais36/textos/rótulosdiretamentenenhumaediçãosemântica. Bibliotecacheckercanônicopodevalidarfontescongeladas; nãoprinteconteúdo. Dadosdev6podemserusadospara auditaro erro. Verificaçõesfocaisapenas,nãorepetirsuítes148nemqualquerPOST. Reportconsolidadoem .superpowers/sdd/conclusao-projeto/luna-real-audit.mdcomcomandos,resultados,limitações,contagemprovenientee veredictos. Retornocurto.

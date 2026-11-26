@@ -53,9 +53,10 @@ Os contratos v1.1.0 distinguem controles injetados e candidato, conforme
 A C03 está integrada com 30 testes e piloto real mínimo aceito: uma chamada
 completou os dois campos de desenvolvimento. A C04 tem código e investigação local revisados, com timeouts e
 rebaixamento de urgência observados; sua configuração não está liberada para
-C05. A [passagem atual](passagem-autonoma.md) reúne os resultados e a retomada.
-Há autorização de até US$ 10 para o piloto, com mínimo de requisições; o
-primeiro caso custou aproximadamente US$ 0,000518. Vencedor segue pendente.
+C05. O [registro de 24/11](passagem-autonoma.md) reúne os resultados dessa
+rodada. O piloto teve autorização de até US$ 10, com mínimo de requisições, e o
+primeiro caso custou aproximadamente US$ 0,000518. A escolha veio depois, com
+o [aceite do SetFit R1](sf2/decisao-adocao-r1.md).
 
 Use o [quadro](README.md), a [especificação](especificacao.md) e o card inteiro.
 A base fonte estudada é `cb9683179d713e7bcbfc95c54003dc30630ab7ad`. O SHA de

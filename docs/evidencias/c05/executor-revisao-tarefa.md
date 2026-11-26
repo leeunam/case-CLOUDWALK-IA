@@ -18,17 +18,17 @@ O pré-voo usa o perfil e a projeção congelados. Autorizações desabilitadas 
 
 ### 1. P1 — Preservar custo atribuído mesmo sem contador de tokens
 
-[final_adapter.py:92](/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/c05-comparacao/script/classification_comparison/c05/final_adapter.py:92)
+[final_adapter.py:92](https://github.com/leeunam/case-CLOUDWALK-IA/blob/24da473a4a20775d495775b2ee578d7df3afede3/script/classification_comparison/c05/final_adapter.py#L92)
 
 O extrator só considera custo USD ou créditos quando os dois contadores de tokens existem. O IPC admite contadores e custo independentes. Com US$ 7,10 já gastos, uma resposta fixture HTTP 200 atribuiu US$ 2,25 ao primeiro caso e omitiu apenas `completion_tokens`. O prefixo da C02 passou no verificador, porém `observed_api_usd`, `gateway_usage` e `frozen_reason` ficaram nulos. O saldo contabilizado permaneceu em US$ 8,5004736. A guarda financeira aceitou outra reserva sintética de US$ 1,4004736, embora o gasto comprovado de US$ 9,35 mais essa nova reserva somasse US$ 10,7504736.
 
 Validar contadores e extrair valores monetários separadamente, preservando unidade, referência e atribuição. A ausência de contadores pode deixar as métricas correspondentes nulas. O valor comprovado acima da reserva precisa ser preservado e congelar o saldo antes do próximo despacho.
 
-Também reproduzi o mesmo resultado com ambos os contadores em uma resposta fixture HTTP 500. O filtro de status descarta o corpo antes da análise financeira ([final_adapter.py:151](/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/c05-comparacao/script/classification_comparison/c05/final_adapter.py:151)). Se a resposta de erro traz evidência financeira que satisfaz a validação de unidade, atribuição e fonte, preserve ao menos o excesso para congelamento. A falha de classificação e a reserva em situação de cobrança desconhecida mantêm a semântica atual. A fixture não demonstra o formato real dos erros do fornecedor.
+Também reproduzi o mesmo resultado com ambos os contadores em uma resposta fixture HTTP 500. O filtro de status descarta o corpo antes da análise financeira ([final_adapter.py:151](https://github.com/leeunam/case-CLOUDWALK-IA/blob/24da473a4a20775d495775b2ee578d7df3afede3/script/classification_comparison/c05/final_adapter.py#L151)). Se a resposta de erro traz evidência financeira que satisfaz a validação de unidade, atribuição e fonte, preserve ao menos o excesso para congelamento. A falha de classificação e a reserva em situação de cobrança desconhecida mantêm a semântica atual. A fixture não demonstra o formato real dos erros do fornecedor.
 
 ### 2. P1 — Registrar violação comprovada após liquidação anterior
 
-[budget.py:290](/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/c05-comparacao/script/classification_comparison/c05/budget.py:290)
+[budget.py:290](https://github.com/leeunam/case-CLOUDWALK-IA/blob/24da473a4a20775d495775b2ee578d7df3afede3/script/classification_comparison/c05/budget.py#L290)
 
 A conciliação rejeita o estado `settled` antes de avaliar o valor do novo recibo. Na conta fixture com US$ 8 de gasto anterior, o primeiro caso reservou US$ 1,4004736 e liquidou US$ 0,001 pelo gateway. Um segundo recibo atribuído ao mesmo caso informou US$ 2,25. O comando retornou “já conciliada”, o saldo continuou em US$ 8,001, `frozen_reason` ficou nulo e a próxima reserva foi aceita. O custo informado implicava US$ 10,25 já gastos.
 
@@ -36,7 +36,7 @@ A duplicação de liquidação deve continuar bloqueada. Para um recibo posterio
 
 ### 3. P2 — Normalizar margem em referências de recibos
 
-[budget.py:80](/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/c05-comparacao/script/classification_comparison/c05/budget.py:80), [budget.py:236](/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/c05-comparacao/script/classification_comparison/c05/budget.py:236)
+[budget.py:80](https://github.com/leeunam/case-CLOUDWALK-IA/blob/24da473a4a20775d495775b2ee578d7df3afede3/script/classification_comparison/c05/budget.py#L80), [budget.py:236](https://github.com/leeunam/case-CLOUDWALK-IA/blob/24da473a4a20775d495775b2ee578d7df3afede3/script/classification_comparison/c05/budget.py#L236)
 
 A validação usa `.strip()` para excluir texto vazio, mas retorna o valor original. O índice e a verificação de unicidade tratam `synthetic invoice` e `synthetic invoice ` como recibos distintos. Na reprodução, os dois liquidaram reservas de casos diferentes. Normalize a referência na entrada antes de comparar, persistir e verificar atribuição duplicada, inclusive contra a referência anterior preservada.
 

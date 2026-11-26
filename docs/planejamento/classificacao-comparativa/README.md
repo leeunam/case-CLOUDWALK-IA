@@ -8,7 +8,15 @@ executou modelos; as implementações e medições posteriores estão registrada
 
 ## Situação atual em 26/11/2026
 
-SetFit R1 foi adotado para C06 após atingir os dez critérios no teste independente de 120 casos e cinco controles. A implementação do complemento real e seu aceite na instalação limpa estão pendentes. [Resultado auditado](../../evidencias/c05/sf2/final-r1-01/README.md) · [Decisão](sf2/decisao-adocao-r1.md) · [Plano C06/C07](c06-setfit-integracao.md).
+SetFit R1 foi adotado para C06 após atingir os dez critérios no teste
+independente de 120 casos e cinco controles. A C06 verificou o complemento no
+Rails e a C07 reproduziu a demonstração em clone limpo. A publicação temporária
+também passou no aceite com SetFit R1 e atendente simulado.
+[Resultado auditado](../../evidencias/c05/sf2/final-r1-01/README.md) ·
+[Decisão](sf2/decisao-adocao-r1.md) ·
+[Aceite C06](../../evidencias/c06/aceite-integrado/README.md) ·
+[Reprodução C07](../../c07.md) ·
+[Aceite da publicação](../../c07-publicacao-setfit.md).
 
 ## Validação de 25/11/2026
 
@@ -59,7 +67,7 @@ com C02 aceita após revisão e reprodução. A C03 tem implementação e piloto
 real mínimo aceitos, com uma chamada e cobrança de aproximadamente US$ 0,000518. A C04 tem código
 revisado e investigação local preservada, com falhas de latência e um
 rebaixamento de urgência. Sua configuração não está aprovada para C05.
-A [passagem atual](passagem-autonoma.md) identifica a próxima decisão humana.
+O [registro de 24/11](passagem-autonoma.md) documenta as decisões dessa rodada.
 
 C01-L/C02-L estão aceitas e integradas em `933836e`: as próximas avaliações
 selecionam `--profile observed-total-1.1`, com p95 do tempo total da classificação

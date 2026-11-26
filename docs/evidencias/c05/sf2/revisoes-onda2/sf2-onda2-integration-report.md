@@ -33,7 +33,7 @@ A rechecagem normal reutilizou a fixture numérica original, sem iniciar worker 
 | Base desta revisão | `8da95a7a6852da01d15c6dc04a677f2055e6d046` |
 | Head da nova evidência | `4f219583d9895332ce5511ca4d5c8b41250dd2bd` |
 | Branch e worktree | `feat/sf2-integracao` em `/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-integracao` |
-| Recibo focal | [recibo-custodia.json](../../../../../../../docs/evidencias/c05/sf2/integracao-onda2/recibo-custodia.json) · `0141eb2db83b00fcb8cb06a8398e8c37c26155aa1b4b246e2ae16f9ca3288e49` |
+| Recibo focal | [recibo-custodia.json](../integracao-onda2/recibo-custodia.json) · `0141eb2db83b00fcb8cb06a8398e8c37c26155aa1b4b246e2ae16f9ca3288e49` |
 | Comando de QA | `verificar.py /tmp/sf2-onda2-custodia-8da95a7-final --fixture-anterior /tmp/sf2-onda2-integracao-237df80-b`, Python 3.11.13 pinado de 03 com `-B`, ambiente limpo e modo offline |
 | Mudança de runtime em relação à primeira rodada | `evaluation/workflow.py` · SHA-256 observado `951feaf647ba124c3559f3b46da9da559bfc4d2cfa8fc139fa60d0d3e35e3f09` |
 
@@ -64,7 +64,7 @@ Cada chamada exigiu a mensagem de divergência com o caminho exato. Nenhuma crio
 | Base com as duas implementações aceitas individualmente | `237df80b4d27229fe79456f943cc11dc2b31f066` |
 | Head da evidência de QA | `eef5c148faf62d5986abe1f13194bc90e6cc8e68` |
 | Branch e worktree | `feat/sf2-integracao` em `/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-integracao` |
-| Evidência versionada | [Roteiro e instruções](../../../../../../../docs/evidencias/c05/sf2/integracao-onda2/README.md) e [recibo](../../../../../../../docs/evidencias/c05/sf2/integracao-onda2/recibo.json) |
+| Evidência versionada | [Roteiro e instruções](../integracao-onda2/README.md) e [recibo](../integracao-onda2/recibo.json) |
 | SHA-256 do recibo de QA | `ce8d97b3a51109e11830ba9aeb0c7edbc9c643ea710628535bd155f000fb1297` |
 
 ## O que foi executado

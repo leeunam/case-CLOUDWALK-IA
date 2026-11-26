@@ -11,7 +11,7 @@ libera a qualificação local de 05 pelo fluxo abaixo. Adoção e API paga não
 estão aprovadas; o estado e os resultados ficam no acompanhamento.
 
 [Protocolo declarativo](protocolo.json) · [Tarefas e passagens](tarefas.md) ·
-[Prompts dos agentes](prompts.md) · [Piloto SF1](../../../c05-setfit-piloto.md).
+[Piloto SF1](../../../c05-setfit-piloto.md).
 
 ## 1. Resultado esperado e limites
 

@@ -21,7 +21,9 @@ O atendente real da CloudWalk, dados reais, integrações de produção e app m�
 
 ### Entrada, classificação e fila
 
-- A credencial do canal simulado identifica a marca. O primeiro evento identifica cliente e conversa externos. Cada evento válido tem um ID estável para reentrega. O Rails persiste a entrada antes de responder `202` e guarda o caso na fila padrão da marca enquanto classifica. O mesmo ID com outro conteúdo recebe `409`.
+- O simulador web envia mensagens por `POST /api/v1/simulator/channels/{channel_id}/messages`, com cookie da sessão sintética, token CSRF e `Idempotency-Key`. O Rails verifica o canal autorizado e, numa continuação, se a conversa pertence à sessão e usa o mesmo canal.
+- Uma integração de canal simulada envia eventos por `POST /webhooks/v1/channels/{channel_id}/messages`, com assinatura HMAC-SHA256 e timestamp. A credencial do canal identifica a marca. O evento informa os IDs externos de cliente e conversa e um ID estável para reentrega.
+- As duas rotas usam o mesmo serviço de entrada no Rails. A entrada é persistida antes do `202` e o caso fica na fila padrão da marca enquanto classifica. Uma reentrega idêntica retorna o mesmo recibo. Reutilizar o ID do evento no mesmo canal, ou a chave do simulador na mesma sessão e canal, retorna `409` se o conteúdo mudou. [Contrato das rotas](../contratos/openapi.yaml) · [Reentregas e sessão](../contratos/README.md).
 - A ordem proposta é **Urgente → Avançado → Intermediário → Básico**. Categorias do seed são Pix, Repasses e Maquininha. Cada marca habilita categorias próprias. Cada prioridade tem uma definição no catálogo da demo. Urgente indica necessidade imediata, avançado indica impacto relevante sem urgência imediata, intermediário indica impacto moderado e básico cobre orientações rotineiras. Essa ordem determina precedência de atendimento. Categoria identifica o assunto e as duas dimensões compõem o perfil de capacidade.
 - Após validar a classificação, o Rails escolhe a primeira regra ativa da marca, em ordem configurada pelo supervisor. Cada regra pode restringir categoria, prioridade ou ambas e aponta para uma fila da mesma marca. A fila padrão é a última opção. Cada marca mantém uma fila padrão ativa e cada fila ativa tem pelo menos uma equipe responsável. A regra escolhida e sua versão ficam no histórico. Alterações aplicam-se a novos encaminhamentos. Um caso em curso muda de fila somente por transferência explícita da operação. Para desativar fila, a operação precisa retirar referências em regras ativas e transferir casos em curso. O histórico permanece consultável.
 - Os dois campos válidos encaminham o caso diretamente ao atendente simulado pelo broker. Campo omitido, `null` ou string vazia solicita complemento somente dos ausentes, desde que os demais sejam válidos. Espaços, tipo incorreto ou código fora do catálogo colocam o caso em revisão sem inferência. Uma correção por supervisor autorizado segue para o atendente simulado após a validação.
@@ -68,8 +70,9 @@ Jobs internos usam Active Job com Solid Queue em PostgreSQL. Classificações e 
 
 ```mermaid
 flowchart LR
-    Sim[Simuladores de chat, WhatsApp e e-mail] -->|Webhook| API[Rails API]
-    UI[React] <-->|REST e sinal de atualização| API
+    Sim[Simulador React · chat, WhatsApp e e-mail] -->|REST · sessão e CSRF| API[Rails API]
+    Canal[Integração de canal simulada] -->|Webhook assinado| API
+    UI[Caixa e supervisão React] <-->|REST e sinal de atualização| API
     API --> PG[(PostgreSQL)]
     Worker[Workers Rails] <-->|Jobs e envios pendentes| PG
     Worker -->|Campos ausentes| SetFit[SetFit R1 privado · C06]

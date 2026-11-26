@@ -1,5 +1,10 @@
-.worktrees/
-.superpowers/financial/
+/.aws/
+/.agents/
+/.codex/
+/.impeccable/
+/.superpowers/
+/.worktrees/
+/entregas/
 .env
 .env.*
 !.env.example
