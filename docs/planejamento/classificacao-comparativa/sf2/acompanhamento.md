@@ -123,3 +123,15 @@ dados e receita. A operação exata da primeira falha não foi identificada.
 Qualquer extensão da grade ou novo treino exige proposta separada. A receita,
 o protocolo e os dados desta execução permanecem inalterados. A próxima
 decisão não autoriza antecipar o final nem reduzir os critérios de qualidade.
+
+## SF2-R1 — extensão offline aprovada
+
+Após o resultado negativo, o responsável aprovou uma extensão única da grade:
+tau 0,95 só em categoria, com 45 combinações adicionais sobre os mesmos
+vetores. O [plano R1](sf2-r1-plano.md) e sua [emenda](sf2-r1-protocolo.json)
+preservam os 225 resultados, contratos e protocolo originais. As metas e os
+dados não mudam. Há duas passagens: código por fixtures e depois uma execução
+offline, ambas com revisão independente. Não autoriza novo treino, inferência,
+API, abertura do final ou adoção. O risco de sobreajuste na validação é
+explicitado. Nenhum resultado das 45 novas políticas foi calculado nesta
+preparação.

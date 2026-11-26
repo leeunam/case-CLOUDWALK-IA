@@ -1,0 +1,235 @@
+{
+  "id": "C05-SF2-R1",
+  "version": "1.0.0",
+  "status": "approved_offline_extension",
+  "authorization": {
+    "date": "2026-11-25",
+    "user_quote": "boa, prossiga",
+    "interpreted_against": "Proposta concreta de extensão única: tau de categoria 0,95, 45 combinações adicionais, mesmos resultados e metas, sem novo treino/inferência/API.",
+    "offline_replay": true,
+    "new_training": false,
+    "new_inference": false,
+    "paid_api": false,
+    "final_access": false,
+    "model_adoption": false,
+    "publication": false
+  },
+  "parent": {
+    "commit": "9bb52144083494aa206b25a59a33b409576c5a4f",
+    "qualification_commit": "4eb86a3282f94f32119042a0f6aa075e9f72960a",
+    "files": {
+      "protocol": {
+        "path": "docs/planejamento/classificacao-comparativa/sf2/protocolo.json",
+        "sha256": "c0efd6d42ee50fd7775ff9db5ffcb9119db5861fd19c9b198b73ca01ce0eecaf"
+      },
+      "schema": {
+        "path": "docs/planejamento/classificacao-comparativa/sf2/contratos/sf2.schema.json",
+        "sha256": "114d25188c4ab7ab5522ee9e9c3a22eddac7dc386ec5df40886ac8cedcd5c1d5"
+      },
+      "validation": {
+        "path": "docs/planejamento/classificacao-comparativa/sf2/dados/validation.jsonl",
+        "sha256": "b7d78a8adca44b1165cbadb804cbd879a3573a5c73d6311a592887d70ef68fc9"
+      },
+      "public_manifest": {
+        "path": "docs/planejamento/classificacao-comparativa/sf2/dados/manifest-public.json",
+        "sha256": "36cbb5dab996775391a0c59802892a2b30d558fbf35b13e2620f0e7950d01ec9"
+      },
+      "final_seal": {
+        "path": "docs/planejamento/classificacao-comparativa/sf2/dados/final-seal.json",
+        "sha256": "71bea26395321246ef00c4374465c6cd8bd3320252a7729429cfad5e3c2263a4"
+      },
+      "catalog": {
+        "path": "script/f08/jev/catalog.json",
+        "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271"
+      },
+      "package_manifest": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/pacote/manifest.json",
+        "sha256": "224c572b0a2c6ce93b1dd1b90317df131cbb47b897b4de38e97659fbc7e57872"
+      },
+      "training_freeze": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/training-freeze.json",
+        "sha256": "1a3a3baa405cf2cd45a15cc3e4ca3a0a654e6ac978f4d280c8b5cb301113112a"
+      },
+      "capture": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/capture.json",
+        "sha256": "cdf9b0cc1ea2a645a66bb9f1f59d234077a43ef7ad6fb96543d6a2fb6eca9736"
+      },
+      "capture_policy": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/capture-policy.json",
+        "sha256": "09de8c13fa56bcddb8006982b0016e3452bb15de89a72a6eae6c42847cedc21f"
+      },
+      "seal": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/run/seal.json",
+        "sha256": "cb5d6bad2f0a7bb58492fc13710fef2102b283e34820cc9cd930c99bc2e8c985"
+      },
+      "predictions": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/run/predictions.jsonl",
+        "sha256": "d70ce59a1579a282f238dd37bdb154f1fa6500bc61e92299f49577255a1cbdab"
+      },
+      "controls": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/run/controls.jsonl",
+        "sha256": "40ecfd8c3ae18457e659182365bea9581cad693c41c7c6b5d261c4de365a8a62"
+      },
+      "journal": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/run/timings.jsonl",
+        "sha256": "bfadaaf7b853f54f150d2d406dcac7fc5727f90672573c07350a92448d78a61e"
+      },
+      "scores04": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/scores.json",
+        "sha256": "59ae17e97256c55603d77a9d1850fdac56708a7fde7a4cf050136c4a3cb78c06"
+      },
+      "scores03": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/scores-sf2-03.json",
+        "sha256": "bccbfeb5e1ad9985a1a35ac05392dd215f91eedaa72e7adcf7309f969587051d"
+      },
+      "parent_selection": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/selection.json",
+        "sha256": "27afda01d79d866fb53c390d0e976d1e96f30d3b55565afc100a803cd5fd7b59"
+      },
+      "parent_report": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/report.json",
+        "sha256": "3dabedbf31424ea8820d2a5ebd54943b9f8b7e923459ee336483f4f830ab5ac5"
+      },
+      "parent_grid_gzip": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/grid.json.gz",
+        "sha256": "bf2459d6d9d32d05110a8853faa260e6189b93fb1ceda6d2067fc57aa954846c"
+      },
+      "parent_grid_original": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/grid-original.json",
+        "sha256": "d4e4014c7e00a04a7fa690e215b6966fe233badf0072462f36adec6a1cb73b35"
+      },
+      "parent_config": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/config.json",
+        "sha256": "d59c7e18b3ff7d8e4eb6a662568897b1522855aae153feca3dae1f9316460832"
+      },
+      "pre_validation": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/pre-validation.json",
+        "sha256": "5e93263f24c686fc803a4e7b213a077a52e679f500dfcd733edda6521dab6b7f"
+      },
+      "capture_argv": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/capture-argv.json",
+        "sha256": "a52df9bc7cd9db1c90150eb74d92919047ab51145b22179bb51a03d6906beda7"
+      },
+      "adapter_index": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/adapter.json",
+        "sha256": "60b16a6772f648055f572c9a8f96ca8e654972ae6bddee2ec4050304bc18ae69"
+      },
+      "training_code": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/training-code.json",
+        "sha256": "599cda69dd60125dc5c55840dde7c4db3927b4029e9a417fc834f7ce254fb67b"
+      },
+      "training_arguments": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/arguments.json",
+        "sha256": "27d1ed81103598cedb32118c824d0f6b6bdfca2deccf449754cc1e52c222b7f5"
+      },
+      "capture_costs": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/costs.json",
+        "sha256": "b18a8d51647ce333d0e24751f819120fd1ef261f4435a350aa07375df88433ae"
+      },
+      "capture_versions": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/versions.json",
+        "sha256": "3026ed2cc8d0449965a9ccfed8e043bf72d423dbc3af8eaa87e33f1f6069a3b4"
+      }
+    },
+    "original_grid_sha256": "d5315f425ed9e94e1680b99619a45ae7894c45c358fb819d0bc7bf2a3742c537",
+    "original_grid_policy_count": 225,
+    "original_grid_eligible_count": 0
+  },
+  "extension": {
+    "namespace": "sf2-r1-offline/1.0",
+    "category_tau": [
+      0.95
+    ],
+    "category_delta": [
+      0.0,
+      0.1,
+      0.2
+    ],
+    "priority_tau": [
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9
+    ],
+    "priority_delta": [
+      0.0,
+      0.1,
+      0.2
+    ],
+    "new_policy_count": 45,
+    "combined_policy_count": 270,
+    "max_execution_rounds": 1,
+    "selection_order": [
+      "correct_complete_cases_desc",
+      "correct_applied_urgent_targets_desc",
+      "wrong_auto_completed_cases_asc",
+      "automatic_coverage_desc",
+      "tau_category_asc",
+      "delta_category_asc",
+      "tau_priority_asc",
+      "delta_priority_asc"
+    ],
+    "allowed_scope": "offline_replay_only"
+  },
+  "invariants": {
+    "parent_outputs_immutable": true,
+    "parent_protocol_and_schema_immutable": true,
+    "training_adapter_code_immutable": true,
+    "parent_225_parity_required": true,
+    "no_global_protocol_monkeypatch": true,
+    "metrics_gates_rank_reused": true,
+    "raw_scores_not_calibrated_probabilities": true,
+    "no_replay_time_as_inference_latency": true,
+    "final_stays_closed_even_if_eligible": true
+  },
+  "validation_quotas": {
+    "total": 90,
+    "masks": [
+      "category",
+      "priority",
+      "both"
+    ],
+    "per_mask": 30,
+    "classifiable_per_mask": 24,
+    "review_per_mask": 6,
+    "both_mask_review": {
+      "category_only_insufficient": 2,
+      "priority_only_insufficient": 2,
+      "both_insufficient": 2
+    },
+    "classifiable_cases": 72,
+    "expected_review_cases": 18,
+    "target_fields": {
+      "category": 60,
+      "priority": 60
+    },
+    "classifiable_category_support_per_mask": {
+      "pix": 8,
+      "payouts": 8,
+      "terminal": 8
+    },
+    "clear_priority_support_per_priority_mask": 6,
+    "clear_priority_support_per_both_mask": 6,
+    "urgent_target_cases": 13,
+    "min_auto_completions": 51,
+    "min_raw_urgent_choices": 11
+  },
+  "gates": {
+    "channel_field_preservation_ratio": 1.0,
+    "complete_or_invalid_controls_model_calls": 0,
+    "partial_application_after_abstention_or_error": 0,
+    "automatic_completion_on_expected_review_cases": 0,
+    "automatic_non_urgent_applied_when_expected_urgent": 0,
+    "applied_accuracy_per_field_min": 0.9,
+    "automatic_coverage_on_fully_classifiable_cases_min": 0.7,
+    "raw_urgent_recognition_min": 0.8,
+    "final_observed_total_latency_p95_ms_max": 3000,
+    "all_metrics_and_denominators_required": true
+  },
+  "stop": {
+    "no_eligible": "archive_negative_result_keep_final_closed_no_further_grid_expansion",
+    "eligible": "archive_selected_policy_and_parentage_keep_final_closed_pending_separate_runtime_contract_review",
+    "invalid_parent_or_code": "fail_before_new_policy_evaluation_no_repair_of_originals"
+  }
+}
