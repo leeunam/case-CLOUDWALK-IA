@@ -57,7 +57,7 @@ Em 26/11/2026, a demonstração passou no aceite HTTPS com SetFit R1 local
 e atendente simulado via Kafka. O teste cobriu complemento de campos
 ausentes, acesso por marca em REST e WSS, resposta automática no navegador
 e persistência das mensagens após recarga. A
-[URL renovada e verificada às 17h47 de 26/11 (Brasília)](https://eos-comp-donors-grocery.trycloudflare.com)
+[URL renovada e verificada às 20h18 de 26/11 (Brasília)](https://tactics-ment-kathy-cookie.trycloudflare.com)
 depende do computador e do túnel ativos e pode mudar ao reabrir o túnel.
 [Roteiro de operação e matriz de aceite](docs/c07-publicacao-setfit.md).
 

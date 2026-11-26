@@ -1,9 +1,17 @@
 # Publicação temporária com SetFit R1
 
-## Endereço renovado em 26/11/2026
+## Acesso verificado às 20h18 de 26/11/2026
+
+Após uma interrupção da publicação, o SetFit voltou a ficar pronto e o
+[endereço HTTPS atual](https://tactics-ment-kathy-cookie.trycloudflare.com/)
+serviu a interface e respondeu com API e banco saudáveis. A consulta ao
+PostgreSQL confirmou que o caso do teste das 17h47 conservou o status
+Resolvido, Pix e Urgente com origem `setfit` e as quatro mensagens.
+
+## Renovação anterior, às 17h47
 
 O túnel anterior expirou. Às 17h47 de Brasília, a aplicação respondeu pelo
-[novo endereço HTTPS](https://eos-comp-donors-grocery.trycloudflare.com/).
+[endereço HTTPS daquele teste](https://eos-comp-donors-grocery.trycloudflare.com/).
 O banco, Kafka e o serviço SetFit foram reaproveitados. A API e o proxy
 receberam a nova origem e passaram na verificação de saúde.
 
