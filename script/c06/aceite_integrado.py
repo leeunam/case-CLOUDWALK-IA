@@ -234,6 +234,11 @@ def subscriptions(origin, actors, targets):
     return evidence
 
 
+def verify_direct_classification(record):
+    assert (record["category"], record["priority"]) == ("terminal", "advanced")
+    assert (record["category_source"], record["priority_source"]) == ("channel", "channel")
+
+
 def run(args):
     demo.ENV_FILE = args.credentials
     values = demo.read_env()
@@ -311,6 +316,8 @@ def run(args):
         assert db["correlation_id"] == receipt["correlation_id"] and db["channel"] == kind
         if label in ("direto", "invalido"):
             assert db["requests"] == 0 and not db["attempts"]
+            if label == "direto":
+                verify_direct_classification(cls)
         else:
             (attempt,) = db["attempts"]
             assert attempt["number"] == 1
@@ -422,6 +429,11 @@ def run(args):
     print("Matriz, Kafka, isolamento, handoff e correção verificados.")
 
 
+def verify_requests(turn, events):
+    assert {event["event_id"] for event in events} == {turn["request_id"]}
+    assert all(event["schema_version"] == turn["request_version"] for event in events)
+
+
 def verify_messaging(args, evidence, agent_secret):
     requests_wire = records(args.project, "agent.requests")
     chosen = evidence["cases"]["ambos"]["receipt"]["case_id"]
@@ -466,7 +478,7 @@ def verify_messaging(args, evidence, agent_secret):
             continue
         record = row.get("after_correction", row["initial"])
         (turn,) = record["turns"]
-        assert {e["event_id"] for e in reqs} == {turn["request_id"]}
+        verify_requests(turn, reqs)
         assert {e["event_id"] for e in res} == {turn["result_id"]}
         assert {e["payload"]["request_event_id"] for e in res} == {turn["request_id"]}
         assert all(
@@ -542,6 +554,8 @@ def inspect_restart(project, evidence):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__)
+    if not __debug__:
+        p.error("Use Python sem otimização para executar as verificações.")
     p.add_argument("--origin", required=True)
     p.add_argument("--project", required=True)
     p.add_argument("--classifier", choices=("fixture", "setfit"), required=True)
