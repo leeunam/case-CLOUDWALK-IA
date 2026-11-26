@@ -1,0 +1,91 @@
+{
+  "claim": {
+    "owner_id": "00000000-0000-4000-8000-000000000901",
+    "request_sha256": "d7553400091a8214e72b5385c2c300218d3f8e95c4af3be2bfea202f2eb105b5"
+  },
+  "reserved": {
+    "state": "reserved",
+    "lease_token": "00000000-0000-4000-8000-000000000902",
+    "lease_expires_at": "2026-11-17T13:30:45Z",
+    "currency": "USD",
+    "reserved_usd": "0.012000000000"
+  },
+  "start": {
+    "owner_id": "00000000-0000-4000-8000-000000000901",
+    "lease_token": "00000000-0000-4000-8000-000000000902"
+  },
+  "dispatch": {
+    "state": "started",
+    "dispatch": true,
+    "lease_expires_at": "2026-11-17T13:30:45Z"
+  },
+  "started": {
+    "state": "started",
+    "dispatch": false
+  },
+  "complete_result": {
+    "owner_id": "00000000-0000-4000-8000-000000000901",
+    "lease_token": "00000000-0000-4000-8000-000000000902",
+    "outcome": "result",
+    "result_b64": "eyJzY2hlbWFfdmVyc2lvbiI6IjEuMCIsImV2ZW50X2lkIjoiMDM0YjIxYmYtYTk1Zi01ZmVlLWE2YjAtYjY4OTlhMzA3OTRjIiwiZXZlbnRfdHlwZSI6ImFnZW50LnJlcGx5LnByb3Bvc2VkIiwib2NjdXJyZWRfYXQiOiIyMDI2LTExLTE3VDEzOjMwOjAwWiIsImNvcnJlbGF0aW9uX2lkIjoiMDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMjAwIiwiY2FzZV9pZCI6IjAwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDMwMCIsImJyYW5kX2lkIjoiMTExMTExMTEtMTExMS00MTExLTgxMTEtMTExMTExMTExMTExIiwiYXNzaWdubWVudF9nZW5lcmF0aW9uIjoxLCJ0dXJuX2lkIjoiMDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwNzAxIiwicGF5bG9hZCI6eyJyZXF1ZXN0X2V2ZW50X2lkIjoiMDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwNjAxIiwidGV4dCI6Ik8gbWVudSBlc3TDoSB2aXPDrXZlbCBubyB2aXNvcj8ifX0=",
+    "result_sha256": "1e71c6fbcbb2e1a44446b3233089c8dfb4c5743e4690b3939c7ab844215e993c",
+    "usage": {
+      "provider_response_id": "fixture-01",
+      "input_tokens": 128,
+      "cached_input_tokens": 12,
+      "output_tokens": 23
+    },
+    "ontology_version": "1.0.0",
+    "knowledge_version": "1.0.0",
+    "policy_version": "e01-v1",
+    "source_refs": [
+      {
+        "id": "aurora.manual",
+        "version": "1.0.0"
+      }
+    ],
+    "handoff_rule": null
+  },
+  "complete_failed": {
+    "owner_id": "00000000-0000-4000-8000-000000000901",
+    "lease_token": "00000000-0000-4000-8000-000000000902",
+    "outcome": "failed",
+    "usage": {
+      "provider_response_id": "fixture-01",
+      "input_tokens": 128,
+      "cached_input_tokens": 12,
+      "output_tokens": 23
+    },
+    "reason": "invalid_decision"
+  },
+  "unknown": {
+    "owner_id": "00000000-0000-4000-8000-000000000901",
+    "lease_token": "00000000-0000-4000-8000-000000000902",
+    "reason": "usage_missing"
+  },
+  "saved": {
+    "state": "result_saved",
+    "result_b64": "eyJzY2hlbWFfdmVyc2lvbiI6IjEuMCIsImV2ZW50X2lkIjoiMDM0YjIxYmYtYTk1Zi01ZmVlLWE2YjAtYjY4OTlhMzA3OTRjIiwiZXZlbnRfdHlwZSI6ImFnZW50LnJlcGx5LnByb3Bvc2VkIiwib2NjdXJyZWRfYXQiOiIyMDI2LTExLTE3VDEzOjMwOjAwWiIsImNvcnJlbGF0aW9uX2lkIjoiMDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMjAwIiwiY2FzZV9pZCI6IjAwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDMwMCIsImJyYW5kX2lkIjoiMTExMTExMTEtMTExMS00MTExLTgxMTEtMTExMTExMTExMTExIiwiYXNzaWdubWVudF9nZW5lcmF0aW9uIjoxLCJ0dXJuX2lkIjoiMDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwNzAxIiwicGF5bG9hZCI6eyJyZXF1ZXN0X2V2ZW50X2lkIjoiMDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwNjAxIiwidGV4dCI6Ik8gbWVudSBlc3TDoSB2aXPDrXZlbCBubyB2aXNvcj8ifX0=",
+    "result_sha256": "1e71c6fbcbb2e1a44446b3233089c8dfb4c5743e4690b3939c7ab844215e993c"
+  },
+  "published": {
+    "result_sha256": "1e71c6fbcbb2e1a44446b3233089c8dfb4c5743e4690b3939c7ab844215e993c"
+  },
+  "terminal": {
+    "state": "published"
+  },
+  "error": {
+    "error": "lease_lost"
+  },
+  "retry_start": {
+    "owner_id": "00000000-0000-4000-8000-000000000901",
+    "lease_token": "00000000-0000-4000-8000-000000000902"
+  },
+  "retry_start_response": {
+    "state": "started",
+    "dispatch": false
+  },
+  "complete_response": {
+    "state": "failed"
+  }
+}

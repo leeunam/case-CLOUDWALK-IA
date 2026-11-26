@@ -1,0 +1,9 @@
+{
+  "billing_basis": "tokens_only",
+  "tariff_tiers": "single_for_entire_proven_range",
+  "per_request_minimum_usd": "0",
+  "fixed_fee_usd": "0",
+  "cache_write_surcharge": false,
+  "provider_rounding": "none",
+  "other_charges": false
+}

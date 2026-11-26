@@ -1,0 +1,617 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "money_usd": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 14,
+      "pattern": "^(0[.][0-9]{12}|1[.]000000000000)$"
+    },
+    "claim": {
+      "type": "object",
+      "required": [
+        "owner_id",
+        "request_sha256"
+      ],
+      "properties": {
+        "owner_id": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f-]{36}$"
+        },
+        "request_sha256": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "start": {
+      "type": "object",
+      "required": [
+        "owner_id",
+        "lease_token"
+      ],
+      "properties": {
+        "owner_id": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f-]{36}$"
+        },
+        "lease_token": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f-]{36}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "unknown": {
+      "type": "object",
+      "required": [
+        "owner_id",
+        "lease_token",
+        "reason"
+      ],
+      "properties": {
+        "owner_id": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f-]{36}$"
+        },
+        "lease_token": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f-]{36}$"
+        },
+        "reason": {
+          "enum": [
+            "transport_ambiguous",
+            "usage_missing",
+            "usage_invalid",
+            "dispatch_uncertain"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "usage": {
+      "type": "object",
+      "required": [
+        "provider_response_id",
+        "input_tokens",
+        "cached_input_tokens",
+        "output_tokens"
+      ],
+      "properties": {
+        "provider_response_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180,
+          "pattern": "\\S"
+        },
+        "input_tokens": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "cached_input_tokens": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "output_tokens": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "additionalProperties": false
+    },
+    "complete_result": {
+      "type": "object",
+      "required": [
+        "owner_id",
+        "lease_token",
+        "outcome",
+        "usage",
+        "knowledge_version",
+        "ontology_version",
+        "policy_version",
+        "source_refs",
+        "result_b64",
+        "result_sha256",
+        "handoff_rule"
+      ],
+      "properties": {
+        "owner_id": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f-]{36}$"
+        },
+        "lease_token": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f-]{36}$"
+        },
+        "outcome": {
+          "const": "result"
+        },
+        "usage": {
+          "$ref": "#/$defs/usage"
+        },
+        "knowledge_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "pattern": "^[0-9]+[.][0-9]+[.][0-9]+$"
+        },
+        "ontology_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "pattern": "^[0-9]+[.][0-9]+[.][0-9]+$"
+        },
+        "policy_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9._-]*$"
+        },
+        "source_refs": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "version"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80,
+                "pattern": "^[a-z][a-z0-9._-]*$"
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 32,
+                "pattern": "^[0-9]+[.][0-9]+[.][0-9]+$"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "result_b64": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 87384,
+          "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+        },
+        "result_sha256": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "handoff_rule": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80,
+                  "pattern": "^[a-z][a-z0-9._-]*$"
+                },
+                "reason": {
+                  "enum": [
+                    "human_requested",
+                    "no_guidance",
+                    "sensitive_operation"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "complete_failed": {
+      "type": "object",
+      "required": [
+        "owner_id",
+        "lease_token",
+        "outcome",
+        "usage",
+        "reason"
+      ],
+      "properties": {
+        "owner_id": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f-]{36}$"
+        },
+        "lease_token": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f-]{36}$"
+        },
+        "outcome": {
+          "const": "failed"
+        },
+        "usage": {
+          "$ref": "#/$defs/usage"
+        },
+        "reason": {
+          "enum": [
+            "invalid_decision",
+            "invalid_result",
+            "provider_rejected"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "complete": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/complete_result"
+        },
+        {
+          "$ref": "#/$defs/complete_failed"
+        }
+      ]
+    },
+    "published": {
+      "type": "object",
+      "required": [
+        "result_sha256"
+      ],
+      "properties": {
+        "result_sha256": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "reserved": {
+      "type": "object",
+      "required": [
+        "state",
+        "lease_token",
+        "lease_expires_at",
+        "currency",
+        "reserved_usd"
+      ],
+      "properties": {
+        "state": {
+          "const": "reserved"
+        },
+        "lease_token": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f-]{36}$"
+        },
+        "lease_expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "currency": {
+          "const": "USD"
+        },
+        "reserved_usd": {
+          "$ref": "#/$defs/money_usd",
+          "not": {
+            "const": "0.000000000000"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "dispatch": {
+      "type": "object",
+      "required": [
+        "state",
+        "dispatch",
+        "lease_expires_at"
+      ],
+      "properties": {
+        "state": {
+          "const": "started"
+        },
+        "dispatch": {
+          "const": true
+        },
+        "lease_expires_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "started": {
+      "type": "object",
+      "required": [
+        "state",
+        "dispatch"
+      ],
+      "properties": {
+        "state": {
+          "const": "started"
+        },
+        "dispatch": {
+          "const": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "saved": {
+      "type": "object",
+      "required": [
+        "state",
+        "result_b64",
+        "result_sha256"
+      ],
+      "properties": {
+        "state": {
+          "const": "result_saved"
+        },
+        "result_b64": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 87384,
+          "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+        },
+        "result_sha256": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "terminal": {
+      "type": "object",
+      "required": [
+        "state"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "unknown",
+            "failed",
+            "discarded",
+            "published"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "claim_response": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/reserved"
+        },
+        {
+          "$ref": "#/$defs/started"
+        },
+        {
+          "$ref": "#/$defs/saved"
+        },
+        {
+          "$ref": "#/$defs/terminal"
+        }
+      ]
+    },
+    "start_response": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/dispatch"
+        },
+        {
+          "$ref": "#/$defs/started"
+        }
+      ]
+    },
+    "complete_response": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/saved"
+        },
+        {
+          "type": "object",
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "failed",
+                "discarded"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "unknown_response": {
+      "type": "object",
+      "required": [
+        "state"
+      ],
+      "properties": {
+        "state": {
+          "const": "unknown"
+        }
+      },
+      "additionalProperties": false
+    },
+    "published_response": {
+      "type": "object",
+      "required": [
+        "state"
+      ],
+      "properties": {
+        "state": {
+          "const": "published"
+        }
+      },
+      "additionalProperties": false
+    },
+    "error": {
+      "type": "object",
+      "required": [
+        "error"
+      ],
+      "properties": {
+        "error": {
+          "enum": [
+            "unauthenticated",
+            "nonce_reused",
+            "invalid_body",
+            "too_large",
+            "not_found",
+            "request_mismatch",
+            "lease_lost",
+            "turn_stale",
+            "busy",
+            "budget_exhausted",
+            "pilot_paused",
+            "preflight_missing",
+            "result_mismatch",
+            "invalid_state",
+            "publication_pending"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "billing_terms": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/billing_linear"
+        },
+        {
+          "$ref": "#/$defs/billing_bounded"
+        }
+      ]
+    },
+    "billing_linear": {
+      "description": "Condições documentais obrigatórias do snapshot privado Rails. Nenhuma operação aceita estes campos do worker.",
+      "type": "object",
+      "properties": {
+        "billing_basis": {
+          "const": "tokens_only"
+        },
+        "tariff_tiers": {
+          "const": "single_for_entire_proven_range"
+        },
+        "per_request_minimum_usd": {
+          "const": "0"
+        },
+        "fixed_fee_usd": {
+          "const": "0"
+        },
+        "cache_write_surcharge": {
+          "const": false
+        },
+        "provider_rounding": {
+          "const": "none"
+        },
+        "other_charges": {
+          "const": false
+        }
+      },
+      "required": [
+        "billing_basis",
+        "tariff_tiers",
+        "per_request_minimum_usd",
+        "fixed_fee_usd",
+        "cache_write_surcharge",
+        "provider_rounding",
+        "other_charges"
+      ],
+      "additionalProperties": false
+    },
+    "billing_bounded": {
+      "description": "Limites para Luna, texto padrão. A provisão adicional por chamada cobre todos os encargos do gateway, incluindo mínimo e arredondamento.",
+      "type": "object",
+      "properties": {
+        "billing_basis": {
+          "const": "text_token_upper_bound"
+        },
+        "tariff_tiers": {
+          "const": "long_context_maximum"
+        },
+        "cache_write": {
+          "const": "inclusive_in_input_bound"
+        },
+        "cache_read": {
+          "const": "full_input_bound"
+        },
+        "per_request_extra_cap_usd": {
+          "$ref": "#/$defs/money_usd"
+        }
+      },
+      "required": [
+        "billing_basis",
+        "tariff_tiers",
+        "cache_write",
+        "cache_read",
+        "per_request_extra_cap_usd"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "anyOf": [
+    {
+      "$ref": "#/$defs/claim"
+    },
+    {
+      "$ref": "#/$defs/start"
+    },
+    {
+      "$ref": "#/$defs/complete"
+    },
+    {
+      "$ref": "#/$defs/unknown"
+    },
+    {
+      "$ref": "#/$defs/published"
+    },
+    {
+      "$ref": "#/$defs/claim_response"
+    },
+    {
+      "$ref": "#/$defs/start_response"
+    },
+    {
+      "$ref": "#/$defs/complete_response"
+    },
+    {
+      "$ref": "#/$defs/error"
+    }
+  ]
+}

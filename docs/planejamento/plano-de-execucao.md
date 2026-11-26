@@ -171,7 +171,7 @@ SF2-FINAL-R1 após a correção dos três P1 da revisão ampla. O QA registrou
 
 Em 26/11/2026, os 120 casos e cinco controles produziram resultado elegível nos dez critérios. A auditoria independente reproduziu o resultado byte a byte e a condição de adoção foi cumprida. C06-A entregou contratos e consumidores compatíveis. O aceite integrado comprovou o cliente Rails de C06-B e o serviço CPU de C06-C. A C07-D reproduziu a instalação do pacote portátil no clone de `89b9e68` e conferiu a persistência após reinício. Após os cinco ajustes da revisão final, a publicação temporária em `977ec3f` passou no aceite com SetFit. [Aceite integrado](../evidencias/c06/aceite-integrado/README.md) · [Reprodução](../c07.md) · [Revisão final](../evidencias/c06/revisao-final/README.md) · [Publicação SetFit](../c07-publicacao-setfit.md) · [Decisão de adoção](classificacao-comparativa/sf2/decisao-adocao-r1.md).
 
-### Evolução futura depois da publicação — E01
+### Evolução depois da publicação — E01
 
 Em 2026-11-23, o responsável pediu registrar o [E01 — atendente experimental
 com IA real](https://github.com/leeunam/case-CLOUDWALK-IA/issues/11). Retomar
@@ -184,6 +184,24 @@ integrado pelos contratos Kafka existentes, com respostas e encaminhamento
 humano demonstráveis. Essa função é distinta do classificador do CLASS-001.
 Modelo, provedor, desenho, critérios de aceite e limites de uso/custo serão
 definidos na retomada; o mock determinístico permanece disponível para testes.
+
+**Retomada em 26/11/2026.** Após a publicação do MVP, o responsável aprovou
+GPT-5.6 Luna pela Feita, conhecimento fictício por marca e teto acumulado de
+US$ 1 no piloto E01. A preparação começou isolada da demonstração publicada.
+A representação do conhecimento e a proposta de ontologia estão na
+[especificação E01](e01-atendente-real.md), com as confirmações e propostas
+separadas. A implementação do atendente e a integração Kafka receberam aceite
+offline na E01-04 em `7765ff0`, incorporado à branch E01 em `406920d`.
+A primeira execução real da E01-05 registrou 4/5 verificações na candidata
+`e4442f1`, com P3.2 inválida. O ensaio adicional após E01-Q1 e E01-Q2
+passou nas nove verificações técnicas. Na E01-06, foram verificadas a
+assinatura WebSocket e a consulta por marca, além de handoff, resposta
+humana e resolução de P4 na interface. Em 26/11/2026, o responsável aprovou
+as seis conversas P1–P6 para demonstração, concluindo E01-00 a E01-06, Q1 e
+Q2 no escopo do piloto. A Luna está parada no ambiente isolado. A
+publicação do MVP usa SetFit R1 e atendente simulado.
+[Evidências E01](../evidencias/e01/README.md) ·
+[Conversas aprovadas](../evidencias/e01/piloto-20261126/conversas.md).
 
 ## 1. Ordem de trabalho
 
@@ -306,3 +324,16 @@ O roteiro de aceite da publicação previu os seguintes passos.
 - Configurar os serviços de aplicação e a origem HTTPS para React, API e WebSocket. Manter PostgreSQL, Kafka e a ponte na rede interna, com volumes persistentes e segredos no ambiente do servidor.
 - Documentar inicialização, migrações, carga de dados, atualização, reinício, consulta de logs e restauração da demonstração. Verificar que a aplicação se recupera de um reinício com casos e histórico preservados.
 - Entregar URL e acesso de demonstração ao responsável, com perfis de cliente e analista. Validar de outra rede a conversa com a IA, o handoff, o acesso por marca e a atualização do chat. Se o roteiro incluir o classificador real, validar sua configuração após a adoção em C06 e registrar o resultado antes da apresentação.
+
+### E01-Q1 e E01-Q2 — ajuste observado no piloto real
+
+A primeira execução parou na quinta chamada porque P3.2 produziu uma proposta
+inválida. A E01-Q1 restringiu a geração às escolhas aplicáveis e a E01-Q2
+viabilizou um segundo ensaio no mesmo projeto e orçamento. As duas revisões
+foram integradas em `7a73df5`. O novo ensaio registrou nove de nove turnos
+tecnicamente aprovados em duas marcas e três canais, entre 5.756 e 6.943 ms
+fim a fim. O registro original conserva a falha e o custo. Foram 14 dos
+24 despachos autorizados, com US$ 0,00508345 reportados pela Feita no
+acumulado, dentro do orçamento original de US$ 1.
+[Especificação do ajuste](e01-atendente-real.md#ajuste-após-a-primeira-execução-real--e01-q1-e-e01-q2) ·
+[Ensaio adicional](../evidencias/e01/piloto-20261126/ensaio-q1.json).

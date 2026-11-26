@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "ontology_version": "1.0.0",
+  "version": "1.0.0",
+  "brand_id": "22222222-2222-4222-8222-222222222222",
+  "slug": "horizonte",
+  "sources": [
+    {
+      "id": "horizonte.manual",
+      "version": "1.0.0",
+      "title": "Manual fictício horizonte",
+      "fictional": true
+    }
+  ],
+  "procedures": [
+    {
+      "id": "horizonte.visor",
+      "intent_id": "consultar-visor",
+      "requires": [
+        "menu-visivel"
+      ],
+      "source_id": "horizonte.manual",
+      "steps": [
+        "Consulte o menu de suporte."
+      ]
+    }
+  ],
+  "handoff_rules": [
+    {
+      "id": "horizonte.humano",
+      "reason": "human_requested",
+      "source_id": "horizonte.manual"
+    }
+  ]
+}

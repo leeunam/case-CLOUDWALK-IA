@@ -74,7 +74,41 @@ O teste independente único passou nos dez critérios, com duas auditorias idên
 A C06 e a C07/F09 final verificaram o pacote e a política adotados, a origem
 dos campos e a resposta via Kafka. O pacote portátil é fornecido pelo
 custodiante. A publicação HTTPS foi validada depois da reprodução local,
-sem chamadas pagas nesta continuação. E01, o atendente conversacional real,
-permanece opcional após o fechamento.
+sem chamadas pagas nesta continuação.
 [Plano de C06/C07](planejamento/classificacao-comparativa/c06-setfit-integracao.md) ·
 [Publicação SetFit](c07-publicacao-setfit.md).
+
+## Piloto conversacional E01
+
+O primeiro ensaio na candidata `e4442f1` passou em quatro de cinco verificações.
+A proposta de P3.2 foi rejeitada como inválida. O registro original preserva
+a falha e o custo desse despacho. Após as revisões E01-Q1 e E01-Q2, integradas
+em `7a73df5`, o ensaio adicional passou nas nove verificações técnicas com
+duas marcas e três canais. A latência fim a fim foi de 5.756 a 6.943 ms.
+[Primeiro ensaio](evidencias/e01/piloto-20261126/primeiro-ensaio.json) ·
+[Ensaio adicional](evidencias/e01/piloto-20261126/ensaio-q1.json).
+
+A revisão independente confirmou as nove verificações técnicas e comparou
+os 14 recibos brutos com seus hashes, tokens e valores na unidade da Feita.
+A API reportou US$ 0,00331830 pelos nove novos despachos e US$ 0,00508345 no
+acumulado. O Rails contabilizou US$ 0,1500054 em provisões de uso, com zero
+reservas pendentes. A revisão financeira se baseou nos recibos da API.
+O piloto conservou o orçamento original de US$ 1 e até 24 despachos acumulados.
+[Evidências e conciliação](evidencias/e01/README.md).
+
+As seis combinações de acesso por marca passaram na consulta, no histórico
+e na verificação da assinatura WebSocket. A entrega de novos eventos pelo
+WebSocket ficou sem medição nesse ensaio. Na sessão de Cris, a interface
+exibiu o resumo e a referência do handoff de P4 e permitiu responder e
+resolver o caso. Após recarregar, a resposta e a resolução continuaram
+visíveis. P6 foi atribuído depois que a resolução de P4 liberou capacidade.
+[Evidências E01](evidencias/e01/README.md).
+
+**Piloto E01 concluído em 26/11/2026.** O responsável aprovou o conjunto
+das seis conversas P1–P6 para demonstração. O aceite de P1 na primeira
+execução também permanece registrado. A Luna está parada no ambiente
+isolado do piloto. A publicação do MVP usa SetFit R1 e atendente simulado.
+A habilitação pública contínua fica fora do escopo do piloto.
+[Conversas aprovadas](evidencias/e01/piloto-20261126/conversas.md) ·
+[Registro do aceite](evidencias/e01/piloto-20261126/aceite-final.json) ·
+[Especificação E01](planejamento/e01-atendente-real.md).

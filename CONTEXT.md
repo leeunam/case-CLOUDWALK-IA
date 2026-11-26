@@ -113,3 +113,21 @@ em todas elas.
 Mudança do contexto operacional do analista para outra marca autorizada. Na V2,
 pode preservar pendências de cliente de outra marca sem permitir atuação humana
 simultânea em ambas.
+
+**Assunto de atendimento**
+Tema que relaciona uma solicitação à categoria operacional.
+
+**Intenção do cliente**
+Objetivo expresso na conversa sobre um assunto. Expressões equivalentes, como “visor” e “tela”, ajudam a reconhecer a mesma intenção.
+
+**Condição de aplicação**
+Fato que precisa estar confirmado na conversa para que um procedimento seja adequado. Sem confirmação, o atendente pode perguntar ou encaminhar.
+
+**Procedimento de atendimento**
+Orientação de uma marca para uma intenção, com passos, condições de aplicação e fonte.
+
+**Fonte de conhecimento**
+Registro de uma marca que fundamenta um procedimento ou regra. A versão identifica a edição que sustentou uma orientação.
+
+**Regra de encaminhamento**
+Condição em que o atendimento precisa de condução humana, como pedido explícito do cliente ou necessidade de ação sobre uma conta.

@@ -1,0 +1,15 @@
+{
+  "action": "reply",
+  "kind": "clarify",
+  "procedure_id": "aurora.visor",
+  "text": "O menu está visível no visor?",
+  "source_refs": [
+    {
+      "id": "aurora.manual",
+      "version": "1.0.0"
+    }
+  ],
+  "message_ids": [
+    "00000000-0000-4000-8000-000000000501"
+  ]
+}

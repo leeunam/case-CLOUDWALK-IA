@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_26_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_26_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -257,6 +257,45 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_26_000001) do
     t.index ["brand_id", "resource_type", "resource_id", "created_at", "id"], name: "configuration_audits_by_resource"
   end
 
+  create_table "e01_executions", force: :cascade do |t|
+    t.uuid "request_event_id", null: false
+    t.string "request_sha256", null: false
+    t.bigint "pilot_id", default: 1, null: false
+    t.string "state", null: false
+    t.uuid "owner_id", null: false
+    t.uuid "lease_token", null: false
+    t.datetime "lease_expires_at", null: false
+    t.datetime "started_at"
+    t.decimal "reserved_usd", precision: 13, scale: 12, null: false
+    t.decimal "cost_usd", precision: 13, scale: 12
+    t.jsonb "snapshot", null: false
+    t.jsonb "usage"
+    t.jsonb "result_metadata"
+    t.binary "result_bytes"
+    t.string "result_sha256"
+    t.string "complete_sha256"
+    t.string "reason"
+    t.datetime "published_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["lease_expires_at"], name: "due_e01_execution_leases", where: "((state)::text = ANY ((ARRAY['reserved'::character varying, 'started'::character varying])::text[]))"
+    t.index ["pilot_id"], name: "one_e01_dispatch_slot", unique: true, where: "((state)::text = ANY ((ARRAY['reserved'::character varying, 'started'::character varying, 'unknown'::character varying])::text[]))"
+    t.index ["request_event_id"], name: "index_e01_executions_on_request_event_id", unique: true
+    t.check_constraint "reserved_usd > 0::numeric AND reserved_usd <= 1::numeric AND (cost_usd >= 0::numeric AND cost_usd <= reserved_usd OR cost_usd IS NULL)", name: "e01_execution_cost"
+    t.check_constraint "state::text = ANY (ARRAY['reserved'::character varying, 'expired'::character varying, 'started'::character varying, 'unknown'::character varying, 'result_saved'::character varying, 'published'::character varying, 'failed'::character varying, 'discarded'::character varying]::text[])", name: "e01_execution_state"
+  end
+
+  create_table "e01_nonces", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "expires_at", null: false
+    t.index ["expires_at"], name: "index_e01_nonces_on_expires_at"
+  end
+
+  create_table "e01_pilots", force: :cascade do |t|
+    t.decimal "spent_usd", precision: 13, scale: 12, default: "0.0", null: false
+    t.integer "dispatch_count", default: 0, null: false
+    t.check_constraint "id = 1 AND spent_usd >= 0::numeric AND spent_usd <= 1::numeric AND dispatch_count >= 0 AND dispatch_count <= 24", name: "e01_pilot_limits"
+  end
+
   create_table "queue_teams", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "brand_id", null: false
     t.uuid "support_queue_id", null: false
@@ -401,6 +440,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_26_000001) do
   add_foreign_key "classification_requests", "support_cases"
   add_foreign_key "configuration_audits", "brands"
   add_foreign_key "configuration_audits", "users", column: "actor_id"
+  add_foreign_key "e01_executions", "agent_outboxes", column: "request_event_id", primary_key: "event_id"
+  add_foreign_key "e01_executions", "e01_pilots", column: "pilot_id"
   add_foreign_key "queue_teams", "brand_teams", column: ["brand_team_id", "brand_id"], primary_key: ["id", "brand_id"]
   add_foreign_key "queue_teams", "brands"
   add_foreign_key "queue_teams", "support_queues", column: ["support_queue_id", "brand_id"], primary_key: ["id", "brand_id"]

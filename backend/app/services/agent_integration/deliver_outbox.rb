@@ -13,6 +13,8 @@ module AgentIntegration
     end
 
     def run_once
+      E01::Ledger.sweep_once
+      E01::Nonce.where(expires_at: ...Time.current).limit(50).delete_all
       expire_turns
       entry = claim
       return false unless entry
