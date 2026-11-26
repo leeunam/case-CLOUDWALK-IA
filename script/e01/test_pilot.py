@@ -23,6 +23,10 @@ class FakeProject:
         self.active = False
         self.sent = self.dispatches = self.stops = 0
         self.record = None
+        self.records = {}
+        self.fixed_response = None
+        self.account = "fixture-account"
+        self.cached = 2
 
     def stopped(self):
         return not self.active
@@ -40,7 +44,7 @@ class FakeProject:
                 "holds": 0, "open_turns": 0, "database": "example", "oid": "1", "cluster": "example"}
 
     def turn(self, case, seq):
-        return self.record
+        return copy.deepcopy(self.records.get((case, seq)))
 
 
 class FakeSimulator:
@@ -88,16 +92,18 @@ class FakeSimulator:
         self.project.record = None if self.delay else {
             **{k: self.receipt[k] for k in ("channel_id", "case_id", "correlation_id")}, "brand_id": brand["brand_id"],
             "category": spec.category, "priority": "basic", "state": "published", "request_ok": True, "result_ok": True, "on_time": True,
-            "request_id": payload["request_event_id"], "result_id": proposal["event_id"],
+            "request_sha256": p.digest(json.dumps(payload).encode()), "request_id": payload["request_event_id"], "result_id": proposal["event_id"],
             "result_sha256": p.digest(json.dumps(proposal).encode()), "disposition": "applied", "proposal": proposal,
             "metadata": {"source_refs": refs, "ontology_version": "1.0.0", "knowledge_version": "1.0.0",
                          "policy_version": "e01-v1", "handoff_rule": {"id":rule["id"], "reason":rule["reason"]} if rule else None},
             "handoff": handoff, "integration": "idle", "status": {"reply":"ai_active","resolve":"resolved",
                                                                   "handoff":"waiting_human"}[action],
-            "mode": "feita_bounded_public", "accounted_usd":"0.001", "reserved_usd":"0.755400000000",
-            "usage":{"input_tokens":10,"cached_input_tokens":2,"output_tokens":3,"provider_response_id":"gen-example"},
+            "account_ref": self.project.account, "mode": "feita_bounded_public", "accounted_usd":"0.001", "reserved_usd":"0.755400000000",
+            "usage":{"input_tokens":10,"cached_input_tokens":self.project.cached,"output_tokens":3,
+                     "provider_response_id":self.project.fixed_response or "gen-" + uid()},
             "started_at": p.now(),
         }
+        self.project.records[(self.receipt["case_id"],2*n-1)] = self.project.record
         return self.receipt
 
     def history(self, case):
@@ -113,16 +119,26 @@ class PilotTests(unittest.TestCase):
         self.sim = FakeSimulator(self.project, self.dir)
         self.runner = p.Pilot(self.project, self.sim, self.dir, timeout=.03)
 
-    def approval(self):
-        row = self.runner.journal["turns"]["P1.1"]["ledger"]
-        capture = {"id":"gen-example", "model":p.MODEL, "status":200, "usage":{"prompt_tokens":10,
-                   "completion_tokens":3, "prompt_tokens_details":{"cached_tokens":2}}, "request_sha256":"0"*64,
+    def approval(self, turn="P1.1", source="provider_portal"):
+        row = self.runner.journal["turns"][turn]["ledger"]
+        resp = row["usage"]["provider_response_id"]
+        capture = {"id":resp, "model":p.MODEL, "status":200, "usage":{"prompt_tokens":10,
+                   "completion_tokens":3, "total_tokens":13, "prompt_tokens_details":{"cached_tokens":row["usage"]["cached_input_tokens"]}}, "request_sha256":"0"*64,
                    "started_at":p.now(), "finished_at":p.now()}
-        record = {"id":"gen-example", "source":"extrato de teste", "precision":"exact", "amount":"0.01", "unit":"credits",
+        record = {"id":resp, "source":"extrato de teste", "precision":"exact", "amount":"0.01", "unit":"credits",
                   "usd_per_credit":"0.01","conversion_source":"exemplo de teste","observed_at":p.now()}
+        original = self.dir / "portal.txt"
+        original.write_text("Relatório individual de teste em créditos " + resp)
+        record.update(source_type=source, account_ref=row["account_ref"], conversion_account_ref=row["account_ref"],
+                      original={"file":original.name,"sha256":p.digest(original.read_bytes())})
+        if source == "provider_api_receipt":
+            capture["usage"]["credits"] = record["amount"]
+            record["field"] = "credits"
         approval = {"approved":True,"reviewer":"Teste offline","reviewed_at":p.now(), "binding":self.runner.journal["binding"],
                     "request_id":row["request_id"],"result_sha256":row["result_sha256"]}
         for name, data in (("capture", capture), ("provider_record", record)):
+            if name == "provider_record" and source == "provider_api_receipt":
+                data["original"] = approval["capture"]
             file = self.dir / (name + ".json")
             p.write_json(file, data)
             approval[name] = {"file":file.name, "sha256":p.digest(file.read_bytes())}
@@ -162,6 +178,10 @@ class PilotTests(unittest.TestCase):
 
     def test_private_receipt_and_cache_mismatch_fail_closed(self):
         self.runner.run("canary")
+        path = self.approval()
+        self.edit_evidence(path, "capture", lambda cap: cap["usage"].pop("prompt_tokens_details"))
+        with self.assertRaisesRegex(p.Stop, "desconto_cache_divergente"):
+            self.runner.run("remaining", path)
         path = self.approval()
         for name, field in (("capture", "usage"), ("provider_record","id")):
             approval = json.loads(path.read_bytes())
@@ -212,12 +232,151 @@ class PilotTests(unittest.TestCase):
         self.runner.run("remaining", self.approval())
         self.assertEqual((self.project.stops, self.project.sent), (9,9))
         report = (self.dir / "public.json").read_text()
-        self.assertEqual(json.loads(report)["receipts_reconciled"], 1)
-        for private in ("simulator-private", "gen-example", "Onde consulto", "secret", "message_ids", "summary"):
+        public = json.loads(report)
+        self.assertEqual(public["receipts_reconciled"], 1)
+        self.assertEqual((public["dispatch_authorizations"], public["provider_calls_observed_distinct"]), (9, 9))
+        for private in ("simulator-private", "gen-", "fixture-account", "Onde consulto", "secret", "message_ids", "summary"):
             self.assertNotIn(private, report)
         with self.assertRaises(p.Stop):
             self.runner.run("remaining", self.approval())
         self.assertEqual(self.project.sent, 9)
+
+    def edit_evidence(self, approval_path, field, change):
+        approval = json.loads(approval_path.read_bytes())
+        path = self.dir / approval[field]["file"]
+        data = json.loads(path.read_bytes())
+        change(data)
+        p.write_json(path, data)
+        approval[field]["sha256"] = p.digest(path.read_bytes())
+        p.write_json(approval_path, approval)
+
+    def test_conflicting_cost_unknown_unit_or_credits_blocks_p2(self):
+        self.runner.run("canary")
+        for fields, reason in [
+            ({"cost":"0.90","cost_unit":"USD"}, "valor_do_provedor_divergente"),
+            ({"cost":"0.0001"}, "custo_sem_unidade_documentada"),
+            ({"credits":"0.01","cost":"0.002","cost_unit":"USD"}, "valores_da_captura_divergentes"),
+        ]:
+            with self.subTest(fields=fields):
+                path = self.approval()
+                self.edit_evidence(path, "capture", lambda cap: cap["usage"].update(fields))
+                with self.assertRaisesRegex(p.Stop, reason):
+                    self.runner.run("remaining", path)
+                self.assertEqual(set(self.runner.journal["turns"]), {"P1.1"})
+
+    def test_metric_rounding_and_documented_unit_in_capture(self):
+        self.runner.run("canary")
+        path = self.approval()
+        self.edit_evidence(path, "capture", lambda cap: cap["usage"].update(cost="0.000", credits="0.01"))
+        self.edit_evidence(path, "provider_record", lambda row: row.update(
+            cost_unit="USD", cost_unit_source="unidade declarada no documento de teste",
+            capture_precision={"cost":{"precision":"nearest", "quantum":"0.001","precision_source":"fonte de teste"}}))
+        self.runner.reconcile_turn("P1.1", path)
+        self.assertEqual(p.public_report(self.runner.journal)["rows"][0]["provider_observed_usd"],"0.0001")
+
+    def test_api_receipt_validates_actual_monetary_field(self):
+        self.runner.run("canary")
+        path = self.approval(source="provider_api_receipt")
+        self.edit_evidence(path, "provider_record", lambda r: r.update(field="cost"))
+        with self.assertRaisesRegex(p.Stop, "valor_ausente"):
+            self.runner.run("remaining", path)
+        path = self.approval(source="provider_api_receipt")
+        self.runner.run("remaining", path)
+        self.assertEqual(self.runner.journal["turns"]["P1.1"]["reconciliation"]["source_type"], "provider_api_receipt")
+
+    def test_mismatched_account_conversion_original_and_identical_evidence(self):
+        self.runner.run("canary")
+        for change, reason in [
+            (lambda r: r.update(account_ref="other"), "conta_divergente"),
+            (lambda r: r.update(conversion_account_ref="other"), "conversao_sem_vinculo"),
+            (lambda r: r["original"].update(sha256="0"*64), "evidencia_alterada"),
+        ]:
+            with self.subTest(reason=reason):
+                path = self.approval()
+                self.edit_evidence(path, "provider_record", change)
+                with self.assertRaisesRegex(p.Stop, reason):
+                    self.runner.run("remaining", path)
+        approval = json.loads(path.read_bytes())
+        approval["provider_record"] = approval["capture"]
+        p.write_json(path, approval)
+        with self.assertRaisesRegex(p.Stop,"extracao_igual"):
+            self.runner.run("remaining",path)
+        self.assertEqual(self.project.sent,1)
+
+    def test_durable_same_database_same_totals_but_changed_p1(self):
+        self.runner.run("canary")
+        row = self.project.record
+        for field in ("request_id", "request_sha256", "result_sha256", "account_ref", "usage", "accounted_usd"):
+            with self.subTest(field=field):
+                path = self.approval()
+                old = row[field]
+                row[field] = "other"
+                with self.assertRaisesRegex(p.Stop, "rodada_duravel_divergente"):
+                    self.runner.run("remaining", path)
+                self.assertNotIn("P2.1",self.runner.journal["turns"])
+                row[field] = old
+
+    def test_reconcile_failed_billed_turn_without_proposal(self):
+        def failed(case, seq):
+            row = copy.deepcopy(self.project.record)
+            row.update(state="failed", result_id=None, result_sha256=None, result_ok=None,
+                       disposition=None, integration="failed", reason="invalid_decision")
+            return row
+        self.project.turn = failed
+        with self.assertRaisesRegex(p.Stop,"terminal_sem_resultado"):
+            self.runner.run("canary")
+        path = self.approval()
+        self.runner.reconcile_turn("P1.1", path)
+        self.runner.reconcile_turn("P1.1", path)
+        report = p.public_report(self.runner.journal)
+        self.assertEqual(report["receipts_reconciled"],1)
+        self.assertTrue(report["rows"][0]["financially_reconciled"])
+        self.assertFalse(report["rows"][0]["human_reviewed"])
+        self.assertEqual(report["rows"][0]["status"], "failed")
+        with self.assertRaises(p.Stop):
+            self.runner.run("remaining",path)
+        self.assertEqual(self.project.sent,1)
+
+    def test_factual_failure_can_be_reconciled_without_releasing_p2(self):
+        self.sim.history = lambda case: []
+        with self.assertRaisesRegex(p.Stop, "sequencias_divergentes"):
+            self.runner.run("canary")
+        path = self.approval(source="provider_api_receipt")
+        self.runner.reconcile_turn("P1.1", path)
+        self.assertEqual(self.runner.journal["turns"]["P1.1"]["status"], "failed")
+        with self.assertRaises(p.Stop):
+            self.runner.run("remaining", path)
+        self.assertEqual(self.project.sent,1)
+
+    def test_duplicate_provider_id_stops_and_prevents_double_counting(self):
+        self.project.fixed_response = "gen-same"
+        self.runner.run("canary")
+        with self.assertRaisesRegex(p.Stop, "duplicado"):
+            self.runner.run("remaining", self.approval())
+        self.assertEqual(self.project.sent,2)
+        self.assertNotIn("P2.2",self.runner.journal["turns"])
+        report = p.public_report(self.runner.journal)
+        self.assertEqual((report["receipts_reconciled"],report["provider_calls_observed_distinct"],
+                          report["ambiguous_provider_ids"]), (0,1,1))
+        self.assertIsNone(report["sum_of_reconciled_receipts_usd"])
+        with self.assertRaisesRegex(p.Stop,"duplicado"):
+            self.runner.reconcile_turn("P1.1",self.approval())
+
+    def test_omitted_cache_keeps_observation_null_and_discount_zero(self):
+        self.project.cached = 0
+        self.runner.run("canary")
+        for invalid in (None, {}, {"cached_tokens":False}, {"cached_tokens":-1}):
+            path = self.approval()
+            self.edit_evidence(path, "capture", lambda cap: cap["usage"].update(prompt_tokens_details=invalid))
+            with self.assertRaisesRegex(p.Stop, "cache_invalido"):
+                self.runner.run("remaining",path)
+        path = self.approval()
+        self.edit_evidence(path, "capture", lambda cap: cap["usage"].pop("prompt_tokens_details"))
+        self.runner.run("remaining",path)
+        row = p.public_report(self.runner.journal)["rows"][0]
+        self.assertTrue(row["cache_capture_reviewed"])
+        self.assertIsNone(row["cached_tokens_observed"])
+        self.assertEqual(row["usage"]["cached_input_tokens"],0)
 
     def test_wrong_case_brand_source_resolution_and_handoff(self):
         self.runner.run("canary")

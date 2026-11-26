@@ -1,9 +1,10 @@
 """Piloto real E01. O único POST de atendimento é pela sessão do simulador."""
 import argparse
 import contextlib
+from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from decimal import Decimal
+from decimal import Decimal, DecimalException
 import fcntl
 import hashlib
 from http.cookiejar import CookieJar
@@ -179,11 +180,11 @@ SELECT json_build_object('case_id',c.id,'correlation_id',c.correlation_id,'brand
     'request_id',t.request_event_id,'result_id',t.result_event_id,'state',e.state,'reason',e.reason,
     'request_bytes',octet_length(o.body),'result_bytes',octet_length(e.result_bytes),
     'on_time',t.completed_at <= t.result_due_at,
-    'request_ok',e.request_sha256=encode(sha256(convert_to(o.body,'UTF8')),'hex'),
+    'request_sha256',e.request_sha256,'request_ok',e.request_sha256=encode(sha256(convert_to(o.body,'UTF8')),'hex'),
     'result_ok',e.result_sha256=encode(sha256(e.result_bytes),'hex') AND e.result_sha256=r.body_sha256,
     'result_sha256',e.result_sha256,'disposition',r.disposition,'metadata',e.result_metadata,
     'proposal',convert_from(e.result_bytes,'UTF8')::jsonb,'usage',e.usage,
-    'mode',e.snapshot->>'mode','accounted_usd',e.cost_usd::text,'reserved_usd',e.reserved_usd::text,
+    'mode',e.snapshot->>'mode','account_ref',e.snapshot->>'account_ref','accounted_usd',e.cost_usd::text,'reserved_usd',e.reserved_usd::text,
     'started_at',e.started_at,'published_at',e.published_at,'completed_at',t.completed_at)
 FROM support_cases c LEFT JOIN agent_turns t ON t.support_case_id=c.id AND t.through_sequence=:'seq'::integer
 LEFT JOIN agent_outboxes o ON o.agent_turn_id=t.id LEFT JOIN e01_executions e ON e.request_event_id=o.event_id
@@ -307,34 +308,116 @@ def exact_money(value):
     return Decimal(value)
 
 
+def evidence_bytes(directory, ref):
+    path = directory / ref["file"]
+    raw = path.read_bytes()
+    check(digest(raw) == ref["sha256"], "evidencia_alterada")
+    return raw
+
+
+def raw_money(value):
+    # json.loads(parse_float=Decimal) preserva o decimal exato enviado pelo gateway.
+    check(type(value) in {int, str, Decimal}, "valor_monetario_invalido")
+    number = Decimal(str(value))
+    check(number.is_finite() and number >= 0, "valor_monetario_invalido")
+    return number
+
+
+def as_usd(value, unit, statement, account):
+    amount = raw_money(value)
+    if unit == "USD":
+        return amount
+    check(unit == "credits" and statement["conversion_account_ref"] == account and
+          statement["conversion_source"].strip(), "conversao_sem_vinculo")
+    rate = exact_money(statement["usd_per_credit"])
+    check(rate > 0, "conversao_invalida")
+    return amount * rate
+
+
+def money_interval(amount, precision):
+    rule = precision["precision"]
+    check(rule in {"exact", "nearest", "truncated"}, "precisao_do_extrato_invalida")
+    if rule == "exact":
+        return amount, amount
+    quantum = exact_money(precision["quantum"])
+    check(quantum > 0 and amount % quantum == 0 and precision["precision_source"].strip(),
+          "precisao_do_extrato_invalida")
+    if rule == "nearest":
+        return max(Decimal(0), amount - quantum / 2), amount + quantum / 2
+    return amount, amount + quantum
+
+
+def receipt_money(counts, statement, account):
+    """Compara os campos informados pela API na precisão de cada campo."""
+    fields = {}
+    for field in ("credits", "cost"):
+        if field not in counts:
+            continue
+        unit = "credits"
+        if field == "cost":
+            unit = counts.get("cost_unit")
+            if unit is None:
+                check(statement.get("cost_unit_source", "").strip(), "custo_sem_unidade_documentada")
+                unit = statement.get("cost_unit")
+            check(isinstance(unit, str) and unit.lower() in {"usd", "credits"}, "unidade_invalida")
+            unit = "USD" if unit.lower() == "usd" else "credits"
+        precision = statement.get("capture_precision", {}).get(field, {"precision": "exact"})
+        value = raw_money(counts[field])
+        low, high = money_interval(value, precision)
+        fields[field] = (unit, as_usd(value, unit, statement, account),
+                         as_usd(low, unit, statement, account), as_usd(high, unit, statement, account))
+    if fields:
+        check(max(x[2] for x in fields.values()) <= min(x[3] for x in fields.values()),
+              "valores_da_captura_divergentes")
+    return fields
+
+
 def reconcile(entry, approval_file, binding):
-    """O integrador referencia duas fontes privadas distintas, consultadas para o mesmo ID."""
-    approval = json.loads(approval_file.read_bytes())
+    """Vincula uma extração documentada ao recibo financeiro do mesmo despacho."""
+    approval_bytes = approval_file.read_bytes()
+    approval = json.loads(approval_bytes)
+    ledger = entry["ledger"]
     check(approval["approved"] is True and approval["reviewer"].strip() and approval["binding"] == binding,
           "aprovacao_ausente_ou_outro_piloto")
-    check(approval["request_id"] == entry["ledger"]["request_id"] and
-          approval["result_sha256"] == entry["ledger"]["result_sha256"], "conciliacao_de_outra_rodada")
+    check(approval["request_id"] == ledger["request_id"] and
+          approval.get("result_sha256") == ledger["result_sha256"], "conciliacao_de_outra_rodada")
     reviewed = instant(approval["reviewed_at"])
     check(instant(entry["intent_at"]) <= reviewed <= datetime.now(timezone.utc), "data_de_revisao_invalida")
 
-    def load_evidence(key):
-        ref = approval[key]
-        path = approval_file.parent / ref["file"]
-        raw = path.read_bytes()
-        check(digest(raw) == ref["sha256"], "evidencia_alterada")
-        return json.loads(raw)
-
-    capture = load_evidence("capture")
-    statement = load_evidence("provider_record")
-    usage = entry["ledger"]["usage"]
-    check(capture["status"] == 200 and capture["model"] == MODEL and
-          capture["id"] == usage["provider_response_id"] == statement["id"], "recibo_de_outro_despacho")
+    cap_ref, record_ref = approval["capture"], approval["provider_record"]
+    capture = json.loads(evidence_bytes(approval_file.parent, cap_ref), parse_float=Decimal)
+    statement = json.loads(evidence_bytes(approval_file.parent, record_ref))
+    check(cap_ref["sha256"] != record_ref["sha256"] and
+          not (approval_file.parent / cap_ref["file"]).samefile(approval_file.parent / record_ref["file"]),
+          "extracao_igual_a_captura")
+    original = statement["original"]
+    evidence_bytes(approval_file.parent, original)
+    kind = statement["source_type"]
+    check(kind in {"provider_api_receipt", "provider_portal"} and
+          original["sha256"] != record_ref["sha256"] and
+          (original["sha256"] == cap_ref["sha256"]) == (kind == "provider_api_receipt"),
+          "origem_financeira_incompativel")
+    account = ledger["account_ref"]
+    check(isinstance(account, str) and account.strip() and statement["account_ref"] == account
+          and capture.get("account_ref", account) == account, "conta_divergente")
+    usage = ledger["usage"]
+    status = capture["status"]
+    check(type(status) is int and (status == 200 or (ledger["state"] in {"failed", "discarded"} and 400 <= status <= 599)) and
+          capture["model"] == MODEL and capture["id"] == usage["provider_response_id"] == statement["id"],
+          "recibo_de_outro_despacho")
     check(re.fullmatch(r"[0-9a-f]{64}", capture["request_sha256"]), "digest_de_envio_ausente")
     counts = capture["usage"]
-    for observed, key in ((counts["prompt_tokens"], "input_tokens"), (counts["completion_tokens"], "output_tokens"),
-                          (counts["prompt_tokens_details"]["cached_tokens"], "cached_input_tokens")):
+    for observed, key in ((counts["prompt_tokens"], "input_tokens"), (counts["completion_tokens"], "output_tokens")):
         check(type(observed) is int and observed >= 0 and observed == usage[key], "uso_divergente")
-    check(usage["cached_input_tokens"] <= usage["input_tokens"], "cache_divergente")
+    check(type(counts["total_tokens"]) is int and counts["total_tokens"] == usage["input_tokens"] + usage["output_tokens"],
+          "total_de_tokens_divergente")
+    cached = None
+    if "prompt_tokens_details" in counts:
+        details = counts["prompt_tokens_details"]
+        check(isinstance(details, dict) and type(details.get("cached_tokens")) is int, "cache_invalido")
+        cached = details["cached_tokens"]
+        check(0 <= cached <= usage["input_tokens"], "cache_invalido")
+    check(usage["cached_input_tokens"] == (cached if cached is not None else 0), "desconto_cache_divergente")
     started, finished = instant(capture["started_at"]), instant(capture["finished_at"])
     check(instant(entry["intent_at"]) <= started <= finished <= reviewed, "tempos_do_provedor_divergentes")
     # O documento independente registra a unidade e precisão oferecidas pela fonte.
@@ -342,38 +425,49 @@ def reconcile(entry, approval_file, binding):
           instant(statement["observed_at"]) <= reviewed and instant(statement["observed_at"]) >= started,
           "extrato_sem_precisao_ou_origem")
     amount = exact_money(statement["amount"])
-    low = high = amount
-    if statement["precision"] != "exact":
-        quantum = exact_money(statement["quantum"])
-        check(quantum > 0 and amount % quantum == 0 and statement["precision_source"].strip(),
-              "precisao_do_extrato_invalida")
-        if statement["precision"] == "nearest":
-            low, high = max(Decimal(0), amount - quantum/2), amount + quantum/2
-        else:
-            high = amount + quantum
-    if statement["unit"] == "credits":
-        check(statement["conversion_source"].strip(), "conversao_sem_fonte")
-        rate = exact_money(statement["usd_per_credit"])
-        check(rate > 0, "conversao_invalida")
-        amount, low, high = amount*rate, low*rate, high*rate
-    else:
-        check(statement["unit"] == "USD", "unidade_invalida")
-    check(high <= exact_money(entry["ledger"]["accounted_usd"]), "gasto_supera_valor_contabilizado")
-    return {"provider_observed_usd": str(amount), "provider_unit": statement["unit"], "precision": statement["precision"],
+    low, high = money_interval(amount, statement)
+    fields = receipt_money(counts, statement, account)
+    amount, low, high = (as_usd(x, statement["unit"], statement, account) for x in (amount, low, high))
+    check(high <= exact_money(ledger["accounted_usd"]), "gasto_supera_valor_contabilizado")
+    check(all(low <= field_high and field_low <= high for _, _, field_low, field_high in fields.values()),
+          "valor_do_provedor_divergente")
+    if kind == "provider_api_receipt":
+        selected = statement["field"]
+        check(selected in fields and fields[selected][:2] == (statement["unit"], amount), "valor_ausente_no_recibo_da_api")
+        # A extração também deve conservar, no mínimo, a incerteza do campo original.
+        check(low <= fields[selected][2] and fields[selected][3] <= high, "precisao_superestimada")
+    return {"source_type": kind, "original_sha256": original["sha256"], "cached_tokens_observed": cached,
+            "provider_observed_usd": str(amount), "provider_unit": statement["unit"], "precision": statement["precision"],
             "provider_usd_min": str(low), "provider_usd_max": str(high),
             "provider_started_at": started.isoformat(), "provider_finished_at": finished.isoformat(),
             "provider_duration_ms": round((finished-started).total_seconds()*1000),
             "capture_sha256": approval["capture"]["sha256"], "record_sha256": approval["provider_record"]["sha256"],
-            "reviewed_at": reviewed.isoformat(), "approval_sha256": digest(approval_file.read_bytes())}
+            "reviewed_at": reviewed.isoformat(), "approval_sha256": digest(approval_bytes)}
+
+
+def provider_identity(item):
+    row = item.get("ledger") or {}
+    response = (row.get("usage") or {}).get("provider_response_id")
+    account = row.get("account_ref")
+    if isinstance(account, str) and account.strip() and isinstance(response, str) and response.strip():
+        return account, response
+    return None
+
+
+def provider_counts(entries):
+    return Counter(key for item in entries.values() if (key := provider_identity(item)) is not None)
 
 
 def public_report(journal):
+    counts = provider_counts(journal["turns"])
     rows = []
     for label, spec in MATRIX.items():
         for number in range(1, len(spec.turns) + 1):
             item = journal["turns"].get(f"{label}.{number}", {})
             ledger = item.get("ledger") or {}
-            finance = item.get("reconciliation", {})
+            key = provider_identity(item)
+            ambiguous = key is not None and counts[key] > 1
+            finance = {} if ambiguous else item.get("reconciliation", {})
             usage = ledger.get("usage") or {}
             start_id = usage.get("provider_response_id")
             verified = item.get("status") == "checked"
@@ -386,7 +480,12 @@ def public_report(journal):
                                                if action == "reply" else None),
                          "handoff_reason": rule["reason"] if rule else None,
                          "linked_handoff_messages": len(ledger["handoff"]["message_ids"]) if action == "handoff" else None,
-                         "human_reviewed": bool(finance),
+                         "financially_reconciled": bool(finance),
+                         "human_reviewed": verified and bool(finance),
+                         "provider_observed": key is not None, "ambiguous_provider_id": ambiguous,
+                         "cache_capture_reviewed": bool(finance),
+                         "cached_tokens_observed": finance.get("cached_tokens_observed"),
+                         "provider_record_type": finance.get("source_type"),
                          "case_id": item.get("receipt", {}).get("case_id"),
                          "request_id": ledger.get("request_id"), "result_id": ledger.get("result_id"),
                          "provider_id_sha256": digest(start_id.encode()) if isinstance(start_id, str) else None,
@@ -401,6 +500,9 @@ def public_report(journal):
                          "provider_observed_usd": finance.get("provider_observed_usd")})
     observed = [r["provider_observed_usd"] for r in rows if r["provider_observed_usd"] is not None]
     return {"updated_at": now(), "rows": rows, "ledger_last_read": journal.get("budget"),
+            "dispatch_authorizations": (journal.get("budget") or {}).get("dispatches"),
+            "provider_calls_observed_distinct": len(counts),
+            "ambiguous_provider_ids": sum(n > 1 for n in counts.values()),
             "timeouts": sum(r["status"] == "timeout" for r in rows),
             "without_verified_result": sum(r["status"] not in ("pending", "checked") for r in rows),
             "max_end_to_end_ms": max((r["end_to_end_ms"] for r in rows if r["end_to_end_ms"] is not None), default=None),
@@ -433,6 +535,32 @@ class Pilot:
         self.journal["budget"] = {k: b[k] for k in ("dispatches", "accounted_usd", "holds")}
         return b
 
+    def reconcile_turn(self, key, approval):
+        self.snapshot()
+        item = self.journal["turns"][key]
+        old = item.get("ledger") or {}
+        check(item.get("receipt") and old.get("request_id"), "turno_sem_vinculo")
+        seq = 2*int(key.split(".")[1])-1
+        current = self.project.turn(item["receipt"]["case_id"], seq)
+        check(current and current["request_ok"] and current["started_at"] and current["usage"] and
+              current["accounted_usd"] is not None and current["state"] in {"published", "discarded", "failed"},
+              "despacho_sem_recibo_contabilizado")
+        for field in ("case_id", "channel_id", "correlation_id"):
+            check(current[field] == item["receipt"][field], "recibo_divergente")
+        for field in ("request_id", "request_sha256", "brand_id", "account_ref", "mode", "reserved_usd",
+                      "result_id", "result_sha256", "disposition", "usage", "accounted_usd"):
+            if item["status"] == "checked" or old.get(field) is not None:
+                check(current[field] == old.get(field), "rodada_duravel_divergente")
+        if item["status"] == "checked":
+            check(current["state"] == "published" and current["result_ok"] and current["on_time"] and
+                  current["disposition"] == "applied", "resultado_aprovado_divergente")
+        candidate = {**item, "ledger": current}
+        entries = {**self.journal["turns"], key: candidate}
+        check(provider_counts(entries)[provider_identity(candidate)] == 1, "id_do_provedor_ausente_ou_duplicado")
+        finance = reconcile(candidate, approval, self.journal["binding"])
+        item.update(ledger=current, reconciliation=finance)
+        self.save()
+
     def run(self, command, approval=None):
         entries = self.journal["turns"]
         if command == "canary":
@@ -441,7 +569,7 @@ class Pilot:
         else:
             check(entries.keys() == {"P1.1"} and entries["P1.1"]["status"] == "checked" and approval is not None,
                   "canario_sem_conciliacao_ou_lote_ja_iniciado")
-            entries["P1.1"]["reconciliation"] = reconcile(entries["P1.1"], approval, self.journal["binding"])
+            self.reconcile_turn("P1.1", approval)
             labels = list(MATRIX)[1:]
         b = self.snapshot()
         check(self.project.stopped(), "parar_consumer_antes_da_rodada")
@@ -512,6 +640,11 @@ class Pilot:
                 check(row["state"] not in {"unknown", "failed", "discarded", "expired"} and
                       row["integration"] != "failed", "terminal_sem_resultado")
                 if row["state"] == "published" and row["disposition"]:
+                    identity = provider_identity(item)
+                    check(identity and provider_counts(self.journal["turns"])[identity] == 1,
+                          "id_do_provedor_ausente_ou_duplicado")
+                    first = provider_identity(self.journal["turns"]["P1.1"])
+                    check(first and first[0] == identity[0], "conta_do_piloto_divergente")
                     return
             time.sleep(min(.4, max(0, deadline-time.monotonic())))
         item["status"] = "timeout"
@@ -539,16 +672,12 @@ def main():
             runner = Pilot(project, Simulator(project.base), directory)
             if args.command == "reconcile":
                 check(args.turn and args.approval, "indique_turno_e_conciliacao")
-                runner.snapshot()
-                item = runner.journal["turns"][args.turn]
-                check(item["status"] == "checked", "turno_inconclusivo")
-                item["reconciliation"] = reconcile(item, args.approval, runner.journal["binding"])
-                runner.save()
+                runner.reconcile_turn(args.turn, args.approval)
             else:
                 check(args.turn is None, "turno_somente_para_conciliacao")
                 runner.run(args.command, args.approval)
         print(directory / "public.json")
-    except (Stop, OSError, ValueError, TypeError, KeyError, IndexError, subprocess.SubprocessError) as error:
+    except (Stop, OSError, ValueError, TypeError, KeyError, IndexError, DecimalException, subprocess.SubprocessError) as error:
         # Exceções de transporte, parse ou conversão podem conter trechos privados.
         print(str(error) if isinstance(error, Stop) else type(error).__name__, file=sys.stderr)
         return 1

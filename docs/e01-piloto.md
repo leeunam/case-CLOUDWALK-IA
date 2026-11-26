@@ -21,24 +21,31 @@ O journal privado fica em `~/.local/state/cloudwalk-e01/<projeto>/journal.json`.
 
 Revisar a orientação e sua fonte contra a edição congelada. Verificar os hashes do pedido e da proposta, a aplicação no Rails, o tempo de persistência e o estado do caso. A aprovação datada registra essa revisão humana. Para P1, cruzar três registros do mesmo despacho.
 
-- O journal contém `usage.provider_response_id`, os contadores normalizados e a provisão registrada pelo Rails.
-- O arquivo de captura privada da Luna contém `id`, `model`, `status`, `started_at`, `finished_at`, `request_sha256` e o objeto financeiro `usage`. Comparar `prompt_tokens`, `prompt_tokens_details.cached_tokens` e `completion_tokens` com o ledger. A falta de uma contagem mantém a conciliação pendente. O hash da captura identifica os bytes do POST ao provedor, enquanto o hash do ledger identifica os bytes do evento interno.
-- O registro independente da Feita precisa identificar o mesmo ID, a cobrança individual, a unidade financeira e a precisão. Salvar privadamente o documento de origem e uma extração JSON com os campos abaixo. O revisor responde pela correspondência entre a extração e o documento consultado. Se a interface mostrar apenas um total agregado, a conciliação individual continua pendente. Valores arredondados exigem também a resolução e a regra usada pela fonte. Não preencher o custo com uma estimativa do ledger.
+- O journal contém o `account_ref` privado do snapshot, o ID do provedor, os contadores normalizados, o hash do pedido e a provisão registrada pelo Rails. Antes de liberar P2 o runner relê o mesmo caso e a mesma sequência no PostgreSQL e compara os identificadores, hashes, recibo aplicado, conta, uso e valores com P1.
+- O arquivo de captura privada da Luna contém `id`, `model`, `status`, `started_at`, `finished_at`, `request_sha256` e o objeto financeiro `usage`. Comparar `prompt_tokens`, `completion_tokens` e sua soma `total_tokens` com o ledger. Quando `prompt_tokens_details` estiver presente, seu `cached_tokens` precisa ser inteiro válido e coincidir com o valor normalizado. A omissão integral do objeto permite aplicar zero desconto. Nesse caso, o relatório preserva `cached_tokens_observed: null` e o campo normalizado de desconto permanece 0. O hash da captura identifica os bytes do POST ao provedor, enquanto o hash do ledger identifica os bytes do evento interno.
+- A fonte monetária precisa identificar a resposta da Feita e a unidade do valor. Usar o próprio recibo HTTPS com `usage.credits` ou `usage.cost`, ou um extrato individual do portal. Salvar uma extração JSON separada com digest distinto da captura e com `original` apontando para o documento usado. Para `provider_api_receipt`, o original é a captura do despacho e `field` seleciona o campo financeiro bruto. Para `provider_portal`, o original é a exportação privada ou imagem do extrato, com digest distinto dos outros dois arquivos. A conferência da autenticidade e da transcrição cabe ao revisor. A cobrança informada no recibo representa o valor reportado pela API. A liquidação na carteira exigiria evidência da própria carteira.
 
-Exemplo de **formato** para a extração, com marcadores a substituir pelos valores observados. `source` identifica a origem consultável. Para cobrança expressa em USD, usar `"unit":"USD"` e omitir a taxa e sua referência.
+Exemplo de **formato** para extrair os créditos do recibo HTTPS. Todos os marcadores dependem de valores observados. O `account_ref` do documento e o `conversion_account_ref` da taxa devem coincidir com a conta do snapshot Rails. Quando a captura também identificar a conta, exige-se o mesmo valor. As referências privadas não aparecem no relatório público.
 
 ```json
 {
   "id": "<id observado na Feita>",
-  "source": "<extrato individual consultado, data e referência privada>",
+  "source_type": "provider_api_receipt",
+  "source": "<rota do gateway e referência privada do despacho>",
+  "original": {"file": "<captura financeira original>", "sha256": "<digest do original>"},
+  "account_ref": "<referência da conta>",
+  "field": "credits",
   "precision": "exact",
   "observed_at": "<instante ISO 8601 com fuso>",
-  "amount": "<decimal exato transcrito>",
+  "amount": "<decimal informado pela API>",
   "unit": "credits",
   "usd_per_credit": "<taxa decimal documentada>",
-  "conversion_source": "<referência aplicável à conta e data>"
+  "conversion_source": "<referência aplicável à conta e à data>",
+  "conversion_account_ref": "<referência da conta>"
 }
 ```
+
+Para extrato do portal, usar `provider_portal` e omitir `field`. Uma observação em USD usa `"unit":"USD"`. Se houver créditos em qualquer um dos documentos, a conversão também exige a taxa e sua fonte aplicável. Cada campo monetário presente na captura precisa ser consistente com os demais e caber no intervalo do extrato. Para `usage.cost` sem `usage.cost_unit`, registrar também `cost_unit` e `cost_unit_source` identificando a evidência que estabelece a unidade de `cost`. Se um campo específico da API tiver arredondamento comprovado, registrar, por exemplo, `capture_precision.cost` com `precision`, `quantum` e `precision_source`. Os valores conhecidos precisam admitir uma cobrança comum considerando suas precisões. Um valor sem unidade fundamentada, saldo agregado ou divergência mantém P2 pendente.
 
 Para arredondamento ao valor mais próximo, usar `"precision":"nearest"`. Para truncamento de uma cobrança não negativa, usar `"precision":"truncated"`. Informar `quantum` como decimal na unidade original e `precision_source` como referência que documenta a precisão e a regra. O relatório conserva o valor exibido e os extremos conservadores do intervalo. Seu limite superior precisa caber no valor contabilizado. Quando a regra ou unidade não tiver respaldo, preservar a pendência.
 
@@ -60,7 +67,7 @@ Preparar um arquivo de aprovação privado por turno. Os nomes de arquivo são r
   "request_id": "<id da rodada no ledger>",
   "result_sha256": "<hash verificado da proposta>",
   "capture": {"file": "<captura da Luna>", "sha256": "<digest>"},
-  "provider_record": {"file": "<extração do extrato independente>", "sha256": "<digest>"}
+  "provider_record": {"file": "<extração do recibo da API ou do extrato>", "sha256": "<digest>"}
 }
 ```
 
@@ -72,13 +79,13 @@ O comando verifica a aprovação antes de enviar P2. Cada turno seguinte exige a
 
 Uma falha interrompe a matriz e preserva o que já foi executado. Timeout, uso ausente, cobrança ambígua, falha de parada ou interrupção exigem inspeção. Parar o consumidor caso a confirmação da parada tenha falhado. Abrir o journal para conferir o caso/turno, as reservas e as contagens antes de interpretar o relatório. A última leitura do banco é uma fotografia e pode preceder uma expiração ou liquidação posterior.
 
-Depois de uma revisão bem-sucedida, o comando de conciliação individual complementa os tempos de provedor e o gasto monetário observado. Ele também pode registrar P1 separadamente antes de `remaining`.
+O comando de conciliação individual complementa os tempos e o valor informado pelo provedor. Uma rodada falha ou descartada com recibo atribuível e valor contabilizado também pode ser conciliada financeiramente. A extração deve indicar o mesmo pedido e `result_sha256` pode ser nulo quando inexiste proposta. O veredito do atendimento permanece `failed` ou `timeout`, e o canário reprovado bloqueia P2. Ele também pode registrar P1 separadamente antes de `remaining`.
 
 ```sh
 python3 -B script/e01/pilot.py reconcile --project cloudwalk_e01_piloto --base-url http://127.0.0.1:43309 --turn P2.1 --approval /caminho/privado/p2-1-aprovado.json
 ```
 
-`reserved_at_claim_usd` é a reserva inicial de cada execução. `accounted_usd` é o valor contabilizado no ledger, que no perfil conservador provisiona um teto pelo uso verificado. `provider_observed_usd` vem da conciliação individual e fica nulo até ela existir. A soma dos recibos conciliados é parcial enquanto a contagem de recibos ficar abaixo dos despachos. Uma verificação automática bem-sucedida recebe `checked`. A coluna `human_reviewed` indica as aprovações já conciliadas.
+`reserved_at_claim_usd` é a reserva inicial de cada execução. `accounted_usd` é o valor contabilizado no ledger, que no perfil conservador provisiona um teto pelo uso verificado. `provider_observed_usd` vem da conciliação individual e fica nulo até ela existir. A soma dos recibos conciliados é parcial enquanto a contagem de recibos ficar abaixo dos despachos. Uma verificação automática bem-sucedida recebe `checked`. A coluna `human_reviewed` indica revisão de uma orientação aceita e conciliada. `financially_reconciled` também pode valer para falhas. O acumulado distingue autorizações do ledger de chamadas observadas por ID distinto na mesma conta. Um ID repetido em turnos diferentes bloqueia o próximo envio e exclui ambos os montantes da soma até esclarecer a atribuição.
 
 Os ensaios históricos Luna R3/R5 publicaram extratos filtrados com ID `gateway:gen-…`, créditos e conversão para USD. Nos arquivos examinados faltam os campos brutos de cache do envelope de resposta. Esse material explica quais campos procurar. A primeira cobrança E01 e sua unidade precisam de verificação própria. [Extrato R3](evidencias/c05/luna-ensaio-real-01/financial-receipts.json) · [Extrato R5](evidencias/c05/luna-r5-ensaio-real-01/financial-receipts.json)
 
