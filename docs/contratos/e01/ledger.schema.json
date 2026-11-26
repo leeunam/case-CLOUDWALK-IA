@@ -509,6 +509,16 @@
       "additionalProperties": false
     },
     "billing_terms": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/billing_linear"
+        },
+        {
+          "$ref": "#/$defs/billing_bounded"
+        }
+      ]
+    },
+    "billing_linear": {
       "description": "Condições documentais obrigatórias do snapshot privado Rails. Nenhuma operação aceita estes campos do worker.",
       "type": "object",
       "properties": {
@@ -542,6 +552,35 @@
         "cache_write_surcharge",
         "provider_rounding",
         "other_charges"
+      ],
+      "additionalProperties": false
+    },
+    "billing_bounded": {
+      "description": "Limites para Luna, texto padrão. A provisão adicional por chamada cobre todos os encargos do gateway, incluindo mínimo e arredondamento.",
+      "type": "object",
+      "properties": {
+        "billing_basis": {
+          "const": "text_token_upper_bound"
+        },
+        "tariff_tiers": {
+          "const": "long_context_maximum"
+        },
+        "cache_write": {
+          "const": "inclusive_in_input_bound"
+        },
+        "cache_read": {
+          "const": "full_input_bound"
+        },
+        "per_request_extra_cap_usd": {
+          "$ref": "#/$defs/money_usd"
+        }
+      },
+      "required": [
+        "billing_basis",
+        "tariff_tiers",
+        "cache_write",
+        "cache_read",
+        "per_request_extra_cap_usd"
       ],
       "additionalProperties": false
     }

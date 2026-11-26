@@ -243,6 +243,9 @@ def main():
         pair = alternative_exchange(doc, example)
         validate_exchange(pair[0], schemas, pair[1])
         scenarios[example["name"]] = pair
+    bounded = dict(doc, billing_terms=read(FIXTURES / "billing-terms-bounded.json"))
+    validate_exchange(bounded, schemas, request_bytes)
+    scenarios["bounded"] = (bounded, request_bytes)
     rejected = read(FIXTURES / "negative.json")
     for case in rejected:
         original, original_bytes = scenarios[case.get("scenario", "clarify")]

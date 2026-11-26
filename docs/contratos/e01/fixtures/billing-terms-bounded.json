@@ -1,0 +1,7 @@
+{
+  "billing_basis": "text_token_upper_bound",
+  "tariff_tiers": "long_context_maximum",
+  "cache_write": "inclusive_in_input_bound",
+  "cache_read": "full_input_bound",
+  "per_request_extra_cap_usd": "0.000000000000"
+}

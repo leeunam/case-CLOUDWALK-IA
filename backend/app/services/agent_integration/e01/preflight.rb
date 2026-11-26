@@ -12,6 +12,12 @@ module AgentIntegration
       OUTPUT_RATE = "output_rate_usd_per_million"
       RATES = [INPUT_RATE, CACHE_RATE, OUTPUT_RATE].freeze
       EVIDENCE = %w[input_cap output_cap input_rate cache_rate output_rate billing_terms billable_failures].freeze
+      GATEWAY_EVIDENCE = %w[account_tariff_scope billable_usage_coverage per_request_extras].freeze
+      # Floors for the dated public Luna schedule. See docs/contratos/e01/README.md.
+      LUNA_INPUT_CAP = 1_050_000
+      LUNA_OUTPUT_CAP = 128_000
+      LUNA_INPUT_BOUND = BigDecimal("0.50")
+      LUNA_OUTPUT_BOUND = BigDecimal("1.80")
       FIELDS = (%w[mode provider model route account_ref policy_version documented_on billing_terms evidence] + CAPS + RATES).freeze
       MAX_BYTES = 16.kilobytes
 
@@ -39,15 +45,18 @@ module AgentIntegration
       def valid?
         return false unless @data.keys.sort == FIELDS.sort
         return false unless @data.values_at("provider", "model", "route") == [PROVIDER, MODEL, ROUTE]
-        return false unless @data["mode"] == "feita_verified" || (Rails.env.test? && @data["mode"] == "offline_test")
         return false unless reference?(@data["account_ref"]) && documented?
         return false unless @data["policy_version"].is_a?(String) && @data["policy_version"].match?(/\A[a-z][a-z0-9._-]{0,79}\z/)
         return false unless CAPS.all? { |field| @data[field].is_a?(Integer) && (1..2_147_483_647).cover?(@data[field]) }
         return false unless RATES.all? { |field| @data[field].is_a?(String) && @data[field].match?(/\A[0-9]+(?:\.[0-9]+)?\z/) }
         return false unless Contract.valid?("billing_terms", @data["billing_terms"])
 
+        return false unless mode_matches_terms?
+        return false if bounded? && !covers_public_schedule?
+
+        required = bounded? ? EVIDENCE + GATEWAY_EVIDENCE : EVIDENCE
         evidence = @data["evidence"]
-        evidence.is_a?(Hash) && evidence.keys.sort == EVIDENCE.sort && evidence.values.all? { |value| reference?(value) } &&
+        evidence.is_a?(Hash) && evidence.keys.sort == required.sort && evidence.values.all? { |value| reference?(value) } &&
           cache_rate <= input_rate && reserve.positive?
       end
 
@@ -68,6 +77,19 @@ module AgentIntegration
 
       private
 
+      def bounded? = @data.dig("billing_terms", "billing_basis") == "text_token_upper_bound"
+
+      def mode_matches_terms?
+        return Rails.env.test? if @data["mode"] == "offline_test"
+
+        @data["mode"] == (bounded? ? "feita_bounded_public" : "feita_verified")
+      end
+
+      def covers_public_schedule?
+        @data.fetch("input_cap") >= LUNA_INPUT_CAP && @data.fetch("output_cap") >= LUNA_OUTPUT_CAP &&
+          input_rate >= LUNA_INPUT_BOUND && output_rate >= LUNA_OUTPUT_BOUND && cache_rate == input_rate
+      end
+
       def documented?
         value = @data["documented_on"]
         value.is_a?(String) && value.match?(/\A[0-9]{4}-[0-9]{2}-[0-9]{2}\z/) && Date.iso8601(value) <= Time.current.to_date
@@ -82,7 +104,8 @@ module AgentIntegration
       def output_rate = BigDecimal(@data.fetch(OUTPUT_RATE))
 
       def usd(microdollars)
-        (microdollars / 1_000_000).ceil(12)
+        extras = bounded? ? BigDecimal(@data.fetch("billing_terms").fetch("per_request_extra_cap_usd")) : 0
+        (microdollars / 1_000_000 + extras).ceil(12)
       end
     end
   end
