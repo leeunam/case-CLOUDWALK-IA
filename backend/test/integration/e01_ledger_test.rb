@@ -202,12 +202,101 @@ class E01LedgerTest < ActionDispatch::IntegrationTest
   end
 
   test "configuração sintética só passa no ambiente de teste" do
-    snapshot = E01::Preflight.load!
+    linear = E01::Preflight.load!
+    configure_bounded
+    bounded = E01::Preflight.load!
     environment = Rails.env
     Rails.env = "production"
-    refute snapshot.valid?
+    refute linear.valid?
+    refute bounded.valid?
   ensure
     Rails.env = environment if environment
+  end
+
+  test "vincula o modo financeiro às premissas e exige cobertura documentada de toda a faixa" do
+    configure_preflight("mode" => "feita_verified")
+    flat = E01::Preflight.load!
+    assert_equal BigDecimal("0.0061"), flat.cost!(usage)
+    refute E01::Preflight.new(flat.data.merge("mode" => "feita_bounded_public")).valid?
+
+    configure_bounded
+    bounded = E01::Preflight.load!.data
+    refute E01::Preflight.new(bounded.merge("mode" => "feita_verified")).valid?
+    assert E01::Preflight.new(bounded.merge("mode" => "feita_bounded_public")).valid?
+    [
+      { "input_cap" => 1_049_999 }, { "output_cap" => 127_999 },
+      { "input_rate_usd_per_million" => "0.49999", "cache_rate_usd_per_million" => "0.49999" },
+      { "output_rate_usd_per_million" => "1.79999" }, { "cache_rate_usd_per_million" => "0.02" },
+      { "evidence" => bounded.fetch("evidence").except("per_request_extras") },
+      { "evidence" => bounded.fetch("evidence").except("billable_usage_coverage") },
+      { "evidence" => bounded.fetch("evidence").merge("account_tariff_scope" => " ") }
+    ].each { |change| refute E01::Preflight.new(bounded.merge(change)).valid?, change.inspect }
+
+    configure_bounded("output_cap" => 32_000)
+    outbox = prepare_round
+    assert_equal [503, { "error" => "preflight_missing" }], send_op(outbox, "claim", claim_body(outbox))
+    assert_equal 0, E01::Execution.count
+  end
+
+  test "dois pedidos disputam a reserva conservadora no último saldo e no último despacho" do
+    configure_bounded
+    contend_for_last(spent: "0.244600000000", prior_dispatches: 23,
+                     final_usage: usage.merge("input_tokens" => 1_050_000, "cached_input_tokens" => 1_050_000,
+                                              "output_tokens" => 128_000))
+    assert_equal BigDecimal("1"), E01::Pilot.find(1).spent_usd
+    assert_equal 24, E01::Pilot.find(1).dispatch_count
+    assert_equal BigDecimal("0.7554"), E01::Execution.sole.cost_usd
+  end
+
+  test "contabiliza toda entrada pelo teto, soma adicionais por chamada e arredonda para cima" do
+    terms = fixture("billing-terms-bounded.json").merge("per_request_extra_cap_usd" => "0.010000000000")
+    configure_bounded("billing_terms" => terms, "input_rate_usd_per_million" => "0.5000001",
+                      "cache_rate_usd_per_million" => "0.5000001")
+    [1, 0].each do |count|
+      outbox = prepare_round
+      lease = start_round(outbox)
+      assert_equal BigDecimal("0.765400105000"), execution(outbox).reserved_usd
+      reported = usage.merge("input_tokens" => count, "cached_input_tokens" => count, "output_tokens" => count)
+      body = completed(outbox, lease).merge("usage" => reported)
+      assert_equal "result_saved", assert_success(send_op(outbox, "complete", body), "complete_response").fetch("state")
+      expected = count == 1 ? "0.010002300001" : "0.010000000000"
+      assert_equal BigDecimal(expected), execution(outbox).cost_usd
+    end
+    assert_equal BigDecimal("0.020002300001"), E01::Pilot.find(1).spent_usd
+  end
+
+  test "um adicional acima do saldo por um picodólar impede o despacho" do
+    terms = fixture("billing-terms-bounded.json")
+    configure_bounded("billing_terms" => terms.merge("per_request_extra_cap_usd" => "0.244600000001"))
+    refused = prepare_round
+    assert_equal [409, { "error" => "budget_exhausted" }], send_op(refused, "claim", claim_body(refused))
+    assert_equal 0, E01::Pilot.find(1).dispatch_count
+
+    configure_bounded("billing_terms" => terms.merge("per_request_extra_cap_usd" => "0.244600000000"))
+    accepted = prepare_round
+    lease = start_round(accepted)
+    assert_equal BigDecimal("1"), execution(accepted).reserved_usd
+    configure_preflight
+    body = completed(accepted, lease)
+    assert_success(send_op(accepted, "complete", body), "complete_response")
+    assert_equal BigDecimal("0.245030000000"), execution(accepted).cost_usd
+  end
+
+  test "uso sem identidade válida conserva a reserva conservadora inteira e pausa o piloto" do
+    configure_bounded
+    outbox = prepare_round
+    lease = start_round(outbox)
+    body = completed(outbox, lease)
+    [nil, usage.except("provider_response_id"), usage.merge("input_tokens" => 1_050_001),
+     usage.merge("output_tokens" => 128_001)].each do |invalid|
+      assert_equal [422, { "error" => "invalid_body" }], send_op(outbox, "complete", body.merge("usage" => invalid))
+    end
+    assert_success(send_op(outbox, "unknown", lease.merge("reason" => "usage_invalid")), "unknown_response")
+    assert_nil execution(outbox).cost_usd
+    assert_equal BigDecimal("0.7554"), execution(outbox).reserved_usd
+    assert_equal BigDecimal("0"), E01::Pilot.find(1).spent_usd
+    blocked = prepare_round
+    assert_equal [409, { "error" => "pilot_paused" }], send_op(blocked, "claim", claim_body(blocked))
   end
 
   test "o mesmo dono recupera a reserva sem prorrogação, e start concorrente despacha uma vez" do
@@ -489,6 +578,18 @@ class E01LedgerTest < ActionDispatch::IntegrationTest
     File.write(@file.path, JSON.generate(snapshot.merge(overrides)))
   end
 
+  def configure_bounded(overrides = {})
+    evidence = JSON.parse(File.read(@file.path)).fetch("evidence")
+    %w[account_tariff_scope billable_usage_coverage per_request_extras].each do |key|
+      evidence[key] = "Synthetic test evidence for #{key}"
+    end
+    configure_preflight({
+      "input_cap" => 1_050_000, "output_cap" => 128_000, "input_rate_usd_per_million" => "0.50",
+      "cache_rate_usd_per_million" => "0.50", "output_rate_usd_per_million" => "1.80",
+      "billing_terms" => fixture("billing-terms-bounded.json"), "evidence" => evidence
+    }.merge(overrides))
+  end
+
   def fixture(name)
     JSON.parse(Rails.root.join("../docs/contratos/e01/fixtures", name).read)
   end
@@ -602,7 +703,8 @@ class E01LedgerTest < ActionDispatch::IntegrationTest
     assert_equal reason, turn.support_case.audits.where(event_type: "agent.execution.failed").sole.reason
   end
 
-  def contend_for_last(spent:, prior_dispatches:)
+  def contend_for_last(spent:, prior_dispatches:, final_usage: usage.merge("input_tokens" => 1000, "output_tokens" => 500,
+                                                                           "cached_input_tokens" => 0))
     pilot = E01::Pilot.create!(id: 1, spent_usd: spent, dispatch_count: prior_dispatches)
     outboxes = [prepare_round, prepare_round]
     contenders = outboxes.map do |outbox|
@@ -620,7 +722,7 @@ class E01LedgerTest < ActionDispatch::IntegrationTest
     assert_equal true, assert_success(winner.last, "start_response").fetch("dispatch")
     assert_equal [409, { "error" => "busy" }], loser.last
     outbox, lease = winner
-    last = completed(outbox, lease).merge("usage" => usage.merge("input_tokens" => 1000, "output_tokens" => 500, "cached_input_tokens" => 0))
+    last = completed(outbox, lease).merge("usage" => final_usage)
     assert_success(send_op(outbox, "complete", last), "complete_response")
     assert_equal [409, { "error" => "budget_exhausted" }], send_op(loser.first, "claim", claim_body(loser.first))
     assert_failure(loser.first, "budget_exhausted")

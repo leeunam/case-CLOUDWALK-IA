@@ -448,5 +448,68 @@
       "dispatch": false
     },
     "expected": "first_dispatch"
+  },
+  {
+    "name": "limite de custo permite desconto de leitura",
+    "scenario": "bounded",
+    "path": "/billing_terms/cache_read",
+    "value": "discounted",
+    "expected": "schema"
+  },
+  {
+    "name": "escrita tratada como leitura no limite",
+    "scenario": "bounded",
+    "path": "/billing_terms/cache_write",
+    "value": "cache_read",
+    "expected": "schema"
+  },
+  {
+    "name": "limite sem cobertura de contexto longo",
+    "scenario": "bounded",
+    "path": "/billing_terms/tariff_tiers",
+    "value": "standard_only",
+    "expected": "schema"
+  },
+  {
+    "name": "limite dos adicionais negativo",
+    "scenario": "bounded",
+    "path": "/billing_terms/per_request_extra_cap_usd",
+    "value": "-0.000000000001",
+    "expected": "schema"
+  },
+  {
+    "name": "adicionais omitidos por desconhecimento",
+    "scenario": "bounded",
+    "path": "/billing_terms/per_request_extra_cap_usd",
+    "value": null,
+    "expected": "schema"
+  },
+  {
+    "name": "limite dos adicionais perde precisão",
+    "scenario": "bounded",
+    "path": "/billing_terms/per_request_extra_cap_usd",
+    "value": "0.0000000000001",
+    "expected": "schema"
+  },
+  {
+    "name": "mistura premissa linear com limite superior",
+    "scenario": "bounded",
+    "path": "/billing_terms/billing_basis",
+    "value": "tokens_only",
+    "expected": "schema"
+  },
+  {
+    "name": "worker tenta escolher a provisão por chamada",
+    "scenario": "bounded",
+    "path": "/ledger/claim/per_request_extra_cap_usd",
+    "value": "0.000000000000",
+    "expected": "schema"
+  },
+  {
+    "name": "worker tenta substituir a contabilização no uso",
+    "scenario": "bounded",
+    "path": "/ledger/complete_result/usage/cost_usd",
+    "value": "0.000000000000",
+    "expected": "schema"
   }
 ]
