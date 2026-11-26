@@ -1,4 +1,4 @@
-"""Pré-voo público e comandos condicionais SF2-FINAL-R1. Usar Python pinado -I -B."""
+"""Pré-voo público e comandos condicionais SF2-FINAL-R1. Usar Python pinado -I -B -S."""
 import argparse
 import importlib
 import json
@@ -53,22 +53,17 @@ def parse(argv):
     return parser.parse_args(argv)
 
 
-def active_worker(args, pre, release, guard, b, commit, source_hashes, snapshot, layout, dependencies):
+def active_worker(args, pre, guard, b, commit, source_hashes, snapshot, authenticated):
     import os
     from importlib import import_module
     storage = import_module(MODULE + ".qualification_r1.storage")
-    seal = json.loads(storage.read(snapshot / b.FINAL_PROTOCOL))["anchors_sha256"]["public_final_seal"]
-    # Derivar o digest da reserva, nunca dos próprios arquivos que se quer liberar.
-    reserved = json.loads(storage.read(guard.shared / (seal + ".json")))
-    expected = reserved["release_sha256"]
-    guard.authorization(expected, seal)
-    guard.verify(args.release, expected, seal, args.run)
-    config, frozen, command = release.chain(args.release, expected, layout=layout)
+    expected, config = authenticated.sha256, authenticated.config
+    frozen, command = authenticated.frozen, authenticated.command
+    guard.verify(args.release, expected, frozen["final_seal_sha256"], args.run)
     require = storage.require
     require(args.commit == commit and config == pre.configuration(ROOT, commit, args.release, args.run)
             and frozen["current_sources"] == source_hashes and command["argv"] == [sys.executable, "-I", "-B", "-S", *sys.argv]
             and command["cwd"] == os.getcwd() and command["environment"] == dict(os.environ), "worker fora da liberação")
-    require(dependencies == frozen["dependencies"], "dependências do worker divergentes")
     verify_interpreter(frozen, b.interpreter())
     # O próprio adaptador original só inicia após vincular este processo à reserva única.
     storage.exclusive(args.run / "worker-started.json", storage.encoded(dict(release_sha256=expected, pid=os.getpid())))
@@ -86,24 +81,51 @@ def verify_interpreter(frozen, actual):
         raise ValueError("Python efetivamente carregado diverge da liberação")
 
 
+def authenticate(args, b, commit, snapshot, sources, layout, release, guard, storage):
+    """Somente o primeiro freeze e a emissão de seu template precedem uma liberação."""
+    if args.action in ("freeze", "template"):
+        return None
+    protocol = storage.decode(storage.read(snapshot / b.FINAL_PROTOCOL, b.PLAN_SHA))
+    seal = protocol["anchors_sha256"]["public_final_seal"]
+    if args.action == "_worker":
+        reserved = storage.decode(storage.read(guard.shared / (seal + ".json")))
+        expected = reserved["release_sha256"]
+        guard.verify(args.release, expected, seal, args.run)
+    else:
+        expected = args.expect
+    authenticated = release.chain(args.release, expected, layout=layout)
+    config, frozen = authenticated.config, authenticated.frozen
+    b.check(frozen["final_seal_sha256"] == seal, "selo público da liberação divergente")
+    b.check(config["accepted_commit"] == frozen["accepted_commit"] == commit
+            and frozen["current_sources"] == sources, "fontes efetivas divergem da liberação")
+    b.check(type(frozen["dependencies"]) is dict and set(frozen["dependencies"]) == {"pth", "distributions"},
+            "inventário de dependências liberado inválido")
+    verify_interpreter(frozen, b.interpreter())
+    return authenticated
+
+
 def dispatch(args):
     b, commit = bootstrap()
     layout = b.arguments(ROOT, commit, args)
     with b.snapshot(ROOT, commit) as (snapshot, sources):
+        # Estes módulos do snapshot usam somente a biblioteca padrão.
+        release = importlib.import_module(MODULE + ".qualification_r1.release")
+        guard = importlib.import_module(MODULE + ".qualification_r1.exposure").Guard.production()
+        storage = importlib.import_module(MODULE + ".qualification_r1.storage")
+        authenticated = authenticate(args, b, commit, snapshot, sources, layout, release, guard, storage)
         dep = importlib.import_module(MODULE + ".qualification_r1.dependencies")
         origin = snapshot / "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/pacote/manifest.json"
         raw = origin.read_bytes()
         b.check(b.sha(raw) == b.PACKAGE_SHA, "manifesto do ambiente divergente")
-        with dep.environment(json.loads(raw)["versions"]) as dependencies:
-            return dispatch_verified(args, b, commit, snapshot, sources, layout, dependencies)
+        expected = authenticated.frozen["dependencies"] if authenticated is not None else None
+        with dep.environment(json.loads(raw)["versions"], expected=expected) as dependencies:
+            return dispatch_verified(args, b, commit, snapshot, sources, layout, dependencies,
+                                     release, guard, authenticated)
 
 
-def dispatch_verified(args, b, commit, snapshot, sources, layout, dependencies):
+def dispatch_verified(args, b, commit, snapshot, sources, layout, dependencies, release, guard, authenticated):
     pre = importlib.import_module(MODULE + ".qualification_r1.preflight")
-    release = importlib.import_module(MODULE + ".qualification_r1.release")
     flow = importlib.import_module(MODULE + ".qualification_r1.execution")
-    exposure = importlib.import_module(MODULE + ".qualification_r1.exposure")
-    guard = exposure.Guard.production()
     def inspect(config):
         return pre.inspect_public(ROOT, commit, snapshot, sources, config, dependencies)
 
@@ -112,11 +134,11 @@ def dispatch_verified(args, b, commit, snapshot, sources, layout, dependencies):
     if args.action == "freeze":
         return release.freeze(args.config, args.out, inspect, layout=layout)
     if args.action == "_worker":
-        return active_worker(args, pre, release, guard, b, commit, sources, snapshot, layout, dependencies)
-    checked = release.check(args.release, args.expect, inspect, layout=layout)
+        return active_worker(args, pre, guard, b, commit, sources, snapshot, authenticated)
+    checked = release.check_authenticated(authenticated, inspect)
     if args.action == "check":
         return args.expect
-    config, _, _ = release.chain(args.release, args.expect, layout=layout)
+    config = authenticated.config
     dest = args.out if args.action == "execute" else args.run
     b.check(str(dest) == config["run"], "destino diferente do planejado")
     runtime = importlib.import_module(MODULE + ".runtime_r1")

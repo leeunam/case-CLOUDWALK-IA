@@ -5,9 +5,8 @@ import os
 import re
 from pathlib import Path
 
-from ..contracts.core import decode
 from .bootstrap import CUSTODY, HISTORY, MAIN, SF
-from .storage import canonical, encoded, exclusive, read, require, sync_directory
+from .storage import decode, canonical, encoded, exclusive, read, require, sync_directory
 
 
 @dataclass(frozen=True)

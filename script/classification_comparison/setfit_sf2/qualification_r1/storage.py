@@ -2,6 +2,7 @@
 import hashlib
 import json
 import os
+import math
 import stat
 from pathlib import Path
 from contextlib import contextmanager
@@ -11,6 +12,23 @@ from secrets import token_hex
 def require(condition, message):
     if not condition:
         raise ValueError(message)
+
+
+def decode(raw):
+    """O bootstrap interpreta o mesmo buffer autenticado e recusa chaves duplicadas e valores não finitos."""
+    def unique(pairs):
+        result = {}
+        for key, value in pairs:
+            require(key not in result, "chave JSON duplicada")
+            result[key] = value
+        return result
+
+    def finite(value):
+        number = float(value)
+        require(math.isfinite(number), "valor JSON não finito")
+        return number
+
+    return json.loads(raw, object_pairs_hook=unique, parse_constant=finite, parse_float=finite)
 
 
 def digest(raw):
@@ -46,13 +64,19 @@ def directory(path):
         os.close(fd)
 
 
-def read(path, expected=None):
+@contextmanager
+def open_regular(path):
     path = Path(path)
     with directory(path.parent) as parent:
         fd = os.open(path.name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=parent)
         with os.fdopen(fd, "rb") as source:
             require(stat.S_ISREG(os.fstat(source.fileno()).st_mode), "arquivo não regular")
-            raw = source.read()
+            yield source
+
+
+def read(path, expected=None):
+    with open_regular(path) as source:
+        raw = source.read()
     if expected is not None:
         require(digest(raw) == expected, "SHA-256 divergente: " + str(path))
     return raw
