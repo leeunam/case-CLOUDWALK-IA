@@ -39,7 +39,7 @@ antes da admissão. Prazo vencido ou transporte interrompido sem prova de recusa
 revisão. O sidecar projeta para `sf2-ipc/1.0`, com versão semântica do catálogo distinta da
 versão operacional da marca.
 
-A materializa as definições fechadas da norma, incluindo pins do pacote, das duas cabeças, das duas políticas e do inventário qualificado. As fixtures públicas são sintéticas e incluem pedido e retorno de sucesso, revisão, erro, recusa por status e o vetor de catálogo de 449 bytes. O checker confere também invariantes relacionais que um JSON Schema isolado não expressa.
+A materializa as definições fechadas da norma, incluindo pins do pacote, das duas cabeças, das duas políticas e do inventário qualificado. As fixtures públicas são sintéticas e incluem pedido e retorno de sucesso, revisão, erro, recusa por status (inclusive `422 text_out_of_scope`) e o vetor de catálogo de 449 bytes. O checker confere também invariantes relacionais que um JSON Schema isolado não expressa.
 
 **Aceite.** Checker valida fixtures REST históricas e 1.1, request Kafka 1.0 e 1.1 e rejeição de
 `setfit` em 1.0. Ponte e mock processam ambas as versões. O mock gera resultado 1.0 e conserva
@@ -64,7 +64,7 @@ Fixar provedor do pedido e capturar catálogo/versão/hash, identificador da men
 marca → caso → pedido. Pedidos pendentes antigos conservam o provedor de origem quando
 recuperável. Se a origem for indeterminada na migração de modo, encerrar em revisão explícita.
 Chamar HTTP fora da transação. Aplicar 5 s no sidecar, incluindo validação, e 6 s de prazo absoluto
-no Ruby, abaixo do lease de 30 s. Para o caminho HTTP, repetir só após `503 busy|not_ready` validado que comprove recusa pré-admissão, no teto atual de duas tentativas. A recuperação de processo continua limitada pelo
+no Ruby, abaixo do lease de 30 s. Para o caminho HTTP, repetir só após `503 busy|not_ready` validado que comprove recusa pré-admissão, no teto atual de duas tentativas. Todo `422`, inclusive `text_out_of_scope`, leva à revisão sem aplicação ou repetição. A recuperação de processo continua limitada pelo
 mesmo teto. B possui a fila Solid Queue `classification_setfit`, com um processo de uma thread, e exclui essa fila dos consumidores gerais. Preservar o consumo da fila legada e a recuperação. A espera por vaga ocorre no PostgreSQL antes do claim. Se o processo Rails morrer após o envio, a recuperação pode iniciar outra tentativa sob o teto. A garantia durável é uma aplicação e uma rodada/outbox por ativação.
 
 Na liquidação, conferir tentativa vigente, lease, status, versão da classificação, versão/hash
@@ -95,14 +95,13 @@ local em `compose*.yml` e `script/demo.py`. Consome o worker congelado `setfit_s
 Sidecar sem porta publicada, na rede privada do worker Rails, com pacote somente
 leitura e identidades verificadas antes da carga. Manter um subprocesso JSONL residente e um
 dono do pipe, com admissão serial e resposta `503 busy` sem fila interna. Aplicar 65.536 bytes tanto ao corpo de entrada como ao frame completo com LF, prazo interno de 5.000 ms incluindo verificação e 60.000 ms para partida. Esses limites de bytes são adicionais aos do IPC qualificado. Manter rede privada exclusiva entre worker Rails e serviço. Pesos e selos entram em modo somente leitura. Readiness exige
-`READY` e identidades esperadas. Conferir os mesmos 17 arquivos e o núcleo R1 com os hashes da adoção. Validar a observação da coleta e usar `load_context`, `derive` e `verify` para a decisão aprovada, conservando o hash dos bytes do frame incluindo LF. O frame `too_long` que R1 recusa vira `502 invalid_worker_frame`, revisão sem aplicação nem repetição. Em EOF, frame inválido ou timeout, retirar prontidão, colher o filho
+`READY` e identidades esperadas. Conferir os mesmos 17 arquivos e o núcleo R1 com os hashes da adoção. Validar a observação da coleta e usar `load_context`, `derive` e `verify` para a decisão aprovada, conservando o hash dos bytes do frame incluindo LF. Antes de admitir inferência, medir o máximo dos tokenizadores solicitados do pacote, verificados conforme pins, com a mesma configuração e tokens especiais do worker, sem truncar nem carregar outro encoder. Acima de 128 tokens com essa comprovação, devolver `422 text_out_of_scope` antes da escrita no pipe, sem inferência ou reinício. Na ausência dessa prova, o frame `too_long` que R1 recusa vira `502 invalid_worker_frame`, revisão sem aplicação nem repetição. Em EOF, frame inválido ou timeout, retirar prontidão, colher o filho
 e reiniciar com tentativas limitadas. Uma sessão interrompida descarta frames tardios. A demo
 local tem seleção explícita do modo real e preserva o fixture como padrão, inclusive na pilha
 publicada.
 
 **Aceite.** Com worker falso, provar duas chamadas no mesmo processo, apenas a cabeça do campo
-ausente, saturação, timeout, ressincronização por reinício e rejeição de identidade/frame
-divergente. Com a integração aprovada, rodar cenários sintéticos do produto em projeto local
+ausente, saturação, timeout, ressincronização por reinício e rejeição de identidade/frame divergente. Com o tokenizador qualificado provar a fronteira de 128/129 tokens de cada cabeça solicitada. No excesso, conferir `422 text_out_of_scope`, zero escritas no pipe e o mesmo PID pronto para o próximo pedido. Sem prova da tokenização, injetar o frame recusado pelo R1 e exigir `502 invalid_worker_frame` e revisão sem aplicação. Com a integração aprovada, rodar cenários sintéticos do produto em projeto local
 isolado, duas marcas e um worker residente. Confirmar fluxo direto, complemento por campo e dos
 dois, revisão/correção, atraso induzido e reentrega, fila correta, uma rodada Kafka e resposta
 visível. Registrar correlações, partida/reinício, tempos de fila, inferência, HTTP e Kafka,
