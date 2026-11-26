@@ -80,6 +80,9 @@ services:
 
   api:
     <<: *backend
+    environment:
+      <<: *backend-environment
+      CLOUDWALK_JEV_MODE: ${CLOUDWALK_JEV_MODE:-disabled}
     command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-P", "/tmp/cloudwalk-server.pid"]
     ports:
       - "127.0.0.1:${API_PORT:-3000}:3000"

@@ -2,6 +2,7 @@
 x-classification: &classification
   CLASSIFICATION_PROVIDER: setfit
   CLASSIFICATION_CONTRACT_DIR: /workspace/docs/contratos/classification-http
+  CLOUDWALK_JEV_MODE: disabled
 
 services:
   api:
@@ -12,7 +13,6 @@ services:
     environment:
       <<: *classification
       SETFIT_URL: http://setfit:8080
-      CLOUDWALK_JEV_MODE: disabled
     command: [bundle, exec, ruby, bin/jobs]
     networks: [default, inference]
     volumes:

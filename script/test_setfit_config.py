@@ -8,19 +8,31 @@ import tempfile
 from types import SimpleNamespace
 import unittest
 
-from demo import Compose
+from demo import Compose, ROOT
 from publish import Stack
 
 
 @unittest.skipUnless(shutil.which("docker"), "Docker Compose necessário")
 class ClassifierConfigTest(unittest.TestCase):
+    def test_base_compose_pins_legacy_mode_at_intake_and_processing(self):
+        for mode in (None, "fixture", "http"):
+            env = {"PATH": os.environ["PATH"]}
+            if mode:
+                env["CLOUDWALK_JEV_MODE"] = mode
+            result = subprocess.run(["docker", "compose", "--env-file", os.devnull, "-f", str(ROOT / "compose.yml"),
+                                     "config", "--format", "json"], env=env, capture_output=True, check=True)
+            services = json.loads(result.stdout)["services"]
+            for key in ("api", "worker"):
+                self.assertEqual(services[key]["environment"]["CLOUDWALK_JEV_MODE"], mode or "disabled")
+            self.assertNotIn("TYPESAFE_API_KEY", services["api"]["environment"])
+
     def test_isolation_of_each_demo_and_default(self):
         with tempfile.TemporaryDirectory() as temp:
             model = Path(temp) / "model"
             model.mkdir()
             (model / "manifest.json").write_text("{}")
             for published in (False, True):
-                for classifier in ("fixture", "setfit"):
+                for classifier in (("fixture", "setfit") if published else ("fixture", "disabled", "setfit")):
                     with self.subTest(published=published, classifier=classifier):
                         args = SimpleNamespace(project="c06c_config", http_port=18111, https_port=18444,
                                                api_port=43210, web_port=45210, classifier=classifier,
@@ -40,9 +52,10 @@ class ClassifierConfigTest(unittest.TestCase):
                         result = subprocess.run([*command, "config", "--format", "json"], check=True,
                                                 env=stack.env, capture_output=True)
                         services = json.loads(result.stdout)["services"]
-                        if classifier == "fixture":
+                        if classifier != "setfit":
                             self.assertNotIn("setfit", services)
-                            self.assertEqual(services["worker"]["environment"]["CLOUDWALK_JEV_MODE"], "fixture")
+                            for key in ("api", "worker"):
+                                self.assertEqual(services[key]["environment"]["CLOUDWALK_JEV_MODE"], classifier)
                             continue
                         sidecar = services["setfit"]
                         self.assertFalse(sidecar.get("ports"))
@@ -53,6 +66,7 @@ class ClassifierConfigTest(unittest.TestCase):
                         self.assertEqual(services["worker"]["environment"]["SETFIT_URL"], "http://setfit:8080")
                         for key in ("worker", "api"):
                             self.assertEqual(services[key]["environment"]["CLASSIFICATION_PROVIDER"], "setfit")
+                            self.assertEqual(services[key]["environment"]["CLOUDWALK_JEV_MODE"], "disabled")
                         mount = next(vol for vol in sidecar["volumes"] if vol["target"] == "/model")
                         self.assertTrue(mount["read_only"])
                         self.assertEqual(mount["source"], str(model))

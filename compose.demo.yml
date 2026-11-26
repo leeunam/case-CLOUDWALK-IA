@@ -27,6 +27,7 @@ services:
   api:
     environment:
       <<: *demo-rails
+      CLOUDWALK_JEV_MODE: ${DEMO_CLASSIFIER_MODE:-fixture}
       CLOUDWALK_CHANNEL_SECRET: ${DEMO_CHANNEL_SECRET:?execute python3 script/demo.py init}
       CLOUDWALK_AGENT_EVENTS_SECRET: ${DEMO_AGENT_EVENTS_SECRET:?execute python3 script/demo.py init}
       CLOUDWALK_DEMO_PASSWORDS: ${DEMO_PASSWORDS:?execute python3 script/demo.py init}
