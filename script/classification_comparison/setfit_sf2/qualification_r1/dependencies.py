@@ -144,7 +144,7 @@ def environment(versions, *, expected):
                 str(OVERLAY / "distutils-precedence.pth")}
     require(set(pth) == allowed_pth and read(SITE / "sf1-readonly.pth").decode().strip() == str(OVERLAY),
             "overlay efetivo diferente do previsto")
-    with TemporaryDirectory(prefix="sf2-site-") as tmp:
+    with TemporaryDirectory(dir="/tmp", prefix="sf2-site-") as tmp:
         receipt, targets = build_sites(versions, roots, Path(tmp))
         inventory = dict(pth=pth, distributions=receipt)
         if expected is not None:

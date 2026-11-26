@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import re
+import stat
 import subprocess
 import sys
 from tempfile import TemporaryDirectory
@@ -34,6 +35,32 @@ def check(value, message):
 
 def sha(raw):
     return hashlib.sha256(raw).hexdigest()
+
+
+@contextmanager
+def directory(path):
+    path = Path(path)
+    check(path.is_absolute() and ".." not in path.parts, "diretório fora da raiz")
+    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+    fd = os.open("/", flags)
+    try:
+        for part in path.parts[1:]:
+            child = os.open(part, flags, dir_fd=fd)
+            os.close(fd)
+            fd = child
+        yield fd
+    finally:
+        os.close(fd)
+
+
+@contextmanager
+def open_regular(path):
+    path = Path(path)
+    with directory(path.parent) as parent:
+        fd = os.open(path.name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=parent)
+        with os.fdopen(fd, "rb") as source:
+            check(stat.S_ISREG(os.fstat(source.fileno()).st_mode), "arquivo não regular")
+            yield source
 
 
 def public_layout(root):
@@ -98,24 +125,22 @@ def interpreter(invocation=PYTHON, process=Path("/proc/self/exe"), *, allowed=No
 
 
 def git(root, *args):
-    return subprocess.check_output(["/usr/bin/git", "--no-replace-objects", "-C", str(root), *args],
-                                   env=MIN_ENV)
+    with directory(root) as fd:
+        return subprocess.check_output(["/usr/bin/git", "--no-replace-objects", "-C", f"/proc/self/fd/{fd}", *args],
+                                       pass_fds=(fd,), env=MIN_ENV)
 
 
 def committed(root, commit, name):
     check(re.fullmatch("[0-9a-f]{40}", commit) and not Path(name).is_absolute() and ".." not in Path(name).parts,
           "commit ou nome inválido")
-    path = root / name
-    for component in (*reversed(path.parents), path):
-        check(not component.is_symlink(), "origem redirecionada: " + name)
-    check(path.is_file(), "origem não regular: " + name)
-    raw = path.read_bytes()
+    with open_regular(root / name) as stream:
+        raw = stream.read()
     check(git(root, "show", commit + ":" + name) == raw, "bytes fora do commit aceito: " + name)
     return raw
 
 
 def checkout(root, commit):
-    check(root.resolve() == root and git(root, "rev-parse", "HEAD").decode().strip() == commit and
+    check(git(root, "rev-parse", "HEAD").decode().strip() == commit and
           Path(git(root, "rev-parse", "--path-format=absolute", "--git-common-dir").decode().strip()) == MAIN / ".git",
           "checkout, raiz principal ou commit divergente")
 
@@ -166,7 +191,7 @@ def snapshot(root, commit):
     entry_environment()
     checkout(root, commit)
     blobs = resources(root, commit)
-    with TemporaryDirectory(prefix="sf2-verified-") as tmp:
+    with TemporaryDirectory(dir="/tmp", prefix="sf2-verified-") as tmp:
         base = Path(tmp)
         for name, raw in blobs.items():
             path = base / name

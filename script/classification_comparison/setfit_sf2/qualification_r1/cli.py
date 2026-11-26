@@ -2,10 +2,13 @@
 import argparse
 import importlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 import types
+from contextlib import ExitStack
 
 ROOT = Path(__file__).absolute().parents[4]
 HERE = "script/classification_comparison/setfit_sf2/qualification_r1/"
@@ -14,17 +17,22 @@ MODULE = "script.classification_comparison.setfit_sf2"
 
 def bootstrap():
     env = {"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8"}
-    command = ["/usr/bin/git", "--no-replace-objects", "-C", str(ROOT)]
-    commit = subprocess.check_output([*command, "rev-parse", "HEAD"], env=env).decode().strip()
-    blobs = {}
-    for name in ("cli.py", "bootstrap.py"):
-        path = ROOT / (HERE + name)
-        raw = subprocess.check_output([*command, "show", commit + ":" + HERE + name], env=env)
-        if path.resolve() != path or path.read_bytes() != raw:
-            raise ValueError("inicializador fora do commit aceito")
-        blobs[name] = raw
+    # Antes de carregar o bootstrap, fixe a worktree por descritor, inclusive seus pais.
+    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+    with ExitStack() as stack:
+        fd = os.open("/", flags)
+        stack.callback(os.close, fd)
+        for part in ROOT.parts[1:]:
+            fd = os.open(part, flags, dir_fd=fd)
+            stack.callback(os.close, fd)
+        cmd = ["/usr/bin/git", "--no-replace-objects", "-C", f"/proc/self/fd/{fd}"]
+        commit = subprocess.check_output([*cmd, "rev-parse", "HEAD"], pass_fds=(fd,), env=env).decode().strip()
+        name = HERE + "bootstrap.py"
+        raw = subprocess.check_output([*cmd, "show", commit + ":" + name], pass_fds=(fd,), env=env)
     module = types.ModuleType("_sf2_bootstrap")
-    exec(compile(blobs["bootstrap.py"], str(ROOT / HERE / "bootstrap.py"), "exec"), module.__dict__)
+    exec(compile(raw, str(ROOT / name), "exec"), module.__dict__)
+    for name in ("cli.py", "bootstrap.py"):
+        module.committed(ROOT, commit, HERE + name)
     return module, commit
 
 
@@ -104,6 +112,14 @@ def authenticate(args, b, commit, snapshot, sources, layout, release, guard, sto
     return authenticated
 
 
+def pin_public_temporaries():
+    # A primeira consulta implícita de tempfile (inclusive em terceiros) já usa a raiz pública.
+    tempfile.tempdir = "/tmp"
+    for key in ("TMPDIR", "TEMP", "TMP"):
+        if key in os.environ:
+            os.environ[key] = "/tmp"
+
+
 def dispatch(args):
     b, commit = bootstrap()
     layout = b.arguments(ROOT, commit, args)
@@ -150,9 +166,14 @@ def dispatch_verified(args, b, commit, snapshot, sources, layout, dependencies, 
                       load_records=flow.records_from_custody, verify=runtime.verify)
 
 
+def main(argv):
+    pin_public_temporaries()
+    return dispatch(parse(argv))
+
+
 if __name__ == "__main__":
     try:
-        result = dispatch(parse(sys.argv[1:]))
+        result = main(sys.argv[1:])
         if type(result) is int:
             sys.exit(result)
         print(json.dumps(result, ensure_ascii=False, indent=2) if isinstance(result, dict) else result)

@@ -3,9 +3,8 @@ import hashlib
 import json
 import os
 import math
-import stat
 from pathlib import Path
-from contextlib import contextmanager
+from .bootstrap import directory, open_regular
 from secrets import token_hex
 
 
@@ -46,32 +45,6 @@ def canonical(path):
     for component in (*reversed(path.parents), path):
         require(not component.is_symlink(), "link não permitido: " + str(component))
     return path
-
-
-@contextmanager
-def directory(path):
-    path = Path(path)
-    require(path.is_absolute() and ".." not in path.parts, "diretório fora da raiz")
-    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
-    fd = os.open("/", flags)
-    try:
-        for part in path.parts[1:]:
-            child = os.open(part, flags, dir_fd=fd)
-            os.close(fd)
-            fd = child
-        yield fd
-    finally:
-        os.close(fd)
-
-
-@contextmanager
-def open_regular(path):
-    path = Path(path)
-    with directory(path.parent) as parent:
-        fd = os.open(path.name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=parent)
-        with os.fdopen(fd, "rb") as source:
-            require(stat.S_ISREG(os.fstat(source.fileno()).st_mode), "arquivo não regular")
-            yield source
 
 
 def read(path, expected=None):

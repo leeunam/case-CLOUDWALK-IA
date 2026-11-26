@@ -116,8 +116,8 @@ class Provenance(unittest.TestCase):
         spec = core.decode(read(ROOT / bootstrap.FINAL_PROTOCOL, bootstrap.PLAN_SHA))
         pre = core.decode(read(ROOT / (bootstrap.REV + "/preflight.json"), spec["anchors_sha256"]["offline_preflight"]))
         origin = pre["provenance"]
-        amendment, data, _, verified, _ = replay.attest(bootstrap.REPLAY, bootstrap.HISTORY,
-                                                        origin["amendment_sha256"], origin["inventory_sha256"])
+        amendment, data, _, verified, _ = preflight.attest_history(
+            bootstrap.REPLAY, bootstrap.HISTORY, origin["amendment_sha256"], origin["inventory_sha256"])
         self.assertEqual(verified, origin)
         self.assertEqual((len(amendment["parent"]["files"]), len(origin["historical_capture"]),
                           len(origin["historical_adapter"]), len(data)), (28, 19, 17, 29))

@@ -38,6 +38,15 @@ def record_interrupt():
         signal.signal(signal.SIGINT, previous)
 
 
+@contextmanager
+def preempt_collection():
+    previous = signal.signal(signal.SIGINT, signal.default_int_handler)
+    try:
+        yield
+    finally:
+        signal.signal(signal.SIGINT, previous)
+
+
 def materialize(root, units, planned):
     hashes, durations, attempted = {}, [], []
     with ExitStack() as stack:
@@ -79,6 +88,18 @@ def supervise(records, argv, context, destination, startup_seconds, *, derive, v
 
 def _supervise(records, argv, context, destination, startup_seconds, *, derive, verify, catalog,
                timeout_ms, cwd, environment, binding=None):
+    with record_interrupt() as interrupted:
+        seal = _run_and_seal(records, argv, context, destination, startup_seconds, derive=derive, verify=verify,
+                             catalog=catalog, timeout_ms=timeout_ms, cwd=cwd, environment=environment,
+                             binding=binding, interrupted=interrupted)
+    # Um sinal recebido depois da serialização do selo vai ao recibo externo, já com o selo durável.
+    if interrupted and (not seal["failure"] or seal["failure"]["type"] != "KeyboardInterrupt"):
+        raise KeyboardInterrupt("SIGINT durante fechamento e publicação do selo")
+    return seal
+
+
+def _run_and_seal(records, argv, context, destination, startup_seconds, *, derive, verify, catalog,
+                  timeout_ms, cwd, environment, binding, interrupted):
     check_command(argv)
     require(startup_seconds > 0 and 0 < timeout_ms <= 5000, "prazo inválido")
     planned = schedule(records)
@@ -91,37 +112,40 @@ def _supervise(records, argv, context, destination, startup_seconds, *, derive, 
     failure = active = raw = startup_ms = None
     with (root / "stderr.log").open("xb") as stderr:
         try:
-            supervisor = WorkerUsage(os.getpid())
-            startup = time.monotonic()
-            process = subprocess.Popen(argv, cwd=cwd, env=environment, stdin=subprocess.PIPE,
-                                       stdout=subprocess.PIPE, stderr=stderr, start_new_session=True, bufsize=0)
-            worker = WorkerUsage(process.pid)
-            transport = Frames(process)
-            require(decode(transport.line(startup + startup_seconds)) == {"type": "ready"}, "READY inválido")
-            startup_ms = (time.monotonic() - startup) * 1000
-            require(startup_ms <= startup_seconds * 1000, "startup excedeu o prazo")
-            for i, (kind, row) in enumerate(planned):
-                path = units / f"{i:04d}.json"
-                raw = None
-                start = time.monotonic()
-                active = (kind, row["id"], start, path)
-                deadline = start + timeout_ms / 1000
-                with case_deadline(deadline - time.monotonic()):
-                    item = project(row, catalog)
-                    transport.send(item, deadline)
-                    raw = transport.raw_line(deadline)
-                    decision = derive(item, raw, context)
-                    verify(item, raw, decision, context)
-                    require(decision["id"] == row["id"] and decision["raw_sha256"] == digest(raw),
-                            "ID ou hash bruto divergente")
-                    elapsed = (time.monotonic() - start) * 1000
-                    if elapsed > timeout_ms:
-                        raise TimeoutError("verificação excedeu o prazo")
-                timing = dict(kind=kind, id=row["id"], elapsed_ms=elapsed, valid=True)
-                publish(path, encoded(dict(timing=timing, decision=decision,
-                                           frame_base64=base64.b64encode(raw).decode("ascii"))))
-                active = None
-            transport.finish(time.monotonic() + timeout_ms / 1000)
+            with preempt_collection():
+                if interrupted:
+                    raise KeyboardInterrupt("SIGINT antes da coleta")
+                supervisor = WorkerUsage(os.getpid())
+                startup = time.monotonic()
+                process = subprocess.Popen(argv, cwd=cwd, env=environment, stdin=subprocess.PIPE,
+                                           stdout=subprocess.PIPE, stderr=stderr, start_new_session=True, bufsize=0)
+                worker = WorkerUsage(process.pid)
+                transport = Frames(process)
+                require(decode(transport.line(startup + startup_seconds)) == {"type": "ready"}, "READY inválido")
+                startup_ms = (time.monotonic() - startup) * 1000
+                require(startup_ms <= startup_seconds * 1000, "startup excedeu o prazo")
+                for i, (kind, row) in enumerate(planned):
+                    path = units / f"{i:04d}.json"
+                    raw = None
+                    start = time.monotonic()
+                    active = (kind, row["id"], start, path)
+                    deadline = start + timeout_ms / 1000
+                    with case_deadline(deadline - time.monotonic()):
+                        item = project(row, catalog)
+                        transport.send(item, deadline)
+                        raw = transport.raw_line(deadline)
+                        decision = derive(item, raw, context)
+                        verify(item, raw, decision, context)
+                        require(decision["id"] == row["id"] and decision["raw_sha256"] == digest(raw),
+                                "ID ou hash bruto divergente")
+                        elapsed = (time.monotonic() - start) * 1000
+                        if elapsed > timeout_ms:
+                            raise TimeoutError("verificação excedeu o prazo")
+                    timing = dict(kind=kind, id=row["id"], elapsed_ms=elapsed, valid=True)
+                    publish(path, encoded(dict(timing=timing, decision=decision,
+                                               frame_base64=base64.b64encode(raw).decode("ascii"))))
+                    active = None
+                transport.finish(time.monotonic() + timeout_ms / 1000)
         except (KeyboardInterrupt, Exception) as exc:
             failure = dict(type=type(exc).__name__, message=str(exc), attempt=None)
             if transport is not None and raw is None:
@@ -158,10 +182,10 @@ def _supervise(records, argv, context, destination, startup_seconds, *, derive, 
                     usage.stop()
             stderr.flush()
             os.fsync(stderr.fileno())
-    with record_interrupt() as interrupted:
-        files, journal, latency = materialize(root, units, planned)
+    sync_directory(units)
+    files, journal, latency = materialize(root, units, planned)
     if interrupted and failure is None:
-        failure = dict(type="KeyboardInterrupt", message="SIGINT durante materialização", attempt=None)
+        failure = dict(type="KeyboardInterrupt", message="SIGINT durante fechamento da coleta", attempt=None)
     seal = dict(contract_version="sf2-final-r1/1.0", reservation_sha256=binding, files=files, startup_ms=startup_ms, failure=failure,
                 resources={"worker": resource(process.pid if process else None, worker),
                            "supervisor": resource(os.getpid(), supervisor)},

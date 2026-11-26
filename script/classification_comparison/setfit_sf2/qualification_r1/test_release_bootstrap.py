@@ -1,6 +1,6 @@
 """A liberação é autenticada sem importar terceiros. Raízes e recibos são todos sintéticos."""
 import base64
-from contextlib import ExitStack, nullcontext
+from contextlib import ExitStack, contextmanager, nullcontext
 from copy import deepcopy
 import hashlib
 import io
@@ -31,6 +31,67 @@ def wheel(root, code):
         lines.append(f"{path.relative_to(root)},sha256={sha},{len(raw)}")
     (meta / "RECORD").write_text("\n".join([*lines, "demo-1.dist-info/RECORD,,"]) + "\n")
     return meta
+
+
+@contextmanager
+def no_target_operations(blocked, link=None):
+    """Observa tanto caminhos completos quanto operações relativas a fds e a entradas de scandir."""
+    readlink = os.readlink
+
+    def location(path, fd=None):
+        if isinstance(path, int):
+            return Path(readlink(f"/proc/self/fd/{path}"))
+        name = Path(os.fsdecode(path))
+        return location(fd) / name if fd is not None and not name.is_absolute() else name
+
+    def observe(path, follows):
+        if path.is_relative_to(blocked) or (link and path.is_relative_to(link) and (path != link or follows)):
+            raise AssertionError(f"operação alcançaria o destino fictício: {path}")
+
+    class ObservedEntry:
+        def __init__(self, entry, parent):
+            self.entry = entry
+            self.name = entry.name
+            self.path = entry.path
+            self.full_path = parent / self.name
+
+        def stat(self, *, follow_symlinks=True):
+            observe(self.full_path, follow_symlinks)
+            return self.entry.stat(follow_symlinks=follow_symlinks)
+
+        def is_symlink(self):
+            return self.entry.is_symlink()
+
+        def is_dir(self, *, follow_symlinks=True):
+            observe(self.full_path, follow_symlinks)
+            return self.entry.is_dir(follow_symlinks=follow_symlinks)
+
+        def is_file(self, *, follow_symlinks=True):
+            observe(self.full_path, follow_symlinks)
+            return self.entry.is_file(follow_symlinks=follow_symlinks)
+
+    def monitored(fn, opname):
+        def observed(path, *args, **kwargs):
+            name = location(path, kwargs.get("dir_fd"))
+            follows = (opname == "open" and not (args[0] & os.O_NOFOLLOW)
+                       or opname == "stat" and kwargs.get("follow_symlinks", True)
+                       or opname in ("io.open", "scandir", "listdir"))
+            observe(name, follows)
+            if opname != "scandir":
+                return fn(path, *args, **kwargs)
+            @contextmanager
+            def entries():
+                with fn(path, *args, **kwargs) as items:
+                    yield (ObservedEntry(item, name) for item in items)
+            return entries()
+        return observed
+
+    with ExitStack() as stack:
+        for owner, key, label in ((os,"open","open"), (os,"stat","stat"), (os,"lstat","lstat"),
+                                  (os,"scandir","scandir"), (io,"open","io.open"), (os,"listdir","listdir"),
+                                  (os,"readlink","readlink"), (os,"unlink","unlink"), (os,"mkdir","mkdir"), (os,"rmdir","rmdir")):
+            stack.enter_context(patch.object(owner, key, monitored(getattr(owner, key), label)))
+        yield
 
 
 class EarlyTrust(unittest.TestCase):
@@ -130,32 +191,10 @@ class EarlyTrust(unittest.TestCase):
             target = blocked / kind
             link.rename(target)
             link.symlink_to(target, target_is_directory=kind == "directory")
-            attempted = []
-            original_readlink = os.readlink
-            def monitored(fn, opname):
-                def observed(path, *args, **kwargs):
-                    if not isinstance(path, int):
-                        name = Path(path)
-                        if not name.is_absolute() and kwargs.get("dir_fd") is not None:
-                            parent = Path(original_readlink("/proc/self/fd/" + str(kwargs["dir_fd"])))
-                            name = parent / name
-                        follows_final = (opname == "open" and not (args[0] & os.O_NOFOLLOW)
-                                         or opname == "stat" and kwargs.get("follow_symlinks", True)
-                                         or opname in ("io.open", "scandir"))
-                        if (name.is_relative_to(blocked) or (name != link and name.is_relative_to(link))
-                                or name == link and follows_final):
-                            attempted.append((opname, str(name)))
-                            raise AssertionError("consulta chegaria ao alvo restrito")
-                    return fn(path, *args, **kwargs)
-                return observed
             try:
-                with self.subTest(kind=kind), ExitStack() as stack:
-                    for owner, name, label in ((os,"open","open"),(os,"stat","stat"),(os,"lstat","lstat"),
-                                                (os,"scandir","scandir"),(io,"open","io.open")):
-                        stack.enter_context(patch.object(owner, name, monitored(getattr(owner,name), label)))
+                with self.subTest(kind=kind), no_target_operations(blocked, link):
                     with self.assertRaises(OSError):
                         dependencies.build_sites({"demo": "1"}, [self.first,self.second], self.root/("copy-"+kind))
-                    self.assertEqual(attempted, [])
             finally:
                 link.unlink()
                 target.rename(link)

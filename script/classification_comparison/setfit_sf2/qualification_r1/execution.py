@@ -24,7 +24,7 @@ def records_from_custody(inventory, seal, scope):
                 "arquivo fora do escopo reservado")
     for location in paths.values():
         canonical(Path(location))
-    with TemporaryDirectory(prefix="sf2-custody-") as tmp:
+    with TemporaryDirectory(dir="/tmp", prefix="sf2-custody-") as tmp:
         files, blobs = {}, {}
         for role, location in paths.items():
             spec = seal["files"].get(role)

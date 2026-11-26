@@ -180,6 +180,82 @@ class Fixes(unittest.TestCase):
             self.assertEqual((result["status"], result["verified_cases"], result["verified_controls"]), ("inconclusive",2,5))
             self.assertEqual(emitted, [True])
 
+    def test_sigint_through_cleanup_link_and_fsync_closes_one_durable_run(self):
+        for point in ("cleanup", "materialize", "before-link", "after-link", "seal-fsync", "parent-fsync"):
+            with self.subTest(point=point), ExitStack() as stack:
+                checked, rel, sha, inv, dest, guard, rows = self.setup_flow(point)
+                sent, synced = [], []
+                original_fsync, original_link = os.fsync, os.link
+
+                def interrupt():
+                    if not sent:
+                        sent.append(point)
+                        os.kill(os.getpid(), signal.SIGINT)
+
+                def link(src, dst, **kwargs):
+                    if dst == "seal.json" and point == "before-link":
+                        interrupt()
+                    original_link(src, dst, **kwargs)
+                    if dst == "seal.json" and point == "after-link":
+                        interrupt()
+
+                def fsync(fd):
+                    path = Path(os.readlink(f"/proc/self/fd/{fd}"))
+                    if path == dest / "run/stderr.log" and point == "cleanup":
+                        interrupt()
+                    if path == dest / "run/timings.jsonl" and point == "materialize":
+                        interrupt()
+                    if (dest / "run/seal.json").exists():
+                        if point == "seal-fsync" and path == dest / "run":
+                            interrupt()
+                        if point == "parent-fsync" and path == dest:
+                            interrupt()
+                    original_fsync(fd)
+                    synced.append(path)
+
+                stack.enter_context(patch.object(os, "link", link))
+                stack.enter_context(patch.object(os, "fsync", fsync))
+                launch = stack.enter_context(patch.object(runner.subprocess, "Popen", wraps=runner.subprocess.Popen))
+                receipt_sha = execution.execute(checked, rel, sha, inv, dest, guard, load_records=lambda *args: rows,
+                    supervise=runner._supervise, derive=dummy_derive, verify=dummy_verify)
+                self.assertEqual(sent, [point])
+                self.assertEqual(launch.call_count, 1)
+                receipt = core.decode(read(dest / "execution.json", receipt_sha))
+                seal = core.decode(read(dest / "run/seal.json", receipt["seal_sha256"]))
+                self.assertEqual(receipt["seal_sha256"], digest(read(dest / "run/seal.json")))
+                self.assertEqual((receipt["interruption"] or seal["failure"])["type"], "KeyboardInterrupt")
+                timing = [core.decode(line) for line in read(dest / "run/timings.jsonl", seal["files"]["timings.jsonl"]).splitlines()]
+                self.assertEqual([t["valid"] for t in timing], [True] * 7)
+                for path in (dest / "run/observations", dest / "run", dest):
+                    self.assertIn(path, synced)
+                result = execution.audit(checked, rel, sha, inv, dest, receipt_sha, guard,
+                                         load_records=lambda *args: rows, verify=dummy_verify)
+                self.assertEqual((result["status"], result["verified_cases"], result["verified_controls"]),
+                                 ("inconclusive", 2, 5))
+                with self.assertRaises((ValueError, FileExistsError)):
+                    execution.execute(checked, rel, sha, inv, dest, guard, load_records=Mock(side_effect=AssertionError),
+                                      supervise=runner._supervise, derive=dummy_derive, verify=dummy_verify)
+                self.assertEqual(launch.call_count, 1)
+
+    def test_closing_interrupt_also_preserves_primary_collection_failure(self):
+        checked, rel, sha, inv, dest, guard, rows = self.setup_flow("failed-before-close")
+        original = runner.materialize
+        def interrupt(*args):
+            os.kill(os.getpid(), signal.SIGINT)
+            return original(*args)
+        def fail_second(item, raw, context):
+            if item["id"] == rows[1]["id"]:
+                raise ValueError("fixture interrompeu a segunda coleta")
+            return dummy_derive(item, raw, context)
+        with patch.object(runner, "materialize", interrupt):
+            receipt = execution.execute(checked, rel, sha, inv, dest, guard, load_records=lambda *args: rows,
+                                        supervise=runner._supervise, derive=fail_second, verify=dummy_verify)
+        report = execution.audit(checked, rel, sha, inv, dest, receipt, guard,
+                                 load_records=lambda *args: rows, verify=dummy_verify)
+        self.assertEqual((report["status"], report["verified_cases"]), ("inconclusive", 1))
+        self.assertEqual(report["failure"]["type"], "ValueError")
+        self.assertEqual(report["execution_interruption"]["type"], "KeyboardInterrupt")
+
     def test_confirmed_execution_with_corrupt_artifacts_is_inconclusive(self):
         checked, rel, sha, inv, dest, guard, rows = self.setup_flow("corrupt")
         receipt = execution.execute(checked, rel, sha, inv, dest, guard, load_records=lambda *args: rows,

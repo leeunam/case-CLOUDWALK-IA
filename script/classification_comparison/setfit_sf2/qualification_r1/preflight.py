@@ -3,6 +3,7 @@ import gzip
 from pathlib import Path
 from types import CodeType
 import sys
+from tempfile import TemporaryDirectory
 
 from ..contracts import core, ipc
 from ..evaluation.metrics import metrics
@@ -85,6 +86,26 @@ def parity(data, report, context, runtime):
                 first_id=cases[0]["id"], first_raw_sha256=cases[0]["raw_sha256"])
 
 
+def attest_history(replay_root, capture_root, amendment_sha, inventory_sha):
+    """O auditor histórico só recebe cópias regulares de papéis públicos abertos sem seguir links."""
+    replay_names = {replay.INVENTORY, replay.AMENDMENT, *replay.SOURCES, *replay.PARENT_FILES.values(),
+                    *replay.EXTRA_TRAINING.values(), replay.VAL + "/run/stderr.log"}
+    for field in ("category", "priority"):
+        for component in ("manifest", *replay.COMPONENTS):
+            replay_names.add(f"{replay.PACK}/{field}/{component}.json")
+    capture_names = {*replay.CAPTURE_PATHS.values(), *replay.ADAPTER_MEMBERS}
+    with TemporaryDirectory(dir="/tmp", prefix="sf2-history-") as temporary:
+        base = Path(temporary)
+        for root, copy, names in ((replay_root, base / "replay", replay_names),
+                                  (capture_root, base / "capture", capture_names)):
+            for name in sorted(names):
+                raw = read(root / name)
+                path = copy / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(raw)
+        return replay.attest(base / "replay", base / "capture", amendment_sha, inventory_sha)
+
+
 def inspect_public(root, commit, snapshot, sources, config, dependencies=None):
     release, run = (Path(config[k]) for k in ("release", "run"))
     projected = root / b.SF / ".cache/qualificacao-r1-01"
@@ -103,7 +124,7 @@ def inspect_public(root, commit, snapshot, sources, config, dependencies=None):
     for name, sha in origin["current_sources"].items():
         require(digest(b.committed(b.REPLAY, OFFLINE, name)) == sha, "fonte histórica do replay divergente")
     # Aqui as dependências auditadas são as da revisão offline original. O runner atual tem outro inventário.
-    amendment, data, _, provenance, _ = replay.attest(
+    amendment, data, _, provenance, _ = attest_history(
         b.REPLAY, b.HISTORY, anchors["amendment_offline"], origin["inventory_sha256"])
     require(provenance == origin and len(data) == 29 and len(amendment["parent"]["files"]) == 28
             and len(origin["historical_capture"]) == 19 and len(origin["historical_adapter"]) == 17,
