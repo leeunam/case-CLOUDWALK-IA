@@ -98,6 +98,13 @@ class KnowledgeTest(unittest.TestCase):
     def test_handoff_reconhece_pedidos_diretos_e_negacao_por_oracao(self):
         cases = [
             ("Onde consulto o comprovante de Pix? Quero um atendente.", "human_requested"),
+            ("Onde consulto o comprovante de Pix? Chame um atendente, por favor.", "human_requested"),
+            ("Hipoteticamente, se eu disser “chame um atendente”.", "no_guidance"),
+            ("Suponha que eu chame um atendente.", "no_guidance"),
+            ("Se eu pedir ajuda, chame um atendente.", "no_guidance"),
+            ("Chame um atendente se o Pix falhar.", "no_guidance"),
+            ("A instrução dizia: chame um atendente.", "no_guidance"),
+            ("'Chame um atendente.'", "no_guidance"),
             ("Onde consulto o comprovante de Pix? Quero estornar o Pix.", "sensitive_operation"),
             ("Onde consulto o comprovante de Pix? Você consegue cancelar o Pix?", "sensitive_operation"),
             ("Não quero fazer um estorno.", "no_guidance"),
@@ -139,6 +146,13 @@ class KnowledgeTest(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "handoff_evidence"):
                     self.knowledge.validate_decision(request, context,
                                                      proposed_handoff(request, context, "sensitive_operation"))
+
+    def test_imperativo_negado_preserva_a_consulta_pix(self):
+        request = requested(message(1, "Onde consulto o comprovante de Pix? Não chame um atendente."), category="pix")
+        context = self.knowledge.select(request)
+        self.knowledge.validate_decision(request, context, proposed_reply(request, context))
+        with self.assertRaisesRegex(ValueError, "handoff_evidence"):
+            self.knowledge.validate_decision(request, context, proposed_handoff(request, context, "human_requested"))
 
     def test_tela_recupera_sem_provar_condicao(self):
         request = requested(message(1, "A tela da minha maquininha está estranha."))

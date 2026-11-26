@@ -25,11 +25,12 @@ _CONSULTATION = re.compile(
     r"^(?:(?:oi|ola|por favor) )*(?:(?:onde|como) (?:eu |posso |consigo )?"
     r"|(?:quero|preciso|gostaria de|nao consigo) )(?:consult|ver\b|vej|acess|encontr|ach|localiz|busc)"
 )
+_HUMAN_ROLE = r" (?:um |uma |o |a )?(?:pessoa|atendente|humano|humana|analista|time humano|equipe humana)\b"
+_CALL_HUMAN = re.compile(r"(?:por favor )?chame" + _HUMAN_ROLE + r"(?: (?:agora|por favor))?")
 _HUMAN_REQUEST = re.compile(
     r"\b(?:(?:quero|queria|preciso|posso|gostaria de) (?:falar|conversar) com"
     r"|(?:me (?:passe|transfira|encaminhe)|(?:pode )?(?:me )?(?:passar|transferir|encaminhar)) para"
-    r"|quero|queria|preciso de|gostaria de)"
-    r" (?:um |uma |o |a )?(?:pessoa|atendente|humano|humana|analista|time humano|equipe humana)\b"
+    r"|quero|queria|preciso de|gostaria de)" + _HUMAN_ROLE
 )
 _SENSITIVE_REQUEST = re.compile(
     r"\b(?:estorne|reembolse|cancel(?:e|ar) (?:o |um )?pix)\b"
@@ -40,7 +41,7 @@ _SENSITIVE_REQUEST = re.compile(
     r"|efetu(?:ar|e)|quero|preciso de) (?:um |uma |o |a |meu )?"
     r"(?:estorno|reembolso|pagamento|transferencia|cancelamento (?:do|de) pix)\b"
 )
-_QUOTED_SPEECH = re.compile(r'"[^"]*"|“[^”]*”|«[^»]*»')
+_QUOTED_SPEECH = re.compile(r'"[^"]*"|“[^”]*”|«[^»]*»|‘[^’]*’|\x27[^\x27]*\x27')
 _CLAUSE_BOUNDARY = re.compile(r"[.!?;:,\n]+|\b(?:mas|porém|contudo|só que)\b", re.IGNORECASE)
 _NEGATED_REQUEST = re.compile(
     r"\b(?:nao|nunca|nem|sem) (?:(?:quero|queria|preciso(?: de)?|gostaria de"
@@ -87,13 +88,17 @@ def _confirmed(history, question, answers, *, suffix=False):
 
 
 def _handoff_reason(text):
-    clauses = [_tokens(clause) for clause in _CLAUSE_BOUNDARY.split(_QUOTED_SPEECH.sub(" ", text))]
+    direct_speech = _QUOTED_SPEECH.sub(" ", text)
+    clauses = [_tokens(clause) for clause in _CLAUSE_BOUNDARY.split(direct_speech)]
     for reason, pattern in (("sensitive_operation", _SENSITIVE_REQUEST), ("human_requested", _HUMAN_REQUEST)):
         for clause in clauses:
             if reason == "human_requested" and _NON_REQUEST_MARKERS.search(clause):
                 continue
             if any(not _NEGATED_REQUEST.search(clause[:match.start()]) for match in pattern.finditer(clause)):
                 return reason
+    # Uma condição ou citação introdutória pode estar separada por vírgula ou dois-pontos.
+    if any(_CALL_HUMAN.fullmatch(_tokens(sentence)) for sentence in re.split(r"[.!?;\n]+", direct_speech)):
+        return "human_requested"
     return None
 
 
