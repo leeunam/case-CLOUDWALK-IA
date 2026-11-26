@@ -102,9 +102,9 @@ module Attendances
                           classification: support_case.classification, previous_case_id: previous&.id)
       InitialRouting.record!(support_case, rule) if status == "ai_active"
       if status == "classification_pending"
-        request = Classification::Request.create!(support_case: support_case,
-          classification_version: support_case.classification_version, available_at: Time.current)
-        Classification::CompleteRequestJob.schedule(request.id)
+        request = Classification::Request.create!(support_case: support_case, available_at: Time.current,
+          classification_version: support_case.classification_version, **Classification::ConfiguredProvider.selection)
+        Classification::CompleteRequestJob.schedule(request)
       elsif invalid_fields.any?
         support_case.audit!("case.classification.review", actor_type: "system", reason: "invalid_input",
                             invalid_fields: invalid_fields, classification_version: support_case.classification_version)

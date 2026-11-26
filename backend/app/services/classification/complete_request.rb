@@ -4,7 +4,7 @@ module Classification
     LEASE = 30.seconds
     RETRY_DELAY = 1.second
 
-    def initialize(request_id, classifier: ConfiguredJev)
+    def initialize(request_id, classifier: nil)
       @request_id = request_id
       @classifier = classifier
     end
@@ -13,9 +13,14 @@ module Classification
       claim = claim_attempt
       return unless claim
 
-      attempt_id, categories, input = claim
-      result = @classifier.call(categories: categories, **input)
-      settle(attempt_id, result)
+      attempt, text = claim
+      snapshot = attempt.snapshot
+      result = if @classifier
+        @classifier.call(categories: snapshot.dig("catalog", "category"), text: text, **snapshot.fetch("received").symbolize_keys)
+      else
+        ConfiguredProvider.call(attempt, text)
+      end
+      settle(attempt.id, result)
     end
 
     private
@@ -51,6 +56,7 @@ module Classification
         end
         if last && last.number >= MAX_ATTEMPTS
           last_issue = last.issues.values.first || "worker_lease_expired"
+          last_issue = "invalid_response" unless %w[worker_lease_expired busy not_ready timeout network_error http_error].include?(last_issue)
           review!(request, record, last_issue, last)
           next
         end
@@ -61,10 +67,31 @@ module Classification
           next
         end
 
-        attempt = request.attempts.create!(number: (last&.number || 0) + 1)
-        request.update!(available_at: LEASE.from_now)
-        [attempt.id, Catalog.categories(record.brand), { text: message.text, category: record.category, priority: record.priority }]
+        ConfiguredProvider.pin_legacy!(request)
+        snapshot = capture(request, record, message)
+        lease = LEASE.from_now
+        attempt = request.attempts.create!(number: (last&.number || 0) + 1, snapshot: snapshot, lease_expires_at: lease)
+        request.update!(available_at: lease)
+        [attempt, message.text]
       end
+    end
+
+    def capture(request, record, message)
+      catalog = Catalog.snapshot(record.brand)
+      snapshot = {
+        "provider" => request.provider, "provider_mode" => request.provider_mode, "message_id" => message.id,
+        "catalog" => catalog, "catalog_sha256" => SetfitContract.catalog_sha256(catalog),
+        "catalog_version" => record.brand.catalog_version, "classification_version" => record.classification_version,
+        "received" => record.slice(:category, :priority), "sources" => record.slice(:category_source, :priority_source)
+      }
+      if request.provider == "setfit"
+        snapshot["identities"] = begin
+          SetfitContract.current.identities
+        rescue SetfitContract::Unavailable
+          {}
+        end
+      end
+      snapshot
     end
 
     def settle(attempt_id, result)
@@ -72,37 +99,61 @@ module Classification
         attempt = request.attempts.find(attempt_id)
         evidence = result.evidence || {}
         if %w[expired discarded].include?(attempt.disposition)
-          attempt.update!(evidence: evidence, issues: attempt.issues.merge("late_result" => result.issues))
+          unless attempt.issues.key?("late_result")
+            observed = attempt.evidence.empty? ? evidence : attempt.evidence.merge("late_result" => evidence)
+            attempt.update!(evidence: observed, issues: attempt.issues.merge("late_result" => result.issues))
+          end
           next
         end
         next if attempt.finished_at
 
         attempt.update!(finished_at: Time.current, issues: result.issues, evidence: evidence)
-        unless current?(request, record)
+        unless current?(request, record) && request.attempts.maximum(:number) == attempt.number
           attempt.update!(disposition: "discarded")
           next
         end
 
-        if result.status == :complete && valid_completion?(record, result.classification)
+        invalidated = invalidated_reason(request, record, attempt)
+        if invalidated
+          attempt.update!(disposition: "discarded", issues: result.issues.merge(provider: invalidated))
+          review!(request, record, invalidated, attempt)
+        elsif result.status == :complete && valid_completion?(request, record, result.classification)
           apply!(request, record, attempt, result.classification)
         elsif result.retryable && attempt.number < MAX_ATTEMPTS
           retry_at = Time.current + [RETRY_DELAY.to_i, result.retry_after_seconds.to_i].max
           attempt.update!(disposition: "retry")
           request.update!(available_at: retry_at)
-          CompleteRequestJob.schedule(request.id, at: retry_at)
+          CompleteRequestJob.schedule(request, at: retry_at)
         else
-          reason = result.issues.values.first || :catalog_changed
+          reason = result.issues.values.first || :invalid_response
           attempt.update!(disposition: "review", issues: result.issues.presence || { provider: reason })
           review!(request, record, reason.to_s, attempt)
         end
       end
     end
 
-    def valid_completion?(record, classification)
-      category, priority = classification.values_at(:category, :priority)
-      Catalog.category_active?(record.brand, category) && Catalog::PRIORITIES.key?(priority) &&
-        (record.category.nil? || record.category == category) &&
-        (record.priority.nil? || record.priority == priority)
+    def invalidated_reason(request, record, attempt)
+      return "worker_lease_expired" if [request.available_at, attempt.lease_expires_at].min <= Time.current
+
+      snapshot = attempt.snapshot
+      return "invalid_input" unless record.classification_version == snapshot.fetch("classification_version") &&
+        record.slice(:category, :priority) == snapshot.fetch("received") &&
+        record.slice(:category_source, :priority_source) == snapshot.fetch("sources")
+
+      catalog = Catalog.snapshot(record.brand)
+      "catalog_changed" unless record.brand.catalog_version == snapshot.fetch("catalog_version") &&
+        SetfitContract.catalog_sha256(catalog) == snapshot.fetch("catalog_sha256")
+    end
+
+    def valid_completion?(request, record, classification)
+      return false unless classification.is_a?(Hash) && classification.keys.sort == %i[category category_source priority priority_source]
+      return false unless Catalog.category_active?(record.brand, classification[:category]) && Catalog::PRIORITIES.key?(classification[:priority])
+
+      %i[category priority].all? do |field|
+        received = record[field]
+        absent = received.nil? || received == ""
+        (absent || received == classification[field]) && classification[:"#{field}_source"] == (absent ? request.provider : "channel")
+      end
     end
 
     def apply!(request, record, attempt, classification)

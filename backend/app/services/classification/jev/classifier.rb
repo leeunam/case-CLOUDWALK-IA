@@ -1,7 +1,9 @@
+require_relative "../result"
+
 module Classification
   module Jev
     class Classifier
-      Result = Data.define(:status, :classification, :issues, :evidence, :retryable, :retry_after_seconds)
+      Result = Classification::Result
 
       ABSTENTION = "informacao_insuficiente"
       ABSTENTION_DESCRIPTION = "O relato não permite escolher com segurança entre as demais opções."

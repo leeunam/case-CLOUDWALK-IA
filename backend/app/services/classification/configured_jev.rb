@@ -1,7 +1,7 @@
 module Classification
   module ConfiguredJev
-    def self.call(categories:, **input)
-      client = case ENV.fetch("CLOUDWALK_JEV_MODE", "disabled")
+    def self.call(categories:, mode: ENV.fetch("CLOUDWALK_JEV_MODE", "disabled"), **input)
+      client = case mode
       when "fixture" then Jev::DemoFixture.new
       when "http" then Jev::HttpClient.new(model: ENV.fetch("CLOUDWALK_JEV_MODEL", "jev-latest"))
       when "disabled" then return review(:classifier_disabled)
