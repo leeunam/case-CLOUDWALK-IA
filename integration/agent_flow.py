@@ -1,4 +1,4 @@
-"""Ponte HTTP/Kafka, consumidor de retornos e mock determinístico da F02."""
+"""Ponte HTTP/Kafka e consumidores de pedidos e retornos do atendente."""
 
 import argparse
 import hashlib
@@ -20,11 +20,17 @@ EVENTS = "agent.events"
 FAILURES = "agent.failures"
 DISPOSITIONS = {"applied", "duplicate", "discarded"}
 REQUEST_PATH = "/webhooks/v1/agent/requests"
-DEFAULT_SCHEMA = Path(__file__).resolve().parents[1] / "docs/contratos/schemas/v1.json"
+HERE = Path(__file__).resolve().parent
+DEFAULT_SCHEMA = HERE.parent / "docs/contratos/schemas/v1.json"
+REQUEST_GROUP = "mock-agent-v1"
 
 
 class InvalidEvent(ValueError):
     pass
+
+
+class RecordPending(RuntimeError):
+    """Reobservar o registro a partir do offset confirmado do grupo."""
 
 
 def signed_headers(secret, body, timestamp=None):
@@ -225,6 +231,77 @@ def run_mock(record, contracts, publisher):
                  result["case_id"], event["event_id"], result["event_id"])
 
 
+def load_agent_backend(name, contracts, environ):
+    if name == "mock":
+        return lambda record, publisher: run_mock(record, contracts, publisher)
+    if name not in {"luna", "luna_fixture"}:
+        raise ValueError("CLOUDWALK_AGENT_BACKEND deve ser mock, luna ou luna_fixture.")
+
+    if __package__:
+        from .e01_backend import LunaBackend
+        from .e01_executor import Executor, ExecutorError
+        from .e01_knowledge import Knowledge
+        from .e01_ledger import LedgerClient
+    else:
+        from e01_backend import LunaBackend
+        from e01_executor import Executor, ExecutorError
+        from e01_knowledge import Knowledge
+        from e01_ledger import LedgerClient
+
+    transport = None
+    if name == "luna":
+        key_path = environ.get("CLOUDWALK_E01_FEITA_KEY_FILE", "")
+        if not key_path:
+            raise ValueError("CLOUDWALK_E01_FEITA_KEY_FILE é obrigatório para luna.")
+        try:
+            key = Path(key_path).read_text(encoding="utf-8").rstrip("\r\n")
+        except (OSError, UnicodeError):
+            raise ValueError("CLOUDWALK_E01_FEITA_KEY_FILE deve ser um arquivo legível em UTF-8.") from None
+        audit_dir = environ.get("CLOUDWALK_E01_AUDIT_DIR")
+        if audit_dir:
+            if __package__:
+                from .e01_audit import AuditedPost
+                from .e01_backend import FEITA_HOST, RESPONSE_LIMIT
+                from .e01_http import DeadlinePost
+            else:
+                from e01_audit import AuditedPost
+                from e01_backend import FEITA_HOST, RESPONSE_LIMIT
+                from e01_http import DeadlinePost
+            transport = AuditedPost(DeadlinePost(FEITA_HOST, response_limit=RESPONSE_LIMIT), audit_dir)
+    else:
+        if environ.get("RAILS_ENV") != "test" or environ.get("CLOUDWALK_E01_FEITA_KEY_FILE"):
+            raise ValueError("luna_fixture exige RAILS_ENV=test e configuração sem credencial Feita.")
+        if __package__:
+            from .e01_fixture import fixture_post
+        else:
+            from e01_fixture import fixture_post
+        key = "offline-test-fixture"
+        transport = fixture_post
+
+    ledger = LedgerClient(environ.get("CLOUDWALK_E01_LEDGER_URL", ""),
+                          environ.get("CLOUDWALK_E01_LEDGER_SECRET", ""))
+    try:
+        knowledge = Knowledge.load(Path(environ.get("CLOUDWALK_E01_KNOWLEDGE_DIR", HERE / "knowledge")))
+        backend = LunaBackend(key, transport=transport)
+    except (OSError, UnicodeError):
+        raise ValueError("Verifique os arquivos de conhecimento e contratos E01.") from None
+    executor = Executor(knowledge, backend, ledger, contracts)
+
+    def handle(record, publisher):
+        try:
+            executor.handle(record, publisher)
+        except ExecutorError as error:
+            if error.retryable:
+                raise RecordPending(error.code) from None
+            raise InvalidEvent(error.code) from None
+        except Exception:
+            # Um erro imprevisto pode ter ocorrido depois de start ou complete.
+            # O ledger continua sendo a autoridade sobre o efeito da tentativa.
+            raise RecordPending("e01_executor_interrupted") from None
+
+    return handle
+
+
 def publish_failure(publisher, record, group, message):
     try:
         event = json.loads(record.value())
@@ -233,10 +310,13 @@ def publish_failure(publisher, record, group, message):
     if not isinstance(event, dict):
         event = {}
     origin = {"group": group, "topic": record.topic(), "partition": record.partition(), "offset": record.offset()}
-    failure = {
-        "event_id": event.get("event_id"), "case_id": event.get("case_id"),
-        "correlation_id": event.get("correlation_id"), "reason": message, "origin": origin,
-    }
+    identifiers = {}
+    for field in ("event_id", "case_id", "correlation_id"):
+        try:
+            identifiers[field] = str(uuid.UUID(event[field]))
+        except (KeyError, ValueError, TypeError, AttributeError):
+            identifiers[field] = None
+    failure = {**identifiers, "reason": message, "origin": origin}
     publisher.publish(FAILURES, record.key(), json_bytes(failure))
     logging.error("falha Kafka registrada: %s", failure)
 
@@ -251,6 +331,8 @@ def process_record(consumer, publisher, record, group, handle, *, pause=time.sle
         try:
             handle(record)
             break
+        except RecordPending:
+            raise
         except InvalidEvent as error:
             publish_failure(publisher, record, group, str(error))
             break
@@ -351,6 +433,10 @@ def consume(topic, group, handle, publisher, brokers):
                     continue
                 try:
                     process_record(consumer, publisher, record, group, handle)
+                except RecordPending as error:
+                    logging.info("registro pendente grupo=%s topico=%s particao=%d offset=%d codigo=%s",
+                                 group, topic, record.partition(), record.offset(), error)
+                    break
                 except MembershipLost as error:
                     logging.warning("reingresso grupo=%s topico=%s particao=%d offset=%d causa=%s",
                                     group, topic, record.partition(), record.offset(), error)
@@ -383,6 +469,13 @@ def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     brokers = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
     contracts = Contracts(os.environ.get("CLOUDWALK_CONTRACT_SCHEMA", DEFAULT_SCHEMA))
+    if args.role == "mock":
+        backend_name = os.environ.get("CLOUDWALK_AGENT_BACKEND", "mock")
+        try:
+            backend = load_agent_backend(backend_name, contracts, os.environ)
+        except (ValueError, OSError) as error:
+            parser.error(str(error))
+        logging.info("atendente backend=%s grupo=%s", backend_name, REQUEST_GROUP)
     publisher = Publisher(Producer({
         "bootstrap.servers": brokers,
         "acks": "all",
@@ -398,8 +491,7 @@ def main():
         consume(EVENTS, "platform-agent-events-v1", lambda record: forward_result(record, contracts, url, secret),
                 publisher, brokers)
     else:
-        consume(REQUESTS, "mock-agent-v1", lambda record: run_mock(record, contracts, publisher),
-                publisher, brokers)
+        consume(REQUESTS, REQUEST_GROUP, lambda record: backend(record, publisher), publisher, brokers)
 
 
 if __name__ == "__main__":

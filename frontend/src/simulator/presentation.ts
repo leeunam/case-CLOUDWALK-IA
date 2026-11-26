@@ -19,7 +19,7 @@ export const caseLabels: Record<CaseStatus, string> = {
 
 export const authorLabels: Record<ActorType, string> = {
   customer: 'Você',
-  ai: 'Atendente simulado',
+  ai: 'Atendente de IA',
   human: 'Equipe de suporte',
   supervisor: 'Supervisão',
   system: 'Sistema',
