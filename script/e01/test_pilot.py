@@ -1,10 +1,15 @@
 """Exercita orquestração e falhas sem conectar ao provedor."""
 import copy
+from contextlib import redirect_stderr, redirect_stdout
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import io
 import json
+import os
 from pathlib import Path
+import shutil
 import tempfile
 import threading
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 import uuid
@@ -296,6 +301,61 @@ class PilotTests(unittest.TestCase):
         with self.assertRaisesRegex(p.Stop, "atividade_nao_conciliada"):
             p.Pilot(self.project, self.sim, other, attempt=p.ADDITIONAL, parent_approval=approval).run("canary")
         self.assertEqual((self.project.sent, self.project.dispatches), (6, 5))
+
+    def test_archived_child_pre_ingress_intent_still_blocks_purchase(self):
+        approval = self.prepare_parent()
+        self.runner = self.additional(approval)
+        with patch.object(self.sim, "send", side_effect=OSError("sem confirmação de ingresso")) as send:
+            with self.assertRaises(OSError):
+                self.runner.run("canary")
+            send.assert_called_once()
+        first = self.runner.journal["turns"]["P1.1"]
+        self.assertEqual(first["status"], "inconclusive")
+        self.runner.dir.rename(self.dir / "filho-arquivado")
+        with self.assertRaisesRegex(p.Stop, "intencao_adicional_ja_registrada"):
+            self.additional(approval).run("canary")
+        self.assertEqual((self.project.sent, self.project.dispatches), (5, 5))
+        marker = self.runner.marker
+        self.assertEqual(marker.stat().st_mode & 0o777, 0o600)
+        self.assertEqual(json.loads(marker.read_bytes())["p1_key"], first["key"])
+        with self.assertRaisesRegex(p.Stop, "ensaio_original_congelado"):
+            p.Pilot(self.project, self.sim, self.dir)
+
+    def test_cli_serializes_same_uid_with_different_home_environments(self):
+        tmp = self.dir
+        system_home, other_home = tmp / "usuario", tmp / "outro-home"
+        state = Path(".local/state/cloudwalk-e01") / self.project.project
+        self.dir = system_home / state
+        self.dir.mkdir(mode=0o700, parents=True)
+        self.sim = FakeSimulator(self.project, self.dir)
+        self.runner = p.Pilot(self.project, self.sim, self.dir)
+        approval = self.prepare_parent()
+        other_dir = other_home / state
+        shutil.copytree(self.dir, other_dir)
+        other_sim = FakeSimulator(self.project, other_dir / p.ADDITIONAL)
+        other_sim.capture_prefix = "outro-"
+        original_send = self.sim.send
+        second = []
+
+        def interleave(channel, body, key):
+            errors = io.StringIO()
+            with patch.dict(os.environ, HOME=str(other_home)), redirect_stderr(errors):
+                second.append((p.main(), errors.getvalue().strip()))
+            return original_send(channel, body, key)
+
+        argv = ["pilot.py", "canary", "--attempt", p.ADDITIONAL, "--project", self.project.project,
+                "--base-url", self.project.base, "--parent-approval", str(approval)]
+        with (patch.dict(os.environ, HOME=str(system_home)), patch.object(p.sys, "argv", argv),
+              patch("pwd.getpwuid", return_value=SimpleNamespace(pw_dir=str(system_home))) as user,
+              patch.object(p.signal, "signal"), patch.object(p, "LocalProject", return_value=self.project),
+              patch.object(p, "Simulator", side_effect=[self.sim, other_sim]),
+              patch.object(self.sim, "send", side_effect=interleave), redirect_stdout(io.StringIO())):
+            result = p.main()
+        self.assertEqual((self.project.sent, self.project.dispatches), (6, 6))
+        self.assertEqual(result, 0)
+        self.assertEqual(second, [(1, "piloto_em_uso")])
+        self.assertEqual([args.args for args in user.call_args_list], [(os.getuid(),), (os.getuid(),)])
+        self.assertFalse((other_dir / p.ADDITIONAL).exists())
 
     def test_additional_reentry_checks_parent_digest_and_candidate(self):
         approval = self.prepare_parent()

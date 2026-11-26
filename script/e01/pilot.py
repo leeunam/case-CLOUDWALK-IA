@@ -11,6 +11,7 @@ from http.cookiejar import CookieJar
 import json
 import os
 from pathlib import Path
+import pwd
 import re
 import signal
 import stat
@@ -95,15 +96,18 @@ def frozen(path):
     return json.loads(raw)
 
 
-def write_json(path, data):
-    # O rename protege o leitor. Os dois fsync protegem a intenção antes do POST.
+def write_json(path, data, *, create_only=False):
+    # O original aparece inteiro. Os dois fsync protegem a intenção antes do POST.
     with tempfile.NamedTemporaryFile(mode="w", dir=path.parent, delete=False) as temp:
         try:
             json.dump(data, temp, ensure_ascii=False, indent=2, allow_nan=False)
             temp.write("\n")
             temp.flush()
             os.fsync(temp.fileno())
-            os.replace(temp.name, path)
+            if create_only:
+                os.link(temp.name, path)
+            else:
+                os.replace(temp.name, path)
         finally:
             Path(temp.name).unlink(missing_ok=True)
     fd = os.open(path.parent, os.O_DIRECTORY)
@@ -629,20 +633,37 @@ class Pilot:
         self.sim = sim
         self.timeout = timeout
         self.parent_path = directory / "journal.json"
+        self.marker = directory / (ADDITIONAL + ".intent.json")
         child = directory / ADDITIONAL
         check(attempt in (None, ADDITIONAL), "ensaio_desconhecido")
         check(not child.is_symlink(), "diretorio_do_ensaio_invalido")
         self.dir = child if attempt else directory
         if attempt:
+            check(not self.marker.exists() or (child / "journal.json").is_file(), "intencao_adicional_ja_registrada")
             self.dir.mkdir(mode=0o700, exist_ok=True)
             check(self.dir.stat().st_mode & 0o077 == 0, "diretorio_privado_necessario")
         else:
-            check(not (child / "journal.json").exists(), "ensaio_original_congelado")
+            check(not self.marker.exists() and not (child / "journal.json").exists(), "ensaio_original_congelado")
         self.path = self.dir / "journal.json"
         self.journal = json.loads(self.path.read_bytes()) if self.path.exists() else {"turns": {}}
         self.parent = {}
         if attempt:
+            first = self.journal["turns"].get("P1.1")
+            if self.marker.exists():
+                check(first and json.loads(self.marker.read_bytes()) == self.marker_data(first),
+                      "intencao_adicional_ja_registrada")
             self.bind_parent(parent_approval)
+            if first and not self.marker.exists():
+                self.mark_first_intent(first)
+
+    def marker_data(self, first):
+        return {"parent_sha256": self.journal["baseline"]["parent_sha256"], "p1_key": first["key"]}
+
+    def mark_first_intent(self, first):
+        try:
+            write_json(self.marker, self.marker_data(first), create_only=True)
+        except FileExistsError:
+            raise Stop("intencao_adicional_ja_registrada") from None
 
     def bind_parent(self, approval):
         raw = self.parent_path.read_bytes()
@@ -855,6 +876,8 @@ class Pilot:
                 key = f"{label}.{index}"
                 item = {"status": "intent", "intent_at": now(), "key": str(uuid.uuid4())}
                 entries[key] = item
+                if self.parent and key == "P1.1":
+                    self.mark_first_intent(item)
                 self.save()
                 try:
                     deadline = time.monotonic() + self.timeout
@@ -952,7 +975,7 @@ def main():
     signal.signal(signal.SIGTERM, interrupted)
     try:
         project = LocalProject(args.project, args.base_url)
-        directory = Path.home() / ".local/state/cloudwalk-e01" / args.project
+        directory = Path(pwd.getpwuid(os.getuid()).pw_dir) / ".local/state/cloudwalk-e01" / args.project
         with exclusive(directory):
             check(not args.parent_approval or args.attempt, "aprovacao_original_somente_no_ensaio_adicional")
             runner = Pilot(project, Simulator(project.base), directory, attempt=args.attempt, parent_approval=args.parent_approval)
