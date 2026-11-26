@@ -1,0 +1,8 @@
+{
+  "cases_preserved": 15,
+  "messages_preserved": 46,
+  "ids_and_content_hashes_identical": true,
+  "local_https_routes_csrf_session_cable": "passed",
+  "classifier": "setfit",
+  "tunnel_opened": false
+}

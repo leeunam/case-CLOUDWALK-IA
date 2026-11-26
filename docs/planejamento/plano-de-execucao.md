@@ -1,6 +1,6 @@
 # Plano de execução e verificação do MVP
 
-Este backlog usa a [especificação](especificacao-mvp.md) como contrato de produto. O horizonte de quatro semanas segue a estimativa do TAPI. Datas e dedicação semanal serão ajustadas à agenda real. Os checkpoints semanais são internos. A demonstração inclui atendente simulado via broker, complemento da classificação em fixture, experimento e resultados documentados.
+Este backlog usa a [especificação](especificacao-mvp.md) como contrato de produto. O horizonte de quatro semanas seguiu a estimativa do TAPI. O recorte do MVP foi concluído em 26/11/2026. A demonstração inclui atendente simulado via broker, complemento da classificação com SetFit R1 e modo fixture para reprodução. O experimento F08 conserva seus resultados históricos. [Estado da entrega](../estado-entrega.md).
 
 F01–F03 estão integradas e verificadas localmente. A rodada de conclusão
 F04/F05 integra jobs persistidos, correção auditada, sessão e catálogo do
@@ -169,7 +169,7 @@ SF2-FINAL-R1 após a correção dos três P1 da revisão ampla. O QA registrou
 7,53 s. O responsável autorizou a conferência dos metadados, o teste independente único e a integração condicionada ao cumprimento de todos os critérios.
 [Evidências da preparação pública](../evidencias/c05/sf2/final-r1-preparacao-02/README.md).
 
-Em 26/11/2026, os 120 casos e cinco controles produziram resultado elegível nos dez critérios. A auditoria independente reproduziu o resultado byte a byte e a condição de adoção foi cumprida. C06-A entregou contratos e consumidores compatíveis. O aceite integrado comprovou o cliente Rails de C06-B e o serviço CPU de C06-C. A C07-D reproduziu a instalação do pacote portátil no clone de `89b9e68` e conferiu a persistência após reinício. [Aceite integrado](../evidencias/c06/aceite-integrado/README.md) · [Reprodução](../c07.md). O fluxo publicado em fixture tem seu próprio aceite anterior. [Decisão de adoção](classificacao-comparativa/sf2/decisao-adocao-r1.md) · [Plano e aceites por frente](classificacao-comparativa/c06-setfit-integracao.md).
+Em 26/11/2026, os 120 casos e cinco controles produziram resultado elegível nos dez critérios. A auditoria independente reproduziu o resultado byte a byte e a condição de adoção foi cumprida. C06-A entregou contratos e consumidores compatíveis. O aceite integrado comprovou o cliente Rails de C06-B e o serviço CPU de C06-C. A C07-D reproduziu a instalação do pacote portátil no clone de `89b9e68` e conferiu a persistência após reinício. Após os cinco ajustes da revisão final, a publicação temporária em `977ec3f` passou no aceite com SetFit. [Aceite integrado](../evidencias/c06/aceite-integrado/README.md) · [Reprodução](../c07.md) · [Revisão final](../evidencias/c06/revisao-final/README.md) · [Publicação SetFit](../c07-publicacao-setfit.md) · [Decisão de adoção](classificacao-comparativa/sf2/decisao-adocao-r1.md).
 
 ### Evolução futura depois da publicação — E01
 
@@ -279,11 +279,17 @@ real seguiu para CLASS-001. [Resultados de carga](../f08.md) · [Plano de conclu
 
 ### Publicação da demonstração por URL
 
+Em 26/11/2026, a publicação temporária foi verificada com SetFit R1 local e
+atendente simulado. O aceite cobriu complemento pelo HTTPS, acesso REST e
+WSS por marca e dois turnos no navegador. O acesso depende do computador e
+do túnel ativos. A atualização preservou os atendimentos anteriores.
+[Endereço verificado, evidências e roteiro](../c07-publicacao-setfit.md).
+
 A preparação F09-A comprovou a reprodução local com fixture. A F10 publicou
 a demonstração com login e dados sintéticos sobre um túnel HTTPS temporário
-do computador local. O reinício e a restauração foram verificados. Na URL
-anterior, o responsável confirmou dois retornos automáticos e quatro mensagens
-após recarga por dados móveis. Após a reabertura do túnel em 25/11/2026, Alex
+do computador local. A F10 verificou o reinício e a restauração. No aceite
+histórico de 25/11, o responsável confirmou dois retornos automáticos e
+quatro mensagens após recarga por dados móveis. Com o túnel reaberto, Alex
 conferiu o contexto do handoff, respondeu e resolveu o atendimento móvel da
 Aurora. Por dados móveis, o responsável confirmou a chegada automática da
 resposta, a persistência após recarga e o estado “Resolvido”. Na F10-B, o
@@ -295,7 +301,7 @@ atendente simulado.
 [F09-A](../f09.md) · [Aceite integrado F10](../f10-aceite-integrado.md) ·
 [Histórico da publicação](../f10-resultado.md) · [UX02](../ux02.md).
 
-O plano de aceite da publicação prevê os seguintes passos.
+O roteiro de aceite da publicação previu os seguintes passos.
 
 - Configurar os serviços de aplicação e a origem HTTPS para React, API e WebSocket. Manter PostgreSQL, Kafka e a ponte na rede interna, com volumes persistentes e segredos no ambiente do servidor.
 - Documentar inicialização, migrações, carga de dados, atualização, reinício, consulta de logs e restauração da demonstração. Verificar que a aplicação se recupera de um reinício com casos e histórico preservados.

@@ -1,6 +1,19 @@
 # C06/C07 · integração e reprodução com SetFit R1
 
-**Estado em 26/11/2026.** A adoção da C05 foi implementada na C06. O núcleo do domínio continua no monólito modular Rails. O serviço Python privado hospeda os dois especialistas e aplica a política R1 qualificada. O atendente simulado continua respondendo via Kafka. O [aceite integrado](../../evidencias/c06/aceite-integrado/README.md) comprovou o fluxo na aplicação. A [reprodução C07](../../c07.md) partiu de clone novo, verificou os três canais, o isolamento de marcas e os mesmos históricos após reiniciar. [Decisão e hashes](sf2/decisao-adocao-r1.md) · [Contrato HTTP normativo](../../contratos/classification-http/README.md) · [Resultado final](../../evidencias/c05/sf2/final-r1-01/README.md)
+**Estado em 26/11/2026.** C06, C07 e a publicação temporária com SetFit estão
+aceitas. O serviço Python privado hospeda os dois especialistas e aplica a
+política R1. O monólito Rails mantém o domínio e o atendente simulado responde
+via Kafka. A C07 partiu de clone novo na revisão `89b9e68` e conferiu
+três canais, isolamento de marcas e os mesmos históricos após reiniciar.
+Após a revisão focal em `977ec3f`, o aceite externo verificou complemento,
+acesso REST/WSS e resposta automática no navegador. O aceite por dados
+móveis pertence à publicação F10 anterior com fixture.
+[Aceite integrado C06](../../evidencias/c06/aceite-integrado/README.md) ·
+[Reprodução C07](../../c07.md) ·
+[Revisão final](../../evidencias/c06/revisao-final/README.md) ·
+[Aceite público SetFit](../../c07-publicacao-setfit.md) ·
+[Decisão e hashes](sf2/decisao-adocao-r1.md) ·
+[Contrato HTTP normativo](../../contratos/classification-http/README.md).
 
 ## Ordem e interface compartilhada
 

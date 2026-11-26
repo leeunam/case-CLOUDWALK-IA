@@ -1,0 +1,193 @@
+{
+  "origin": "https://mortality-windsor-weed-watt.trycloudflare.com",
+  "browser": "Codex in-app browser",
+  "category_omitted_by_ui": true,
+  "priority_received": "basic",
+  "first_reply_appeared_without_manual_refresh": true,
+  "second_reply_resolved": true,
+  "four_messages_visible_after_reload": true,
+  "case": {
+    "case_id": "a171c5c5-ed82-409e-a762-3a504ef603b2",
+    "correlation_id": "bf6c399c-460b-49a7-98b0-4342e0d7bc03",
+    "brand": "aurora",
+    "channel": "chat",
+    "status": "resolved",
+    "queue_id": "d8b1583c-fdc5-4660-8062-3a95ac4a351f",
+    "queue": "general",
+    "category": "pix",
+    "priority": "basic",
+    "category_source": "setfit",
+    "priority_source": "channel",
+    "classification_version": 2,
+    "entry": {
+      "source_event_id": "simulator-15b822aa6c2e39ca4a698d4b90c5c81b280ac5ee3399b0e9b1d03909b3388f95",
+      "sha256": "d7efe82cf0c1a7cb20e22429b21637a3152b59af54ec574aebf8fdc30142a6b7"
+    },
+    "requests": 1,
+    "attempts": [
+      {
+        "id": "8b2e4ea9-b7e2-48f7-8d16-f41a2a90e765",
+        "number": 1,
+        "disposition": "applied",
+        "provider": "setfit",
+        "provider_mode": "http",
+        "queue_ms": 625.206,
+        "http_ms": 103.986,
+        "sidecar_ms": 86.55643600013718,
+        "raw_frame_sha256": "47df2400b6740a0ba66cbc9a9f8b22264e1c491690a5919b6f4c6d5d56ed672e",
+        "package_sha256": "224c572b0a2c6ce93b1dd1b90317df131cbb47b897b4de38e97659fbc7e57872",
+        "calls": {
+          "category": 1,
+          "priority": 0
+        },
+        "received": {
+          "category": null,
+          "priority": "basic"
+        },
+        "applied": {
+          "category": "pix"
+        },
+        "outcome": "complete",
+        "issues": {},
+        "catalog_version": 1,
+        "catalog_sha256": "0eeeeb80ca60a5bfef03a01100fcf7d9399b293a937ec1d9c5498c97bd572fb4"
+      }
+    ],
+    "turns": [
+      {
+        "id": "fb383757-4f76-48a7-87c4-1401c0c7195b",
+        "request_id": "59c0ce7d-d493-46ea-aea4-38316b6e3687",
+        "result_id": "340d0ebe-d8d2-524f-be3d-32bcb1a1be9e",
+        "outbox_id": "a79e7e7d-1c4f-40e4-b2d8-c5a2545b2648",
+        "deliveries": 1,
+        "request_version": "1.1",
+        "turn_to_result_ms": 176.699,
+        "case_to_result_ms": 971.895,
+        "outbox_published": true
+      },
+      {
+        "id": "6318a54f-fd76-4f09-b6b4-61b7115d7b5e",
+        "request_id": "3676763a-5f34-46ea-b576-778a0a34f75b",
+        "result_id": "d2fc6496-74cd-5519-bf9c-337e144d541f",
+        "outbox_id": "c9b681a1-b41b-4e4b-9435-e180382a8f69",
+        "deliveries": 1,
+        "request_version": "1.1",
+        "turn_to_result_ms": 296.961,
+        "case_to_result_ms": 44582.44,
+        "outbox_published": true
+      }
+    ],
+    "messages": [
+      {
+        "id": "784828da-b34c-4c49-996d-ca9ec34144d5",
+        "author": "customer",
+        "sequence": 1
+      },
+      {
+        "id": "4e18b99e-ecf1-44b6-8fda-bc5d03974112",
+        "author": "ai",
+        "sequence": 2
+      },
+      {
+        "id": "a3522a12-211c-4f69-9d6e-f33ea601acb6",
+        "author": "customer",
+        "sequence": 3
+      },
+      {
+        "id": "3e4ee6a0-cc58-41e4-9b68-050dacd90049",
+        "author": "ai",
+        "sequence": 4
+      }
+    ],
+    "audit": [
+      {
+        "type": "case.opened",
+        "id": "b9a36c51-ed6f-4082-95b3-eeecc9d36be7",
+        "attempt_id": null,
+        "rule_id": null,
+        "rule_version": null,
+        "queue_id": "d8b1583c-fdc5-4660-8062-3a95ac4a351f"
+      },
+      {
+        "type": "channel.message.received",
+        "id": "554d79c6-1532-4110-9da9-928453c17e37",
+        "attempt_id": null,
+        "rule_id": null,
+        "rule_version": null,
+        "queue_id": null
+      },
+      {
+        "type": "case.routing.applied",
+        "id": "8c008177-b171-43ae-904f-218474a2342b",
+        "attempt_id": null,
+        "rule_id": null,
+        "rule_version": null,
+        "queue_id": "d8b1583c-fdc5-4660-8062-3a95ac4a351f"
+      },
+      {
+        "type": "agent.turn.requested",
+        "id": "41ac86d8-aba1-4696-b2ff-5eaf9b2564eb",
+        "attempt_id": null,
+        "rule_id": null,
+        "rule_version": null,
+        "queue_id": null
+      },
+      {
+        "type": "case.classification.completed",
+        "id": "ad98e845-8240-4a88-abc2-c70492c00e0b",
+        "attempt_id": "8b2e4ea9-b7e2-48f7-8d16-f41a2a90e765",
+        "rule_id": null,
+        "rule_version": null,
+        "queue_id": null
+      },
+      {
+        "type": "agent.delivery.confirmed",
+        "id": "d0fec02b-fa53-4b84-8cb1-01ebdd682993",
+        "attempt_id": null,
+        "rule_id": null,
+        "rule_version": null,
+        "queue_id": null
+      },
+      {
+        "type": "agent.reply.proposed",
+        "id": "de1408ed-8cea-47fe-85a3-7b7e81578cb7",
+        "attempt_id": null,
+        "rule_id": null,
+        "rule_version": null,
+        "queue_id": null
+      },
+      {
+        "type": "channel.message.received",
+        "id": "03d7f503-ea45-4535-8588-b173b3ca313e",
+        "attempt_id": null,
+        "rule_id": null,
+        "rule_version": null,
+        "queue_id": null
+      },
+      {
+        "type": "agent.turn.requested",
+        "id": "aabfb32e-d51e-4656-9d84-d97274a7ebc0",
+        "attempt_id": null,
+        "rule_id": null,
+        "rule_version": null,
+        "queue_id": null
+      },
+      {
+        "type": "agent.delivery.confirmed",
+        "id": "577935c9-beb3-4c47-8fe6-e2fd6b62ce7e",
+        "attempt_id": null,
+        "rule_id": null,
+        "rule_version": null,
+        "queue_id": null
+      },
+      {
+        "type": "agent.resolve.proposed",
+        "id": "67d110b1-31dc-488c-b215-5aeb72f143aa",
+        "attempt_id": null,
+        "rule_id": null,
+        "rule_version": null,
+        "queue_id": null
+      }
+    ]
+  }
+}

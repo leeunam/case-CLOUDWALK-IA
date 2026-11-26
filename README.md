@@ -8,7 +8,8 @@ histórico e referências da conversa. O frontend usa a API Rails real e os
 atendimentos ficam no PostgreSQL. A supervisão pode revisar a classificação,
 auditar decisões e configurar a operação.
 
-[Estado da entrega e próximos passos](docs/estado-entrega.md).
+O recorte do MVP foi concluído em 26/11/2026.
+[Estado da entrega](docs/estado-entrega.md).
 
 ## Demonstração local
 
@@ -52,37 +53,29 @@ portas e comandos Docker diretos.
 
 ## Publicação temporária
 
-A demonstração da F10 foi publicada em HTTPS com classificação fixture e
-atendente simulado. O reinício preservou os atendimentos, e a restauração da
-cópia em uma instalação isolada recuperou o mesmo caso. A reorganização da
-interface e o tema inspirado na CloudWalk foram aceitos e publicados.
+Em 26/11/2026, a demonstração passou no aceite HTTPS com SetFit R1 local
+e atendente simulado via Kafka. O teste cobriu complemento de campos
+ausentes, acesso por marca em REST e WSS, resposta automática no navegador
+e persistência das mensagens após recarga. A
+[URL verificada em 26/11](https://mortality-windsor-weed-watt.trycloudflare.com)
+depende do computador e do túnel ativos e pode mudar ao reabrir o túnel.
+[Roteiro de operação e matriz de aceite](docs/c07-publicacao-setfit.md).
+
+O teste por dados móveis do responsável ocorreu na publicação de 25/11
+com fixture. Ele confirmou conversa automática, handoff humano, resolução,
+persistência e isolamento entre marcas. O reinício e a restauração em
+instalação isolada também foram verificados na F10. A atualização para
+SetFit preservou os 15 casos e as 46 mensagens da instalação.
+[Aceite histórico F10](docs/f10-aceite-integrado.md) ·
 [Histórico da publicação](docs/f10-resultado.md) ·
 [Aceite UX01](docs/ux01.md) · [Aceite UX02](docs/ux02.md).
 
-A [URL temporária](https://jason-dollar-lcd-bought.trycloudflare.com/) foi
-verificada em HTTPS após a reabertura do túnel em 25/11/2026. O endereço depende
-do computador e do túnel ativos e muda quando o túnel é recriado.
-O serviço limita a 200 requisições simultâneas em voo e a disponibilidade pode
-variar. [Roteiro e limites da publicação](docs/f10.md).
-
-Na URL anterior, o responsável confirmou por dados móveis dois retornos
-automáticos e quatro mensagens após recarregar. No endereço atual, Alex
-conferiu o contexto do handoff, respondeu e resolveu o atendimento móvel da
-Aurora. Com o Wi-Fi desligado, o responsável confirmou que a resposta apareceu
-automaticamente, persistiu após recarregar e o caso ficou como “Resolvido”.
-O responsável também confirmou por dados móveis que Bia abriu Aurora, recebeu
-“Atendimento não encontrado” em Horizonte e que Cris abriu o histórico do mesmo
-caso Horizonte. A matriz pública de acesso por marca passou em 36 de 36
-verificações no computador de origem. O aceite externo da F10 foi concluído com
-classificação fixture e atendente simulado.
-[Aceite integrado](docs/f10-aceite-integrado.md).
-
-O [roteiro de publicação](docs/f10.md) orienta a escolher um projeto exclusivo
-e executar `init`, `up` e `check` com `script/publish.py` antes de `prepare` e
-`publish`. Use `credentials` em terminal privado para obter o acesso sintético.
-O mesmo roteiro cobre como parar, retomar e restaurar a demonstração.
-
 ## Arquitetura
+
+![Arquitetura do help desk com React, Rails, PostgreSQL, SetFit privado, ponte e Kafka](docs/arquitetura/arquitetura.png)
+
+[SVG editável](docs/arquitetura/arquitetura.svg) ·
+[Fonte Mermaid](docs/arquitetura/arquitetura.mmd).
 
 1. React envia a mensagem ao Rails pelo proxy do Vite na demonstração local
    e pelo Caddy na publicação. A API persiste o caso no PostgreSQL e devolve

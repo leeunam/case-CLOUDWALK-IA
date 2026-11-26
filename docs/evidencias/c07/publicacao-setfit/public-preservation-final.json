@@ -1,0 +1,21 @@
+{
+  "origin": "https://mortality-windsor-weed-watt.trycloudflare.com",
+  "source_revision": "977ec3f21096d66c6b462d3cc94880e4a94eb490",
+  "schema_migration": "20261126000001",
+  "old_cases_preserved": 15,
+  "old_messages_preserved": 46,
+  "old_ids_and_content_hashes_unchanged": true,
+  "current_cases": 19,
+  "current_messages": 56,
+  "new_rows_are_synthetic_acceptance_cases": true,
+  "images": {
+    "api": "sha256:4f092183046206ceeead5ff23bd0f2fd8cb8a99cb9807add310e468f59785e65",
+    "worker": "sha256:4f092183046206ceeead5ff23bd0f2fd8cb8a99cb9807add310e468f59785e65",
+    "requests": "sha256:2a9f5271862501f1aa391f2b263b2e3c406e5e8f4367f81dae26a4cbc3c0ae31",
+    "events": "sha256:2a9f5271862501f1aa391f2b263b2e3c406e5e8f4367f81dae26a4cbc3c0ae31",
+    "mock": "sha256:2a9f5271862501f1aa391f2b263b2e3c406e5e8f4367f81dae26a4cbc3c0ae31",
+    "web": "sha256:d9a6b1eb1c7f529a161cb7037543a9357d8007c0eef688af50a00f4e435ed0f2",
+    "setfit": "sha256:1d360036318f606e57c2890b6ec12d8623443918632efa13a9f9df2d741c2ced"
+  },
+  "no_secrets_in_evidence": true
+}

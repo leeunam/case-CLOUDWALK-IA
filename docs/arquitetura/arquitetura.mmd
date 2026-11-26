@@ -1,0 +1,62 @@
+---
+title: Arquitetura final do MVP · Help desk multimarca
+---
+flowchart LR
+    subgraph UI["Interface React"]
+        Simulator["Simulador · Chat, WhatsApp e E-mail"]
+        Chat["Conversas · atualiza pela API"]
+        Analyst["Caixa do analista · atendimento humano"]
+    end
+
+    subgraph Rails["Rails API · monólito modular"]
+        Entry["Entrada HTTP · persiste antes do 202"]
+        Triage["Triagem · valida a classificação"]
+        Worker["Solid Queue · job após commit"]
+        Review["Revisão · supervisão corrige"]
+        Route["Roteamento · fila e regras da marca"]
+        Outbox["Outbox · pedido persistido"]
+        Apply["Resultado · Rails aplica evento"]
+        Database[("PostgreSQL · histórico, auditoria, outbox e jobs")]
+        Cable["Action Cable · sinal pós-commit"]
+        HumanQueue["Fila humana · resumo, referências das mensagens e histórico do mesmo atendimento"]
+    end
+
+    subgraph Classification["Classificação local"]
+        SetFit["SetFit R1 · Python, HTTP privado<br/>Completa categoria ou prioridade ausentes"]
+    end
+
+    subgraph Integration["Integração conversacional"]
+        BridgeIn["Ponte Python · recebe webhook"]
+        Requests["Kafka · agent.requests"]
+        Mock["Atendente simulado · mock em Python"]
+        Events["Kafka · agent.events"]
+        BridgeOut["Ponte Python · envia callback"]
+    end
+
+    Simulator -->|POST| Entry
+    Entry -->|202| Simulator
+    Entry --> Triage
+    Triage -->|Campo ausente| Worker
+    Worker <-->|HTTP privado| SetFit
+    Worker -->|Resultado| Triage
+    Triage -->|Inválida, abstenção ou falha| Review
+    Review --> Route
+    Triage -->|Completa e válida| Route
+    Route --> Outbox
+    Outbox --> BridgeIn --> Requests --> Mock --> Events --> BridgeOut --> Apply
+    Apply --> Database --> Cable
+    Cable -->|WebSocket| Chat
+    Apply -->|Handoff| HumanQueue
+    HumanQueue -->|Contexto| Analyst
+
+    classDef app fill:#262d27,stroke:#404c40,color:#fcfaf3;
+    classDef real fill:#eef4ec,stroke:#c3d3c5,color:#191c19;
+    classDef neutral fill:#f4f3ed,stroke:#d4d5c8,color:#191c19;
+    classDef simulated fill:#191e19,stroke:#191e19,color:#fcfaf3;
+    class Simulator,Chat,Analyst app;
+    class Entry,Triage,Worker,Review,Route,Outbox,Apply,Cable,HumanQueue,SetFit,Requests,Events real;
+    class Database,BridgeIn,BridgeOut neutral;
+    class Mock simulated;
+
+    %% Real · plataforma, PostgreSQL, Kafka e SetFit R1 local.
+    %% Simulado · canais, dados e atendente conversacional.

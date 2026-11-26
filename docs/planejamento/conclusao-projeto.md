@@ -1,5 +1,9 @@
 # Conclusão do projeto — execução autorizada
 
+**Fechamento em 26/11/2026.** O recorte do MVP foi concluído com o
+classificador SetFit R1 local e o atendente simulado via Kafka.
+[Estado da entrega](../estado-entrega.md) · [Aceite público SetFit](../c07-publicacao-setfit.md).
+
 Data: 24/11/2026. Base de partida: `380f45bab5708d344f41bf554452586980c65743`.
 O responsável respondeu «autorizo, so prossiga para concluir todo projeto»
 à proposta concreta de até seis chamadas R2 e, somente se aprovadas, até
@@ -58,7 +62,7 @@ nova estratégia para um modelo reprovado continuam decisões distintas.
 O responsável quer aprender. Cada passagem mantém explicação curta, arquivos
 de referência e um exercício. O chat central informa resultados e barreiras
 concretas e continua o trabalho independente quando aguarda informação.
-Este plano não declara o projeto concluído: o aceite depende das provas acima.
+Na abertura deste plano, o fechamento dependia das provas acima.
 
 ### Resultado da frente real
 
@@ -279,10 +283,11 @@ trecho real em instalação limpa.
 
 A demonstração com fixture tem prova de instalação limpa e passou no aceite
 externo da F10 com atendente simulado. Na F10-A, o responsável confirmou por
-dados móveis a conversa e o histórico na URL anterior e, na URL atual, a
-chegada automática da resposta humana, a persistência após recarga e o estado
-“Resolvido”. Na F10-B, confirmou por dados móveis que Bia abriu Aurora e teve
-acesso negado a Horizonte, enquanto Cris abriu o histórico do mesmo caso
+dados móveis a conversa e o histórico na primeira URL e, após a reabertura
+do túnel em 25/11, a chegada automática da resposta humana, a persistência
+após recarga e o estado “Resolvido”. Na F10-B, confirmou por dados móveis
+que Bia abriu Aurora e teve acesso negado a Horizonte, enquanto Cris abriu
+o histórico do mesmo caso
 Horizonte. A matriz pública passou em 36 de 36 verificações no computador de
 origem. O fechamento completo ainda depende do complemento real.
 [Aceite integrado F10](../f10-aceite-integrado.md) ·
@@ -312,3 +317,21 @@ O teste independente dos 120 casos e cinco controles passou nos dez critérios c
 ### Aceite local do complemento real — 26/11/2026
 
 A C06 comprovou o fluxo da aplicação com SetFit e mock via Kafka. A C07/F09 final reproduziu o pacote portátil em clone novo nas duas marcas e nos três canais, com revisão humana, handoff e persistência após reinício. A atualização HTTPS do modo SetFit tem verificação própria. [Aceite integrado C06](../evidencias/c06/aceite-integrado/README.md) · [Guia C07](../c07.md).
+
+### Publicação SetFit e fechamento — 26/11/2026
+
+Na revisão `977ec3f`, a revisão focal aprovou os cinco ajustes apontados
+pelo parecer amplo. O integrador conservou os 15 casos e as 46 mensagens
+anteriores ao atualizar a instalação. O aceite pelo HTTPS, WSS e navegador
+passou com complemento real e mock via Kafka. O aceite móvel em fixture de
+25/11 fica registrado na F10. A URL temporária depende do computador e do
+túnel ativos. O modelo rodou localmente, sem chamadas pagas nesta etapa.
+[Revisão final](../evidencias/c06/revisao-final/README.md) ·
+[Aceite e operação da publicação](../c07-publicacao-setfit.md).
+
+R01 e R02 passaram em reprodução independente. A matriz de referência F08
+conserva a rodada reprovada e segue sem repetição após os ajustes. Os ensaios
+de maior escala, incluindo dez mil conexões, seguem sem medição. Hospedagem
+permanente fica fora do recorte. E01, o atendente conversacional real,
+segue como evolução opcional.
+[F08](../f08.md) · [Reprodução R01/R02](../evidencias/c07/README.md).

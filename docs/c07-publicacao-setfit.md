@@ -1,0 +1,83 @@
+# Publicação temporária com SetFit R1
+
+Em 26/11/2026, a demonstração foi verificada em
+[mortality-windsor-weed-watt.trycloudflare.com](https://mortality-windsor-weed-watt.trycloudflare.com).
+O SetFit R1 instalado no computador completou campos ausentes com o pacote
+aprovado. O atendente que respondeu às mensagens foi o mock via Kafka.
+As verificações da configuração local e do HTTPS usaram a revisão
+`977ec3f21096d66c6b462d3cc94880e4a94eb490`.
+
+## O que passou
+
+| Verificação | Resultado observado |
+| --- | --- |
+| HTTPS · Aurora / Chat | Categoria e prioridade ausentes. SetFit completou Pix e Urgente. |
+| HTTPS · Horizonte / E-mail | Categoria Pix enviada pelo canal. SetFit acrescentou Urgente e preservou Pix com origem `channel`. |
+| API e WebSocket públicos | Bia leu Aurora e recebeu HTTP 404 em Horizonte. Cris leu Horizonte. O WSS confirmou, recusou e confirmou as assinaturas para esses três pares, respectivamente. |
+| Navegador público · Aurora / Chat | SetFit preencheu Pix e preservou a prioridade Básica recebida. A primeira resposta apareceu automaticamente. O segundo turno resolveu o caso. As quatro mensagens conservaram os IDs após recarregar. |
+| Repetição da publicação | Repetir `publish` em SetFit preservou a URL. Solicitar fixture com o túnel ativo retornou código 1 e preservou API, worker e túnel no modo vigente. |
+
+Cada um dos dois casos da API teve uma tentativa aplicada, um turno e uma
+outbox publicada com request Kafka 1.1, além da resposta do mock. A atualização
+preservou os IDs dos 15 casos e das 46 mensagens anteriores e os hashes dos
+textos. Foram acrescentados quatro casos sintéticos de aceite, um deles
+verificado pelo HTTPS local com o túnel fechado.
+[Registros da publicação](evidencias/c07/publicacao-setfit/README.md).
+
+## Operar a publicação
+
+No checkout da instalação original, use a revisão `977ec3f` ou posterior
+com as correções de publicação e reaproveite a configuração privada e o
+projeto Compose `cloudwalk_publish_integrator`. Obtenha o pacote pelo
+custodiante e siga a etapa **Obter código e modelo** da
+[instalação limpa C07](c07.md#obter-código-e-modelo) para validar e instalar
+os pesos. O SHA do clone daquele ensaio registra a reprodução histórica.
+
+No terminal, aponte `MODELO` para o diretório instalado. Na primeira
+publicação com o túnel desligado, use a sequência abaixo. Se o projeto já
+estiver publicado em SetFit, use `publicacao_setfit check` e
+`publicacao_setfit publish` diretamente para confirmar a origem em uso.
+
+```sh
+MODELO=/caminho/escolhido/setfit-r1
+publicacao_setfit() {
+  rtk proxy python3 -B script/publish.py --project cloudwalk_publish_integrator \
+    --classifier setfit --model-dir "$MODELO" "$@"
+}
+publicacao_setfit init
+publicacao_setfit up
+publicacao_setfit check
+publicacao_setfit prepare
+publicacao_setfit publish
+publicacao_setfit credentials
+```
+
+Execute `credentials` em terminal privado para obter o acesso sintético.
+Use a URL exibida por `publish` e abra `/analista` para entrar na operação.
+A função usa as portas locais padrão. Para instalações com outras portas,
+passe os mesmos valores em todas as ações.
+
+Use `publicacao_setfit status` e `publicacao_setfit logs` para diagnóstico.
+Para trocar de modo ou atualizar a pilha, execute `unpublish` com o
+classificador em uso antes da troca. Em SetFit, execute
+`publicacao_setfit unpublish`. A ação `down` para a pilha e preserva os
+volumes. Para copiar ou restaurar esta instalação, conserve o pacote aprovado
+separado dos volumes e use a seleção SetFit nas ações de `script/publish.py`.
+Os passos de cópia, restauração e parada de emergência estão no
+[procedimento geral F10](f10.md).
+
+## Limites do aceite
+
+A URL é temporária e depende do computador e do túnel ativos. O endereço
+pode mudar ao reabrir o túnel. O aceite público foi funcional e usou
+inferência local, sem chamadas pagas. Na carga de referência F08, cinco
+rodadas passaram e uma reprovou. R01 e R02 passaram em reprodução
+independente. O ensaio de dez mil conexões permanece sem medição.
+[F08](f08.md) · [R01](r01.md) · [R02](r02.md).
+
+O aceite por dados móveis do responsável ocorreu na F10 em fixture, nas
+URLs de então. A URL de 26/11 foi verificada por HTTPS, WSS e navegador,
+sem repetir esse aceite móvel. Hospedagem permanente fica fora do recorte.
+E01, o atendente conversacional real, segue como evolução opcional.
+[Aceite histórico F10](f10-aceite-integrado.md) ·
+[Estado da entrega](estado-entrega.md).

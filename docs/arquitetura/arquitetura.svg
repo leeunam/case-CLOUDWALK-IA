@@ -1,0 +1,187 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1728" height="1024" viewBox="0 0 1728 1024" role="img" aria-labelledby="diagram-title diagram-description">
+  <title id="diagram-title">Arquitetura final do help desk multimarca</title>
+  <desc id="diagram-description">O Rails persiste a entrada antes de devolver 202. Classificação completa segue ao roteamento. Campos ausentes usam um job no Solid Queue e SetFit R1 por HTTP privado. Entrada inválida, abstenção ou falha de classificação vão à revisão. O outbox envia pela ponte Python e Kafka ao atendente simulado. O resultado volta por callback ao Rails, que grava no PostgreSQL e sinaliza o React pelo Action Cable. No handoff, o analista recebe o mesmo caso com resumo e histórico.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="#32674e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      text { font-family: Lato, Arial, sans-serif; fill: #191c19; }
+      .eyebrow { font-size: 17px; font-weight: 900; letter-spacing: 2px; fill: #32674e; }
+      .title { font-size: 65px; font-weight: 900; letter-spacing: -1.9px; }
+      .section { font-size: 27px; font-weight: 900; }
+      .heading { font-size: 22px; font-weight: 900; }
+      .body { font-size: 17px; fill: #414b43; }
+      .secondary { font-size: 17px; fill: #526055; }
+      .annotation { font-size: 15px; font-weight: 700; fill: #2d5d45; }
+      .topic { font-family: "DejaVu Sans Mono", "Courier New", monospace; font-size: 19px; font-weight: 700; }
+      .legend { font-size: 17px; fill: #37423a; }
+      .light { fill: #fcfaf3; }
+      .muted-light { fill: #e4e7db; }
+      .panel { fill: #fffefa; stroke: #cbd1c6; stroke-width: 1.5px; }
+      .app-card { fill: #262d27; stroke: #404c40; stroke-width: 1.5px; }
+      .node { fill: #eef4ec; stroke: #c3d3c5; stroke-width: 1.5px; }
+      .neutral { fill: #f4f3ed; stroke: #d4d5c8; stroke-width: 1.5px; }
+      .flow { fill: none; stroke: #32674e; stroke-width: 2px; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="1728" height="1024" fill="#f6f5ef"/>
+  <text class="eyebrow" x="48" y="65">ARQUITETURA FINAL DO MVP</text>
+  <text class="title" x="45" y="139">Help desk multimarca</text>
+
+  <!-- Áreas de responsabilidade -->
+  <rect x="48" y="178" width="238" height="742" rx="16" fill="#191e19"/>
+  <rect class="panel" x="380" y="178" width="714" height="742" rx="16"/>
+  <rect class="panel" x="1146" y="178" width="534" height="180" rx="16"/>
+  <rect class="panel" x="1146" y="380" width="534" height="394" rx="16"/>
+
+  <text class="section light" x="70" y="220">Interface React</text>
+  <text class="section" x="406" y="220">Rails API · monólito modular</text>
+  <text class="secondary" x="1068" y="220" text-anchor="end">Filas por marca, permissões e carteira</text>
+  <text class="section" x="1170" y="220">Classificação local</text>
+  <text class="section" x="1170" y="422">Integração conversacional</text>
+
+  <!-- React -->
+  <g id="react-simulador">
+    <rect class="app-card" x="70" y="253" width="194" height="90" rx="10"/>
+    <text class="heading light" x="86" y="281">Simulador</text>
+    <text class="body muted-light" x="86" y="306">Chat, WhatsApp<tspan x="86" dy="20">e e-mail</tspan></text>
+  </g>
+  <g id="react-conversas">
+    <rect class="app-card" x="70" y="662" width="194" height="80" rx="10"/>
+    <text class="heading light" x="86" y="695">Conversas</text>
+    <text class="body muted-light" x="86" y="720">Atualiza pela API</text>
+  </g>
+  <g id="react-analista">
+    <rect class="app-card" x="70" y="814" width="194" height="78" rx="10"/>
+    <text class="heading light" x="86" y="846">Caixa do analista</text>
+    <text class="body muted-light" x="86" y="871">Atendimento humano</text>
+  </g>
+
+  <!-- Entrada, complemento e revisão -->
+  <g id="entrada-http">
+    <rect class="node" x="406" y="253" width="197" height="80" rx="10"/>
+    <text class="heading" x="422" y="286">Entrada HTTP</text>
+    <text class="body" x="422" y="311">Persiste antes do 202</text>
+  </g>
+  <g id="triagem">
+    <rect class="node" x="650" y="253" width="199" height="80" rx="10"/>
+    <text class="heading" x="666" y="286">Triagem</text>
+    <text class="body" x="666" y="311">Valida a classificação</text>
+  </g>
+  <g id="solid-queue">
+    <rect class="node" x="894" y="253" width="174" height="80" rx="10"/>
+    <text class="heading" x="910" y="286">Solid Queue</text>
+    <text class="body" x="910" y="311">Job após commit</text>
+  </g>
+  <g id="setfit">
+    <rect class="node" x="1170" y="253" width="486" height="80" rx="10"/>
+    <text class="heading" x="1186" y="286">SetFit R1</text>
+    <text class="body" x="1186" y="311">Completa categoria ou prioridade ausentes</text>
+    <text class="annotation" x="1640" y="280" text-anchor="end">Python · HTTP privado</text>
+  </g>
+  <g id="revisao">
+    <rect class="node" x="406" y="444" width="197" height="80" rx="10"/>
+    <text class="heading" x="422" y="477">Revisão</text>
+    <text class="body" x="422" y="502">Supervisão corrige</text>
+  </g>
+  <g id="roteamento">
+    <rect class="node" x="650" y="444" width="199" height="80" rx="10"/>
+    <text class="heading" x="666" y="477">Roteamento</text>
+    <text class="body" x="666" y="502">Fila e regras da marca</text>
+  </g>
+  <g id="outbox">
+    <rect class="node" x="894" y="444" width="174" height="80" rx="10"/>
+    <text class="heading" x="910" y="477">Outbox</text>
+    <text class="body" x="910" y="502">Pedido persistido</text>
+  </g>
+  <path d="M406 561H1068" stroke="#d9ded5" stroke-width="1.5"/>
+  <text class="secondary" x="406" y="593">O PostgreSQL também guarda o outbox e sustenta os jobs do Solid Queue.</text>
+
+  <!-- Ida e volta do atendente simulado -->
+  <g id="ponte-saida">
+    <rect class="neutral" x="1170" y="444" width="204" height="80" rx="10"/>
+    <text class="heading" x="1186" y="477">Ponte Python</text>
+    <text class="body" x="1186" y="502">Recebe webhook</text>
+  </g>
+  <g id="agent-requests">
+    <rect class="node" x="1424" y="444" width="232" height="80" rx="10"/>
+    <text class="topic" x="1440" y="477">agent.requests</text>
+    <text class="body" x="1440" y="502">Kafka · solicitações</text>
+  </g>
+  <g id="mock">
+    <rect x="1424" y="555" width="232" height="76" rx="10" fill="#191e19"/>
+    <text class="heading light" x="1440" y="587">Atendente simulado</text>
+    <text class="body muted-light" x="1440" y="611">Mock em Python</text>
+  </g>
+  <g id="agent-events">
+    <rect class="node" x="1424" y="662" width="232" height="80" rx="10"/>
+    <text class="topic" x="1440" y="695">agent.events</text>
+    <text class="body" x="1440" y="720">Kafka · resultados</text>
+  </g>
+  <g id="ponte-retorno">
+    <rect class="neutral" x="1170" y="662" width="204" height="80" rx="10"/>
+    <text class="heading" x="1186" y="695">Ponte Python</text>
+    <text class="body" x="1186" y="720">Envia callback</text>
+  </g>
+
+  <!-- O resultado aplicado é durável antes de atualizar a interface -->
+  <g id="callback">
+    <rect class="node" x="894" y="662" width="174" height="80" rx="10"/>
+    <text class="heading" x="910" y="695">Resultado</text>
+    <text class="body" x="910" y="720">Rails aplica evento</text>
+  </g>
+  <g id="postgres">
+    <rect class="neutral" x="650" y="662" width="199" height="80" rx="10"/>
+    <text class="heading" x="666" y="695">PostgreSQL</text>
+    <text class="body" x="666" y="720">Histórico e auditoria</text>
+  </g>
+  <g id="action-cable">
+    <rect class="node" x="406" y="662" width="197" height="80" rx="10"/>
+    <text class="heading" x="422" y="695">Action Cable</text>
+    <text class="body" x="422" y="720">Sinal pós-commit</text>
+  </g>
+  <g id="fila-humana">
+    <rect class="node" x="406" y="814" width="662" height="78" rx="10"/>
+    <text class="heading" x="422" y="846">Fila humana</text>
+    <text class="body" x="422" y="871">Resumo, referências das mensagens e histórico do mesmo atendimento</text>
+  </g>
+
+  <!-- Setas e rótulos -->
+  <path class="flow" d="M264 274H400"/>
+  <text class="annotation" x="333" y="264" text-anchor="middle">POST</text>
+  <path class="flow" d="M406 312H270"/>
+  <text class="annotation" x="333" y="302" text-anchor="middle">202</text>
+  <path class="flow" d="M603 293H644"/>
+  <path class="flow" d="M849 274H888"/>
+  <text class="annotation" x="872" y="244" text-anchor="middle">Se falta campo</text>
+  <path class="flow" d="M894 312H855"/>
+  <path class="flow" d="M1068 274H1164"/>
+  <path class="flow" d="M1170 312H1074"/>
+
+  <path class="flow" d="M683 333V387H505V438"/>
+  <text class="annotation" x="479" y="373">Inválida, abstenção ou falha</text>
+  <path class="flow" d="M749 333V438"/>
+  <text class="annotation" x="761" y="409">Completa e válida</text>
+  <path class="flow" d="M603 484H644"/>
+  <path class="flow" d="M849 484H888"/>
+  <path class="flow" d="M1068 484H1164"/>
+  <path class="flow" d="M1374 484H1418"/>
+  <path class="flow" d="M1540 524V549"/>
+  <path class="flow" d="M1540 631V656"/>
+  <path class="flow" d="M1424 702H1380"/>
+  <path class="flow" d="M1170 702H1074"/>
+  <path class="flow" d="M894 702H855"/>
+  <path class="flow" d="M650 702H609"/>
+  <path class="flow" d="M406 702H270"/>
+  <text class="annotation" x="333" y="692" text-anchor="middle">WebSocket</text>
+  <path class="flow" d="M981 742V808"/>
+  <text class="annotation" x="993" y="782">Handoff</text>
+  <path class="flow" d="M406 853H270"/>
+  <text class="annotation" x="333" y="843" text-anchor="middle">Contexto</text>
+
+  <path d="M48 952H1680" stroke="#cbd1c6" stroke-width="1.5"/>
+  <text class="legend" x="48" y="985"><tspan font-weight="900">Real</tspan> · plataforma, PostgreSQL, Kafka e SetFit R1 local</text>
+  <text class="legend" x="880" y="985"><tspan font-weight="900">Simulado</tspan> · canais, dados e atendente conversacional</text>
+</svg>

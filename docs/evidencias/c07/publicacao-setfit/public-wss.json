@@ -1,0 +1,27 @@
+{
+  "origin": "https://mortality-windsor-weed-watt.trycloudflare.com",
+  "transport": "wss",
+  "checks": [
+    {
+      "actor": "bia@example.test",
+      "brand": "aurora",
+      "case_id": "614965a9-1776-4d79-afad-786d473a22b2",
+      "expected": "confirm_subscription",
+      "observed": "confirm_subscription"
+    },
+    {
+      "actor": "bia@example.test",
+      "brand": "horizonte",
+      "case_id": "fcd5f957-26ef-4cd6-a5ff-3900ce60a768",
+      "expected": "reject_subscription",
+      "observed": "reject_subscription"
+    },
+    {
+      "actor": "cris@example.test",
+      "brand": "horizonte",
+      "case_id": "fcd5f957-26ef-4cd6-a5ff-3900ce60a768",
+      "expected": "confirm_subscription",
+      "observed": "confirm_subscription"
+    }
+  ]
+}
