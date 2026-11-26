@@ -3,6 +3,8 @@ from functools import partial
 from io import StringIO
 import json
 from pathlib import Path
+import subprocess
+import sys
 import tempfile
 import time
 import traceback
@@ -23,6 +25,7 @@ from test_e01_knowledge import (
 CREDENTIAL = "synthetic-api-key-never-log"
 SECRET = "synthetic-ledger-secret-never-log"
 REQUEST_ID = "00000000-0000-4000-8000-000000000601"
+LARGE_BODY = b"x" * 90_000
 USAGE = {"provider_response_id": "response-01", "input_tokens": 123, "cached_input_tokens": 3, "output_tokens": 21}
 
 
@@ -227,6 +230,8 @@ class FakeConnection:
             output.write(f"{self.host} {method} {path}\n")
         if self.phase == "write":
             raise TimeoutError
+        if self.phase == "verify_payload" and (body != LARGE_BODY or headers != {"Authorization": CREDENTIAL}):
+            raise ValueError("unexpected_fixture_payload")
 
     def getresponse(self):
         return FakeResponse(self.phase)
@@ -253,6 +258,48 @@ class DeadlineTest(unittest.TestCase):
                 self.assertLess(elapsed, 3.0)
                 lines = trace.read_text().splitlines() if trace.exists() else []
                 self.assertEqual(lines, [f"{FEITA_HOST} POST {FEITA_PATH}"] * expected_posts)
+
+    def test_transfers_body_larger_than_spawn_pipe(self):
+        with tempfile.TemporaryDirectory() as directory:
+            trace = Path(directory) / "requests"
+            post = DeadlinePost(FEITA_HOST, response_limit=RESPONSE_LIMIT,
+                                connection_factory=partial(FakeConnection, phase="verify_payload", trace=str(trace)))
+            self.assertEqual(post(FEITA_PATH, {"Authorization": CREDENTIAL}, LARGE_BODY,
+                                  deadline=time.monotonic() + 2.0), (200, b"{}"))
+            self.assertEqual(trace.read_text().splitlines(), [f"{FEITA_HOST} POST {FEITA_PATH}"])
+
+    def test_cold_worker_respects_deadline_for_large_body_without_late_post(self):
+        with tempfile.TemporaryDirectory() as directory:
+            trace = Path(directory) / "requests"
+            fixture = Path(directory) / "cold_worker.py"
+            fixture.write_text(
+                f"""import sys
+import time
+from functools import partial
+sys.path.insert(0, {str(ROOT)!r})
+if __name__ == "__mp_main__":
+    time.sleep(0.65)
+
+from e01_http import DeadlinePost
+from test_e01_transport import FakeConnection, FEITA_HOST, FEITA_PATH, LARGE_BODY, RESPONSE_LIMIT
+
+if __name__ == "__main__":
+    post = DeadlinePost(FEITA_HOST, response_limit=RESPONSE_LIMIT,
+                        connection_factory=partial(FakeConnection, phase="redirect", trace={str(trace)!r}))
+    started = time.monotonic()
+    try:
+        post(FEITA_PATH, {{}}, LARGE_BODY, deadline=started + 0.04)
+    except TimeoutError:
+        print(time.monotonic() - started, flush=True)
+    else:
+        raise AssertionError("cold request did not time out")
+    time.sleep(0.7)
+""")
+            result = subprocess.run([sys.executable, "-B", str(fixture)], text=True,
+                                    capture_output=True, timeout=8)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertLess(float(result.stdout), 0.28)
+            self.assertFalse(trace.exists(), result.stderr)
 
     def test_backend_uses_default_verified_tls_connection(self):
         post = LunaBackend(CREDENTIAL)._post

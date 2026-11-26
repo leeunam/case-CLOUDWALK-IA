@@ -26,17 +26,26 @@ _CONSULTATION = re.compile(
     r"|(?:quero|preciso|gostaria de|nao consigo) )(?:consult|ver\b|vej|acess|encontr|ach|localiz|busc)"
 )
 _HUMAN_REQUEST = re.compile(
-    r"\b(?:(?:quero|preciso|posso|gostaria de) (?:falar|conversar) com"
-    r"|(?:me (?:passe|transfira|encaminhe)|(?:pode )?(?:me )?(?:passar|transferir|encaminhar)) para)"
+    r"\b(?:(?:quero|queria|preciso|posso|gostaria de) (?:falar|conversar) com"
+    r"|(?:me (?:passe|transfira|encaminhe)|(?:pode )?(?:me )?(?:passar|transferir|encaminhar)) para"
+    r"|quero|queria|preciso de|gostaria de)"
     r" (?:um |uma |o |a )?(?:pessoa|atendente|humano|humana|analista|time humano|equipe humana)\b"
 )
 _SENSITIVE_REQUEST = re.compile(
-    r"\b(?:estorne|reembolse|cancel(?:e|ar) (?:o |um )?pix)\b"
+    r"\b(?:estorne|reembolse|cancele (?:o |um )?pix)\b"
+    r"|(?:^|\b(?:quero|queria|preciso|gostaria de|pode|para) )"
+    r"(?:estornar|reembolsar|cancelar (?:o |um )?pix)\b"
     r"|\b(?:alter(?:e|ar)|troc(?:a|ar|que)) (?:os |meus |a |minha )?(?:dados bancarios|conta bancaria|chave pix)\b"
     r"|\btransfer(?:e|ir) (?:o |meu )?(?:saldo|dinheiro|valores)\b"
     r"|\b(?:faz(?:er|a)|solicitar|realiz(?:ar|e)|execut(?:ar|e)|process(?:ar|e)"
     r"|efetu(?:ar|e)|quero|preciso de) (?:um |uma |o |a |meu )?"
     r"(?:estorno|reembolso|pagamento|transferencia|cancelamento (?:do|de) pix)\b"
+)
+_QUOTED_SPEECH = re.compile(r'"[^"]*"|“[^”]*”|«[^»]*»')
+_CLAUSE_BOUNDARY = re.compile(r"[.!?;:,\n]+|\b(?:mas|porém|contudo|só que)\b", re.IGNORECASE)
+_NEGATED_REQUEST = re.compile(
+    r"\b(?:nao|nunca|nem|sem) (?:(?:quero|queria|preciso(?: de)?|gostaria de"
+    r"|pretendo|vou|posso|estou pedindo (?:para|pra)) )?(?:(?:mais|mesmo) )?$"
 )
 _NEGATION_OR_QUOTE = re.compile(r'["“”«»]|\b(?:ignore|fingir|suponha|hipoteticamente|apenas um exemplo)\b',
                                 re.IGNORECASE)
@@ -78,12 +87,11 @@ def _confirmed(history, question, answers, *, suffix=False):
 
 
 def _handoff_reason(text):
-    normalized = _tokens(text)
-    if _SENSITIVE_REQUEST.search(normalized):
-        return "sensitive_operation"
-    match = _HUMAN_REQUEST.search(normalized)
-    if match and not (_NEGATION_OR_QUOTE.search(text) or normalized[:match.start()].endswith(("nao ", "nunca "))):
-        return "human_requested"
+    clauses = [_tokens(clause) for clause in _CLAUSE_BOUNDARY.split(_QUOTED_SPEECH.sub(" ", text))]
+    for reason, pattern in (("sensitive_operation", _SENSITIVE_REQUEST), ("human_requested", _HUMAN_REQUEST)):
+        for clause in clauses:
+            if any(not _NEGATED_REQUEST.search(clause[:match.start()]) for match in pattern.finditer(clause)):
+                return reason
     return None
 
 

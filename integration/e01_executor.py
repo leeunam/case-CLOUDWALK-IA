@@ -94,7 +94,8 @@ class Executor:
             request = self._contracts.read("AgentTurnRequested", raw)
             require_key(request, record)
             validate_history(request)
-            if not isinstance(raw, bytes) or not canonical_uuid(request["event_id"]):
+            has_customer = any(row["author"]["type"] == "customer" for row in request["payload"]["history"])
+            if not isinstance(raw, bytes) or not canonical_uuid(request["event_id"]) or not has_customer:
                 raise ValueError
         except (TypeError, ValueError, RecursionError):
             raise ExecutorError("invalid_e01_request") from None
@@ -182,12 +183,6 @@ class Executor:
 
     def handle(self, record, publisher) -> None:
         raw, request = self._read_request(record)
-        try:
-            candidates = self._knowledge.select(request)
-            validate_context(request, candidates)
-        except (TypeError, ValueError, OSError):
-            raise ExecutorError("invalid_e01_context") from None
-
         request_id = request["event_id"]
         owner = {"owner_id": str(uuid.uuid4())}
         claim = {**owner, "request_sha256": hashlib.sha256(raw).hexdigest()}
@@ -221,6 +216,13 @@ class Executor:
                     # Nunca repetir start dentro da tentativa que perdeu a autorização.
                     if start_attempted:
                         raise ExecutorError("e01_start_unconfirmed", retryable=True)
+                    # Uma edição nova só afeta despachos novos. Resultado salvo
+                    # já foi validado com a versão usada no despacho original.
+                    try:
+                        candidates = self._knowledge.select(request)
+                        validate_context(request, candidates)
+                    except (TypeError, ValueError, OSError):
+                        raise ExecutorError("invalid_e01_context") from None
                     if self._lease_deadline(response, claimed_at, 10.0) <= self._monotonic():
                         raise ExecutorError("e01_reservation_expired", retryable=True)
                     token = response["lease_token"]

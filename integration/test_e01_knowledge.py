@@ -95,6 +95,30 @@ class KnowledgeTest(unittest.TestCase):
                     self.knowledge.validate_decision(request, context, proposed_reply(request, context))
                 self.knowledge.validate_decision(request, context, proposed_handoff(request, context, reason))
 
+    def test_handoff_reconhece_pedidos_diretos_e_negacao_por_oracao(self):
+        cases = [
+            ("Onde consulto o comprovante de Pix? Quero um atendente.", "human_requested"),
+            ("Onde consulto o comprovante de Pix? Quero estornar o Pix.", "sensitive_operation"),
+            ("Não quero fazer um estorno.", "no_guidance"),
+            ("Não quero fazer um estorno, mas quero um atendente.", "human_requested"),
+            ("Não quero um atendente. Preciso estornar o Pix.", "sensitive_operation"),
+            ('Ela me disse "quero um atendente".', "no_guidance"),
+            ("Quero um atendente para me ajudar. Quero estornar o Pix.", "sensitive_operation"),
+        ]
+        for text, expected in cases:
+            with self.subTest(text=text):
+                request = requested(message(1, text), category="pix")
+                context = self.knowledge.select(request)
+                self.knowledge.validate_decision(request, context, proposed_handoff(request, context, expected))
+                for rule in context["handoff_rules"]:
+                    if rule["reason"] != expected:
+                        incorrect = proposed_handoff(request, context, rule["reason"])
+                        with self.assertRaisesRegex(ValueError, "handoff_evidence"):
+                            self.knowledge.validate_decision(request, context, incorrect)
+                if context["procedures"]:
+                    with self.assertRaisesRegex(ValueError, "reply_evidence"):
+                        self.knowledge.validate_decision(request, context, proposed_reply(request, context))
+
     def test_tela_recupera_sem_provar_condicao(self):
         request = requested(message(1, "A tela da minha maquininha está estranha."))
         context = self.knowledge.select(request)

@@ -4,7 +4,10 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 import hashlib
 import json
+from pathlib import Path
 import runpy
+import shutil
+import tempfile
 from threading import Event, Lock
 import time
 from types import SimpleNamespace
@@ -13,7 +16,7 @@ from unittest.mock import Mock
 import uuid
 
 from agent_flow import Contracts, DEFAULT_SCHEMA, EVENTS, json_bytes
-from e01_backend import InferenceFailure
+from e01_backend import CONTEXT_LIMIT, InferenceFailure, validate_context
 from e01_contracts import read_private_schema
 from e01_executor import Executor, ExecutorError
 from e01_knowledge import Knowledge
@@ -225,21 +228,33 @@ class ExecutorTest(unittest.TestCase):
         check["schema_check"](read_private_schema("ledger"), complete, "complete_result")
         check["validate_projection"](request, infer(request, self.knowledge.select(request), timeout_s=1)[0], result)
 
-    def test_invalid_record_and_unknown_knowledge_precede_all_http(self):
+    def test_invalid_record_precedes_all_http(self):
         bad_key = SimpleNamespace(value=self.record.value, key=lambda: b"another-case")
         unordered = record(requested(message(2, "uma mensagem"), message(1, "outra")))
         duplicate_id = message(2, "outra")
         duplicate_id["id"] = message(1, "uma")["id"]
         duplicated = record(requested(message(1, "uma"), duplicate_id))
-        unknown = record(requested(message(1, "Pix"), brand="99999999-9999-4999-8999-999999999999"))
-        too_large = record(requested(message(1, "x" * (65 * 1024))))
+        no_customer = record(requested(message(1, "Sem cliente", "system")))
         server = LedgerStore(self.record, now=self.clock.wall)
-        for invalid in (bad_key, unordered, duplicated, unknown, too_large):
+        for invalid in (bad_key, unordered, duplicated, no_customer):
             with self.assertRaises(ExecutorError) as caught:
                 self.executor(server).handle(invalid, self.publisher)
             self.assertFalse(caught.exception.retryable)
         self.assertFalse(server.calls)
         self.backend.infer.assert_not_called()
+
+    def test_invalid_context_on_new_claim_does_not_start_or_dispatch(self):
+        unknown = record(requested(message(1, "Pix"), brand="99999999-9999-4999-8999-999999999999"))
+        too_large = record(requested(message(1, "x" * (65 * 1024))))
+        for invalid in (unknown, too_large):
+            server = LedgerStore(invalid, now=self.clock.wall)
+            with self.assertRaisesRegex(ExecutorError, "invalid_e01_context") as caught:
+                self.executor(server).handle(invalid, self.publisher)
+            self.assertFalse(caught.exception.retryable)
+            self.assertEqual([op for op, _ in server.calls], ["claim"])
+            self.assertEqual(server.state, "reserved")
+        self.backend.infer.assert_not_called()
+        self.publisher.publish.assert_not_called()
 
     def test_start_without_ack_or_dispatch_flag_reconciles_with_no_model_post(self):
         for failure in ("start_lost", "start_false"):
@@ -310,6 +325,42 @@ class ExecutorTest(unittest.TestCase):
         self.executor(server).handle(self.record, self.publisher)
         self.assertEqual(broken.publish.call_args, self.publisher.publish.call_args)
         self.assertEqual(self.backend.infer.call_count, 1)
+        self.assertEqual(server.state, "published")
+
+    def test_replay_uses_old_saved_bytes_even_when_current_context_is_too_large(self):
+        request = self.request
+        payload = request["payload"]
+        context = self.knowledge.select(request)
+        initial_size = len(json_bytes({"history": payload["history"], "category": "pix", "knowledge": context}))
+        payload["history"][0]["text"] += " " + "x" * (CONTEXT_LIMIT - initial_size - 8)
+        original = record(request)
+        server = LedgerStore(original, now=self.clock.wall)
+
+        broken = Mock()
+        broken.publish.side_effect = TimeoutError
+        with self.assertRaisesRegex(ExecutorError, "e01_publication_unconfirmed"):
+            self.executor(server).handle(original, broken)
+        self.assertEqual(server.state, "result_saved")
+
+        with tempfile.TemporaryDirectory() as directory:
+            edited_root = Path(directory) / "knowledge"
+            shutil.copytree(ROOT / "knowledge", edited_root)
+            edition = edited_root / "brands/aurora.json"
+            catalog = json.loads(edition.read_bytes())
+            catalog["version"] = "1.1.0"
+            catalog["sources"][0]["title"] += " " + "x" * 256
+            edition.write_bytes(json_bytes(catalog))
+            self.knowledge = Knowledge.load(edited_root)
+            edited = self.knowledge.select(request)
+            self.assertEqual(edited["knowledge_version"], "1.1.0")
+            with self.assertRaisesRegex(ValueError, "context_too_large"):
+                validate_context(request, edited)
+            self.executor(server).handle(original, self.publisher)
+
+        self.assertEqual(broken.publish.call_args, self.publisher.publish.call_args)
+        self.assertEqual(self.backend.infer.call_count, 1)
+        self.assertEqual(server.completion["knowledge_version"], "1.0.0")
+        self.assertEqual(server.calls[-1], ("published", {"result_sha256": server.saved["result_sha256"]}))
         self.assertEqual(server.state, "published")
 
     def test_lost_completion_and_published_replies_recover_without_new_post(self):
