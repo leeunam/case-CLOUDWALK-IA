@@ -21,6 +21,10 @@ module Classification
       category_code?(code) && brand.categories.exists?(code: code, active: true)
     end
 
+    def self.snapshot(brand)
+      { "category" => categories(brand), "priority" => PRIORITIES }
+    end
+
     def self.categories(brand)
       brand.categories.where(active: true).order(:code).pluck(:code, :name).to_h do |code, name|
         [code, CATEGORY_DESCRIPTIONS.fetch(code, name)]
