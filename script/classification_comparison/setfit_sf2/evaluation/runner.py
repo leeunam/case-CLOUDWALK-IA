@@ -131,10 +131,11 @@ class Frames:
             readable, _ = self._ready([self.process.stdout], [self.process.stdin], deadline)
             if readable:
                 prefix = os.read(self.process.stdout.fileno(), 1)
+                self.buffer.extend(prefix)
                 raise PrematureOutput("stdout antecipado" if prefix else "EOF antes de enviar a próxima entrada")
             data = data[os.write(self.process.stdin.fileno(), data):]
 
-    def line(self, deadline):
+    def raw_line(self, deadline):
         while b"\n" not in self.buffer:
             self._ready([self.process.stdout], [], deadline)
             chunk = os.read(self.process.stdout.fileno(), 65536)
@@ -143,13 +144,17 @@ class Frames:
             self.buffer.extend(chunk)
         line, _, rest = self.buffer.partition(b"\n")
         self.buffer = bytearray(rest)
-        return line.decode("utf-8")
+        return bytes(line) + b"\n"
+
+    def line(self, deadline):
+        return self.raw_line(deadline)[:-1].decode("utf-8")
 
     def finish(self, deadline):
         self.process.stdin.close()
         require(not self.buffer, "stdout adicional após a última decisão")
         self._ready([self.process.stdout], [], deadline)
-        require(not os.read(self.process.stdout.fileno(), 1), "stdout adicional após a última decisão")
+        self.buffer.extend(os.read(self.process.stdout.fileno(), 65536))
+        require(not self.buffer, "stdout adicional após a última decisão")
         require(self.process.wait(timeout=max(0, deadline-time.monotonic())) == 0, "worker saiu com falha")
 
 
