@@ -5,7 +5,19 @@
 Iniciada em 26/11/2026, sobre a main publicada
 `343d073caa447d467209977ae5d464329658d128`.
 Branch `feat/atendente-real`, worktree `.worktrees/e01-atendente`.
-A E01-00 partiu de `64cc769`. Na base de preparação `9f37ffc`, passaram por revisão os contratos (00), o conhecimento por marca (01), o ledger Rails (02), o executor Luna (03), o perfil financeiro e o roteiro executável da E01-05. A integração Kafka da E01-04 recebeu aceite offline em `7765ff0` e foi integrada à branch E01 em `406920d`. A E01-05 aguarda P1 e os demais turnos para medir custo e qualidade reais. O aceite de interface da E01-06 também está pendente. [Operação do piloto](../e01-piloto.md).
+A E01-00 partiu de `64cc769`. Na base de preparação `9f37ffc`, passaram por
+revisão os contratos (00), o conhecimento por marca (01), o ledger Rails
+(02), o executor Luna (03), o perfil financeiro e o roteiro executável da
+E01-05. A integração Kafka da E01-04 recebeu aceite offline em `7765ff0` e
+foi incorporada à branch E01 em `406920d`. A E01-05 registrou 4/5
+verificações no primeiro ensaio e 9/9 verificações técnicas no ensaio
+adicional após E01-Q1 e E01-Q2, integradas em `7a73df5`.
+A E01-06 registrou verificações de interface e de acesso por marca. Em
+26/11/2026, o responsável aprovou as seis conversas P1–P6 para demonstração.
+As etapas E01-00 a E01-06, Q1 e Q2 estão concluídas no escopo do piloto. A
+Luna está parada no ambiente isolado.
+[Operação do piloto](../e01-piloto.md) ·
+[Evidências E01](../evidencias/e01/README.md).
 
 O responsável aprovou GPT-5.6 Luna pela Feita, conhecimento fictício por marca
 e teto **acumulado de US$ 1 para o piloto E01**. A autorização cobre o piloto;
@@ -17,7 +29,7 @@ reabre a seleção ou o teste final do classificador. O mock permanece disponív
 [Estado do MVP](../estado-entrega.md) ·
 [Card E01](https://github.com/leeunam/case-CLOUDWALK-IA/issues/11).
 
-O responsável confirmou também a representação em **JSON versionado**, com catálogo comum e bases fictícias separadas por marca. A E01-00 fixa as interfaces de implementação e a matriz anterior à inferência. A avaliação do piloto e a decisão sobre habilitação pública continuam pendentes.
+O responsável confirmou também a representação em **JSON versionado**, com catálogo comum e bases fictícias separadas por marca. A E01-00 fixa as interfaces de implementação e a matriz anterior à inferência. A habilitação contínua na publicação depende de decisão separada.
 
 ## Objetivo observável
 
@@ -174,13 +186,68 @@ conexões seguem evoluções separadas, sem capacidade presumida.
 
 ## Ajuste após a primeira execução real — E01-Q1 e E01-Q2
 
-Em 26/11/2026, o primeiro ensaio real executou cinco despachos: P1, P2/1, P2/2 e P3/1 passaram; P3/2 foi rejeitado como `invalid_decision`. O atendimento não recebeu uma proposta inválida. O registro original permanece falho. A chamada tem uso e recibo monetário conhecidos; o lote parou antes de P4. Nenhum evento pode receber um segundo POST para repetir sua inferência.
+Em 26/11/2026, o primeiro ensaio real, na candidata `e4442f1`, passou em
+quatro de cinco verificações. P1, P2/1, P2/2 e P3/1 passaram. P3/2 foi
+rejeitada como `invalid_decision` antes de a proposta chegar ao atendimento.
+O registro preserva a falha, o uso e o recibo monetário. O lote parou antes
+de P4. Cada evento admite um único despacho ao modelo.
+[Primeiro ensaio](../evidencias/e01/piloto-20261126/primeiro-ensaio.json).
 
-O diagnóstico offline aceitou o encaminhamento correto com a requisição original. A decisão rejeitada não foi preservada; não atribuir a falha a um campo específico por suposição. Reforçar a geração com escolhas que o validador já admite para aquele histórico, amarrando ação, procedimento ou regra, texto e fonte. O schema normativo continua o mesmo e o modelo continua Luna. IDs históricos ficam restritos à origem, e a validação posterior permanece. Registrar submotivos fechados de rejeição, sem texto ou credenciais. Essa mudança de implementação não muda a semântica `e01-v1`; o novo commit identifica a candidata.
+O diagnóstico offline aceitou o encaminhamento correto com a requisição
+original. A evidência disponível identifica a rejeição como
+`invalid_decision`, sem indicar o campo que a causou. A Q1 restringiu a
+geração a escolhas admitidas pelo validador para aquele histórico,
+vinculando ação, procedimento ou regra, texto e fonte. IDs históricos ficam
+restritos à origem. A validação posterior usa o contrato `e01-v1` e registra
+submotivos fechados sem texto ou credenciais. A implementação integrada em
+`7a73df5` identifica a candidata revisada com o mesmo modelo Luna.
 
 | Etapa | Entrega | Aceite |
 | --- | --- | --- |
 | E01-Q1 | Geração estruturada restrita às escolhas aplicáveis e diagnóstico sanitizado. | Mesma requisição P3/2 admite o handoff esperado e exclui esclarecer outra vez, orientar sem condição ou resolver. Cobrir formas válidas da matriz e negativas, sem chamada paga. |
 | E01-Q2 | Ensaio adicional explícito no mesmo projeto e orçamento, sem apagar o primeiro. | Novo journal de revisão Q1 ligado ao original e ao mesmo banco/piloto, base de cinco despachos e cinco recibos preservados. Nove novos turnos da matriz após Q1 revisada; total máximo previsto 14, dentro do limite original de 24 e US$1. Reentrada não compra outra tentativa. |
 
-A parada do consumidor entre turnos do primeiro lote causou esperas de aproximadamente 45 segundos pelo abandono da associação Kafka. O ensaio adicional deverá usar encerramento gracioso para liberar o grupo. Medir novamente os tempos reais e manter os tempos anteriores no registro. Não reduzir nem omitir o relógio do cliente. A primeira orientação continua sujeita à conferência e ao recibo; a aprovação de conteúdo idêntico já concedida pelo responsável fica referenciada explicitamente.
+A parada do consumidor entre turnos do primeiro lote causou esperas de
+aproximadamente 45 segundos pelo abandono da associação Kafka. A Q1 passou em
+49 testes focais após revisão. A suíte de integração Docker da revisão
+anterior passou em 70/70 testes em uma de quatro execuções. Nas outras três,
+houve falha intermitente no teste de prazo do transporte. A suíte integral
+fica sem nova execução após a revisão focal. A Q2 passou em 38 testes
+focais e o teste Kafka verificou que o grupo ficou vazio após encerramento
+gracioso do consumidor via SIGINT.
+
+## Resultado do ensaio adicional e aceite
+
+O ensaio adicional passou nas **nove verificações técnicas** em Aurora e
+Horizonte, por chat, WhatsApp e e-mail. Os turnos levaram de 5.756 a 6.943 ms
+da entrada do cliente até a persistência no Rails, usando o relógio completo.
+O novo P1 tem recibo próprio e reaproveitou a aprovação anterior da orientação.
+A revisão independente confirmou as nove verificações e conferiu hashes,
+tokens, unidade e custo dos 14 recibos brutos. A API da Feita reportou
+US$ 0,00331830 no novo lote e US$ 0,00508345 nas 14 chamadas acumuladas.
+O Rails contabilizou US$ 0,1500054 em provisões de uso e encerrou com zero
+reservas pendentes. O teto acumulado de US$ 1 e o limite de 24 despachos
+permaneceram os da autorização original. A conferência financeira se baseou
+nos recibos da API e deixou a liquidação em carteira sem verificação.
+[Ensaio adicional](../evidencias/e01/piloto-20261126/ensaio-q1.json) ·
+[Evidências e conciliação](../evidencias/e01/README.md).
+
+A E01-06 verificou seis combinações de acesso. Bia consultou o caso Aurora
+com HTTP 200 e teve a assinatura WebSocket confirmada. O caso Horizonte
+ficou ausente para Bia na listagem, retornou HTTP 404 no detalhe e no
+histórico e teve a assinatura recusada. Cris e Alex consultaram os dois
+casos com HTTP 200 e tiveram as assinaturas confirmadas. A entrega de novos
+eventos pelo WebSocket ficou sem medição nesse ensaio.
+
+Na sessão de Cris, a interface exibiu o resumo e a referência do handoff de
+P4. A verificação enviou `E01-RESPOSTA-HUMANA` e resolveu o caso. A resposta
+e a resolução persistiram após recarga. P6 foi atribuído depois que a
+resolução de P4 liberou capacidade. [Evidências E01](../evidencias/e01/README.md).
+
+**Aceite humano das seis conversas para demonstração recebido em
+26/11/2026.** A aprovação anterior de P1 segue registrada. A Luna está
+parada no ambiente isolado. A demonstração pública usa SetFit R1 e
+atendente simulado. A habilitação pública contínua da Luna fica fora
+do escopo do piloto.
+[Conversas aprovadas](../evidencias/e01/piloto-20261126/conversas.md) ·
+[Registro do aceite](../evidencias/e01/piloto-20261126/aceite-final.json).

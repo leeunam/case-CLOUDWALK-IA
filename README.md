@@ -186,17 +186,26 @@ o atendimento nos três canais e a releitura dos casos após reiniciar.
 [Aceite da aplicação](docs/evidencias/c06/aceite-integrado/README.md) ·
 [Roteiro de reprodução](docs/c07.md).
 
-O piloto conversacional E01 pode ser exercitado localmente com transporte
-Feita fictício. O consumidor do piloto usa o ledger do Rails e os mesmos
-tópicos Kafka da demonstração. O canário com a Luna é uma operação separada.
-[Roteiro offline E01](docs/e01-offline.md).
-
 [Resultado real R5](docs/c05-luna-r5-resultado.md) ·
 [Candidata R5](docs/c05-luna-r5-candidata.md) ·
 [Preparação R5](docs/planejamento/classificacao-comparativa/rodada-5-implementacao.md) ·
 [Piloto SetFit](docs/planejamento/classificacao-comparativa/setfit-piloto.md) ·
 [SF2 e divisão dos agentes](docs/planejamento/classificacao-comparativa/sf2/especificacao.md) ·
 [Plano de conclusão](docs/planejamento/conclusao-projeto.md).
+
+### Piloto conversacional E01
+
+GPT-5.6 Luna pela Feita passou nas nove verificações técnicas
+do ensaio adicional em um ambiente isolado, com Aurora e Horizonte nos três
+canais simulados. Os turnos levaram de 5.756 a 6.943 ms da entrada até a
+persistência no Rails. O primeiro ensaio mantém seu resultado de 4/5, com
+uma proposta inválida. A Feita reportou US$ 0,00508345 nas 14 chamadas
+acumuladas. O responsável aprovou as seis conversas P1–P6 para demonstração
+em 26/11/2026, concluindo o piloto E01. A Luna está parada no ambiente isolado
+do piloto. A demonstração pública do MVP usa SetFit R1 e atendente simulado.
+[Evidências E01](docs/evidencias/e01/README.md) ·
+[Conversas do piloto](docs/evidencias/e01/piloto-20261126/conversas.md) ·
+[Roteiro offline E01](docs/e01-offline.md).
 
 [Contrato HTTP e eventos](docs/contratos/openapi.yaml) ·
 [Roteiro de desenvolvimento do frontend](frontend/README.md) ·
