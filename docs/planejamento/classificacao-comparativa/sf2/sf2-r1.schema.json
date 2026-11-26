@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Candidata de validação offline SF2-R1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "category",
+    "priority"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "sf2-r1-offline/1.0"
+    },
+    "category": {
+      "$ref": "#/$defs/categoryCut"
+    },
+    "priority": {
+      "$ref": "#/$defs/priorityCut"
+    }
+  },
+  "$defs": {
+    "categoryCut": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tau",
+        "delta"
+      ],
+      "properties": {
+        "tau": {
+          "type": "number",
+          "enum": [
+            0.95
+          ]
+        },
+        "delta": {
+          "type": "number",
+          "enum": [
+            0,
+            0.1,
+            0.2
+          ]
+        }
+      }
+    },
+    "priorityCut": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tau",
+        "delta"
+      ],
+      "properties": {
+        "tau": {
+          "type": "number",
+          "enum": [
+            0.5,
+            0.6,
+            0.7,
+            0.8,
+            0.9
+          ]
+        },
+        "delta": {
+          "type": "number",
+          "enum": [
+            0,
+            0.1,
+            0.2
+          ]
+        }
+      }
+    },
+    "unionPolicy": {
+      "oneOf": [
+        {
+          "$ref": "urn:cloudwalk:sf2:ipc:1.0#/$defs/policy"
+        },
+        {
+          "$ref": "#"
+        }
+      ]
+    }
+  },
+  "$id": "urn:cloudwalk:sf2:r1:offline:1.0"
+}

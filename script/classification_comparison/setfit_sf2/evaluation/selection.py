@@ -31,7 +31,8 @@ def rank_key(candidate):
             *(cuts[f][k] for f in FIELDS for k in ("tau", "delta")))
 
 
-def select(records, bundle, control_calls, *, catalog=CATALOG):
+def prepare_replay(records, bundle, control_calls, *, catalog=CATALOG):
+    """Valida os vetores uma vez e devolve a função pura de avaliação de cortes."""
     require(bundle["partition"] == "validation", "a grade aceita somente validação")
     # validate_scores e a auditoria das decisões de origem antecedem esta função.
     indexed = {r["id"]: r for r in bundle["rows"]}
@@ -62,13 +63,23 @@ def select(records, bundle, control_calls, *, catalog=CATALOG):
                                 applied=accepted if complete else {}))
         return metrics(records, results, control_calls)
 
-    rule = PROTOCOL["review_policy"]
-    cuts = [dict(tau=t, delta=d) for t, d in product(rule["tau_grid"], rule["delta_grid"])]
+    return replay
+
+
+def evaluate_policies(replay, policies):
     grid = []
-    for category, priority in product(cuts, repeat=2):
-        policy = dict(contract_version=VERSION, category=category, priority=priority)
+    for policy in policies:
         totals = replay(policy)
         gates = quality_gates(totals, "validation")
         grid.append(dict(policy=policy, metrics=totals, gates=gates, eligible=all(gates.values())))
+    return grid
+
+
+def select(records, bundle, control_calls, *, catalog=CATALOG):
+    replay = prepare_replay(records, bundle, control_calls, catalog=catalog)
+    rule = PROTOCOL["review_policy"]
+    cuts = [dict(tau=t, delta=d) for t, d in product(rule["tau_grid"], rule["delta_grid"])]
+    policies = (dict(contract_version=VERSION, category=c, priority=p) for c, p in product(cuts, repeat=2))
+    grid = evaluate_policies(replay, policies)
     winner = min((p for p in grid if p["eligible"]), key=rank_key, default=None)
     return dict(baseline_argmax=replay(None), policies=grid, selected=winner["policy"] if winner else None)
