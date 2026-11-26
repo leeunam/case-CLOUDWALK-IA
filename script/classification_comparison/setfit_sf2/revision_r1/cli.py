@@ -8,6 +8,7 @@ import importlib.util
 import json
 from pathlib import Path
 import sys
+from tempfile import TemporaryDirectory
 import time
 import types
 
@@ -108,8 +109,11 @@ def attest(root, history, amendment_sha, inventory_sha):
           ("C05-SF2-R1", "1.0.0", "approved_offline_extension"), "emenda incorreta")
     files = amendment["parent"]["files"]
     check({role: info["path"] for role, info in files.items()} == PARENT_FILES, "caminhos públicos divergentes")
-    paths = {role: safe_path(root, path) for role, path in PARENT_FILES.items()}
     raw = {role: verified(root, info["path"], info["sha256"]) for role, info in files.items()}
+    current = dict(source_bytes)
+    for role, name in PARENT_FILES.items():
+        check(name not in current or current[name] == raw[role], f"fonte e insumo divergem: {name}")
+        current[name] = raw[role]
     capture, pre = (json.loads(raw[k]) for k in ("capture", "pre_validation"))
     check(pre["preflight_status"] == "passed" and pre["capture_expected"] == capture
           and pre["evaluation_config_sha256"] == sha(raw["parent_config"])
@@ -118,7 +122,7 @@ def attest(root, history, amendment_sha, inventory_sha):
     for role, path in CAPTURE_PATHS.items():
         verified(history, path, capture[role])
         if role != "evaluation/selection.py":
-            verified(root, path, capture[role])
+            check(sha(current[path]) == capture[role], "coleta diverge dos bytes atuais: " + path)
     adapter, training = (json.loads(raw[k])["files"] for k in ("adapter_index", "training_code"))
     check(set(adapter) == ADAPTER_MEMBERS and set(training) == TRAINING_SOURCES
           and all(adapter[k] == v for k, v in training.items()) and pre["adapter_member_count"] == len(adapter),
@@ -133,7 +137,10 @@ def attest(root, history, amendment_sha, inventory_sha):
     check(set(training_paths) == set(freeze["files"]) and freeze["final_seal_sha256"] == sha(raw["final_seal"]),
           "freeze de treino divergente")
     for role, name in training_paths.items():
-        verified(root, name, freeze["files"][role])
+        if name in current:
+            check(sha(current[name]) == freeze["files"][role], "freeze diverge dos bytes atuais: " + name)
+        else:
+            verified(root, name, freeze["files"][role])
     model = json.loads(raw["package_manifest"])
     component_hashes = {}
     model_files = model["files"]
@@ -156,7 +163,7 @@ def attest(root, history, amendment_sha, inventory_sha):
     check(set(seal["files"]) == {*run_files, "stderr.log"} and seal["failure"] is None, "selo incompleto")
     for name, role in run_files.items():
         check(seal["files"][name] == sha(raw[role]), "arquivo do selo divergente: " + name)
-    verified(root, VAL + "/run/stderr.log", seal["files"]["stderr.log"])
+    raw["stderr"] = verified(root, VAL + "/run/stderr.log", seal["files"]["stderr.log"])
     archived = gzip.decompress(raw["parent_grid_gzip"])
     grid_hash = amendment["parent"]["original_grid_sha256"]
     check(json.loads(raw["parent_grid_original"]) == {"size_bytes": len(archived), "sha256": sha(archived)}
@@ -165,7 +172,7 @@ def attest(root, history, amendment_sha, inventory_sha):
                       historical_capture=capture, historical_adapter=adapter, parent_files=files,
                       sealed_files=seal["files"], public_package_members=model_files,
                       weights_verified_in_replay=False)
-    return amendment, paths, archived, provenance, source_bytes
+    return amendment, raw, archived, provenance, source_bytes
 
 
 class VerifiedModules(importlib.abc.MetaPathFinder, importlib.abc.Loader):
@@ -206,6 +213,41 @@ def engine_from(root, sources):
     return importlib.import_module(finder.namespace + ".revision_r1.engine")
 
 
+def replay_attested(amendment, capture, archive, origin, sources, destination):
+    # O auditor SF2 e contracts.core recebem caminhos. Sua raiz privada contém
+    # somente os recursos necessários, copiados dos bytes já autenticados.
+    roles = ("protocol", "schema", "catalog", "validation", "capture_policy", "package_manifest",
+             "seal", "predictions", "controls", "journal", "public_manifest", "training_freeze",
+             "final_seal", "capture_versions", "scores03", "scores04", "parent_selection", "parent_report")
+    names = {role: PARENT_FILES[role] for role in roles}
+    names["stderr"] = VAL + "/run/stderr.log"
+    with TemporaryDirectory(prefix="sf2-r1-") as temporary:
+        root = Path(temporary)
+        paths = {role: root/name for role, name in names.items()}
+        for role, path in paths.items():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(capture[role])
+        engine = engine_from(root, sources)
+        policies = engine.extension_policies(amendment, sources[SCHEMA])
+        data = engine.audit_capture(amendment, paths)
+        original = engine.confirm_original(data, archive, amendment["parent"])
+        engine.check_union(original, policies)
+        # A criação exclusiva reserva a única rodada antes de avaliar qualquer corte novo.
+        destination.mkdir(parents=True, exist_ok=False)
+        started = time.perf_counter()
+        report = engine.compare(data, original, policies)
+        report["extension_compute_seconds"] = time.perf_counter() - started
+    report.update(provenance=origin,
+                  quotas=amendment["validation_quotas"], gates=amendment["gates"],
+                  selection_order=amendment["extension"]["selection_order"])
+    pending = destination/"result.pending"
+    with pending.open("xb") as stream:
+        stream.write(engine.encoded(report))
+    (destination/"result.json").hardlink_to(pending)
+    pending.unlink()
+    return report
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--historical-root", required=True, type=Path)
@@ -216,25 +258,9 @@ def main(argv=None):
         check(sys.flags.isolated and sys.dont_write_bytecode, "use o Python com -I -B")
         destination = safe_path(ROOT, DESTINATION)
         check(not destination.exists(), "destino R1 já existe")
-        amendment, paths, archive, origin, sources = attest(
+        amendment, capture, archive, origin, sources = attest(
             ROOT, args.historical_root, args.amendment_sha256, args.inventory_sha256)
-        engine = engine_from(ROOT, sources)
-        policies = engine.extension_policies(amendment, sources[SCHEMA])
-        data = engine.audit_capture(amendment, paths)
-        original = engine.confirm_original(data, archive, amendment["parent"])
-        engine.check_union(original, policies)
-        # A criação exclusiva reserva a única rodada antes de avaliar qualquer corte novo.
-        destination.mkdir(parents=True, exist_ok=False)
-        started = time.perf_counter()
-        report = engine.compare(data, original, policies)
-        report.update(extension_compute_seconds=time.perf_counter()-started, provenance=origin,
-                      quotas=amendment["validation_quotas"], gates=amendment["gates"],
-                      selection_order=amendment["extension"]["selection_order"])
-        pending = destination/"result.pending"
-        with pending.open("xb") as stream:
-            stream.write(engine.encoded(report))
-        (destination/"result.json").hardlink_to(pending)
-        pending.unlink()
+        report = replay_attested(amendment, capture, archive, origin, sources, destination)
         print(f"{report['status']} | {destination}/result.json")
         return 0 if report["selected"] else 1
     except Exception as exc:

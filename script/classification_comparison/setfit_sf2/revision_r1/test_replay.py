@@ -1,5 +1,5 @@
 """Fixtures sintéticas. O arquivo de testes nunca abre frames, scores ou grade reais."""
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 import gzip
 import inspect
@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from ..contracts.core import FIELDS, REVIEW, VERSION, read, structure
 from ..evaluation.metrics import metrics
@@ -258,6 +259,39 @@ class ReplayTests(unittest.TestCase):
         (self.root/"redirecionado").symlink_to(self.history)
         with self.assertRaisesRegex(ValueError,"redirecionado"):
             cli.safe_path(self.root,"redirecionado/arquivo")
+
+    def test_snapshot_survives_source_replacement_after_attestation(self):
+        attested = cli.attest(self.root, self.history, self.pin, self.index_pin)
+        destination = self.root/"fixture-snapshot-result"
+        inputs = {**self.paths, "stderr": self.paths["seal"].with_name("stderr.log")}
+        old_scores = inputs["scores03"].read_bytes()
+        changed = {"scores03": b"\n" + old_scores}
+        changed.update({role: b"{}" for role in ("protocol", "schema", "catalog", "validation", "seal", "predictions", "stderr")})
+        self.assertEqual(json.loads(changed["scores03"]), json.loads(old_scores))
+        self.assertNotEqual(cli.sha(changed["scores03"]), cli.sha(old_scores))
+
+        used_scores = []
+        original_open = Path.open
+        def deny_original_read(path, mode="r", *args, **kwargs):
+            if "r" in mode and path.is_relative_to(self.root):
+                self.fail("reabriu arquivo da origem após a atestação: " + str(path))
+            if "r" in mode and path.name == inputs["scores03"].name:
+                with original_open(path, "rb") as stream:
+                    used_scores.append(cli.sha(stream.read()))
+            return original_open(path, mode, *args, **kwargs)
+
+        with ExitStack() as stack:
+            for role, content in changed.items():
+                stack.enter_context(self.replaced(inputs[role], content))
+            # Isola os módulos do motor carregados exclusivamente nesta fixture.
+            stack.enter_context(patch.dict(sys.modules))
+            stack.enter_context(patch.object(sys, "meta_path", sys.meta_path.copy()))
+            stack.enter_context(patch.object(Path, "open", deny_original_read))
+            report = cli.replay_attested(*attested, destination)
+        self.assertEqual(used_scores, [cli.sha(old_scores)])
+        self.assertEqual(report["provenance"]["parent_files"]["scores03"]["sha256"], used_scores[0])
+        self.assertEqual(report["original_grid_sha256"], GOLDEN_GRID)
+        self.assertEqual(report, read(destination/"result.json"))
 
     def test_semantic_audit_precedes_replay(self):
         data = engine.audit_capture(self.amendment, self.paths)
