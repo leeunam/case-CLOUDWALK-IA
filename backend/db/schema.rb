@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_20_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_26_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -223,6 +223,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_20_000001) do
     t.jsonb "evidence", default: {}, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "snapshot", default: {}, null: false
+    t.datetime "lease_expires_at"
     t.index ["classification_request_id", "number"], name: "unique_classification_attempt", unique: true
   end
 
@@ -233,6 +235,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_20_000001) do
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "provider"
+    t.string "provider_mode"
     t.index ["available_at"], name: "due_classification_requests", where: "(completed_at IS NULL)"
     t.index ["support_case_id", "classification_version"], name: "unique_classification_request", unique: true
   end
