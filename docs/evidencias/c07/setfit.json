@@ -1,0 +1,878 @@
+{
+  "base": "89b9e68f6473c16da898d7021b5d18be211942cb",
+  "project": "cloudwalk_demo_c07vx",
+  "mode": "setfit",
+  "cases": {
+    "direto": {
+      "receipt": {
+        "case_id": "132c2585-65e2-4f20-ba8b-9c49efc55560",
+        "correlation_id": "16cec192-82fe-4670-b718-b0f8d78508be",
+        "channel_id": "50ddd448-20b5-4fa5-8205-2af25e0b2c64",
+        "external_conversation_id": "simulator-52c80feb63e6e634110745c9918e26d9c545a38a2041eb29aa10c4f93961767d"
+      },
+      "before": {
+        "case_id": "132c2585-65e2-4f20-ba8b-9c49efc55560",
+        "correlation_id": "16cec192-82fe-4670-b718-b0f8d78508be",
+        "brand": "aurora",
+        "channel": "whatsapp",
+        "status": "human_active",
+        "queue_id": "4b6b115e-b5dc-4c59-bb77-d9eca1857419",
+        "queue": "general",
+        "category": "terminal",
+        "priority": "advanced",
+        "category_source": "channel",
+        "priority_source": "channel",
+        "classification_version": 1,
+        "entry": {
+          "source_event_id": "simulator-52c80feb63e6e634110745c9918e26d9c545a38a2041eb29aa10c4f93961767d",
+          "sha256": "fb7e0fba384ee8cb316e38830cc3fc1aa32d7ff7ccbf00c470ab9d46de2041cd"
+        },
+        "requests": 0,
+        "attempts": [],
+        "turns": [
+          {
+            "id": "5617a427-f6eb-4459-95ec-1dbf14e2d482",
+            "request_id": "6e0ccaa1-e116-49a7-8f38-4d70dfab80be",
+            "result_id": "448fe07f-7413-51fc-8031-b0e74cbe97ce",
+            "outbox_id": "c75b217f-258c-4ffa-b20f-f16e8062be95",
+            "deliveries": 1,
+            "request_version": "1.0",
+            "turn_to_result_ms": 475.88,
+            "case_to_result_ms": 537.919,
+            "outbox_published": true
+          }
+        ],
+        "messages": [
+          {
+            "id": "1c8db6bd-cc05-4589-98a5-7914002decc3",
+            "author": "customer",
+            "sequence": 1
+          },
+          {
+            "id": "4e7fab68-58d0-45bc-91a1-89614e9232dd",
+            "author": "ai",
+            "sequence": 2
+          }
+        ],
+        "audit": [
+          {
+            "type": "case.opened",
+            "id": "0f703b1a-d8a5-49ca-9326-cfac2c435064",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": "4b6b115e-b5dc-4c59-bb77-d9eca1857419"
+          },
+          {
+            "type": "case.routing.applied",
+            "id": "23793695-5a39-4d20-918e-71b5f9199b75",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": "4b6b115e-b5dc-4c59-bb77-d9eca1857419"
+          },
+          {
+            "type": "channel.message.received",
+            "id": "e7d0ebaa-87ff-4f12-bf2d-c0fb6dcebf3b",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "agent.turn.requested",
+            "id": "59452f62-5e93-4b3d-9214-39113bb5db1b",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "agent.delivery.confirmed",
+            "id": "892fcb35-8f71-4ba2-9c55-2d24ab7f1f30",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "agent.handoff.proposed",
+            "id": "47853b23-4ca9-49e1-86ff-a019f8236940",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "case.human.assigned",
+            "id": "e221da9c-bdad-464d-b4d7-e5635f767287",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": "4b6b115e-b5dc-4c59-bb77-d9eca1857419"
+          }
+        ]
+      },
+      "owner": "Bia",
+      "final": {
+        "case_id": "132c2585-65e2-4f20-ba8b-9c49efc55560",
+        "correlation_id": "16cec192-82fe-4670-b718-b0f8d78508be",
+        "brand": "aurora",
+        "channel": "whatsapp",
+        "status": "resolved",
+        "queue_id": "4b6b115e-b5dc-4c59-bb77-d9eca1857419",
+        "queue": "general",
+        "category": "terminal",
+        "priority": "advanced",
+        "category_source": "channel",
+        "priority_source": "channel",
+        "classification_version": 1,
+        "entry": {
+          "source_event_id": "simulator-52c80feb63e6e634110745c9918e26d9c545a38a2041eb29aa10c4f93961767d",
+          "sha256": "fb7e0fba384ee8cb316e38830cc3fc1aa32d7ff7ccbf00c470ab9d46de2041cd"
+        },
+        "requests": 0,
+        "attempts": [],
+        "turns": [
+          {
+            "id": "5617a427-f6eb-4459-95ec-1dbf14e2d482",
+            "request_id": "6e0ccaa1-e116-49a7-8f38-4d70dfab80be",
+            "result_id": "448fe07f-7413-51fc-8031-b0e74cbe97ce",
+            "outbox_id": "c75b217f-258c-4ffa-b20f-f16e8062be95",
+            "deliveries": 1,
+            "request_version": "1.0",
+            "turn_to_result_ms": 475.88,
+            "case_to_result_ms": 537.919,
+            "outbox_published": true
+          }
+        ],
+        "messages": [
+          {
+            "id": "1c8db6bd-cc05-4589-98a5-7914002decc3",
+            "author": "customer",
+            "sequence": 1
+          },
+          {
+            "id": "4e7fab68-58d0-45bc-91a1-89614e9232dd",
+            "author": "ai",
+            "sequence": 2
+          },
+          {
+            "id": "5875aefc-0473-4ee8-80e2-688f1c1a2274",
+            "author": "human",
+            "sequence": 3
+          }
+        ],
+        "audit": [
+          {
+            "type": "case.opened",
+            "id": "0f703b1a-d8a5-49ca-9326-cfac2c435064",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": "4b6b115e-b5dc-4c59-bb77-d9eca1857419"
+          },
+          {
+            "type": "case.routing.applied",
+            "id": "23793695-5a39-4d20-918e-71b5f9199b75",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": "4b6b115e-b5dc-4c59-bb77-d9eca1857419"
+          },
+          {
+            "type": "channel.message.received",
+            "id": "e7d0ebaa-87ff-4f12-bf2d-c0fb6dcebf3b",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "agent.turn.requested",
+            "id": "59452f62-5e93-4b3d-9214-39113bb5db1b",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "agent.delivery.confirmed",
+            "id": "892fcb35-8f71-4ba2-9c55-2d24ab7f1f30",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "agent.handoff.proposed",
+            "id": "47853b23-4ca9-49e1-86ff-a019f8236940",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "case.human.assigned",
+            "id": "e221da9c-bdad-464d-b4d7-e5635f767287",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": "4b6b115e-b5dc-4c59-bb77-d9eca1857419"
+          },
+          {
+            "type": "case.human.replied",
+            "id": "f632cc7c-ef36-4052-9de9-49c2b860fc31",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "case.human.resolved",
+            "id": "54dcb359-2121-44f9-906c-c40e22cfc724",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          }
+        ]
+      },
+      "access": {
+        "bia": {
+          "listed": true,
+          "detail_and_history_http": 200
+        },
+        "alex": {
+          "listed": true,
+          "detail_and_history_http": 200
+        }
+      },
+      "kafka": {
+        "agent.requests": {
+          "event_id": "6e0ccaa1-e116-49a7-8f38-4d70dfab80be",
+          "records": 1,
+          "schema": "1.0"
+        },
+        "agent.events": {
+          "event_id": "448fe07f-7413-51fc-8031-b0e74cbe97ce",
+          "records": 1,
+          "schema": "1.0"
+        }
+      }
+    },
+    "complemento": {
+      "receipt": {
+        "case_id": "4134e6e6-4545-4210-b83e-894619cf6530",
+        "correlation_id": "dca3e8fd-4a6f-4f33-899d-659c6d0a83a7",
+        "channel_id": "9cb2d7be-8db1-4e1c-bb9f-d96310bfa970",
+        "external_conversation_id": "simulator-77017fe84a480961ef92fdcc8cbcd082f311e2aad4a497b4c12fb35237310020"
+      },
+      "before": {
+        "case_id": "4134e6e6-4545-4210-b83e-894619cf6530",
+        "correlation_id": "dca3e8fd-4a6f-4f33-899d-659c6d0a83a7",
+        "brand": "horizonte",
+        "channel": "email",
+        "status": "ai_active",
+        "queue_id": "f3e4c321-e79a-48c9-8399-8e27063cb020",
+        "queue": "general",
+        "category": "pix",
+        "priority": "urgent",
+        "category_source": "channel",
+        "priority_source": "setfit",
+        "classification_version": 2,
+        "entry": {
+          "source_event_id": "simulator-77017fe84a480961ef92fdcc8cbcd082f311e2aad4a497b4c12fb35237310020",
+          "sha256": "bcee91e01e51c14404a77a114d14d95da1b2b209463563fa2a1056b0fb646014"
+        },
+        "requests": 1,
+        "attempts": [
+          {
+            "id": "4ca129b0-d59b-43fb-9107-634943f1e7a7",
+            "number": 1,
+            "disposition": "applied",
+            "provider": "setfit",
+            "provider_mode": "http",
+            "queue_ms": 447.619,
+            "http_ms": 217.64,
+            "sidecar_ms": 205.0368290001643,
+            "raw_frame_sha256": "7c56b3fc4ba6babff31567f720e2bed9ae4f54927c8c20fae3b8d7ab711b609e",
+            "package_sha256": "224c572b0a2c6ce93b1dd1b90317df131cbb47b897b4de38e97659fbc7e57872",
+            "calls": {
+              "category": 0,
+              "priority": 1
+            },
+            "received": {
+              "category": "pix",
+              "priority": null
+            },
+            "applied": {
+              "priority": "urgent"
+            },
+            "outcome": "complete",
+            "issues": {},
+            "catalog_version": 1,
+            "catalog_sha256": "0eeeeb80ca60a5bfef03a01100fcf7d9399b293a937ec1d9c5498c97bd572fb4"
+          }
+        ],
+        "turns": [
+          {
+            "id": "5728481f-4681-4937-ad9b-33d550dd6227",
+            "request_id": "c231130b-7dcd-479c-bda7-ac154dfbe2a8",
+            "result_id": "eb1c38a4-6de2-5c05-a3f9-b66912660d06",
+            "outbox_id": "d28e3f90-7ab1-45ce-9a59-2a7501b52efa",
+            "deliveries": 1,
+            "request_version": "1.1",
+            "turn_to_result_ms": 247.992,
+            "case_to_result_ms": 1084.955,
+            "outbox_published": true
+          }
+        ],
+        "messages": [
+          {
+            "id": "bed3d72e-28bc-4009-bc14-b060667c59cb",
+            "author": "customer",
+            "sequence": 1
+          },
+          {
+            "id": "be16f0b5-5a10-4f32-bdd3-f2cfda422db7",
+            "author": "ai",
+            "sequence": 2
+          }
+        ],
+        "audit": [
+          {
+            "type": "case.opened",
+            "id": "bfde0bce-4e57-43a5-afaa-c3ba9507e381",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": "f3e4c321-e79a-48c9-8399-8e27063cb020"
+          },
+          {
+            "type": "channel.message.received",
+            "id": "de2c2a4e-3b4c-4418-a5eb-ca28c18f3cfa",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "case.routing.applied",
+            "id": "5ef98f72-355d-4518-bc8b-30db138b8e63",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": "f3e4c321-e79a-48c9-8399-8e27063cb020"
+          },
+          {
+            "type": "agent.turn.requested",
+            "id": "dca0e30f-468d-450b-8d94-8511ce223af9",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "case.classification.completed",
+            "id": "e60e7385-a506-4467-89a5-47a69f4a5860",
+            "attempt_id": "4ca129b0-d59b-43fb-9107-634943f1e7a7",
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "agent.delivery.confirmed",
+            "id": "d8294e63-ffa8-474f-83aa-4a0337c910aa",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "agent.reply.proposed",
+            "id": "0cb25e07-6132-4acf-b37c-7745a7e268b3",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          }
+        ]
+      },
+      "final": {
+        "case_id": "4134e6e6-4545-4210-b83e-894619cf6530",
+        "correlation_id": "dca3e8fd-4a6f-4f33-899d-659c6d0a83a7",
+        "brand": "horizonte",
+        "channel": "email",
+        "status": "ai_active",
+        "queue_id": "f3e4c321-e79a-48c9-8399-8e27063cb020",
+        "queue": "general",
+        "category": "pix",
+        "priority": "urgent",
+        "category_source": "channel",
+        "priority_source": "setfit",
+        "classification_version": 2,
+        "entry": {
+          "source_event_id": "simulator-77017fe84a480961ef92fdcc8cbcd082f311e2aad4a497b4c12fb35237310020",
+          "sha256": "bcee91e01e51c14404a77a114d14d95da1b2b209463563fa2a1056b0fb646014"
+        },
+        "requests": 1,
+        "attempts": [
+          {
+            "id": "4ca129b0-d59b-43fb-9107-634943f1e7a7",
+            "number": 1,
+            "disposition": "applied",
+            "provider": "setfit",
+            "provider_mode": "http",
+            "queue_ms": 447.619,
+            "http_ms": 217.64,
+            "sidecar_ms": 205.0368290001643,
+            "raw_frame_sha256": "7c56b3fc4ba6babff31567f720e2bed9ae4f54927c8c20fae3b8d7ab711b609e",
+            "package_sha256": "224c572b0a2c6ce93b1dd1b90317df131cbb47b897b4de38e97659fbc7e57872",
+            "calls": {
+              "category": 0,
+              "priority": 1
+            },
+            "received": {
+              "category": "pix",
+              "priority": null
+            },
+            "applied": {
+              "priority": "urgent"
+            },
+            "outcome": "complete",
+            "issues": {},
+            "catalog_version": 1,
+            "catalog_sha256": "0eeeeb80ca60a5bfef03a01100fcf7d9399b293a937ec1d9c5498c97bd572fb4"
+          }
+        ],
+        "turns": [
+          {
+            "id": "5728481f-4681-4937-ad9b-33d550dd6227",
+            "request_id": "c231130b-7dcd-479c-bda7-ac154dfbe2a8",
+            "result_id": "eb1c38a4-6de2-5c05-a3f9-b66912660d06",
+            "outbox_id": "d28e3f90-7ab1-45ce-9a59-2a7501b52efa",
+            "deliveries": 1,
+            "request_version": "1.1",
+            "turn_to_result_ms": 247.992,
+            "case_to_result_ms": 1084.955,
+            "outbox_published": true
+          }
+        ],
+        "messages": [
+          {
+            "id": "bed3d72e-28bc-4009-bc14-b060667c59cb",
+            "author": "customer",
+            "sequence": 1
+          },
+          {
+            "id": "be16f0b5-5a10-4f32-bdd3-f2cfda422db7",
+            "author": "ai",
+            "sequence": 2
+          }
+        ],
+        "audit": [
+          {
+            "type": "case.opened",
+            "id": "bfde0bce-4e57-43a5-afaa-c3ba9507e381",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": "f3e4c321-e79a-48c9-8399-8e27063cb020"
+          },
+          {
+            "type": "channel.message.received",
+            "id": "de2c2a4e-3b4c-4418-a5eb-ca28c18f3cfa",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "case.routing.applied",
+            "id": "5ef98f72-355d-4518-bc8b-30db138b8e63",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": "f3e4c321-e79a-48c9-8399-8e27063cb020"
+          },
+          {
+            "type": "agent.turn.requested",
+            "id": "dca0e30f-468d-450b-8d94-8511ce223af9",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "case.classification.completed",
+            "id": "e60e7385-a506-4467-89a5-47a69f4a5860",
+            "attempt_id": "4ca129b0-d59b-43fb-9107-634943f1e7a7",
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "agent.delivery.confirmed",
+            "id": "d8294e63-ffa8-474f-83aa-4a0337c910aa",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "agent.reply.proposed",
+            "id": "0cb25e07-6132-4acf-b37c-7745a7e268b3",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          }
+        ]
+      },
+      "access": {
+        "bia": {
+          "listed": false,
+          "detail_and_history_http": 404
+        },
+        "alex": {
+          "listed": true,
+          "detail_and_history_http": 200
+        }
+      },
+      "kafka": {
+        "agent.requests": {
+          "event_id": "c231130b-7dcd-479c-bda7-ac154dfbe2a8",
+          "records": 1,
+          "schema": "1.1"
+        },
+        "agent.events": {
+          "event_id": "eb1c38a4-6de2-5c05-a3f9-b66912660d06",
+          "records": 1,
+          "schema": "1.0"
+        }
+      }
+    },
+    "revisao": {
+      "receipt": {
+        "case_id": "5994cc11-a4ca-43b8-a5c2-70965ab585d2",
+        "correlation_id": "9ddc02c8-6fc6-489e-9296-4fc2190b3620",
+        "channel_id": "f0f0a50e-5bd1-4814-b253-87fe51e8f084",
+        "external_conversation_id": "simulator-ca153752cd044d245a510dcfd5e5cc0a86b1d1d1796805f14efd19f34039fe4d"
+      },
+      "before": {
+        "case_id": "5994cc11-a4ca-43b8-a5c2-70965ab585d2",
+        "correlation_id": "9ddc02c8-6fc6-489e-9296-4fc2190b3620",
+        "brand": "aurora",
+        "channel": "chat",
+        "status": "classification_review",
+        "queue_id": "4b6b115e-b5dc-4c59-bb77-d9eca1857419",
+        "queue": "general",
+        "category": null,
+        "priority": null,
+        "category_source": null,
+        "priority_source": null,
+        "classification_version": 1,
+        "entry": {
+          "source_event_id": "simulator-ca153752cd044d245a510dcfd5e5cc0a86b1d1d1796805f14efd19f34039fe4d",
+          "sha256": "c1a0862961e0447fa860ffbb1ee1f49e552809aba372439cf92951dda7eb3fe6"
+        },
+        "requests": 1,
+        "attempts": [
+          {
+            "id": "1f1e7394-36cf-4381-a58c-e3d6d799148b",
+            "number": 1,
+            "disposition": "review",
+            "provider": "setfit",
+            "provider_mode": "http",
+            "queue_ms": 363.606,
+            "http_ms": 113.569,
+            "sidecar_ms": 105.57374300060474,
+            "raw_frame_sha256": "bc3163a7bcb122a8e83291d049c0dc54326285c027eac8ee4a29f15b22f23185",
+            "package_sha256": "224c572b0a2c6ce93b1dd1b90317df131cbb47b897b4de38e97659fbc7e57872",
+            "calls": {
+              "category": 1,
+              "priority": 1
+            },
+            "received": {
+              "category": null,
+              "priority": null
+            },
+            "applied": {},
+            "outcome": "review",
+            "issues": {
+              "category": "raw_review",
+              "priority": "raw_review"
+            },
+            "catalog_version": 1,
+            "catalog_sha256": "0eeeeb80ca60a5bfef03a01100fcf7d9399b293a937ec1d9c5498c97bd572fb4"
+          }
+        ],
+        "turns": [],
+        "messages": [
+          {
+            "id": "a50c99fe-2717-46d2-8410-c89e9b608193",
+            "author": "customer",
+            "sequence": 1
+          }
+        ],
+        "audit": [
+          {
+            "type": "case.opened",
+            "id": "8e448385-22c8-48d2-a901-9089deea1978",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": "4b6b115e-b5dc-4c59-bb77-d9eca1857419"
+          },
+          {
+            "type": "channel.message.received",
+            "id": "e54d4075-b1c9-4d1e-b56c-3debf097ae0d",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "case.classification.review",
+            "id": "4a91bd9b-7b92-4a25-9bf7-f20fe42fb1df",
+            "attempt_id": "1f1e7394-36cf-4381-a58c-e3d6d799148b",
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          }
+        ]
+      },
+      "final": {
+        "case_id": "5994cc11-a4ca-43b8-a5c2-70965ab585d2",
+        "correlation_id": "9ddc02c8-6fc6-489e-9296-4fc2190b3620",
+        "brand": "aurora",
+        "channel": "chat",
+        "status": "ai_active",
+        "queue_id": "4b6b115e-b5dc-4c59-bb77-d9eca1857419",
+        "queue": "general",
+        "category": "payouts",
+        "priority": "basic",
+        "category_source": "supervisor",
+        "priority_source": "supervisor",
+        "classification_version": 2,
+        "entry": {
+          "source_event_id": "simulator-ca153752cd044d245a510dcfd5e5cc0a86b1d1d1796805f14efd19f34039fe4d",
+          "sha256": "c1a0862961e0447fa860ffbb1ee1f49e552809aba372439cf92951dda7eb3fe6"
+        },
+        "requests": 1,
+        "attempts": [
+          {
+            "id": "1f1e7394-36cf-4381-a58c-e3d6d799148b",
+            "number": 1,
+            "disposition": "review",
+            "provider": "setfit",
+            "provider_mode": "http",
+            "queue_ms": 363.606,
+            "http_ms": 113.569,
+            "sidecar_ms": 105.57374300060474,
+            "raw_frame_sha256": "bc3163a7bcb122a8e83291d049c0dc54326285c027eac8ee4a29f15b22f23185",
+            "package_sha256": "224c572b0a2c6ce93b1dd1b90317df131cbb47b897b4de38e97659fbc7e57872",
+            "calls": {
+              "category": 1,
+              "priority": 1
+            },
+            "received": {
+              "category": null,
+              "priority": null
+            },
+            "applied": {},
+            "outcome": "review",
+            "issues": {
+              "category": "raw_review",
+              "priority": "raw_review"
+            },
+            "catalog_version": 1,
+            "catalog_sha256": "0eeeeb80ca60a5bfef03a01100fcf7d9399b293a937ec1d9c5498c97bd572fb4"
+          }
+        ],
+        "turns": [
+          {
+            "id": "45291c8f-51d7-4330-9461-0136de4a11bc",
+            "request_id": "56459adb-df19-49b9-b45a-177ef05aeca1",
+            "result_id": "a96275d1-2d83-50f4-9aeb-14f8030182d7",
+            "outbox_id": "ac473e40-ea2a-47dd-a664-6c5dfbe55274",
+            "deliveries": 1,
+            "request_version": "1.0",
+            "turn_to_result_ms": 302.91,
+            "case_to_result_ms": 1094.644,
+            "outbox_published": true
+          }
+        ],
+        "messages": [
+          {
+            "id": "a50c99fe-2717-46d2-8410-c89e9b608193",
+            "author": "customer",
+            "sequence": 1
+          },
+          {
+            "id": "5f373834-d6f9-4b4f-a4f1-d63f20c2ce38",
+            "author": "ai",
+            "sequence": 2
+          }
+        ],
+        "audit": [
+          {
+            "type": "case.opened",
+            "id": "8e448385-22c8-48d2-a901-9089deea1978",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": "4b6b115e-b5dc-4c59-bb77-d9eca1857419"
+          },
+          {
+            "type": "channel.message.received",
+            "id": "e54d4075-b1c9-4d1e-b56c-3debf097ae0d",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "case.classification.review",
+            "id": "4a91bd9b-7b92-4a25-9bf7-f20fe42fb1df",
+            "attempt_id": "1f1e7394-36cf-4381-a58c-e3d6d799148b",
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "case.routing.applied",
+            "id": "d21ceb34-db9c-4aff-a179-e1abacaee9c5",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": "4b6b115e-b5dc-4c59-bb77-d9eca1857419"
+          },
+          {
+            "type": "agent.turn.requested",
+            "id": "eeadd74e-ae7b-4445-848a-d733631f4175",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "case.classification.corrected",
+            "id": "448c27cd-1f79-46b2-b214-25bdc1168b63",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "agent.delivery.confirmed",
+            "id": "56ae24cc-0d08-4dce-9d67-45ed991bec1e",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          },
+          {
+            "type": "agent.reply.proposed",
+            "id": "77bb950c-823c-4373-9890-5a303a97cb9b",
+            "attempt_id": null,
+            "rule_id": null,
+            "rule_version": null,
+            "queue_id": null
+          }
+        ]
+      },
+      "access": {
+        "bia": {
+          "listed": true,
+          "detail_and_history_http": 200
+        },
+        "alex": {
+          "listed": true,
+          "detail_and_history_http": 200
+        }
+      },
+      "kafka": {
+        "agent.requests": {
+          "event_id": "56459adb-df19-49b9-b45a-177ef05aeca1",
+          "records": 1,
+          "schema": "1.0"
+        },
+        "agent.events": {
+          "event_id": "a96275d1-2d83-50f4-9aeb-14f8030182d7",
+          "records": 1,
+          "schema": "1.0"
+        }
+      }
+    }
+  },
+  "ready_before": {
+    "ready": true,
+    "worker_pid": 46,
+    "counts": {
+      "starts": 1
+    }
+  },
+  "ready_after": {
+    "ready": true,
+    "worker_pid": 46,
+    "counts": {
+      "starts": 1,
+      "pipe_writes": 2,
+      "verified": 2
+    }
+  },
+  "resources": {
+    "api": {
+      "memory_bytes": 119803904,
+      "memory_peak_bytes": 129294336,
+      "cpu_usec": 12300907
+    },
+    "worker": {
+      "memory_bytes": 235970560,
+      "memory_peak_bytes": 237686784,
+      "cpu_usec": 5261551
+    },
+    "db": {
+      "memory_bytes": 124502016,
+      "memory_peak_bytes": 148914176,
+      "cpu_usec": 10933654
+    },
+    "kafka": {
+      "memory_bytes": 385323008,
+      "memory_peak_bytes": 581009408,
+      "cpu_usec": 97643413
+    },
+    "outbox": {
+      "memory_bytes": 84328448,
+      "memory_peak_bytes": 86138880,
+      "cpu_usec": 5421538
+    },
+    "requests": {
+      "memory_bytes": 43102208,
+      "memory_peak_bytes": 47083520,
+      "cpu_usec": 2442486
+    },
+    "events": {
+      "memory_bytes": 44994560,
+      "memory_peak_bytes": 46424064,
+      "cpu_usec": 3365220
+    },
+    "mock": {
+      "memory_bytes": 42741760,
+      "memory_peak_bytes": 44474368,
+      "cpu_usec": 3356176
+    },
+    "web": {
+      "memory_bytes": 298196992,
+      "memory_peak_bytes": 353222656,
+      "cpu_usec": 12656918
+    },
+    "setfit": {
+      "memory_bytes": 2519220224,
+      "memory_peak_bytes": 2623467520,
+      "cpu_usec": 49729605
+    }
+  }
+}
