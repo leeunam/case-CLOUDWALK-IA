@@ -19,7 +19,7 @@ class SetfitClassificationFlowTest < ActiveSupport::TestCase
   end
 
   test "um ou dois ausentes gravam snapshot e uma rodada por caso mesmo após reentrega ou mudança de provedor" do
-    [{ "category" => "pix", "priority" => "" }, {}].each do |fields|
+    [{ "category" => "pix", "priority" => "" }, { "priority" => "basic" }, {}].each do |fields|
       ENV["CLASSIFICATION_PROVIDER"] = "setfit"
       data = channel_payload.merge(fields)
       record = receive(data)
@@ -34,21 +34,23 @@ class SetfitClassificationFlowTest < ActiveSupport::TestCase
       assert_equal %w[setfit http], attempt.snapshot.values_at("provider", "provider_mode")
       assert_equal @brand.catalog_version, attempt.snapshot.fetch("catalog_version")
       assert_equal record.messages.sole.id, attempt.snapshot.fetch("message_id")
-      assert_equal [fields["category"], nil], attempt.snapshot.fetch("received").values_at("category", "priority")
+      received = fields.values_at("category", "priority").map(&:presence)
+      assert_equal received, attempt.snapshot.fetch("received").values_at("category", "priority")
       assert_equal Classification::SetfitContract.current.identities, attempt.snapshot.fetch("identities")
       assert_equal attempt.id, @endpoint.requests.last.fetch("id")
       assert_equal attempt.id, attempt.evidence.fetch("id")
       assert_equal attempt.snapshot.fetch("catalog_sha256"), attempt.evidence.fetch("catalog_sha256")
-      assert_equal [fields.empty? ? 1 : 0, 1], attempt.evidence.fetch("calls").values_at("category", "priority")
+      assert_equal received.map { |value| value ? 0 : 1 }, attempt.evidence.fetch("calls").values_at("category", "priority")
+      assert_equal [received[0] || "pix", received[1] || "urgent"], record.reload.classification.values_at(:category, :priority)
       assert_equal 1, record.turns.count
       assert_equal 1, AgentIntegration::AgentOutbox.where(agent_turn: record.turns).count
-      assert_equal [fields.empty? ? "setfit" : "channel", "setfit"], record.reload.classification.values_at(:category_source, :priority_source)
+      assert_equal received.map { |value| value ? "channel" : "setfit" }, record.classification.values_at(:category_source, :priority_source)
       assert_equal "1.1", JSON.parse(record.turns.sole.outbox.body).fetch("schema_version")
       audit = record.audits.where(event_type: "case.classification.completed").sole
       assert_equal attempt.id, audit.details.fetch("attempt_id")
       refute_includes [attempt.snapshot, attempt.evidence, audit.details].to_json, data.fetch("text")
     end
-    assert_equal 2, @endpoint.requests.size
+    assert_equal 3, @endpoint.requests.size
   end
 
   test "completa com catálogo operacional e inválidas não criam job; incompatível recusa antes do HTTP" do
@@ -143,16 +145,86 @@ class SetfitClassificationFlowTest < ActiveSupport::TestCase
     assert_empty @endpoint.requests
   end
 
-  test "pedido antigo no teto não replica motivo livre na auditoria" do
+  test "origem legada no teto preserva tentativa vencida e encerra com motivo controlado" do
+    [%w[fixture jev worker_lease_expired], [nil, "unknown", "invalid_classifier_mode"]].each do |mode, provider, reason|
+      record = receive(channel_payload)
+      request = request_for(record)
+      request.update!(provider: nil, provider_mode: nil)
+      first = request.attempts.create!(number: 1, disposition: "retry", finished_at: 1.minute.ago,
+        evidence: { "mode" => mode }.compact, issues: { provider: "marcador-sintetico-privado" })
+      last = request.attempts.create!(number: 2, lease_expires_at: 1.second.ago, evidence: { http_status: 503 })
+      2.times { Classification::CompleteRequestJob.perform_now(request.id) }
+
+      assert_equal [provider, mode], request.reload.attributes.values_at("provider", "provider_mode")
+      assert request.completed_at
+      assert_equal first.attributes, first.reload.attributes
+      assert_equal [first.id, last.id], request.attempts.order(:number).ids
+      assert_equal ["expired", { "http_status" => 503 }], [last.reload.disposition, last.evidence]
+      audit = record.audits.where(event_type: "case.classification.review").sole
+      assert_equal [reason, reason, last.id], [record.reload.blocking_reason, audit.reason, audit.details["attempt_id"]]
+      refute_includes audit.attributes.to_s, "marcador-sintetico-privado"
+      assert_empty record.turns
+      assert_empty AgentIntegration::AgentOutbox.where(agent_turn: record.turns)
+    end
+    assert_empty @endpoint.requests
+  end
+
+  test "motivo livre no histórico legado não chega à auditoria" do
     record = receive(channel_payload)
     request = request_for(record)
     request.update!(provider: nil, provider_mode: nil)
-    request.attempts.create!(number: 2, disposition: "retry", finished_at: Time.current,
-                             issues: { provider: "marcador-sintetico-privado" })
+    last = request.attempts.create!(number: 2, finished_at: Time.current, evidence: { mode: "fixture" },
+                                    issues: { provider: "marcador-sintetico-privado" })
     Classification::CompleteRequestJob.perform_now(request.id)
-    assert_equal "invalid_response", record.reload.blocking_reason
-    assert_equal "invalid_response", record.audits.where(event_type: "case.classification.review").sole.reason
+    assert_equal %w[jev fixture], request.reload.attributes.values_at("provider", "provider_mode")
+    audit = record.audits.where(event_type: "case.classification.review").sole
+    assert_equal ["invalid_response", last.id], [audit.reason, audit.details["attempt_id"]]
+    refute_includes audit.attributes.to_s, "marcador-sintetico-privado"
     assert_empty @endpoint.requests
+  end
+
+  test "origem legada é fixada mesmo se faltar a mensagem inicial" do
+    [[{ mode: "fixture" }, "jev", "missing_classification_text"], [{}, "unknown", "invalid_classifier_mode"]].each do |evidence, provider, reason|
+      record = receive(channel_payload)
+      request = request_for(record)
+      request.update!(provider: nil, provider_mode: nil)
+      last = request.attempts.create!(number: 1, finished_at: Time.current, evidence: evidence)
+      record.messages.sole.destroy!
+      Classification::CompleteRequestJob.perform_now(request.id)
+      assert_equal [provider, evidence[:mode]], request.reload.attributes.values_at("provider", "provider_mode")
+      assert_equal reason, record.reload.blocking_reason
+      assert_equal last.id, record.audits.where(event_type: "case.classification.review").sole.details["attempt_id"]
+      assert_equal last.attributes, request.attempts.sole.attributes
+    end
+    assert_empty @endpoint.requests
+  end
+
+  test "JSONB mantém score abaixo do corte e margem decimal exata da resposta" do
+    @endpoint.reply = lambda do |request|
+      status, body = @endpoint.complete(request)
+      body.merge!("outcome" => "review", "applied" => {})
+      field = body.fetch("fields").fetch("priority")
+      field.merge!("decision" => "review", "reason" => "below_tau", "margin" => JSON::Fragment.new("0.59999999999999999"))
+      field.fetch("vector")["scores"] = [0.1, 0.1, 0.05, 0.05, JSON::Fragment.new("0.69999999999999999")]
+      [status, body]
+    end
+    record = receive(channel_payload.merge("category" => "pix"))
+    request = request_for(record)
+    Classification::CompleteRequestJob.perform_now(request.id)
+    assert_equal "below_tau", record.reload.blocking_reason
+    assert_empty record.turns
+
+    persisted = Classification::Attempt.where(id: request.attempts.sole.id).pick(
+      Arel.sql("evidence #>> '{fields,priority,vector,scores,4}'"),
+      Arel.sql("evidence #>> '{fields,priority,margin}'"),
+      Arel.sql("jsonb_typeof(evidence #> '{fields,priority,vector,scores,4}')"),
+      Arel.sql("jsonb_typeof(evidence #> '{fields,priority,margin}')"),
+      Arel.sql("(evidence #> '{fields,priority,vector,scores,4}')::numeric < (evidence #> '{fields,priority,cut,tau}')::numeric")
+    )
+    assert_equal ["0.69999999999999999", "0.59999999999999999", "number", "number", true], persisted
+    field = request.attempts.sole.reload.evidence.dig("fields", "priority")
+    assert_equal BigDecimal("0.59999999999999999"), field.fetch("margin")
+    assert_operator field.fetch("vector").fetch("scores").last, :<, field.dig("cut", "tau")
   end
 
   test "supervisão corrige a marca autorizada e não altera a outra" do

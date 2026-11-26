@@ -80,8 +80,7 @@ module Classification
       end
       raise Invalid unless body.fetch("applied") == applied
 
-      # O JSONB deve receber números JSON, não a serialização de BigDecimal do Active Support em strings.
-      evidence = JSON.parse(bytes).merge("http_status" => status)
+      evidence = body.merge("http_status" => status)
       return complete(received, applied, evidence) if outcome == "complete"
 
       issues = outcomes.filter_map do |field, decision|

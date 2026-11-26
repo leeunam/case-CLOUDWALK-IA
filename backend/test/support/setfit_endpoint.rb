@@ -40,8 +40,15 @@ class SetfitEndpoint
   end
 
   def complete(request)
-    fixture = request.fetch("received").values.all?(&:nil?) ? "response-complete-both" : "response-complete"
+    received = request.fetch("received")
+    fixture = received["category"] ? "response-complete" : "response-complete-both"
     body = self.class.fixture(fixture).merge(request.slice("id", "catalog_version"))
+    if received["priority"]
+      provided = self.class.fixture("response-complete").dig("fields", "category")
+      body.fetch("fields")["priority"] = provided
+      body.fetch("calls")["priority"] = 0
+      body.fetch("applied").delete("priority")
+    end
     body["catalog_sha256"] = Classification::SetfitContract.catalog_sha256(request.fetch("catalog"))
     [200, body]
   end

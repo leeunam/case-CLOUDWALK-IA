@@ -54,6 +54,13 @@ module Classification
         if last && last.finished_at.nil?
           last.update!(finished_at: Time.current, disposition: "expired", issues: { provider: :worker_lease_expired })
         end
+        if request.provider.nil?
+          ConfiguredProvider.pin_legacy!(request)
+          if request.provider == "unknown"
+            review!(request, record, "invalid_classifier_mode", last)
+            next
+          end
+        end
         if last && last.number >= MAX_ATTEMPTS
           last_issue = last.issues.values.first || "worker_lease_expired"
           last_issue = "invalid_response" unless %w[worker_lease_expired busy not_ready timeout network_error http_error].include?(last_issue)
@@ -63,11 +70,10 @@ module Classification
 
         message = record.messages.where(author_type: "customer").order(:sequence).first
         unless message
-          review!(request, record, "missing_classification_text")
+          review!(request, record, "missing_classification_text", last)
           next
         end
 
-        ConfiguredProvider.pin_legacy!(request)
         snapshot = capture(request, record, message)
         lease = LEASE.from_now
         attempt = request.attempts.create!(number: (last&.number || 0) + 1, snapshot: snapshot, lease_expires_at: lease)
