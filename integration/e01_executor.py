@@ -4,18 +4,19 @@ import base64
 from datetime import datetime
 import hashlib
 import math
+import sys
 import time
 import uuid
 
 if __package__:
     from .agent_flow import EVENTS, json_bytes, require_key, validate_history
-    from .e01_backend import InferenceFailure, POLICY_VERSION, valid_usage, validate_context
+    from .e01_backend import InferenceFailure, POLICY_VERSION, prepare_request, valid_usage
     from .e01_contracts import read_json_object
     from .e01_knowledge import HANDOFF_TEXT, RESOLVE_TEXT
     from .e01_ledger import LedgerError, canonical_uuid
 else:
     from agent_flow import EVENTS, json_bytes, require_key, validate_history
-    from e01_backend import InferenceFailure, POLICY_VERSION, valid_usage, validate_context
+    from e01_backend import InferenceFailure, POLICY_VERSION, prepare_request, valid_usage
     from e01_contracts import read_json_object
     from e01_knowledge import HANDOFF_TEXT, RESOLVE_TEXT
     from e01_ledger import LedgerError, canonical_uuid
@@ -27,6 +28,22 @@ _TERMINAL = {"published", "unknown", "failed", "discarded"}
 _OBSERVE_AGAIN = {"busy", "publication_pending", "lease_lost", "nonce_reused", "ledger_transport"}
 _UNKNOWN_REASONS = {"transport_ambiguous", "usage_missing", "usage_invalid", "dispatch_uncertain"}
 _FAILED_REASONS = {"invalid_decision", "invalid_result", "provider_rejected"}
+
+_DIAGNOSTICS = {
+    "provider": {"choices_shape", "finish_length", "finish_unexpected", "message_shape",
+                 "decision_json", "decision_envelope", "decision_schema"},
+    "knowledge": {"invalid_decision_schema", "invalid_candidate_snapshot", "latest_customer_origin", "message_origin",
+                  "resolution_evidence", "candidate_origin", "reply_evidence", "handoff_evidence", "source_origin"},
+}
+
+
+def _report_rejection(stage, detail):
+    code = detail if type(detail) is str and detail in _DIAGNOSTICS[stage] else "unspecified"
+    try:
+        print(f"e01_invalid_decision stage={stage} reason={code}", file=sys.stderr, flush=True)
+    except Exception:
+        # A indisponibilidade do log não altera a liquidação de um despacho já realizado.
+        pass
 
 
 class ExecutorError(RuntimeError):
@@ -117,14 +134,16 @@ class Executor:
             raise ExecutorError("invalid_ledger_lease") from None
         return min(requested_at + cap, self._monotonic() + seconds)
 
-    def _infer(self, request, candidates, claim, dispatch_deadline):
+    def _infer(self, request, candidates, body, claim, dispatch_deadline):
         timeout = dispatch_deadline - self._monotonic() - self._completion_margin
         if timeout <= 0:
             return "unknown", {**claim, "reason": "dispatch_uncertain"}
         try:
-            decision, usage = self._backend.infer(request, candidates, timeout_s=timeout)
+            decision, usage = self._backend.infer(body, timeout_s=timeout)
         except InferenceFailure as error:
             if valid_usage(error.usage) and error.reason in _FAILED_REASONS:
+                if error.reason == "invalid_decision":
+                    _report_rejection("provider", error.detail)
                 return "complete", {**claim, "outcome": "failed", "usage": error.usage, "reason": error.reason}
             reason = error.reason if error.reason in _UNKNOWN_REASONS and error.usage is None else "usage_invalid"
             return "unknown", {**claim, "reason": reason}
@@ -133,7 +152,8 @@ class Executor:
         failure = {**claim, "outcome": "failed", "usage": usage}
         try:
             self._knowledge.validate_decision(request, candidates, decision)
-        except ValueError:
+        except ValueError as error:
+            _report_rejection("knowledge", error.args[0] if len(error.args) == 1 else None)
             return "complete", {**failure, "reason": "invalid_decision"}
         try:
             raw = _proposal(request, decision)
@@ -220,7 +240,8 @@ class Executor:
                     # já foi validado com a versão usada no despacho original.
                     try:
                         candidates = self._knowledge.select(request)
-                        validate_context(request, candidates)
+                        options = self._knowledge.applicable_options(request, candidates)
+                        provider_body = prepare_request(request, candidates, options)
                     except (TypeError, ValueError, OSError):
                         raise ExecutorError("invalid_e01_context") from None
                     if self._lease_deadline(response, claimed_at, 10.0) <= self._monotonic():
@@ -234,7 +255,7 @@ class Executor:
                     response = self._ledger.start(request_id, credentials)
                     if response.get("dispatch") is True and response["state"] == "started":
                         dispatch_deadline = self._lease_deadline(response, start_at, 40.0)
-                        settlement = self._infer(request, candidates, credentials, dispatch_deadline)
+                        settlement = self._infer(request, candidates, provider_body, credentials, dispatch_deadline)
                         if settlement[1].get("outcome") == "result":
                             submitted = settlement[1]
                     continue

@@ -74,6 +74,10 @@ def _author(row, kind):
     return row["author"]["type"] == kind
 
 
+def latest_customer(history):
+    return next(row for row in reversed(history) if _author(row, "customer"))
+
+
 def _confirmed(history, question, answers, *, suffix=False):
     if len(history) < 2:
         return False
@@ -212,30 +216,48 @@ class Knowledge:
                 options[procedure["id"]] = ("clarify", question)
         return options
 
+    def applicable_options(self, request: dict, candidates: dict) -> list:
+        history = request["payload"]["history"]
+        reason = _handoff_reason(latest_customer(history)["text"])
+        sources = _index(candidates["sources"])
+
+        def source_refs(item):
+            source = sources[item["source_id"]]
+            return [{"id": source["id"], "version": source["version"]}]
+
+        if reason is None:
+            if _confirmed(history, RESOLUTION_QUESTION, {"sim, resolveu", "o problema foi resolvido"}, suffix=True):
+                return [{"action": "resolve", "text": RESOLVE_TEXT, "source_refs": []}]
+            replies = self._reply_options(history, candidates["procedures"])
+            if replies:
+                procedures = _index(candidates["procedures"])
+                return [{"action": "reply", "kind": kind, "procedure_id": identifier, "text": text,
+                         "source_refs": source_refs(procedures[identifier])}
+                        for identifier, (kind, text) in replies.items()]
+            reason = "no_guidance"
+        return [{"action": "handoff", "rule_id": rule["id"], "text": HANDOFF_TEXT, "source_refs": source_refs(rule)}
+                for rule in candidates["handoff_rules"] if rule["reason"] == reason]
+
     def validate_decision(self, request: dict, candidates: dict, decision: dict) -> None:
         _require(self._decision.is_valid(decision), "invalid_decision_schema")
         _require(candidates == self.select(request), "invalid_candidate_snapshot")
         history = request["payload"]["history"]
-        last_customer = next(row for row in reversed(history) if _author(row, "customer"))
-        _require(last_customer["id"] in decision["message_ids"], "latest_customer_origin")
+        _require(latest_customer(history)["id"] in decision["message_ids"], "latest_customer_origin")
         _require(set(decision["message_ids"]) <= {row["id"] for row in history}, "message_origin")
-        handoff = _handoff_reason(last_customer["text"])
-        can_resolve = _confirmed(history, RESOLUTION_QUESTION, {"sim, resolveu", "o problema foi resolvido"}, suffix=True)
+        options = self.applicable_options(request, candidates)
         action = decision["action"]
         if action == "resolve":
-            _require(can_resolve and handoff is None and decision["text"] == RESOLVE_TEXT, "resolution_evidence")
+            _require(any(row["action"] == action and row["text"] == decision["text"] for row in options),
+                     "resolution_evidence")
             return
 
-        options = self._reply_options(history, candidates["procedures"]) if not (handoff or can_resolve) else {}
         if action == "reply":
-            identifier = decision["procedure_id"]
-            item = _index(candidates["procedures"]).get(identifier)
-            _require(item is not None, "candidate_origin")
-            _require(options.get(identifier) == (decision["kind"], decision["text"]), "reply_evidence")
+            id_field, candidates_field, evidence = "procedure_id", "procedures", "reply_evidence"
         else:
-            item = _index(candidates["handoff_rules"]).get(decision["rule_id"])
-            _require(item is not None, "candidate_origin")
-            expected_reason = handoff or ("no_guidance" if not options and not can_resolve else None)
-            _require(item["reason"] == expected_reason and decision["text"] == HANDOFF_TEXT, "handoff_evidence")
-        source = _index(candidates["sources"])[item["source_id"]]
-        _require(decision["source_refs"] == [{"id": source["id"], "version": source["version"]}], "source_origin")
+            id_field, candidates_field, evidence = "rule_id", "handoff_rules", "handoff_evidence"
+        identifier = decision[id_field]
+        _require(identifier in _index(candidates[candidates_field]), "candidate_origin")
+        option = next((row for row in options if row.get(id_field) == identifier), None)
+        _require(option is not None and option["text"] == decision["text"] and option.get("kind") == decision.get("kind"),
+                 evidence)
+        _require(option["source_refs"] == decision["source_refs"], "source_origin")

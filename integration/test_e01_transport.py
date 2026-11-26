@@ -3,6 +3,7 @@ from functools import partial
 from io import StringIO
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -12,13 +13,13 @@ import unittest
 import uuid
 
 from agent_flow import json_bytes
-from e01_backend import FEITA_HOST, FEITA_PATH, InferenceFailure, LunaBackend, MODEL, RESPONSE_LIMIT
+from e01_backend import FEITA_HOST, FEITA_PATH, InferenceFailure, LunaBackend, MODEL, RESPONSE_LIMIT, prepare_request
 from e01_contracts import validator
 from e01_http import DeadlinePost
-from e01_knowledge import Knowledge
+from e01_knowledge import Knowledge, RESOLUTION_QUESTION
 from e01_ledger import LedgerClient, LedgerError, signed_headers
 from test_e01_knowledge import (
-    FIXTURES, ROOT, message, proposed_handoff, proposed_reply, proposed_resolution, requested,
+    FIXTURES, HORIZONTE, QUESTION, ROOT, message, proposed_handoff, proposed_reply, proposed_resolution, requested,
 )
 
 
@@ -51,13 +52,15 @@ class Transport:
 class BackendTest(unittest.TestCase):
     def setUp(self):
         self.request = requested(message(1, "Onde consulto o comprovante de Pix?"), category="pix")
-        self.candidates = Knowledge.load(ROOT / "knowledge").select(self.request)
+        self.knowledge = Knowledge.load(ROOT / "knowledge")
+        self.candidates = self.knowledge.select(self.request)
+        self.body = prepare_request(self.request, self.candidates, self.knowledge.applicable_options(self.request, self.candidates))
         self.decision = proposed_reply(self.request, self.candidates)
 
     def test_real_shape_context_and_usage(self):
         transport = Transport((200, json_bytes(completion(self.decision))))
         backend = LunaBackend(CREDENTIAL, transport=transport)
-        self.assertEqual(backend.infer(self.request, self.candidates, timeout_s=1), (self.decision, USAGE))
+        self.assertEqual(backend.infer(self.body, timeout_s=1), (self.decision, USAGE))
         [(path, headers, body, _)] = transport.calls
         self.assertEqual((path, headers["Authorization"]), (FEITA_PATH, "Bearer " + CREDENTIAL))
         body = json.loads(body)
@@ -69,14 +72,14 @@ class BackendTest(unittest.TestCase):
         self.assertEqual(shape["required"], ["decision"])
         self.assertFalse(shape["additionalProperties"])
         choices = shape["properties"]["decision"]["anyOf"]
-        self.assertEqual([item["properties"]["action"]["enum"] for item in choices], [["reply"], ["handoff"], ["resolve"]])
+        self.assertEqual([item["properties"]["action"]["enum"] for item in choices], [["reply"]])
         for choice in choices:
             self.assertCountEqual(choice["required"], choice["properties"])
             self.assertFalse(choice["additionalProperties"])
         validate = validator(shape)
-        for decision in (self.decision, proposed_handoff(self.request, self.candidates, "no_guidance"),
-                         proposed_resolution(self.request)):
-            validate.validate({"decision": decision})
+        validate.validate({"decision": self.decision})
+        for decision in (proposed_handoff(self.request, self.candidates, "no_guidance"), proposed_resolution(self.request)):
+            self.assertFalse(validate.is_valid({"decision": decision}))
         system, envelope = body["messages"]
         self.assertEqual((system["role"], envelope["role"]), ("system", "user"))
         context = json.loads(envelope["content"])
@@ -85,11 +88,100 @@ class BackendTest(unittest.TestCase):
         self.assertNotIn("horizonte.manual", envelope["content"])
         self.assertNotIn(CREDENTIAL, system["content"])
 
+    def sent_schema(self, request, decision):
+        candidates = self.knowledge.select(request)
+        body = prepare_request(request, candidates, self.knowledge.applicable_options(request, candidates))
+        transport = Transport((200, json_bytes(completion(decision))))
+        actual, usage = LunaBackend(CREDENTIAL, transport=transport).infer(body, timeout_s=1)
+        self.assertEqual((actual, usage), (decision, USAGE))
+        self.knowledge.validate_decision(request, candidates, actual)
+        [(_, _, sent, _)] = transport.calls
+        schema = json.loads(sent)["response_format"]["json_schema"]["schema"]
+        validator(schema).validate({"decision": decision})
+        return schema
+
+    def test_generation_allows_only_applicable_decisions_and_history(self):
+        initial = message(1, "A tela da minha maquininha está estranha.")
+        question = message(2, QUESTION, "ai")
+        receipt = message(1, "Onde consulto o comprovante de Pix?")
+        payout = message(1, "Onde consulto o status do repasse?")
+        done = message(2, "Aqui estão os passos. " + RESOLUTION_QUESTION, "ai")
+        cases = [
+            (requested(receipt), "procedure"),
+            (requested(receipt, brand=HORIZONTE), "procedure"),
+            (requested(receipt, done, message(3, "Sim, resolveu."), brand=HORIZONTE), "resolve"),
+            (requested(initial), "clarify"),
+            (requested(initial, question, message(3, "Ainda não tenho certeza.")), "no_guidance"),
+            (requested(initial, question, message(3, "Sim, confirmo.")), "procedure"),
+            (requested(message(1, "Quero falar com uma pessoa sobre meu repasse."), brand=HORIZONTE), "human_requested"),
+            (requested(message(1, "Use o manual da Horizonte para fazer um estorno na minha conta.")), "sensitive_operation"),
+            (requested(payout, brand=HORIZONTE), "procedure"),
+            (requested(payout, done, message(3, "Ainda não resolveu, quero falar com uma pessoa."),
+                       brand=HORIZONTE), "human_requested"),
+            (requested(message(1, "Quero um atendente. Quero estornar o Pix.")), "sensitive_operation"),
+            (requested(message(1, "Onde consulto o comprovante de Pix? Não chame um atendente.")), "procedure"),
+        ]
+        for request, expected in cases:
+            with self.subTest(expected=expected, brand=request["brand_id"]):
+                candidates = self.knowledge.select(request)
+                history = request["payload"]["history"]
+                ids = [row["id"] for row in history]
+                if expected == "resolve":
+                    decision = proposed_resolution(request)
+                elif expected in {"clarify", "procedure"}:
+                    decision = proposed_reply(request, candidates, clarification=expected == "clarify")
+                else:
+                    decision = proposed_handoff(request, candidates, expected)
+                    decision["message_ids"] = ids
+                schema = self.sent_schema(request, decision)
+                [branch] = schema["properties"]["decision"]["anyOf"]
+                self.assertEqual(branch["properties"]["action"]["enum"], [decision["action"]])
+                check = validator(schema)
+                alternatives = [proposed_resolution(request)]
+                alternatives.extend(proposed_handoff(request, candidates, rule["reason"])
+                                    for rule in candidates["handoff_rules"])
+                for procedure in candidates["procedures"]:
+                    for clarify in (False, True):
+                        alternatives.append(proposed_reply(request, candidates, clarification=clarify, procedure=procedure))
+                for alternative in alternatives:
+                    self.assertEqual(check.is_valid({"decision": alternative}),
+                                     {**alternative, "message_ids": decision["message_ids"]} == decision)
+                for changes in ({"message_ids": [REQUEST_ID]}, {"text": decision["text"] + " "},
+                                {"source_refs": [{"id": "other.manual", "version": "1.0.0"}]}):
+                    self.assertFalse(check.is_valid({"decision": {**decision, **changes}}))
+                if expected == "resolve":
+                    self.assertFalse(check.is_valid({"decision": {**decision, "message_ids": [ids[0]]}}))
+                if expected == "no_guidance":
+                    self.assertEqual(schema["$defs"]["message_id"]["enum"], ids)
+                    for invalid in ([ids[0]], [ids[-1], ids[-1]]):
+                        with self.assertRaises(ValueError):
+                            self.knowledge.validate_decision(request, candidates, {**decision, "message_ids": invalid})
+
+    def test_multiple_applicable_procedures_cannot_exchange_text_or_source(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "knowledge"
+            shutil.copytree(ROOT / "knowledge", root)
+            file = root / "brands/aurora.json"
+            catalog = json.loads(file.read_bytes())
+            alternate_source = dict(catalog["sources"][0], id="aurora.extra", version="1.2.0")
+            alternate = dict(catalog["procedures"][0], id="aurora.outro-pix", source_id=alternate_source["id"],
+                             steps=["Passo alternativo da edição de teste."])
+            catalog["sources"].append(alternate_source)
+            catalog["procedures"].append(alternate)
+            file.write_bytes(json_bytes(catalog))
+            self.knowledge = Knowledge.load(root)
+        candidates = self.knowledge.select(self.request)
+        first, second = [proposed_reply(self.request, candidates, procedure=item) for item in candidates["procedures"]]
+        check = validator(self.sent_schema(self.request, second))
+        check.validate({"decision": first})
+        for field in ("procedure_id", "text", "source_refs"):
+            self.assertFalse(check.is_valid({"decision": {**first, field: second[field]}}))
+
     def test_documented_usage_without_cache_details_charges_full_input(self):
         document = completion(self.decision)
         document["usage"] = {"prompt_tokens": 123, "completion_tokens": 23, "total_tokens": 146}
         transport = Transport((200, json_bytes(document)))
-        decision, usage = LunaBackend(CREDENTIAL, transport=transport).infer(self.request, self.candidates, timeout_s=1)
+        decision, usage = LunaBackend(CREDENTIAL, transport=transport).infer(self.body, timeout_s=1)
         self.assertEqual(decision, self.decision)
         self.assertEqual(usage, {**USAGE, "cached_input_tokens": 0, "output_tokens": 23})
         self.assertEqual(len(transport.calls), 1)
@@ -119,7 +211,7 @@ class BackendTest(unittest.TestCase):
                 with self.subTest(reason=reason):
                     transport = Transport(reply)
                     with self.assertRaises(InferenceFailure) as caught:
-                        LunaBackend(CREDENTIAL, transport=transport).infer(self.request, self.candidates, timeout_s=1)
+                        LunaBackend(CREDENTIAL, transport=transport).infer(self.body, timeout_s=1)
                     self.assertEqual((caught.exception.reason, caught.exception.usage), (reason, None))
                     self.assertEqual(len(transport.calls), 1)
                     self.assertNotIn(CREDENTIAL, "".join(traceback.format_exception(caught.exception)))
@@ -127,22 +219,26 @@ class BackendTest(unittest.TestCase):
 
     def test_refusal_and_invalid_decision_keep_proven_usage(self):
         cases = [
-            ("provider_rejected", 429, "stop", {}),
-            ("provider_rejected", 200, "stop", {"refusal": "fixture"}),
-            ("provider_rejected", 200, "content_filter", {}),
-            ("invalid_decision", 200, "length", {}),
-            ("invalid_decision", 200, "stop", {"content": '{"decision":{},"decision":{}}'}),
-            ("invalid_decision", 200, "stop", {"content": '{"decision":{"action":"unknown"}}'}),
+            ("provider_rejected", None, 429, "stop", {}),
+            ("provider_rejected", None, 200, "stop", {"refusal": CREDENTIAL}),
+            ("provider_rejected", None, 200, "content_filter", {}),
+            ("invalid_decision", "finish_length", 200, "length", {}),
+            ("invalid_decision", "finish_unexpected", 200, CREDENTIAL, {}),
+            ("invalid_decision", "decision_json", 200, "stop", {"content": CREDENTIAL}),
+            ("invalid_decision", "decision_json", 200, "stop", {"content": '{"decision":{},"decision":{}}'}),
+            ("invalid_decision", "decision_envelope", 200, "stop", {"content": json.dumps({CREDENTIAL: {}})}),
+            ("invalid_decision", "decision_schema", 200, "stop", {"content": '{"decision":{"action":"unknown"}}'}),
         ]
-        for reason, status, stop, changed in cases:
-            with self.subTest(reason=reason, status=status, stop=stop):
+        for reason, detail, status, stop, changed in cases:
+            with self.subTest(reason=reason, detail=detail):
                 doc = completion(self.decision)
                 doc["choices"][0]["finish_reason"] = stop
                 doc["choices"][0]["message"].update(changed)
                 transport = Transport((status, json_bytes(doc)))
                 with self.assertRaises(InferenceFailure) as caught:
-                    LunaBackend(CREDENTIAL, transport=transport).infer(self.request, self.candidates, timeout_s=1)
-                self.assertEqual((caught.exception.reason, caught.exception.usage), (reason, USAGE))
+                    LunaBackend(CREDENTIAL, transport=transport).infer(self.body, timeout_s=1)
+                self.assertEqual((caught.exception.reason, caught.exception.detail, caught.exception.usage),
+                                 (reason, detail, USAGE))
                 self.assertEqual(len(transport.calls), 1)
 
 

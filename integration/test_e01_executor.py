@@ -1,5 +1,7 @@
 import base64
 from collections import Counter
+from contextlib import redirect_stderr
+from io import StringIO
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 import hashlib
@@ -12,11 +14,11 @@ from threading import Event, Lock
 import time
 from types import SimpleNamespace
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 import uuid
 
 from agent_flow import Contracts, DEFAULT_SCHEMA, EVENTS, json_bytes
-from e01_backend import CONTEXT_LIMIT, InferenceFailure, validate_context
+from e01_backend import CONTEXT_LIMIT, InferenceFailure, LunaBackend, prepare_request
 from e01_contracts import read_private_schema
 from e01_executor import Executor, ExecutorError
 from e01_knowledge import Knowledge
@@ -24,7 +26,7 @@ from e01_ledger import LedgerClient
 from test_e01_knowledge import (
     HORIZONTE, ROOT, message, proposed_handoff, proposed_reply, requested,
 )
-from test_e01_transport import SECRET, USAGE
+from test_e01_transport import CREDENTIAL, SECRET, USAGE, Transport, completion
 
 
 def record(request):
@@ -177,7 +179,7 @@ class ExecutorTest(unittest.TestCase):
         self.knowledge = Knowledge.load(ROOT / "knowledge")
         self.contracts = Contracts(DEFAULT_SCHEMA)
         self.backend = Mock()
-        self.backend.infer.side_effect = lambda req, ctx, timeout_s: (proposed_reply(req, ctx), USAGE)
+        self.backend.infer.return_value = (proposed_reply(self.request, self.knowledge.select(self.request)), USAGE)
         self.publisher = Mock()
 
     def executor(self, server, *, real_clock=False, **options):
@@ -207,13 +209,10 @@ class ExecutorTest(unittest.TestCase):
         request["schema_version"] = "1.1"
         self.record = record(request)
 
-        def infer(req, ctx, *, timeout_s):
-            decision = proposed_handoff(req, ctx, "human_requested")
-            # O resumo publicado segue sequência, independentemente da ordem do modelo.
-            decision["message_ids"].append(req["payload"]["history"][0]["id"])
-            return decision, USAGE
-
-        self.backend.infer.side_effect = infer
+        decision = proposed_handoff(request, self.knowledge.select(request), "human_requested")
+        # O resumo publicado segue sequência, independentemente da ordem do modelo.
+        decision["message_ids"].append(request["payload"]["history"][0]["id"])
+        self.backend.infer.return_value = decision, USAGE
         server = LedgerStore(self.record, now=self.clock.wall)
         self.executor(server).handle(self.record, self.publisher)
         raw = self.publisher.publish.call_args.args[-1]
@@ -226,7 +225,7 @@ class ExecutorTest(unittest.TestCase):
         check = runpy.run_path(str(ROOT.parent / "script/e01/check_contracts.py"))
         check["schema_check"](json.loads(DEFAULT_SCHEMA.read_bytes()), result, "AgentResult")
         check["schema_check"](read_private_schema("ledger"), complete, "complete_result")
-        check["validate_projection"](request, infer(request, self.knowledge.select(request), timeout_s=1)[0], result)
+        check["validate_projection"](request, decision, result)
 
     def test_invalid_record_precedes_all_http(self):
         bad_key = SimpleNamespace(value=self.record.value, key=lambda: b"another-case")
@@ -253,6 +252,27 @@ class ExecutorTest(unittest.TestCase):
             self.assertFalse(caught.exception.retryable)
             self.assertEqual([op for op, _ in server.calls], ["claim"])
             self.assertEqual(server.state, "reserved")
+        self.backend.infer.assert_not_called()
+        self.publisher.publish.assert_not_called()
+
+    def test_no_options_and_oversized_materialized_body_stop_before_start(self):
+        for mode in ("no_options", "large_body"):
+            with self.subTest(mode=mode):
+                candidates = self.knowledge.select(self.request)
+                options = self.knowledge.applicable_options(self.request, candidates)
+                if mode == "no_options":
+                    options = []
+                else:
+                    self.request["payload"]["history"][0]["text"] += " " + "x" * (CONTEXT_LIMIT - 2000)
+                    context = json_bytes({"history": self.request["payload"]["history"], "category": "pix",
+                                          "knowledge": candidates})
+                    self.assertLess(len(context), CONTEXT_LIMIT)
+                original = record(self.request)
+                server = LedgerStore(original, now=self.clock.wall)
+                with patch.object(self.knowledge, "applicable_options", return_value=options):
+                    with self.assertRaisesRegex(ExecutorError, "invalid_e01_context"):
+                        self.executor(server).handle(original, self.publisher)
+                self.assertEqual([op for op, _ in server.calls], ["claim"])
         self.backend.infer.assert_not_called()
         self.publisher.publish.assert_not_called()
 
@@ -287,11 +307,11 @@ class ExecutorTest(unittest.TestCase):
         release = Event()
         entered = Event()
 
-        def infer(req, ctx, *, timeout_s):
+        def infer(body, *, timeout_s):
             entered.set()
             if not release.wait(3):
                 raise AssertionError("inference gate not released")
-            return proposed_reply(req, ctx), USAGE
+            return self.backend.infer.return_value
 
         self.backend.infer.side_effect = infer
         with ThreadPoolExecutor(max_workers=2) as workers:
@@ -331,7 +351,7 @@ class ExecutorTest(unittest.TestCase):
         request = self.request
         payload = request["payload"]
         context = self.knowledge.select(request)
-        initial_size = len(json_bytes({"history": payload["history"], "category": "pix", "knowledge": context}))
+        initial_size = len(prepare_request(request, context, self.knowledge.applicable_options(request, context)))
         payload["history"][0]["text"] += " " + "x" * (CONTEXT_LIMIT - initial_size - 8)
         original = record(request)
         server = LedgerStore(original, now=self.clock.wall)
@@ -354,7 +374,7 @@ class ExecutorTest(unittest.TestCase):
             edited = self.knowledge.select(request)
             self.assertEqual(edited["knowledge_version"], "1.1.0")
             with self.assertRaisesRegex(ValueError, "context_too_large"):
-                validate_context(request, edited)
+                prepare_request(request, edited, self.knowledge.applicable_options(request, edited))
             self.executor(server).handle(original, self.publisher)
 
         self.assertEqual(broken.publish.call_args, self.publisher.publish.call_args)
@@ -389,7 +409,7 @@ class ExecutorTest(unittest.TestCase):
             with self.subTest(mode=mode, outcome=end):
                 server = LedgerStore(self.record, now=self.clock.wall, fail=mode)
                 self.backend.reset_mock()
-                self.backend.infer.side_effect = failure or (lambda req, ctx, timeout_s: (proposed_reply(req, ctx), USAGE))
+                self.backend.infer.side_effect = failure
                 self.executor(server).handle(self.record, self.publisher)
                 self.executor(server).handle(self.record, self.publisher)
                 self.assertEqual(server.state, end)
@@ -400,13 +420,57 @@ class ExecutorTest(unittest.TestCase):
                 self.publisher.publish.assert_not_called()
 
     def test_bad_decision_with_trustworthy_usage_is_failed(self):
-        self.backend.infer.side_effect = lambda req, ctx, timeout_s: ({"action": "resolve"}, USAGE)
+        self.backend.infer.return_value = ({"action": "resolve"}, USAGE)
         server = LedgerStore(self.record, now=self.clock.wall)
         self.executor(server).handle(self.record, self.publisher)
         self.assertEqual(server.state, "failed")
         self.assertEqual(server.completion["reason"], "invalid_decision")
         self.assertEqual(server.completion["usage"], USAGE)
         self.publisher.publish.assert_not_called()
+
+    def test_diagnostic_is_closed_private_and_preserves_terminal_usage(self):
+        request = self.request
+        request["payload"]["history"][0]["text"] += " Mensagem privada de teste."
+        decision = proposed_reply(request, self.knowledge.select(request))
+        original = record(request)
+        cases = [
+            (["conteúdo privado"], "provider", "choices_shape"),
+            ([{"finish_reason": "stop", "message": CREDENTIAL}], "provider", "message_shape"),
+            ([{"finish_reason": "stop", "message": {"content": CREDENTIAL}}], "provider", "decision_json"),
+            ([{"finish_reason": CREDENTIAL}], "provider", "finish_unexpected"),
+            (completion({**decision, "text": CREDENTIAL})["choices"], "knowledge", "reply_evidence"),
+        ]
+        for choices, stage, reason in cases:
+            with self.subTest(reason=reason), redirect_stderr(StringIO()) as log:
+                doc = dict(completion(decision), choices=choices)
+                post = Transport((200, json_bytes(doc)))
+                self.backend = LunaBackend(CREDENTIAL, transport=post)
+                server = LedgerStore(original, now=self.clock.wall)
+                self.executor(server).handle(original, self.publisher)
+                self.executor(server).handle(original, self.publisher)
+                self.assertEqual(log.getvalue(), f"e01_invalid_decision stage={stage} reason={reason}\n")
+                self.assertEqual(len(post.calls), 1)
+                self.assertEqual(server.completion["reason"], "invalid_decision")
+                self.assertEqual(server.completion["usage"], USAGE)
+                self.assertEqual(server.state, "failed")
+                self.publisher.publish.assert_not_called()
+
+    def test_unrecognized_detail_and_unavailable_log_cannot_change_settlement(self):
+        for broken in (False, True):
+            with self.subTest(broken=broken):
+                server = LedgerStore(self.record, now=self.clock.wall)
+                sink = Mock() if broken else StringIO()
+                if broken:
+                    sink.write.side_effect = OSError("log unavailable")
+                with redirect_stderr(sink), patch.object(self.knowledge, "validate_decision", side_effect=ValueError(CREDENTIAL)):
+                    self.executor(server).handle(self.record, self.publisher)
+                if not broken:
+                    self.assertEqual(sink.getvalue(), "e01_invalid_decision stage=knowledge reason=unspecified\n")
+                self.assertEqual(server.state, "failed")
+                self.assertEqual(server.completion["reason"], "invalid_decision")
+                self.assertEqual(server.completion["usage"], USAGE)
+                self.assertEqual(self.backend.infer.call_count, 1)
+                self.backend.infer.reset_mock()
 
     def test_changed_saved_bytes_are_not_published_from_complete(self):
         server = LedgerStore(self.record, now=self.clock.wall, fail="changed_response")
