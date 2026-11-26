@@ -1,5 +1,22 @@
 # Publicação temporária com SetFit R1
 
+## Endereço renovado em 26/11/2026
+
+O túnel anterior expirou. Às 17h47 de Brasília, a aplicação respondeu pelo
+[novo endereço HTTPS](https://eos-comp-donors-grocery.trycloudflare.com/).
+O banco, Kafka e o serviço SetFit foram reaproveitados. A API e o proxy
+receberam a nova origem e passaram na verificação de saúde.
+
+No simulador público, um chat sintético da Aurora sem categoria nem
+prioridade recebeu Pix e Urgente, ambos com origem `setfit`. O atendente
+simulado respondeu nos dois turnos sem atualização manual. Depois da
+confirmação do cliente, a página mostrou **Resolvido** e manteve as quatro
+mensagens após recarregar. A consulta ao banco confirmou os mesmos campos
+no caso `b2a9974b-4769-4fd8-8a2c-e2746f39415c`. O endereço permanece
+temporário. Os registros completos do primeiro endereço seguem abaixo.
+
+## Aceite no primeiro endereço
+
 Em 26/11/2026, a demonstração foi verificada em
 [mortality-windsor-weed-watt.trycloudflare.com](https://mortality-windsor-weed-watt.trycloudflare.com).
 O SetFit R1 instalado no computador completou campos ausentes com o pacote
@@ -78,8 +95,10 @@ independente. O ensaio de dez mil conexões permanece sem medição.
 [F08](f08.md) · [R01](r01.md) · [R02](r02.md).
 
 O aceite por dados móveis do responsável ocorreu na F10 em fixture, nas
-URLs de então. A URL de 26/11 foi verificada por HTTPS, WSS e navegador,
-sem repetir esse aceite móvel. Hospedagem permanente fica fora do recorte.
-E01, o atendente conversacional real, segue como evolução opcional.
+URLs de então. O primeiro endereço SetFit foi verificado por HTTPS, WSS e
+navegador. Hospedagem permanente fica fora do recorte.
+O atendente conversacional Luna foi aprovado em um piloto isolado e está
+desligado após o ensaio. A demonstração pública usa o atendente simulado.
+[Evidências E01](evidencias/e01/README.md).
 [Aceite histórico F10](f10-aceite-integrado.md) ·
 [Estado da entrega](estado-entrega.md).

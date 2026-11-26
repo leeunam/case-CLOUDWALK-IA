@@ -8,8 +8,8 @@ histórico e referências da conversa. O frontend usa a API Rails real e os
 atendimentos ficam no PostgreSQL. A supervisão pode revisar a classificação,
 auditar decisões e configurar a operação.
 
-O recorte do MVP foi concluído em 26/11/2026.
-[Estado da entrega](docs/estado-entrega.md).
+O MVP e o piloto conversacional E01 foram concluídos em 26/11/2026.
+[Estado da entrega](docs/estado-entrega.md) · [Piloto E01](docs/evidencias/e01/README.md).
 
 ## Demonstração local
 
@@ -57,7 +57,7 @@ Em 26/11/2026, a demonstração passou no aceite HTTPS com SetFit R1 local
 e atendente simulado via Kafka. O teste cobriu complemento de campos
 ausentes, acesso por marca em REST e WSS, resposta automática no navegador
 e persistência das mensagens após recarga. A
-[URL verificada em 26/11](https://mortality-windsor-weed-watt.trycloudflare.com)
+[URL renovada e verificada às 17h47 de 26/11 (Brasília)](https://eos-comp-donors-grocery.trycloudflare.com)
 depende do computador e do túnel ativos e pode mudar ao reabrir o túnel.
 [Roteiro de operação e matriz de aceite](docs/c07-publicacao-setfit.md).
 

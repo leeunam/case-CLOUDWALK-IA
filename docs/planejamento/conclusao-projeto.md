@@ -2,7 +2,10 @@
 
 **Fechamento em 26/11/2026.** O recorte do MVP foi concluído com o
 classificador SetFit R1 local e o atendente simulado via Kafka.
-[Estado da entrega](../estado-entrega.md) · [Aceite público SetFit](../c07-publicacao-setfit.md).
+Após a publicação, o piloto E01 também foi concluído e aprovado em ambiente
+isolado. Abaixo fica o histórico das decisões e dos ensaios do MVP.
+[Estado da entrega](../estado-entrega.md) · [Aceite público SetFit](../c07-publicacao-setfit.md) ·
+[Evidências E01](../evidencias/e01/README.md).
 
 Data: 24/11/2026. Base de partida: `380f45bab5708d344f41bf554452586980c65743`.
 O responsável respondeu «autorizo, so prossiga para concluir todo projeto»
@@ -332,6 +335,6 @@ túnel ativos. O modelo rodou localmente, sem chamadas pagas nesta etapa.
 R01 e R02 passaram em reprodução independente. A matriz de referência F08
 conserva a rodada reprovada e segue sem repetição após os ajustes. Os ensaios
 de maior escala, incluindo dez mil conexões, seguem sem medição. Hospedagem
-permanente fica fora do recorte. E01, o atendente conversacional real,
-segue como evolução opcional.
+permanente fica fora do recorte. O piloto E01 foi retomado depois deste
+fechamento e tem seu próprio [registro de aceite](../evidencias/e01/README.md).
 [F08](../f08.md) · [Reprodução R01/R02](../evidencias/c07/README.md).
