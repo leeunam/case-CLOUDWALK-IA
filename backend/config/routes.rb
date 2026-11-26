@@ -1,6 +1,10 @@
 Rails.application.routes.draw do
   get "up", to: "rails/health#show", as: :rails_health_check
 
+  post "internal/v1/e01/executions/:request_event_id/:operation",
+       to: Internal::V1::E01::ExecutionsController,
+       constraints: { operation: /claim|start|complete|unknown|published/ }, format: false
+
   namespace :api do
     namespace :v1 do
       get "health", to: "health#show"
