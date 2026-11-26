@@ -44,7 +44,8 @@ _QUOTED_SPEECH = re.compile(r'"[^"]*"|“[^”]*”|«[^»]*»')
 _CLAUSE_BOUNDARY = re.compile(r"[.!?;:,\n]+|\b(?:mas|porém|contudo|só que)\b", re.IGNORECASE)
 _NEGATED_REQUEST = re.compile(
     r"\b(?:nao|nunca|nem|sem) (?:(?:quero|queria|preciso(?: de)?|gostaria de"
-    r"|pretendo|vou|posso|estou pedindo (?:para|pra)) )?(?:(?:mais|mesmo) )?$"
+    r"|pretendo|vou|posso|pode(?:mos|m)?|consigo|consegue(?:m)?|conseguimos"
+    r"|devo|deve(?:mos|m)?|para|pra|estou pedindo (?:para|pra)) )?(?:(?:mais|mesmo) )?$"
 )
 _NON_REQUEST_MARKERS = re.compile(r'["“”«»]|\b(?:ignore|fingir|suponha|hipoteticamente|apenas um exemplo)\b',
                                 re.IGNORECASE)

@@ -123,6 +123,23 @@ class KnowledgeTest(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "reply_evidence"):
                         self.knowledge.validate_decision(request, context, proposed_reply(request, context))
 
+    def test_cancelamento_negado_em_outra_oracao_preserva_consulta(self):
+        statements = (
+            "O aplicativo não pode cancelar o Pix.",
+            "O aplicativo não consegue cancelar o Pix.",
+            "O aplicativo não deve cancelar o Pix.",
+            "Esta opção é para consultar e não para cancelar o Pix.",
+        )
+        for statement in statements:
+            with self.subTest(statement=statement):
+                text = "Onde consulto o comprovante de Pix? " + statement
+                request = requested(message(1, text), category="pix")
+                context = self.knowledge.select(request)
+                self.knowledge.validate_decision(request, context, proposed_reply(request, context))
+                with self.assertRaisesRegex(ValueError, "handoff_evidence"):
+                    self.knowledge.validate_decision(request, context,
+                                                     proposed_handoff(request, context, "sensitive_operation"))
+
     def test_tela_recupera_sem_provar_condicao(self):
         request = requested(message(1, "A tela da minha maquininha está estranha."))
         context = self.knowledge.select(request)
