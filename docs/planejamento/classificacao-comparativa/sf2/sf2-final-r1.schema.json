@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cloudwalk:sf2:final:r1:1.0",
+  "title": "Decisão SF2 da política fixa R1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "id", "raw_sha256", "capture_policy_sha256", "selected_policy_sha256", "package_sha256", "model_sha256", "received", "outcome", "applied", "calls", "fields"],
+  "properties": {
+    "contract_version": {"const": "sf2-final-r1/1.0"},
+    "id": {"type": "string", "pattern": "\\S"},
+    "raw_sha256": {"$ref": "#/$defs/hash"},
+    "capture_policy_sha256": {"$ref": "#/$defs/hash"},
+    "selected_policy_sha256": {"$ref": "#/$defs/hash"},
+    "package_sha256": {"$ref": "#/$defs/hash"},
+    "model_sha256": {
+      "type": "object", "additionalProperties": false, "required": ["category", "priority"],
+      "properties": {"category": {"$ref": "#/$defs/hash"}, "priority": {"$ref": "#/$defs/hash"}}
+    },
+    "received": {
+      "type": "object", "additionalProperties": false,
+      "properties": {"category": {}, "priority": {}}
+    },
+    "outcome": {"enum": ["complete", "review", "error"]},
+    "applied": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "category": {"enum": ["payouts", "pix", "terminal"]},
+        "priority": {"enum": ["advanced", "basic", "intermediate", "urgent"]}
+      }
+    },
+    "calls": {
+      "type": "object", "additionalProperties": false, "required": ["category", "priority"],
+      "properties": {"category": {"enum": [0, 1]}, "priority": {"enum": [0, 1]}}
+    },
+    "fields": {
+      "type": "object", "additionalProperties": false, "required": ["category", "priority"],
+      "properties": {
+        "category": {"allOf": [{"$ref": "#/$defs/field"}, {"properties": {"cut": {"enum": [null, {"tau": 0.95, "delta": 0}]}}}]},
+        "priority": {"allOf": [{"$ref": "#/$defs/field"}, {"properties": {"cut": {"enum": [null, {"tau": 0.7, "delta": 0}]}}}]}
+      }
+    }
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^[a-f0-9]{64}$", "minLength": 64, "maxLength": 64},
+    "field": {
+      "type": "object", "additionalProperties": false,
+      "required": ["vector", "raw", "margin", "cut", "decision", "reason"],
+      "properties": {
+        "vector": {
+          "type": ["object", "null"], "additionalProperties": false, "required": ["classes", "scores"],
+          "properties": {
+            "classes": {"type": "array", "minItems": 2, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+            "scores": {"type": "array", "minItems": 2, "items": {"type": "number", "minimum": 0, "maximum": 1}}
+          }
+        },
+        "raw": {"type": ["string", "null"]},
+        "margin": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "cut": {"type": ["object", "null"]},
+        "decision": {"enum": ["accept", "review", "error", "provided", "invalid", "not_requested"]},
+        "reason": {"enum": ["accepted", "raw_review", "inactive_label", "below_tau", "low_margin", "error", "timeout", "invalid_score", "invalid_input", "invalid_catalog", "provided", "not_requested"]}
+      }
+    }
+  }
+}
