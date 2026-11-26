@@ -26,12 +26,14 @@ verificado pelo HTTPS local com o túnel fechado.
 
 ## Operar a publicação
 
-No checkout da instalação original, use a revisão `977ec3f` ou posterior
-com as correções de publicação e reaproveite a configuração privada e o
-projeto Compose `cloudwalk_publish_integrator`. Obtenha o pacote pelo
-custodiante e siga a etapa **Obter código e modelo** da
-[instalação limpa C07](c07.md#obter-código-e-modelo) para validar e instalar
-os pesos. O SHA do clone daquele ensaio registra a reprodução histórica.
+Reaproveite a configuração privada e o projeto Compose
+`cloudwalk_publish_integrator` da instalação original. Obtenha o pacote
+pelo custodiante e aproveite apenas os passos de validação e extração dos
+pesos da seção **Obter código e modelo** da
+[instalação limpa C07](c07.md#obter-código-e-modelo). Mantenha o checkout em
+`977ec3f` ou posterior com as correções de publicação. O comando de
+checkout em `89b9e68` serve exclusivamente para reproduzir o ensaio
+histórico.
 
 No terminal, aponte `MODELO` para o diretório instalado. Na primeira
 publicação com o túnel desligado, use a sequência abaixo. Se o projeto já
