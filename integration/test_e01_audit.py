@@ -41,6 +41,24 @@ class E01AuditTest(unittest.TestCase):
         self.assertTrue(report["started_at"].endswith("+00:00"))
         self.assertGreaterEqual(report["finished_at"], report["started_at"])
 
+    def test_marks_invalid_present_cost_credits_and_unit_without_saving_external_values(self):
+        for raw_usage, invalid in [
+            ({"credits": "0.1", "cost": True, "cost_unit": "PRIVATE"}, ["cost", "cost_unit"]),
+            ({"credits": {"private": "PRIVATE"}, "cost": "0.1", "cost_unit": None}, ["credits", "cost_unit"]),
+            ({"credits": None}, ["credits"]),
+        ]:
+            with self.subTest(invalid=invalid), tempfile.TemporaryDirectory() as directory:
+                raw = json.dumps({"usage": raw_usage}).encode()
+                AuditedPost(Mock(return_value=(200, raw)), directory)("/route", {}, b"body", deadline=2)
+                receipt, = Path(directory).iterdir()
+                self.assertEqual(receipt.stat().st_mode & 0o777, 0o600)
+                proof = receipt.read_text()
+                self.assertNotIn("PRIVATE", proof)
+                usage = json.loads(proof)["usage"]
+                self.assertEqual(usage["invalid_fields"], invalid)
+                if raw_usage.get("credits") == "0.1":
+                    self.assertEqual(usage["credits"], "0.1")
+
     def test_audit_write_failure_after_post_is_ambiguous_with_no_second_post(self):
         post = Mock(return_value=(200, b"{}"))
         with tempfile.TemporaryDirectory() as parent:

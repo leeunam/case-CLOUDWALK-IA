@@ -56,6 +56,10 @@ def _response_fields(raw):
         unit = usage.get("cost_unit")
         if type(unit) is str and unit in {"USD", "usd", "CREDITS", "credits"}:
             cleaned["cost_unit"] = unit
+        invalid = [field for field in ("cost", "credits", "cost_unit")
+                   if field in usage and cleaned.get(field) is None]
+        if invalid:
+            cleaned["invalid_fields"] = invalid
         for key, allowed in _DETAILS_FIELDS.items():
             if key in usage:
                 cleaned[key] = _numbers(usage[key], allowed) if isinstance(usage[key], dict) else None

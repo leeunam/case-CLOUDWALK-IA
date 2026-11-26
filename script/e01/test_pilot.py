@@ -27,6 +27,8 @@ class FakeProject:
         self.fixed_response = None
         self.account = "fixture-account"
         self.cached = 2
+        self.captures = {}
+        self.next_charge = {"credits": "0.01"}
 
     def stopped(self):
         return not self.active
@@ -38,6 +40,11 @@ class FakeProject:
     def stop(self):
         self.stops += 1
         self.active = False
+
+    def copy_receipts(self, directory):
+        assert self.stopped()
+        for filename, capture in self.captures.values():
+            p.write_json(Path(directory) / filename, capture)
 
     def budget(self):
         return {"dispatches": self.dispatches, "entries": self.sent, "accounted_usd": str(self.dispatches * .001),
@@ -104,6 +111,15 @@ class FakeSimulator:
             "started_at": p.now(),
         }
         self.project.records[(self.receipt["case_id"],2*n-1)] = self.project.record
+        if self.project.record:
+            response = self.project.record["usage"]["provider_response_id"]
+            counts = {"prompt_tokens": 10, "completion_tokens": 3, "total_tokens": 13,
+                      "prompt_tokens_details": {"cached_tokens": self.project.cached}}
+            if label != "P1":
+                counts.update(self.project.next_charge)
+            self.project.captures[f"{label}.{n}"] = ("receipt-" + uid() + ".json", {
+                "id": response, "model": p.MODEL, "status": 200, "usage": counts, "request_sha256": "0"*64,
+                "started_at": p.now(), "finished_at": p.now()})
         return self.receipt
 
     def history(self, case):
@@ -122,9 +138,11 @@ class PilotTests(unittest.TestCase):
     def approval(self, turn="P1.1", source="provider_portal"):
         row = self.runner.journal["turns"][turn]["ledger"]
         resp = row["usage"]["provider_response_id"]
-        capture = {"id":resp, "model":p.MODEL, "status":200, "usage":{"prompt_tokens":10,
-                   "completion_tokens":3, "total_tokens":13, "prompt_tokens_details":{"cached_tokens":row["usage"]["cached_input_tokens"]}}, "request_sha256":"0"*64,
-                   "started_at":p.now(), "finished_at":p.now()}
+        filename, original_capture = self.project.captures[turn]
+        capture = {**original_capture, "usage": {
+            "prompt_tokens": 10, "completion_tokens": 3, "total_tokens": 13,
+            "prompt_tokens_details": {"cached_tokens": row["usage"]["cached_input_tokens"]}}}
+        self.project.captures[turn] = filename, capture
         record = {"id":resp, "source":"extrato de teste", "precision":"exact", "amount":"0.01", "unit":"credits",
                   "usd_per_credit":"0.01","conversion_source":"exemplo de teste","observed_at":p.now()}
         original = self.dir / "portal.txt"
@@ -233,8 +251,14 @@ class PilotTests(unittest.TestCase):
         self.assertEqual((self.project.stops, self.project.sent), (9,9))
         report = (self.dir / "public.json").read_text()
         public = json.loads(report)
-        self.assertEqual(public["receipts_reconciled"], 1)
-        self.assertEqual((public["dispatch_authorizations"], public["provider_calls_observed_distinct"]), (9, 9))
+        self.assertEqual(public["receipts_reconciled"], 9)
+        self.assertEqual([r["human_reviewed"] for r in public["rows"]], [True] + [False] * 8)
+        self.assertTrue(all(r["financially_reconciled"] for r in public["rows"]))
+        row = self.runner.journal["turns"]["P2.1"]["reconciliation"]
+        saved = self.dir / row["capture_file"]
+        self.assertEqual(row["capture_sha256"], p.digest(saved.read_bytes()))
+        self.assertEqual(saved.stat().st_mode & 0o777, 0o600)
+        self.assertEqual((public["dispatch_authorizations"], public["distinct_provider_ids_in_ledger_usage"]), (9, 9))
         for private in ("simulator-private", "gen-", "fixture-account", "Onde consulto", "secret", "message_ids", "summary"):
             self.assertNotIn(private, report)
         with self.assertRaises(p.Stop):
@@ -246,6 +270,9 @@ class PilotTests(unittest.TestCase):
         path = self.dir / approval[field]["file"]
         data = json.loads(path.read_bytes())
         change(data)
+        if field == "capture":
+            filename, _ = self.project.captures["P1.1"]
+            self.project.captures["P1.1"] = filename, data
         p.write_json(path, data)
         approval[field]["sha256"] = p.digest(path.read_bytes())
         p.write_json(approval_path, approval)
@@ -263,6 +290,74 @@ class PilotTests(unittest.TestCase):
                 with self.assertRaisesRegex(p.Stop, reason):
                     self.runner.run("remaining", path)
                 self.assertEqual(set(self.runner.journal["turns"]), {"P1.1"})
+
+    def test_invalid_filtered_field_blocks_even_with_valid_credits_and_documented_unit(self):
+        self.runner.run("canary")
+        for marker in ("cost", "credits", "cost_unit"):
+            with self.subTest(marker=marker):
+                path = self.approval(source="provider_api_receipt")
+                self.edit_evidence(path, "capture", lambda cap: cap["usage"].update(invalid_fields=[marker]))
+                approval = json.loads(path.read_bytes())
+                self.edit_evidence(path, "provider_record", lambda row: row.update(
+                    original=approval["capture"], cost_unit="USD", cost_unit_source="documento de teste"))
+                with self.assertRaisesRegex(p.Stop, "campo_financeiro_invalido"):
+                    self.runner.run("remaining", path)
+                self.assertEqual(self.project.sent, 1)
+
+    def test_p21_missing_charge_stops_before_p22_post_and_persists_journal(self):
+        self.project.next_charge = {}
+        self.runner.run("canary")
+        with self.assertRaisesRegex(p.Stop, "valor_ausente_no_recibo_da_api"):
+            self.runner.run("remaining", self.approval())
+        saved = json.loads((self.dir / "journal.json").read_bytes())
+        self.assertEqual(list(saved["turns"]), ["P1.1", "P2.1"])
+        self.assertEqual((self.project.sent, self.project.dispatches), (2, 2))
+        self.assertTrue(self.project.stopped())
+
+    def test_p21_conflicting_credits_and_cost_stops_before_p22(self):
+        self.project.next_charge = {"credits": "0.01", "cost": "0.50", "cost_unit": "USD"}
+        self.runner.run("canary")
+        with self.assertRaisesRegex(p.Stop, "valores_da_captura_divergentes"):
+            self.runner.run("remaining", self.approval())
+        self.assertEqual((self.project.sent, self.project.dispatches), (2, 2))
+        with self.assertRaises(p.Stop):
+            p.Pilot(self.project, self.sim, self.dir).run("remaining", self.approval())
+        self.assertEqual(self.project.sent, 2)
+
+    def test_p21_over_provision_stops_before_p22(self):
+        self.project.next_charge = {"credits": "0.9"}
+        self.runner.run("canary")
+        with self.assertRaisesRegex(p.Stop, "gasto_supera_valor_contabilizado"):
+            self.runner.run("remaining", self.approval())
+        self.assertEqual((self.project.sent, self.project.dispatches), (2, 2))
+
+    def test_prior_capture_blocks_first_dispatch(self):
+        self.project.captures["unknown"] = "receipt-" + uid() + ".json", {"id": "unexpected"}
+        with self.assertRaisesRegex(p.Stop, "quantidade_de_capturas_divergente"):
+            self.runner.run("canary")
+        self.assertEqual((self.project.sent, self.project.dispatches), (0, 0))
+
+    def test_approved_p1_must_match_original_in_consumer_before_p2(self):
+        self.runner.run("canary")
+        approval = self.approval()
+        self.project.captures["P1.1"][1]["id"] = "other"
+        with self.assertRaisesRegex(p.Stop, "capturas_do_piloto_divergentes"):
+            self.runner.run("remaining", approval)
+        self.assertEqual(self.project.sent, 1)
+
+    def test_unknown_without_usage_has_authorization_outside_ledger_id_coverage(self):
+        def unknown(case, seq):
+            row = copy.deepcopy(self.project.record)
+            row.update(state="unknown", usage=None)
+            return row
+        self.project.turn = unknown
+        with self.assertRaisesRegex(p.Stop, "terminal_sem_resultado"):
+            self.runner.run("canary")
+        report = p.public_report(self.runner.journal)
+        self.assertEqual(report["dispatch_authorizations"], 1)
+        self.assertTrue(self.project.captures["P1.1"][1]["id"])
+        self.assertEqual(report["distinct_provider_ids_in_ledger_usage"], 0)
+        self.assertFalse(report["rows"][0]["provider_id_in_ledger_usage"])
 
     def test_metric_rounding_and_documented_unit_in_capture(self):
         self.runner.run("canary")
@@ -381,7 +476,7 @@ class PilotTests(unittest.TestCase):
         self.assertEqual(self.project.sent,2)
         self.assertNotIn("P2.2",self.runner.journal["turns"])
         report = p.public_report(self.runner.journal)
-        self.assertEqual((report["receipts_reconciled"],report["provider_calls_observed_distinct"],
+        self.assertEqual((report["receipts_reconciled"],report["distinct_provider_ids_in_ledger_usage"],
                           report["ambiguous_provider_ids"]), (0,1,1))
         self.assertIsNone(report["sum_of_reconciled_receipts_usd"])
         with self.assertRaisesRegex(p.Stop,"duplicado"):

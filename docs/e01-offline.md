@@ -62,7 +62,9 @@ dedicado, do usuário do contêiner (UID 10001) e com modo `0700`. Cada POST
 gera um recibo JSON com modo `0600`, contendo horário UTC, duração, status,
 hash do pedido, ID, modelo e campos financeiros permitidos da resposta.
 Os campos ausentes permanecem ausentes e o recibo conserva a precisão
-decimal. Credenciais, mensagens e decisões ficam fora do arquivo. Se a
+decimal. Se `cost`, `credits` ou `cost_unit` tiverem conteúdo inválido, a captura
+registra os nomes dos campos em `usage.invalid_fields` para interromper a conciliação.
+Credenciais, mensagens e decisões ficam fora do arquivo. Se a
 gravação falhar depois do POST, o executor trata o uso como incerto e o
 ledger preserva a reserva durante a pausa para conciliação.
 
