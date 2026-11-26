@@ -65,6 +65,23 @@ class PublishConfigurationTest(unittest.TestCase):
             stack.compose("up", origin="https://spoof.trycloudflare.com.example.test")
         run.assert_not_called()
 
+    def test_running_setfit_must_answer_ready_at_check_time(self):
+        with TemporaryDirectory() as temp:
+            model = Path(temp)
+            (model / "manifest.json").write_text("{}")
+            args = SimpleNamespace(project="cloudwalk_publish_test", http_port=18080, https_port=18443,
+                                   classifier="setfit", model_dir=model, action="check")
+            stack = Stack(args, {})
+            def compose(*command, **_):
+                if command[0] == "ps":
+                    return "\n".join(stack.services)
+                self.assertEqual(command[:4], ("exec", "-T", "setfit", "python"))
+                self.assertIn("/ready", command[-1])
+                raise PublishError("HTTP 503")
+            with patch.object(stack, "compose", side_effect=compose), patch.object(stack, "ca", return_value=None), \
+                 patch("publish.ready", return_value=True), self.assertRaisesRegex(PublishError, "SetFit"):
+                stack.check()
+
 
 if __name__ == "__main__":
     unittest.main()

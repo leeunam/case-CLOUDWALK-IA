@@ -13,7 +13,8 @@ def classifier_overlay(args, root, env):
             raise SystemExit("--model-dir exige --classifier setfit.")
         return []
     model = args.model_dir
-    if model is None or not model.is_dir() or not (model / "manifest.json").is_file():
+    teardown = getattr(args, "action", None) in ("down", "unpublish")
+    if model is None or (not teardown and not (model / "manifest.json").is_file()):
         raise SystemExit("Informe --model-dir com o pacote SetFit R1 instalado.")
     env["SETFIT_MODEL_PATH"] = str(model.resolve())
     return [root / "compose.setfit.yml"]

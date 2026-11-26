@@ -93,7 +93,7 @@ class Session:
             item = ipc.project(request, catalog)
             missing, invalid, _, known = ipc.validate_input(item)
             wire = encoded(item) + b"\n"
-            if invalid or not missing or len(wire) > LIMIT:
+            if invalid or not missing:
                 return refusal(422, "invalid_request")
             if not known:
                 return refusal(422, "unsupported_catalog")

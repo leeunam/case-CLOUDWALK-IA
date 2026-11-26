@@ -27,7 +27,8 @@ def install(archive, destination):
                         raise ValueError("membro inválido no pacote")
                     target = stage / path
                     if entry.isdir():
-                        target.mkdir(mode=0o755)
+                        target.mkdir()
+                        target.chmod(0o755)
                     else:
                         with members.extractfile(entry) as source, target.open("xb") as output:
                             shutil.copyfileobj(source, output)

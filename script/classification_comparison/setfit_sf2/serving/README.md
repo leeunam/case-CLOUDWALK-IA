@@ -25,6 +25,8 @@ python3 -B script/publish.py --project cloudwalk_publish_setfit --classifier set
 
 Para uma publicação autorizada, passe esses mesmos argumentos a `up`, `check`, `publish` e `unpublish`. Se o projeto já estiver publicado, encerre o túnel com o modo vigente antes de mudar o classificador e suba o modo escolhido com `up`.
 
+Em modo SetFit, `publish.py check` consulta a prontidão atual do classificador e a saúde da API e do banco. Se o pacote tiver sido movido, use o caminho anterior em `--model-dir` para `down` ou `unpublish`. Para iniciar novamente, indique o diretório onde o pacote está instalado.
+
 ## Prontidão e prazos
 
 `GET /live` verifica o supervisor. `GET /ready` retorna o PID do filho e contadores de partidas, escritas, respostas verificadas e recusas. O log `verified` associa o UUID da tentativa às durações do adaptador e da operação verificada. Somente o worker Rails compartilha a rede de inferência com o serviço. O Compose aguarda o healthcheck antes de iniciar esse worker.

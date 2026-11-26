@@ -152,6 +152,13 @@ class Stack:
         context = ssl.create_default_context(cadata=self.ca())
         if not ready(self.local_url, context):
             raise PublishError("API ou banco indisponível pelo HTTPS local.")
+        if "setfit" in self.services:
+            try:
+                self.compose("exec", "-T", "setfit", "python", "-c",
+                             "from urllib.request import urlopen; urlopen('http://127.0.0.1:8080/ready', timeout=2).close()",
+                             capture=True, timeout=5)
+            except (PublishError, subprocess.TimeoutExpired) as error:
+                raise PublishError("O classificador SetFit está indisponível.") from error
         print(f"Pilha pronta em {self.local_url}. A CA local pode ser obtida com ca.")
 
     def prepare(self):

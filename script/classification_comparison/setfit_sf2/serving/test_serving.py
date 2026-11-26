@@ -16,6 +16,8 @@ from unittest.mock import patch
 from jsonschema import Draft202012Validator
 
 from script.classification_comparison.setfit_sf2 import runtime_r1
+from script.classification_comparison.setfit_sf2.contracts import ipc
+from script.classification_comparison.setfit_sf2.runtime_r1.context import encoded
 from script.classification_comparison.setfit_sf2.serving import bootstrap
 from script.classification_comparison.setfit_sf2.serving.server import COMPLETE, Handler, Server, Supervisor
 
@@ -147,9 +149,25 @@ class TransportTest(unittest.TestCase):
                 if (self.root / "received").exists():
                     break
                 time.sleep(0.005)
-            self.assertEqual(self.http(req), (503, self.req("503-busy.json")))
+            self.assert_headers_refused("busy")
             self.assertEqual(first.result()[0], 200)
         self.assertEqual(self.wait_ready()["counts"]["pipe_writes"], 1)
+
+    def test_slot_is_rechecked_after_body(self):
+        supervisor = Supervisor(load=None)
+        supervisor.ready = True
+        self.assertIsNone(supervisor.preflight())
+        supervisor.active = object()
+        self.assertEqual(supervisor.submit(b"{}"), (503, self.req("503-busy.json")))
+
+    def assert_headers_refused(self, reason):
+        with contextlib.closing(HTTPConnection("127.0.0.1", self.port, timeout=1)) as client:
+            client.putrequest("POST", COMPLETE)
+            client.putheader("Content-Type", "application/json")
+            client.putheader("Content-Length", "1024")
+            client.endheaders()
+            response = client.getresponse()
+            self.assertEqual((response.status, json.loads(response.read())), (503, self.req(f"503-{reason}.json")))
 
     def test_inclusive_byte_limits(self):
         self.start("exact-limit")
@@ -157,6 +175,21 @@ class TransportTest(unittest.TestCase):
         self.assertEqual(self.http(body.ljust(65536))[0], 200)
         self.assertEqual(self.http(body.ljust(65537))[0], 422)
         self.assertEqual(self.wait_ready()["counts"]["pipe_writes"], 1)
+
+    def test_valid_full_body_can_grow_in_ipc_projection(self):
+        pid = self.start()
+        req = self.req()
+        req["text"] = "a"
+        req["text"] += " " * (65536 - len(encoded(req)))
+        body = encoded(req)
+        self.assertEqual(len(body), 65536)
+        _, schema = bootstrap.sources()
+        Draft202012Validator({**schema, "$ref": "#/$defs/Request"}).validate(req)
+        item = ipc.project(req, {"version": "1.0.0", **req["catalog"]})
+        self.assertGreater(len(encoded(item) + b"\n"), 65536)
+        self.assertEqual(self.http(body)[0], 200)
+        self.assertEqual(self.wait_ready()["counts"]["pipe_writes"], 1)
+        self.assertEqual(self.wait_ready()["worker_pid"], pid)
 
     def test_abandoned_client_does_not_release_slot_or_leave_frame(self):
         pid = self.start("delay")
@@ -210,7 +243,7 @@ class TransportTest(unittest.TestCase):
 
     def test_boot_timeout_reaps_child(self):
         self.start("boot-timeout", ready=False)
-        self.assertEqual(self.http(self.req())[1]["error"], "not_ready")
+        self.assert_headers_refused("not-ready")
         for _ in range(175):
             if self.http()[1]["counts"].get("session_failures") == 2:
                 break

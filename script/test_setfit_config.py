@@ -7,9 +7,51 @@ import subprocess
 import tempfile
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
+
+import demo
+import publish
 
 from demo import Compose, ROOT
 from publish import Stack
+
+
+class ClassifierShutdownTest(unittest.TestCase):
+    def test_down_and_unpublish_work_after_model_moves(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            model = root / "model"
+            model.mkdir()
+            (model / "manifest.json").write_text("{}")
+            for app in (demo, publish):
+                project = "cloudwalk_demo_stop" if app is demo else "cloudwalk_publish_stop"
+                args = ["app", "--project", project, "--classifier", "setfit", "--model-dir", str(model)]
+                envfile = root / (app.__name__ + ".env")
+                with patch.object(app, "ROOT", root), patch.object(app, "ENV_FILE", envfile), \
+                     patch.object(subprocess, "run") as run:
+                    run.side_effect = lambda argv, **_: subprocess.CompletedProcess(
+                        argv, 0, stdout="api\nweb\n" if "ps" in argv else "")
+                    with patch("sys.argv", [*args, "init"]):
+                        app.main()
+                    with patch("sys.argv", [*args, "config"]):
+                        app.main()
+                    moved = model.rename(root / "moved")
+                    for action in (("up", "prepare") if app is publish else ("up",)):
+                        with patch("sys.argv", [*args, action]), self.assertRaises(SystemExit):
+                            app.main()
+                    for action in (("down", "unpublish") if app is publish else ("down",)):
+                        run.reset_mock()
+                        with patch("sys.argv", [*args, action]):
+                            app.main()
+                        first = run.call_args_list[0]
+                        self.assertIn("rm" if action == "unpublish" else "down", first.args[0])
+                        if action == "unpublish":
+                            updates = [c.args[0] for c in run.call_args_list if "up" in c.args[0]]
+                            self.assertEqual([cmd[-1] for cmd in updates], ["api", "web"])
+                            self.assertTrue(all("--no-deps" in cmd for cmd in updates))
+                        self.assertEqual(first.kwargs["env"]["SETFIT_MODEL_PATH"], str(model))
+                        self.assertFalse(model.exists())
+                    moved.rename(model)
 
 
 @unittest.skipUnless(shutil.which("docker"), "Docker Compose necessário")

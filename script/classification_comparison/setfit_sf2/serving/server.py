@@ -31,14 +31,24 @@ class Supervisor:
         self.worker_pid = None
         self.counters = Counter()
 
+    def _slot_refusal(self):
+        if not self.ready:
+            reason = "not_ready"
+        elif self.active is not None:
+            reason = "busy"
+        else:
+            return None
+        self.counters[reason] += 1
+        return refusal(503, reason)
+
+    def preflight(self):
+        with self.condition:
+            return self._slot_refusal()
+
     def submit(self, body):
         with self.condition:
-            if not self.ready:
-                self.counters["not_ready"] += 1
-                return refusal(503, "not_ready")
-            if self.active is not None:
-                self.counters["busy"] += 1
-                return refusal(503, "busy")
+            if blocked := self._slot_refusal():
+                return blocked
             self.active = call = Call(body)
             self.condition.notify()
         call.done.wait()
@@ -158,6 +168,9 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(*refusal(422, "invalid_request"))
             return
         size = int(sizes[0])
+        if blocked := self.server.supervisor.preflight():
+            self.reply(*blocked)
+            return
         body = self.rfile.read(size)
         if len(body) != size:
             self.reply(*refusal(422, "invalid_request"))
