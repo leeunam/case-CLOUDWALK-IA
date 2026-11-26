@@ -66,9 +66,8 @@ class E01AuditTest(unittest.TestCase):
             directory.mkdir(mode=0o700)
             backend = LunaBackend("dummy", transport=AuditedPost(post, directory))
             directory.rmdir()
-            request = {"payload": {"history": [], "classification": {"category": "pix"}}}
             with self.assertRaisesRegex(InferenceFailure, "transport_ambiguous") as error:
-                backend.infer(request, {}, timeout_s=2.0)
+                backend.infer(b"synthetic request", timeout_s=2.0)
         self.assertIsNone(error.exception.usage)
         post.assert_called_once()
 
