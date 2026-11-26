@@ -8,7 +8,7 @@ O MVP recebe solicitações sintéticas por chat, WhatsApp e e-mail, organiza os
 
 | Critério | Evidência na apresentação |
 | --- | --- |
-| AI first | Todo caso com classificação válida começa pelo atendente simulado via broker. Demonstrar um caso respondido e resolvido pela IA e um caso escalado com resumo e histórico. O Jev entra somente para completar a classificação. |
+| AI first | Todo caso com classificação válida começa pelo atendente simulado via broker. Demonstrar um caso respondido e resolvido pela IA e um caso escalado com resumo e histórico. SetFit R1 foi adotado para o complemento real em C06. |
 | Multimarca | Duas marcas sintéticas, com pelo menos duas filas por marca. O mesmo assunto pode seguir filas distintas em marcas diferentes. Um analista autorizado consulta ambas e atua em uma por vez. Uma credencial sem acesso à segunda marca recebe `403` ou `404` ao tentar consultar ou agir nela. |
 | Multiequipes | Três equipes no seed, com uma compartilhada pelas duas marcas. Uma fila tem duas equipes responsáveis. Uma pessoa que integra ambas é avaliada uma vez. A interface permite alterar as equipes da fila e rejeita equipe sem vínculo com a marca. |
 | Operável | Um supervisor cria e edita filas e regras de entrada, vínculos com equipes e perfis de capacidade pela interface. Alterações influenciam os próximos encaminhamentos e aparecem na auditoria. |
@@ -24,8 +24,8 @@ O atendente real da CloudWalk, dados reais, integrações de produção e app m�
 - A credencial do canal simulado identifica a marca. O primeiro evento identifica cliente e conversa externos. Cada evento válido tem um ID estável para reentrega. O Rails persiste a entrada antes de responder `202` e guarda o caso na fila padrão da marca enquanto classifica. O mesmo ID com outro conteúdo recebe `409`.
 - A ordem proposta é **Urgente → Avançado → Intermediário → Básico**. Categorias do seed são Pix, Repasses e Maquininha. Cada marca habilita categorias próprias. Cada prioridade tem uma definição no catálogo da demo. Urgente indica necessidade imediata, avançado indica impacto relevante sem urgência imediata, intermediário indica impacto moderado e básico cobre orientações rotineiras. Essa ordem determina precedência de atendimento. Categoria identifica o assunto e as duas dimensões compõem o perfil de capacidade.
 - Após validar a classificação, o Rails escolhe a primeira regra ativa da marca, em ordem configurada pelo supervisor. Cada regra pode restringir categoria, prioridade ou ambas e aponta para uma fila da mesma marca. A fila padrão é a última opção. Cada marca mantém uma fila padrão ativa e cada fila ativa tem pelo menos uma equipe responsável. A regra escolhida e sua versão ficam no histórico. Alterações aplicam-se a novos encaminhamentos. Um caso em curso muda de fila somente por transferência explícita da operação. Para desativar fila, a operação precisa retirar referências em regras ativas e transferir casos em curso. O histórico permanece consultável.
-- Os dois campos válidos encaminham o caso ao atendente simulado pelo broker. Campo ausente, `null` ou vazio aciona o Jev em segundo plano, desde que os campos presentes sejam válidos. Um identificador fora do catálogo ou de tipo incorreto coloca o caso em revisão de classificação. Correção explícita por supervisor segue para o atendente simulado depois da validação.
-- O adaptador Rails usa Jev via HTTP com `Choice`, envia texto sintético e apenas perguntas dos campos ausentes, com os valores do catálogo e a opção `informacao_insuficiente`. O backend preserva valores válidos de entrada e valida todos os resultados antes de aceitar o complemento. Se faltar algum resultado válido, a classificação fica em revisão. Proposta inicial de timeout de 5 s por tentativa, com até uma repetição para timeout, `429` ou falha transitória, respeitando `Retry-After` quando fornecido. Sem credencial ou diante de falha definitiva, o motivo fica visível em revisão. Uma correção humana posterior invalida a resposta pendente do modelo. Registrar versão, resultado, confiança retornada e latência. A primeira política aceita escolhas válidas com opção de abstenção e mede empiricamente os erros. [API Jev Choice](https://docs.typesafe.ai/primitives/choice)
+- Os dois campos válidos encaminham o caso diretamente ao atendente simulado pelo broker. Campo omitido, `null` ou string vazia solicita complemento somente dos ausentes, desde que os demais sejam válidos. Espaços, tipo incorreto ou código fora do catálogo colocam o caso em revisão sem inferência. Uma correção por supervisor autorizado segue para o atendente simulado após a validação.
+- A escolha para C06 é o SetFit R1 local. O Rails verifica o catálogo da marca, preserva os valores recebidos e só aplica uma resposta integral da tentativa vigente. Abstenção, catálogo incompatível para complemento, falha ou resposta inválida seguem para revisão com motivo. Correção humana invalida a aplicação de resposta pendente. Guardar por tentativa os hashes do pacote, das cabeças, das políticas e do frame, além de contagens, decisões, scores brutos e duração. A demonstração publicada tem aceite em fixture Jev. A integração do modo real ainda está pendente. [Decisão](classificacao-comparativa/sf2/decisao-adocao-r1.md) · [Prazos, repetições e contrato HTTP privado](../contratos/classification-http/README.md).
 
 ### Capacidade e distribuição humana
 
@@ -49,8 +49,8 @@ O atendente real da CloudWalk, dados reais, integrações de produção e app m�
 
 | Situação | Gatilho e condição | Resultado |
 | --- | --- | --- |
-| Entrada recebida | Classificação válida, ausente ou inválida | Encaminha à IA, aguarda Jev ou fica em revisão de classificação, respectivamente. |
-| Aguardando Jev ou em revisão | Resultado válido do Jev ou correção válida do supervisor | Define fila, atribui a IA e grava o envio pendente. Falha ou abstenção fica em revisão. |
+| Entrada recebida | Classificação válida, ausente ou inválida | Encaminha à IA, aguarda complemento ou fica em revisão de classificação, respectivamente. |
+| Aguardando complemento ou em revisão | Complemento integral válido ou correção válida do supervisor | Define fila, atribui a IA e grava o envio pendente. Falha ou abstenção fica em revisão. |
 | IA em atendimento | Resposta, resolução ou handoff do mock para a rodada vigente | Publica resposta no histórico. Pode continuar, resolver ou encaminhar ao humano. Handoff exige resumo e referências às mensagens, preserva a conversa e libera a IA. |
 | Aguardando atribuição humana | Motor encontra analista elegível | Analista passa a ser responsável e o caso passa a ativo. Sem candidato, fica visível na fila. |
 | Humano ativo | Responsável responde, solicita informação ou resolve | Resposta mantém ativo. Solicitar informação registra a mensagem e passa para aguardando cliente. Resolver libera capacidade e carteira. |
@@ -72,7 +72,7 @@ flowchart LR
     UI[React] <-->|REST e sinal de atualização| API
     API --> PG[(PostgreSQL)]
     Worker[Workers Rails] <-->|Jobs e envios pendentes| PG
-    Worker -->|Campos ausentes| Jev[Jev HTTP]
+    Worker -->|Campos ausentes| SetFit[SetFit R1 privado · C06]
     Worker -->|Webhook de solicitação| Ponte[Ponte de integração]
     Ponte -->|agent.requests| MQ[(Kafka)]
     MQ --> Mock[Atendente simulado]
@@ -85,7 +85,7 @@ flowchart LR
 | --- | --- |
 | Operação | Marcas, equipes, vínculos, filas, regras de entrada, catálogo, perfis, presença e marca em operação. Controla permissões e edições. |
 | Atendimento | Entrada canônica, estados, identidade do caso, mensagens, responsável atual, resolução e histórico. É o único módulo que aplica transições. |
-| Triagem e distribuição | Validação, complemento por adaptador Jev, escolha de fila, elegibilidade, ordenação, atribuição e retomada. Aciona as transições de Atendimento. |
+| Triagem e distribuição | Validação, complemento pelo adaptador do provedor selecionado, escolha de fila, elegibilidade, ordenação, atribuição e retomada. Aciona as transições de Atendimento. |
 | Integração | Webhooks assinados, envios persistidos, comunicação com a ponte, deduplicação, novas tentativas e confirmação de resultados. |
 | Auditoria | Eventos de negócio gravados junto à mudança, consulta por caso e correlação com erros de integração e métricas. |
 
@@ -129,7 +129,7 @@ erDiagram
 | React → Rails | REST versionado em `/api/v1` para sessão, caixa de casos filtrada e paginada, detalhe, mensagens, ações, configurações e auditoria. Ações de estado incluem versão esperada, chave de idempotência e motivo quando aplicável. IDs de marca na URL ou no corpo são verificados no servidor. |
 | Rails → React | Action Cable com PostgreSQL envia apenas sinal de atualização pós-commit, com assinatura autenticada por sessão. O navegador busca dados novos pela API e recupera ao reconectar. Sem conexão, consulta periódica enquanto a conversa está aberta. O servidor revalida acesso em cada consulta. [Action Cable](https://guides.rubyonrails.org/action_cable_overview.html) |
 
-O envelope de integração traz `schema_version`, `event_id`, `event_type`, `occurred_at`, `correlation_id`, `case_id`, `brand_id`, `assignment_generation`, `turn_id` e `payload`. Resposta do mock referencia o `event_id` da solicitação. Os endpoints, esquemas e exemplos devem ser congelados na primeira tarefa do [plano de execução](plano-de-execucao.md). Webhooks usam HMAC sobre corpo e timestamp com segredo por integração. React e API compartilham origem na instalação de demonstração, com sessão autenticada e proteção CSRF. Dados e chaves de teste do mock são distintos das credenciais Jev.
+O envelope de integração traz `schema_version`, `event_id`, `event_type`, `occurred_at`, `correlation_id`, `case_id`, `brand_id`, `assignment_generation`, `turn_id` e `payload`. Resposta do mock referencia o `event_id` da solicitação. Os endpoints, esquemas e exemplos devem ser congelados na primeira tarefa do [plano de execução](plano-de-execucao.md). Webhooks usam HMAC sobre corpo e timestamp com segredo por integração. React e API compartilham origem na instalação de demonstração, com sessão autenticada e proteção CSRF. Dados e chaves de teste do mock ficam separados da configuração do classificador.
 
 Rotas de referência para esse contrato incluem `GET /api/v1/cases` com filtros e cursor, `GET /api/v1/cases/{id}`, `GET /api/v1/cases/{id}/messages?after_sequence=42`, `POST /api/v1/cases/{id}/messages` e `POST /api/v1/cases/{id}/actions`. A ação tem `type`, `expected_version` e campos próprios da transição, como `reason` e `destination_queue_id` numa transferência. Escritas e consultas aplicam as mesmas permissões do módulo de operação. O simulador do cliente usa sessão própria com acesso somente à sua conversa. Um processo servidor assina os webhooks de simulação. Os segredos ficam no ambiente do servidor.
 
@@ -147,4 +147,4 @@ Rotas de referência para esse contrato incluem `GET /api/v1/cases` com filtros 
 | Configuração da operação | Marcas, equipes, filas, regras, catálogos e perfis. Mostrar efeito e erros de edição, inclusive vínculos inválidos e excesso de carteira. |
 | Revisão e falhas | Casos com classificação inválida ou inconclusiva e entregas com erro. Corrigir campos, reenviar quando elegível ou escalar falha persistente, com histórico. Pode ser uma aba da operação. |
 
-O critério final é executar os dois caminhos principais completos e demonstrar isolamento, reentrega, capacidade e recuperação com as evidências do [plano de execução](plano-de-execucao.md). A capacidade de produção, o comportamento real do Jev e o volume máximo ficam sujeitos à implementação e às medições.
+O critério final é executar os dois caminhos principais completos e demonstrar isolamento, reentrega, capacidade e recuperação com as evidências do [plano de execução](plano-de-execucao.md). A capacidade de produção, o tempo do complemento integrado e o volume máximo ficam sujeitos à implementação e às medições.

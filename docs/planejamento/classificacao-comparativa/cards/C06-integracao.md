@@ -2,10 +2,7 @@
 
 Issue publicada: [#7](https://github.com/leeunam/case-CLOUDWALK-IA/issues/7). Consulte a issue para progresso e comentários atuais.
 
-Escopo vigente: integrar Qwen somente se C05 comprovar elegibilidade e o
-responsável aprovar a adoção. Novos ajustes GLiClass foram encerrados nesta
-entrega. O resultado histórico de C04 continua preservado; não é pré-requisito
-de elegibilidade para C05.
+A decisão de 26/11/2026 liberou a integração do SetFit R1 após o final independente e a auditoria. O trabalho segue C06-A → C06-B e C06-C. A reprodução C07-D depende do aceite integrado. [Adoção](../sf2/decisao-adocao-r1.md) · [Tarefas e bases](../c06-setfit-integracao.md).
 
 ## Parent e especificação
 
@@ -22,7 +19,7 @@ preservando histórico, correção humana e autorização por marca.
 
 - [ ] Antes da implementação, integrador fixa origem/proveniência e atualiza os
   contratos/fixtures/tipos consumidores em conjunto. Histórico Jev permanece
-  interpretável; Qwen/GLiClass não são gravados falsamente com origem Jev.
+  interpretável e novas inferências usam origem `setfit`.
 - [ ] Com classificação completa ou entrada inválida, há zero inferências reais.
   Um campo ausente solicita só esse campo; dois ausentes seguem a política comum.
 - [ ] Entrada válida com complemento concluído ativa a fila correta da marca,
@@ -35,20 +32,16 @@ preservando histórico, correção humana e autorização por marca.
   probabilidades inventadas. Timeout, lease e retentativas têm limites coerentes.
 - [ ] Testes e passagem real cobrem ao menos os caminhos completo, complemento,
   revisão/correção e resultado tardio, incluindo isolamento entre duas marcas.
-- [ ] Se o Qwen for elegível e sua adoção for aprovada, configurar somente
-  credencial/rede permitidas. Contratos de webhooks
-  e eventos Kafka não mudam incidentalmente.
+- [ ] Serviço privado residente carrega o pacote local verificado, preserva as 17 fontes do worker e aplica a política R1 qualificada. O mock e a ponte leem as versões Kafka históricas e a nova antes de ativar a emissão.
 
 ## Fora do escopo
 
 Troca de modelo por atendimento, fallback automático entre modelos, UI para
 seleção de modelos, treinamento ou alteração de filas/capacidade/handoff.
 
-## Bloqueado por
+## Dependências
 
-- [C05 — decisão humana com vencedor elegível](C05-decisao.md).
-- Contrato de proveniência congelado pelo integrador; fechar C05 com resultado
-  inconclusivo não libera esta tarefa.
+A seleção em C05 foi concluída. C06-A começa no SHA integrado que contém a adoção. B e C dependem da base comum de contratos de A. [Contrato privado](../../../contratos/classification-http/README.md).
 
 ## Execução e retorno
 

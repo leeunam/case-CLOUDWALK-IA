@@ -304,3 +304,7 @@ não reutilizam os finais consumidos e não fazem chamadas pagas.
 C05 está retomada em planejamento. C06 e C07/F09 final permanecem condicionadas
 à qualificação completa, decisão de adoção e aceites próprios. A publicação
 fixture continua aceita; E01 e a escala exploratória ficam fora desta rodada.
+
+### Adoção SetFit R1 para C06 — 26/11/2026
+
+O teste independente dos 120 casos e cinco controles passou nos dez critérios congelados e teve auditoria reproduzida byte a byte. A autorização para integrar após aprovação de todos os critérios passa a valer para o pacote e a política R1 registrados. C06 integra o complemento real ao Rails. C07/F09 final depende da C06 e comprova a instalação limpa. [Decisão de adoção](classificacao-comparativa/sf2/decisao-adocao-r1.md) · [Plano e aceites](classificacao-comparativa/c06-setfit-integracao.md).

@@ -1,0 +1,403 @@
+{
+  "status": "eligible",
+  "unstarted_ids": [],
+  "interrupted_ids": [],
+  "verified_cases": 120,
+  "verified_controls": 5,
+  "latency_ms": {
+    "n": 120,
+    "p50": 38.46291599995766,
+    "p95": 71.9609360000959,
+    "maximum": 110.899447999941
+  },
+  "resources": {
+    "supervisor": {
+      "peak_cpu_percent": 79.35925968587526,
+      "peak_ram_bytes": 529989632,
+      "pid": 84,
+      "scope": "process"
+    },
+    "worker": {
+      "peak_cpu_percent": 198.7988138308377,
+      "peak_ram_bytes": 1708331008,
+      "pid": 214,
+      "scope": "process"
+    }
+  },
+  "startup_ms": 19381.062905999897,
+  "failure": null,
+  "historical_capture_costs": {
+    "classifier_api_calls": 0,
+    "download_ms": 0,
+    "training_ms": 913684.5375259982
+  },
+  "metrics": {
+    "preservation": {
+      "numerator": 80,
+      "denominator": 80,
+      "wilson95": [
+        0.954181870464473,
+        1
+      ]
+    },
+    "control_calls": 0,
+    "partial_applications": 0,
+    "wrong_expected_review": {
+      "numerator": 0,
+      "denominator": 24,
+      "wilson95": [
+        0,
+        0.13797620467498012
+      ]
+    },
+    "nonurgent_on_urgent": 0,
+    "applied_accuracy": {
+      "category": {
+        "numerator": 40,
+        "denominator": 40,
+        "wilson95": [
+          0.9123783988027133,
+          0.9999999999999999
+        ]
+      },
+      "priority": {
+        "numerator": 47,
+        "denominator": 48,
+        "wilson95": [
+          0.8910078200474814,
+          0.9963128890224893
+        ]
+      }
+    },
+    "automatic_coverage": {
+      "numerator": 69,
+      "denominator": 96,
+      "wilson95": [
+        0.6217410386959606,
+        0.7989258916163063
+      ]
+    },
+    "correct_coverage": {
+      "numerator": 68,
+      "denominator": 96,
+      "wilson95": [
+        0.6108010969781354,
+        0.7898340747478332
+      ]
+    },
+    "raw_urgent": {
+      "numerator": 17,
+      "denominator": 17,
+      "wilson95": [
+        0.8156818649911481,
+        0.9999999999999998
+      ]
+    },
+    "applied_urgent": {
+      "numerator": 13,
+      "denominator": 17,
+      "wilson95": [
+        0.5273820188043501,
+        0.9044495567791988
+      ]
+    },
+    "review_by_case": {
+      "numerator": 51,
+      "denominator": 120,
+      "wilson95": [
+        0.34023039219273576,
+        0.5144224827700699
+      ]
+    },
+    "review_by_field": {
+      "category": {
+        "numerator": 32,
+        "denominator": 80,
+        "wilson95": [
+          0.29961827595870943,
+          0.5095453499483961
+        ]
+      },
+      "priority": {
+        "numerator": 22,
+        "denominator": 80,
+        "wilson95": [
+          0.18917757188084203,
+          0.3814405864101452
+        ]
+      }
+    },
+    "confusion": {
+      "category": {
+        "pix": {
+          "pix": 23,
+          "payouts": 0,
+          "terminal": 0,
+          "informacao_insuficiente": 0,
+          "error": 0
+        },
+        "payouts": {
+          "pix": 0,
+          "payouts": 22,
+          "terminal": 0,
+          "informacao_insuficiente": 1,
+          "error": 0
+        },
+        "terminal": {
+          "pix": 0,
+          "payouts": 0,
+          "terminal": 20,
+          "informacao_insuficiente": 1,
+          "error": 0
+        },
+        "informacao_insuficiente": {
+          "pix": 1,
+          "payouts": 0,
+          "terminal": 1,
+          "informacao_insuficiente": 11,
+          "error": 0
+        }
+      },
+      "priority": {
+        "basic": {
+          "basic": 17,
+          "intermediate": 0,
+          "advanced": 0,
+          "urgent": 0,
+          "informacao_insuficiente": 0,
+          "error": 0
+        },
+        "intermediate": {
+          "basic": 0,
+          "intermediate": 13,
+          "advanced": 1,
+          "urgent": 1,
+          "informacao_insuficiente": 1,
+          "error": 0
+        },
+        "advanced": {
+          "basic": 0,
+          "intermediate": 0,
+          "advanced": 16,
+          "urgent": 1,
+          "informacao_insuficiente": 0,
+          "error": 0
+        },
+        "urgent": {
+          "basic": 0,
+          "intermediate": 0,
+          "advanced": 0,
+          "urgent": 17,
+          "informacao_insuficiente": 0,
+          "error": 0
+        },
+        "informacao_insuficiente": {
+          "basic": 0,
+          "intermediate": 0,
+          "advanced": 0,
+          "urgent": 0,
+          "informacao_insuficiente": 13,
+          "error": 0
+        }
+      }
+    },
+    "by_class": {
+      "category": {
+        "pix": {
+          "precision": {
+            "numerator": 23,
+            "denominator": 24,
+            "wilson95": [
+              0.7975819352134407,
+              0.9926065438344941
+            ]
+          },
+          "recall": {
+            "numerator": 23,
+            "denominator": 23,
+            "wilson95": [
+              0.8568833815495731,
+              1
+            ]
+          },
+          "f1": 0.9787234042553191,
+          "support": 23
+        },
+        "payouts": {
+          "precision": {
+            "numerator": 22,
+            "denominator": 22,
+            "wilson95": [
+              0.8513451253913792,
+              1
+            ]
+          },
+          "recall": {
+            "numerator": 22,
+            "denominator": 23,
+            "wilson95": [
+              0.7900884492974114,
+              0.9922833338565469
+            ]
+          },
+          "f1": 0.9777777777777777,
+          "support": 23
+        },
+        "terminal": {
+          "precision": {
+            "numerator": 20,
+            "denominator": 21,
+            "wilson95": [
+              0.7733063992587743,
+              0.9915440121901735
+            ]
+          },
+          "recall": {
+            "numerator": 20,
+            "denominator": 21,
+            "wilson95": [
+              0.7733063992587743,
+              0.9915440121901735
+            ]
+          },
+          "f1": 0.9523809523809523,
+          "support": 21
+        },
+        "informacao_insuficiente": {
+          "precision": {
+            "numerator": 11,
+            "denominator": 13,
+            "wilson95": [
+              0.5776536898051747,
+              0.9567418216419188
+            ]
+          },
+          "recall": {
+            "numerator": 11,
+            "denominator": 13,
+            "wilson95": [
+              0.5776536898051747,
+              0.9567418216419188
+            ]
+          },
+          "f1": 0.8461538461538461,
+          "support": 13
+        }
+      },
+      "priority": {
+        "basic": {
+          "precision": {
+            "numerator": 17,
+            "denominator": 17,
+            "wilson95": [
+              0.8156818649911481,
+              0.9999999999999998
+            ]
+          },
+          "recall": {
+            "numerator": 17,
+            "denominator": 17,
+            "wilson95": [
+              0.8156818649911481,
+              0.9999999999999998
+            ]
+          },
+          "f1": 1.0,
+          "support": 17
+        },
+        "intermediate": {
+          "precision": {
+            "numerator": 13,
+            "denominator": 13,
+            "wilson95": [
+              0.7719046276458016,
+              0.9999999999999999
+            ]
+          },
+          "recall": {
+            "numerator": 13,
+            "denominator": 16,
+            "wilson95": [
+              0.5699111903802587,
+              0.9340840092857186
+            ]
+          },
+          "f1": 0.896551724137931,
+          "support": 16
+        },
+        "advanced": {
+          "precision": {
+            "numerator": 16,
+            "denominator": 17,
+            "wilson95": [
+              0.730179693624246,
+              0.9895395990150022
+            ]
+          },
+          "recall": {
+            "numerator": 16,
+            "denominator": 17,
+            "wilson95": [
+              0.730179693624246,
+              0.9895395990150022
+            ]
+          },
+          "f1": 0.9411764705882353,
+          "support": 17
+        },
+        "urgent": {
+          "precision": {
+            "numerator": 17,
+            "denominator": 19,
+            "wilson95": [
+              0.6860591728889099,
+              0.9706414397011297
+            ]
+          },
+          "recall": {
+            "numerator": 17,
+            "denominator": 17,
+            "wilson95": [
+              0.8156818649911481,
+              0.9999999999999998
+            ]
+          },
+          "f1": 0.9444444444444444,
+          "support": 17
+        },
+        "informacao_insuficiente": {
+          "precision": {
+            "numerator": 13,
+            "denominator": 14,
+            "wilson95": [
+              0.6853129557584889,
+              0.987277784752109
+            ]
+          },
+          "recall": {
+            "numerator": 13,
+            "denominator": 13,
+            "wilson95": [
+              0.7719046276458016,
+              0.9999999999999999
+            ]
+          },
+          "f1": 0.9629629629629629,
+          "support": 13
+        }
+      }
+    }
+  },
+  "gates": {
+    "preservation": true,
+    "control_calls": true,
+    "partial_applications": true,
+    "wrong_expected_review": true,
+    "nonurgent_on_urgent": true,
+    "category_accuracy": true,
+    "priority_accuracy": true,
+    "automatic_coverage": true,
+    "raw_urgent": true,
+    "p95": true
+  }
+}

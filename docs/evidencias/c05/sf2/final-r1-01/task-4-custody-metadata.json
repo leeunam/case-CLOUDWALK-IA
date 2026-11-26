@@ -1,0 +1,19 @@
+{
+  "inventory": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.superpowers/sdd/conclusao-projeto/sf2-final/accepted/r1-private-inventory.json",
+  "members": {
+    "final": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.superpowers/sdd/conclusao-projeto/sf2-final/accepted/final.jsonl",
+    "annotations": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.superpowers/sdd/conclusao-projeto/sf2-final/accepted/annotations-final.jsonl",
+    "review_receipt": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.superpowers/sdd/conclusao-projeto/sf2-final/accepted/review_receipt.json",
+    "token_lengths": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.superpowers/sdd/conclusao-projeto/sf2-final/accepted/token-lengths.json"
+  },
+  "metadata_hashes_verified": {
+    "review_receipt": "58dcf3c81dce0ba28b539121d541209bf353a29878821e9c80940e035007f369",
+    "token_lengths": "cb953d63fdcc4c540e7058d4cadd294ef4907435ef334d6343194eca19ba55f1"
+  },
+  "metadata_inventory_created": true,
+  "evidence_of_scope": [
+    "Listagem dos nomes dos filhos diretos e confirmação dos tipos de arquivo sem seguir links.",
+    "Leitura binária privada limitada aos metadados review_receipt e token_lengths para verificar seus hashes.",
+    "Relatos, anotações e proveniência tiveram zero acessos de conteúdo. Nenhum marcador foi consultado ou criado."
+  ]
+}

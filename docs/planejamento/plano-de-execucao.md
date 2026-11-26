@@ -45,7 +45,7 @@ Em 2026-11-23, o responsável escolheu comparar Qwen pela Feita com GLiClass
 local antes de selecionar o classificador. O [quadro SDD](classificacao-comparativa/README.md)
 contém sete cards de protocolo/avaliador/adaptadores/comparação/integração/demo
 e duas correções independentes de robustez. A especificação é CLASS-SPEC-001;
-a decisão está em D017. SDD aqui significa Specification Driven Development.
+a investigação inicial consta em D017 e a adoção em D018. SDD aqui significa Specification Driven Development.
 A divisão foi aprovada e publicada no [épico CLASS-001](https://github.com/leeunam/case-CLOUDWALK-IA/issues/1),
 com nove issues vinculadas. A aprovação dos cards não aprova ainda dados,
 orçamento de inferência ou vencedor.
@@ -154,25 +154,22 @@ treino de categoria/prioridade, revisão e teste independente, com
 parâmetros foram aprovados. Após o aceite de 00–04, SF2-05A treinou os dois
 especialistas e coletou uma vez os 90 relatos de validação e cinco controles.
 Nenhuma das 225 políticas cumpriu todos os critérios. A entrega negativa
-passou por revisão independente; os 120 finais permanecem fechados, sem
-congelamento ou adoção. C06/C07 continuam bloqueadas. A demonstração fixture
+passou por revisão independente. Naquela etapa, os 120 finais continuavam fechados e C06/C07 estavam bloqueadas. A demonstração fixture
 foi preservada e não houve chamadas pagas nessa execução.
 [Resultado e evidências](../evidencias/c05/sf2/qualificacao-01/README.md).
 Na extensão offline SF2-R1 posterior, nove das 45 combinações adicionais
 passaram na validação. A candidata tem cobertura correta de 51/72 e
 zero conclusões indevidas nos 18 casos que exigiam revisão.
 [Política, execução e revisão global](../evidencias/c05/sf2/revisao-01/README.md).
-Esse resultado permite preparar o contrato do teste independente; não
-substitui o teste de 120 casos nem libera adoção ou C06/C07.
+Esse resultado permitiu preparar o teste independente de 120 casos.
 
 Em 26/11/2026, a revisão independente aceitou a preparação pública da
 SF2-FINAL-R1 após a correção dos três P1 da revisão ampla. O QA registrou
 32 testes aprovados em 7,736 s e o revisor reproduziu o recibo revisado em
-7,53 s. O conjunto final de 120 casos permanece fechado. A abertura depende
-da confirmação do nome exato do inventário e dos quatro papéis previstos no
-protocolo e da autorização para execução única vinculada ao recibo revisado.
-A adoção segue pendente e C06/C07 continuam bloqueadas.
+7,53 s. O responsável autorizou a conferência dos metadados, o teste independente único e a integração condicionada ao cumprimento de todos os critérios.
 [Evidências da preparação pública](../evidencias/c05/sf2/final-r1-preparacao-02/README.md).
+
+Em 26/11/2026, os 120 casos e cinco controles produziram resultado elegível nos dez critérios. A auditoria independente reproduziu o resultado byte a byte e a condição de adoção foi cumprida. C06-A congela os contratos e atualiza os consumidores. C06-B (Rails) e C06-C (serviço SetFit local) começam na mesma base após A. C07-D comprova instalação limpa depois do aceite integrado e de R01/R02. O fluxo publicado em fixture tem seu próprio aceite anterior. [Decisão de adoção](classificacao-comparativa/sf2/decisao-adocao-r1.md) · [Plano e aceites por frente](classificacao-comparativa/c06-setfit-integracao.md).
 
 ### Evolução futura depois da publicação — E01
 

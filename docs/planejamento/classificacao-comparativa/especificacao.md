@@ -1,27 +1,26 @@
 # CLASS-SPEC-001 — comparação e seleção do classificador
 
-Versão: 1.1, de 2026-11-23. SDD significa **Specification Driven Development**:
+Versão: 1.2, de 2026-11-26. SDD significa **Specification Driven Development**:
 o comportamento e suas provas são definidos antes da implementação.
 
 ## Estado e objetivo
 
 A comparação **Qwen pela Feita × GLiClass local** foi a escolha inicial do responsável.
 Os critérios de aceitação e a divisão 24/36 foram aprovados pelo responsável.
-Vencedor permanece pendente. Posteriormente, o responsável autorizou até
+O vencedor ainda estava pendente naquela rodada. Posteriormente, o responsável autorizou até
 US$ 10 para o piloto e pediu mínimo de requisições; uma chamada real C03
 foi executada e aceita. [Autorização e limites](autorizacao-piloto-economico.md). A revisão dos 60 rótulos está documentada:
 oito casos aprovados diretamente pelo responsável e 52 pela IA sob delegação
 explícita, para referência exploratória. Os contratos v1.0.0 passaram na
 verificação local; o [aceite C01](aceite-c01.md) registra evidências e limites
-para liberar C02 com fixtures. Esta especificação não declara um vencedor.
+para liberar C02 com fixtures. O resultado independente posterior e a adoção para C06 estão na [decisão SetFit R1](sf2/decisao-adocao-r1.md).
 
 **Emenda de escopo aprovada:** depois dos pilotos, o responsável escolheu
 focar na avaliação do Qwen e encerrar novos ajustes do GLiClass nesta entrega.
 C05 passa a ser uma qualificação do Qwen contra as metas congeladas, sem
 comparação pareada final. C04 conserva implementação e resultados como
 investigação encerrada, sem aceite do modelo para integração. A descrição
-original do ensaio pareado abaixo é histórica; esta emenda prevalece na
-continuidade. [Plano vigente](qualificacao-qwen.md).
+original do ensaio pareado abaixo é histórica; esta emenda regeu a qualificação do Qwen. [Plano histórico](qualificacao-qwen.md).
 
 O objetivo é escolher um classificador para completar categoria e prioridade
 ausentes, com acerto, tratamento de urgência, abstenção, latência e custo
@@ -161,19 +160,9 @@ fixture após integração, preservando os limites de execução real.
 
 ## Integração posterior
 
-O experimento é independente da aplicação. Depois da decisão C05, C06 conecta
-um único classificador ativo por configuração ao fluxo existente. Preservar
-o histórico Jev e os testes já disponíveis. Atualizar em conjunto origem da
-classificação, schemas/fixtures e tipos consumidores para não registrar Qwen
-ou GLiClass como se fossem Jev. O formato público escolhido será uma decisão
-explícita de contrato antes de sua implementação; não alterar webhooks e
-eventos Kafka incidentalmente.
+A C05 adotou o SetFit R1 em 26/11/2026 após teste único de 120 casos, cinco controles e auditoria independente. C06 implementa um único provedor ativo por configuração. O Rails valida, preserva os valores do canal e aplica o complemento integral ou encaminha à revisão. O pacote e as políticas aprovados são carregados por um serviço privado residente.
 
-Se GLiClass for selecionado, empacotar sua execução Python/pesos e verificar
-prontidão, carregamento, limites de recurso e falhas na instalação de demo.
-Se Qwen for selecionado, documentar credencial, rede, timeout e custo. Não
-introduzir UI de troca de modelos, fallback automático entre fornecedores ou
-duas inferências por atendimento no escopo atual.
+A origem por campo aceita `setfit` na revisão REST 1.1.0 sob `/api/v1`. A ponte e o mock passam a ler requests Kafka 1.0 e 1.1 antes de ativar SetFit. Casos com origem SetFit geram requests 1.1; os resultados continuam em 1.0. O histórico Jev e o modo fixture conservam sua interpretação. O aceite integrado e a instalação limpa pertencem a C06/C07. [Contrato normativo](../../contratos/classification-http/README.md) · [Plano e responsáveis](c06-setfit-integracao.md).
 
 ## Dependências do fechamento
 

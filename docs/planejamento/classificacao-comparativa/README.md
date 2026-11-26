@@ -6,7 +6,11 @@ executou modelos; as implementações e medições posteriores estão registrada
 
 [Especificação CLASS-SPEC-001](especificacao.md) · [Guia para os chats](guia-dos-chats.md).
 
-## Situação atual — SF2-R1 elegível somente na validação, 25/11/2026
+## Situação atual em 26/11/2026
+
+SetFit R1 foi adotado para C06 após atingir os dez critérios no teste independente de 120 casos e cinco controles. A implementação do complemento real e seu aceite na instalação limpa estão pendentes. [Resultado auditado](../../evidencias/c05/sf2/final-r1-01/README.md) · [Decisão](sf2/decisao-adocao-r1.md) · [Plano C06/C07](c06-setfit-integracao.md).
+
+## Validação de 25/11/2026
 
 Após o piloto SetFit e o aceite externo F10 em fixture, o responsável retomou
 a classificação. Foram aprovados 360 relatos novos: 150 de treino, 90 de
@@ -17,13 +21,12 @@ foram treinados e a validação única registrou 90 relatos e cinco controles.
 Nenhuma das 225 regras de revisão passou por todos os critérios: todas
 concluíram pelo menos dois casos que exigiam revisão. A
 [execução revisada](../../evidencias/c05/sf2/qualificacao-01/README.md) teve
-zero chamadas de API. Os 120 casos finais continuam privados e não foram
-executados. Na extensão offline SF2-R1 aprovada depois desse resultado, nove
+zero chamadas de API. Nessa etapa, os 120 casos finais ainda estavam reservados. Na extensão offline SF2-R1 aprovada depois desse resultado, nove
 das 45 combinações adicionais passaram. A candidata selecionada usa corte
 0,95 para categoria e 0,70 para prioridade: concluiu corretamente 51/72
 classificáveis, com 0/18 conclusões indevidas em revisão esperada.
 [Evidências e limites R1](../../evidencias/c05/sf2/revisao-01/README.md).
-C06/C07 permanecem bloqueadas; nenhum modelo foi qualificado no final ou adotado.
+A integração aguardava o teste independente.
 [Acompanhamento e próximas dependências](sf2/acompanhamento.md).
 
 ## Histórico de decisões e limites
@@ -31,7 +34,7 @@ C06/C07 permanecem bloqueadas; nenhum modelo foi qualificado no final ou adotado
 Após investigar Qwen pela Feita e GLiClass local, o responsável aprovou
 focar na qualificação do Qwen e encerrar novos ajustes do GLiClass nesta
 entrega. C04 conserva seus resultados e deixa de bloquear C05. Não houve
-comparação pareada final nem escolha de modelo. [Plano vigente](qualificacao-qwen.md).
+comparação pareada final nem escolha de modelo. [Plano da rodada Qwen](qualificacao-qwen.md).
 Os 60 rótulos
 foram revisados para referência exploratória: oito casos diretamente pelo
 responsável e 52 pela IA sob delegação, conforme o [registro](revisao-de-rotulos.md).
@@ -42,8 +45,7 @@ financeiro do teste final foi definido e autorizado posteriormente, sob o mesmo
 teto cumulativo. O lote de 24/11/2026 concluiu 36 relatos + 13 controles em 44
 chamadas, por US$ 0,02197127. Resultado técnico **não elegível**: 3/7 conclusões
 indevidas e 19/22 categorias aplicadas corretas. O p95 de 2.493,510 ms e o
-reconhecimento de 6/6 urgentes passaram. C05 aguarda deliberação humana e C06
-continua bloqueada. [Resultado e auditorias](../../c05-resultado.md).
+reconhecimento de 6/6 urgentes passaram. Na rodada Qwen, C05 aguardava deliberação e C06 ficou bloqueada. [Resultado e auditorias](../../c05-resultado.md).
 A integração operacional só começa depois de C05 registrar
 um vencedor elegível aprovado pelo responsável. O resultado pode ser inconclusivo.
 
@@ -84,7 +86,7 @@ flowchart LR
   C01["C01 · especificação e dados"] --> C02["C02 · avaliador comum"]
   C02 --> C03["C03 · Qwen / Feita"]
   C02 --> C04["C04 · GLiClass local"]
-  C03 --> C05["C05 · qualificação Qwen e decisão humana"]
+  C03 --> C05["C05 · qualificação e adoção SetFit R1"]
   C04 -.-> H["Investigação preservada, fora da entrega atual"]
   C05 -->|"vencedor aprovado"| C06["C06 · integração"]
   C06 --> C07["C07 · reprodução da demo"]
@@ -143,4 +145,4 @@ C02 integrada localmente em `d8e09b62e42122e08e3c8edc7f3566dcdb82a173`.
 a manutenção de integração, com revisões aprovadas,
 exemplo do código aceito revalidado pelos schemas e hashes. C03 e C04 recebem
 a mesma base imutável com essa integração e trabalham em áreas próprias.
-R01 e R02 têm aceite local concluído. Vencedor e orçamento de API seguem pendentes.
+R01 e R02 têm aceite local concluído. Vencedor e orçamento de API ainda estavam pendentes no aceite da C02.

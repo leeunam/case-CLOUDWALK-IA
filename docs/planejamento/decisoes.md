@@ -12,8 +12,7 @@ de pesos, conforme D011. D001 a D007 permanecem como base. D008 e partes de
 D009/D010 foram substituídas; seus textos abaixo são histórico das decisões
 anteriores. O desempate por maior tempo sem receber caso permanece confirmado.
 O [fluxo operacional](fluxo-operacional.md) descreve a versão atual.
-A classificação inicial vem dos canais simulados. O Jev preenche apenas campos
-ausentes na primeira entrega, conforme D015.
+A classificação inicial vem dos canais simulados. D018 adota SetFit R1 para o complemento real na C06. D015 conserva a regra de completar somente campos ausentes e o histórico Jev.
 
 Para transporte de eventos, D016 substitui qualquer escolha técnica anterior:
 Kafka é o broker confirmado. F01 continua usando Solid Queue no PostgreSQL para
@@ -608,10 +607,10 @@ modelo, limiares, prazos e política de falhas ainda precisam ser definidos.
 
 ## D017 — Comparar Qwen/Feita e GLiClass antes de selecionar o classificador
 
-**Estado atual:** em 2026-11-23, após a investigação dos dois candidatos, o
+**Estado em 2026-11-23:**, após a investigação dos dois candidatos, o
 responsável aprovou focar a avaliação no Qwen e encerrar novos ajustes do
 GLiClass nesta entrega. A C05 passa a qualificar o Qwen contra as metas
-aprovadas. Escolha operacional e integração continuam pendentes. As regras
+aprovadas. Escolha operacional e integração estavam pendentes nessa data. As regras
 abaixo conservam o desenho inicial; a emenda seguinte define o escopo vigente.
 
 - Comparar `qwen/qwen3.8-27b` pela Feita com
@@ -649,7 +648,7 @@ conforme o [registro](classificacao-comparativa/autorizacao-piloto-economico.md)
 O responsável também aprovou usar o tempo total de espera pela classificação
 na meta de 3 s, em substituição à exigência de aquecimento comprovado.
 Essa alteração será versionada antes do teste final; resultados históricos
-conservam sua régua. A escolha do classificador continua pendente.
+conservam sua régua. A escolha do classificador seguia pendente naquele marco.
 
 ### Emenda — qualificação do Qwen
 
@@ -677,10 +676,15 @@ e acerto de categoria aplicada 19/22 (86,36%, abaixo de 90%). O p95 de
 US$ 0,02197127; total conservador com pilotos US$ 0,02300927, sem reservas
 pendentes. [Resultado e evidências](../c05-resultado.md).
 
-Não houve adoção nem ajuste do candidato. C06 continua bloqueada, e o
-responsável precisa deliberar sobre um novo escopo. A autorização deste lote
+Nesse lote não houve adoção nem ajuste do candidato. C06 ficou bloqueada até nova decisão de escopo. A autorização deste lote
 foi consumida. O [registro de decisão pendente](classificacao-comparativa/decisao-qwen-01.md)
 separa o resultado automático dos critérios de uma aprovação humana.
+
+## D018 — Adotar SetFit R1 para o complemento real na C06
+
+**Confirmado em 26/11/2026.** O responsável autorizou a integração se todos os critérios do teste independente passassem. A R1 cumpriu os dez, e o segundo auditor reproduziu a saída byte a byte. Esta decisão substitui a escolha do Jev ao vivo como provedor previsto para o complemento real. Preservar o modo fixture, os registros e origens Jev e a configuração legada. O padrão de configuração continua `jev` para instalações existentes; a demo real local selecionará `setfit` explicitamente depois de integrar os consumidores compatíveis.
+
+O Rails mantém as decisões de acesso, fila, revisão e envio. O serviço auxiliar privado completa apenas os campos ausentes com o pacote e as políticas congeladas. Uma classificação integral válida segue diretamente ao atendente simulado. C06 e C07 têm aceites próprios antes do fechamento. [Identidades e decisão](classificacao-comparativa/sf2/decisao-adocao-r1.md) · [Plano SDD](classificacao-comparativa/c06-setfit-integracao.md).
 
 ## Relações de domínio já confirmadas
 

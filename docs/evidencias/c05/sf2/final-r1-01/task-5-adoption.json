@@ -1,0 +1,15 @@
+{
+  "date_local": "2026-11-26",
+  "status": "adopted_for_c06",
+  "basis": "User affirmative continuation to explicit final-test and all-gates conditional integration approval; independently verified eligible result.",
+  "user_authorization_record_sha256": "43fbc65e7b49d37de3b752ff6fdcacb56f4d679ccd7b14c4cb3f9f8de5585158",
+  "release_sha256": "1d4396aa3ea665f6ed6c8d2743cabdc3f1e9f0f966d405c070f65f06862fd52a",
+  "execution_sha256": "f3116bb82d03e268386873f9006465328f7092b55674667ead8b85db62060911",
+  "seal_sha256": "022f1ebc20daa58c8ac9941390b31fecef056b0cad33d0700b19df46e0eab67a",
+  "audit_sha256": "f2da03afdadbddfe3cd86a776cdca318dcff4883b9723f03c2e465e5c7e30f40",
+  "all_frozen_gates_pass": true,
+  "eligible_final_cases": 120,
+  "integration_acceptance_pending": true,
+  "external_paid_api": false,
+  "model_retraining_or_cut_changes": false
+}

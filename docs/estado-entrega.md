@@ -7,11 +7,7 @@ A SF2 concluiu contratos, dados, código e a validação dos dois especialistas
 treinados. Nenhuma das 225 políticas de revisão atingiu todos os critérios.
 Na extensão offline SF2-R1, nove regras adicionais atingiram as metas de
 validação. A selecionada concluiu corretamente 51/72 classificáveis e
-revisou todos os 18 casos que exigiam revisão. A
-[preparação pública revisada da SF2-FINAL-R1](evidencias/c05/sf2/final-r1-preparacao-02/README.md)
-teve aceite independente. Os 120 casos finais permanecem fechados e nenhum
-modelo foi adotado.
-[Plano de execução e critérios de aceite](planejamento/plano-de-execucao.md).
+revisou todos os 18 casos que exigiam revisão. No teste independente final, a R1 passou nos dez critérios, com 120 casos e cinco controles. O responsável adotou o SetFit R1 para C06 pela autorização condicionada ao resultado. O fluxo real no Rails e sua reprodução em instalação limpa ainda aguardam implementação e aceite. [Decisão](planejamento/classificacao-comparativa/sf2/decisao-adocao-r1.md) · [Plano de integração](planejamento/classificacao-comparativa/c06-setfit-integracao.md).
 
 ## Plataforma e demonstração
 
@@ -72,15 +68,8 @@ de revisão esperada, zero urgentes rebaixados e 39/90 revisões.
 Em 26/11/2026, a revisão independente aceitou a preparação pública da
 SF2-FINAL-R1 após a correção dos três P1 da revisão ampla. O QA registrou
 32 testes aprovados em 7,736 s e o revisor reproduziu o recibo revisado em
-7,53 s. Os tempos do replay medem fixture e cálculo da decisão. O teste
-final e a medição de inferência aguardam a confirmação do nome do
-inventário e dos quatro papéis previstos no protocolo e a autorização
-específica vinculada ao recibo revisado.
-[Evidências da preparação pública](evidencias/c05/sf2/final-r1-preparacao-02/README.md).
+7,53 s. Os tempos do replay medem fixture e cálculo da decisão. [Evidências da preparação pública](evidencias/c05/sf2/final-r1-preparacao-02/README.md).
 
-A integração (C06) e a reprodução do complemento real (C07/F09 final) continuam
-bloqueadas. O fechamento completo ainda requer qualificação conforme
-os critérios vigentes, adoção aprovada e o aceite do complemento real com
-proveniência, revisão humana, broker e handoff. O atendente conversacional
-real (E01) fica como evolução posterior e opcional.
-[Plano de conclusão](planejamento/conclusao-projeto.md).
+O teste independente único passou nos dez critérios, com duas auditorias idênticas em bytes. Houve 68 conclusões corretas entre 96 classificáveis, uma conclusão com prioridade incorreta e 51 revisões em 120 casos. O p95 de 71,96 ms mede a latência do adaptador nos casos. O tempo do cliente até a resposta no help desk será medido após a integração. [Resultado final e recursos observados](evidencias/c05/sf2/final-r1-01/README.md).
+
+A C06 está liberada para integrar o pacote e a política aprovados, com proveniência por campo, revisão humana e Kafka. A C07/F09 final depende desse aceite e de uma instalação limpa com o pacote qualificado. E01, o atendente conversacional real, permanece opcional após o fechamento. [Plano de C06/C07](planejamento/classificacao-comparativa/c06-setfit-integracao.md).

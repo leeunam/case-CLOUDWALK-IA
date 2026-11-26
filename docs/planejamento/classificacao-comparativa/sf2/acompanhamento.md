@@ -149,3 +149,7 @@ generalização. O teste independente de 120 casos, a adoção e C06/C07
 continuam bloqueados. A próxima preparação é um contrato de execução
 compatível com a política R1, preservando modelos e critérios; a abertura
 do final será uma liberação separada após esse preparo.
+
+## Teste independente final e adoção em 26/11/2026
+
+Concluídas a preparação revisada e a exposição única do conjunto selado. A auditoria independente confirmou 120 casos, cinco controles e dez critérios aprovados. A autorização condicionada do responsável libera a adoção de R1 para C06. O fluxo real do produto e a instalação limpa têm aceites posteriores próprios. [Resultado](../../../evidencias/c05/sf2/final-r1-01/README.md) · [Decisão](decisao-adocao-r1.md) · [Próximas tarefas](../c06-setfit-integracao.md).
