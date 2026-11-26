@@ -99,7 +99,11 @@ class KnowledgeTest(unittest.TestCase):
         cases = [
             ("Onde consulto o comprovante de Pix? Quero um atendente.", "human_requested"),
             ("Onde consulto o comprovante de Pix? Quero estornar o Pix.", "sensitive_operation"),
+            ("Onde consulto o comprovante de Pix? Você consegue cancelar o Pix?", "sensitive_operation"),
             ("Não quero fazer um estorno.", "no_guidance"),
+            ("Não quero cancelar o Pix.", "no_guidance"),
+            ("Suponha que quero falar com uma pessoa.", "no_guidance"),
+            ("Suponha que o Pix ainda esteja pendente. Quero falar com uma pessoa.", "human_requested"),
             ("Não quero fazer um estorno, mas quero um atendente.", "human_requested"),
             ("Não quero um atendente. Preciso estornar o Pix.", "sensitive_operation"),
             ('Ela me disse "quero um atendente".', "no_guidance"),

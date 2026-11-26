@@ -32,9 +32,8 @@ _HUMAN_REQUEST = re.compile(
     r" (?:um |uma |o |a )?(?:pessoa|atendente|humano|humana|analista|time humano|equipe humana)\b"
 )
 _SENSITIVE_REQUEST = re.compile(
-    r"\b(?:estorne|reembolse|cancele (?:o |um )?pix)\b"
-    r"|(?:^|\b(?:quero|queria|preciso|gostaria de|pode|para) )"
-    r"(?:estornar|reembolsar|cancelar (?:o |um )?pix)\b"
+    r"\b(?:estorne|reembolse|cancel(?:e|ar) (?:o |um )?pix)\b"
+    r"|(?:^|\b(?:quero|queria|preciso|gostaria de|pode|para) )(?:estornar|reembolsar)\b"
     r"|\b(?:alter(?:e|ar)|troc(?:a|ar|que)) (?:os |meus |a |minha )?(?:dados bancarios|conta bancaria|chave pix)\b"
     r"|\btransfer(?:e|ir) (?:o |meu )?(?:saldo|dinheiro|valores)\b"
     r"|\b(?:faz(?:er|a)|solicitar|realiz(?:ar|e)|execut(?:ar|e)|process(?:ar|e)"
@@ -47,7 +46,7 @@ _NEGATED_REQUEST = re.compile(
     r"\b(?:nao|nunca|nem|sem) (?:(?:quero|queria|preciso(?: de)?|gostaria de"
     r"|pretendo|vou|posso|estou pedindo (?:para|pra)) )?(?:(?:mais|mesmo) )?$"
 )
-_NEGATION_OR_QUOTE = re.compile(r'["“”«»]|\b(?:ignore|fingir|suponha|hipoteticamente|apenas um exemplo)\b',
+_NON_REQUEST_MARKERS = re.compile(r'["“”«»]|\b(?:ignore|fingir|suponha|hipoteticamente|apenas um exemplo)\b',
                                 re.IGNORECASE)
 _CONTRADICTION = re.compile(r"\b(?:mas nao|porem nao|nao quero|nao e sobre|nao era sobre|talvez|se por acaso)\b")
 
@@ -90,6 +89,8 @@ def _handoff_reason(text):
     clauses = [_tokens(clause) for clause in _CLAUSE_BOUNDARY.split(_QUOTED_SPEECH.sub(" ", text))]
     for reason, pattern in (("sensitive_operation", _SENSITIVE_REQUEST), ("human_requested", _HUMAN_REQUEST)):
         for clause in clauses:
+            if reason == "human_requested" and _NON_REQUEST_MARKERS.search(clause):
+                continue
             if any(not _NEGATED_REQUEST.search(clause[:match.start()]) for match in pattern.finditer(clause)):
                 return reason
     return None
@@ -181,7 +182,7 @@ class Knowledge:
 
     def _reply_options(self, history, procedures):
         latest = history[-1]
-        if not _author(latest, "customer") or _NEGATION_OR_QUOTE.search(latest["text"]):
+        if not _author(latest, "customer") or _NON_REQUEST_MARKERS.search(latest["text"]):
             return {}
         normalized = _tokens(latest["text"])
         if _CONTRADICTION.search(normalized):
