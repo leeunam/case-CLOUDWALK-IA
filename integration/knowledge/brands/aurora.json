@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0",
+  "ontology_version": "1.0.0",
+  "version": "1.0.0",
+  "brand_id": "11111111-1111-4111-8111-111111111111",
+  "slug": "aurora",
+  "sources": [
+    {
+      "id": "aurora.manual",
+      "version": "1.0.0",
+      "title": "Guia operacional fictício Aurora",
+      "fictional": true
+    }
+  ],
+  "procedures": [
+    {
+      "id": "aurora.comprovante-pix",
+      "intent_id": "consultar-comprovante-pix",
+      "requires": [],
+      "source_id": "aurora.manual",
+      "steps": [
+        "No aplicativo Aurora, abra Atividade.",
+        "Escolha o Pix na lista e toque em Ver comprovante."
+      ]
+    },
+    {
+      "id": "aurora.status-repasse",
+      "intent_id": "consultar-status-repasse",
+      "requires": [],
+      "source_id": "aurora.manual",
+      "steps": [
+        "No aplicativo Aurora, abra Vendas e selecione Agenda de repasses.",
+        "Abra um repasse para consultar a data prevista e a situação."
+      ]
+    },
+    {
+      "id": "aurora.visor-terminal",
+      "intent_id": "consultar-visor-terminal",
+      "requires": [
+        "menu-visivel"
+      ],
+      "source_id": "aurora.manual",
+      "steps": [
+        "Na maquininha Aurora, abra Ajuda no menu visível.",
+        "Selecione Informações da tela para consultar os símbolos do visor."
+      ]
+    }
+  ],
+  "handoff_rules": [
+    {
+      "id": "aurora.humano",
+      "reason": "human_requested",
+      "source_id": "aurora.manual"
+    },
+    {
+      "id": "aurora.sem-orientacao",
+      "reason": "no_guidance",
+      "source_id": "aurora.manual"
+    },
+    {
+      "id": "aurora.operacao-sensivel",
+      "reason": "sensitive_operation",
+      "source_id": "aurora.manual"
+    }
+  ]
+}
