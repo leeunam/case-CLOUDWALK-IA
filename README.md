@@ -1,9 +1,9 @@
 # Help desk multimarca CloudWalk
 
 Projeto individual do TAPI Inteli/CloudWalk. O help desk reúne atendimentos
-simulados de chat, WhatsApp e e-mail em filas por marca. A demonstração usa
-respostas determinísticas (fixture) para completar a classificação. Um
-atendente simulado responde pelo Kafka e encaminha casos ao analista com
+simulados de chat, WhatsApp e e-mail em filas por marca. O operador pode
+completar a classificação com SetFit R1 local ou usar a fixture determinística
+habilitada por padrão. Um atendente simulado responde pelo Kafka e encaminha casos ao analista com
 histórico e referências da conversa. O frontend usa a API Rails real e os
 atendimentos ficam no PostgreSQL. A supervisão pode revisar a classificação,
 auditar decisões e configurar a operação.
@@ -21,6 +21,11 @@ Na raiz do checkout, rode
 python3 script/demo.py up
 python3 script/demo.py check
 ```
+
+Para usar o classificador real, solicite ao custodiante o arquivo portátil
+`setfit-r1-package.tar.gz` e instale-o com Python 3.11 em um diretório novo.
+O roteiro inclui a conferência dos hashes, o comando da demo, os cliques do
+simulador e as provas de persistência e isolamento. [Instalação limpa com SetFit R1](docs/c07.md).
 
 Abra o [simulador](http://127.0.0.1:45179/) e a [caixa do analista](http://127.0.0.1:45179/analista).
 O simulador abre uma identidade sintética no Rails. Para entrar como analista
@@ -83,8 +88,9 @@ O mesmo roteiro cobre como parar, retomar e restaurar a demonstração.
    e pelo Caddy na publicação. A API persiste o caso no PostgreSQL e devolve
    o recibo idempotente.
 2. A classificação completa recebida segue direto para o atendimento. Para
-   campos ausentes, Solid Queue executa o complemento fixture. Casos sem
-   informação suficiente aguardam correção da supervisão.
+   campos ausentes, Solid Queue usa o provedor selecionado. No modo SetFit, o
+   serviço Python privado consulta somente os especialistas correspondentes aos
+   campos ausentes. Uma abstenção leva o caso à supervisão.
 3. O outbox entrega a solicitação assinada à ponte. Ela publica no
    `agent.requests`. O mock consome o pedido e publica no `agent.events`.
 4. A ponte envia o resultado assinado ao Rails. A API grava a resposta ou
@@ -176,12 +182,17 @@ transporte sem custo conciliável. No prefixo, o filtro permitiu apenas 1/26
 conclusões em casos classificáveis: a candidata não está apta para adoção.
 O custo confirmado da R5 foi US$ 0,00992557; uma reserva de US$ 1,239 permanece
 pendente e não representa cobrança confirmada. Não houve repetição. Novas
-chamadas pagas estão suspensas. O piloto local SetFit (C05-SF1) concluiu a
-avaliação exploratória de categoria. O responsável retomou a qualificação
-(C05) com a SF2 e aprovou a especificação, incluindo 360 relatos novos:
-150 de treino, 90 de validação e 120 finais. A primeira onda 00/01/02 está
-liberada; ainda não há novo treino. C06 e C07/F09 final dependem da qualificação e decisão de
-adoção; a demonstração segue com fixture.
+chamadas pagas estão suspensas.
+
+O piloto local SetFit precedeu a avaliação SF2 com 150 relatos de treino, 90
+de validação e 120 finais. A política R1 adotada passou nos dez critérios do
+teste independente. A C06 comprovou o fluxo da aplicação com o pacote
+aprovado. A reprodução C07 inclui a instalação desse pacote em um clone novo,
+o atendimento nos três canais e a releitura dos casos após reiniciar.
+[Decisão de adoção](docs/planejamento/classificacao-comparativa/sf2/decisao-adocao-r1.md) ·
+[Aceite da aplicação](docs/evidencias/c06/aceite-integrado/README.md) ·
+[Roteiro de reprodução](docs/c07.md).
+
 O atendente conversacional real (E01) fica como evolução posterior e opcional.
 [Resultado real R5](docs/c05-luna-r5-resultado.md) ·
 [Candidata R5](docs/c05-luna-r5-candidata.md) ·

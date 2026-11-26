@@ -169,7 +169,7 @@ SF2-FINAL-R1 após a correção dos três P1 da revisão ampla. O QA registrou
 7,53 s. O responsável autorizou a conferência dos metadados, o teste independente único e a integração condicionada ao cumprimento de todos os critérios.
 [Evidências da preparação pública](../evidencias/c05/sf2/final-r1-preparacao-02/README.md).
 
-Em 26/11/2026, os 120 casos e cinco controles produziram resultado elegível nos dez critérios. A auditoria independente reproduziu o resultado byte a byte e a condição de adoção foi cumprida. C06-A congela os contratos e atualiza os consumidores. C06-B (Rails) e C06-C (serviço SetFit local) começam na mesma base após A. C07-D comprova instalação limpa depois do aceite integrado e de R01/R02. O fluxo publicado em fixture tem seu próprio aceite anterior. [Decisão de adoção](classificacao-comparativa/sf2/decisao-adocao-r1.md) · [Plano e aceites por frente](classificacao-comparativa/c06-setfit-integracao.md).
+Em 26/11/2026, os 120 casos e cinco controles produziram resultado elegível nos dez critérios. A auditoria independente reproduziu o resultado byte a byte e a condição de adoção foi cumprida. C06-A entregou contratos e consumidores compatíveis. O aceite integrado comprovou o cliente Rails de C06-B e o serviço CPU de C06-C. A C07-D reproduziu a instalação do pacote portátil no clone de `89b9e68` e conferiu a persistência após reinício. [Aceite integrado](../evidencias/c06/aceite-integrado/README.md) · [Reprodução](../c07.md). O fluxo publicado em fixture tem seu próprio aceite anterior. [Decisão de adoção](classificacao-comparativa/sf2/decisao-adocao-r1.md) · [Plano e aceites por frente](classificacao-comparativa/c06-setfit-integracao.md).
 
 ### Evolução futura depois da publicação — E01
 
@@ -271,7 +271,7 @@ Evidências mínimas incluem testes automatizados do domínio e integração, ro
 - Scripts de carga, dados sintéticos, resultados, gráficos ou tabelas e metodologia para reproduzir.
 - README com problema, escopo, arquitetura, instalação, execução, modelos e configuração, método experimental, resultados, limitações e evolução.
 
-A aplicação local admite o complemento em fixture. O ensaio de carga de
+A aplicação local admite complemento com SetFit R1 e com fixture. O ensaio de carga de
 referência usou campos válidos na entrada e atendente simulado. Os cenários
 exploratórios de aumento de taxa, atendimento humano e dez mil conexões
 continuam sem medição. A avaliação com Jev na F08 foi offline. A qualificação

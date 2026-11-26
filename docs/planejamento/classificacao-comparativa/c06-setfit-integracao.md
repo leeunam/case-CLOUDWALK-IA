@@ -1,6 +1,6 @@
 # C06/C07 · integração e reprodução com SetFit R1
 
-**Estado em 26/11/2026.** A decisão de C05 libera o desenvolvimento de C06. O núcleo do domínio continua no monólito modular Rails. O serviço Python privado hospeda os dois especialistas e aplica a política R1 qualificada. O atendente simulado continua respondendo via Kafka. O aceite da integração e a reprodução final estão pendentes. [Decisão e hashes](sf2/decisao-adocao-r1.md) · [Contrato HTTP normativo](../../contratos/classification-http/README.md) · [Resultado final](../../evidencias/c05/sf2/final-r1-01/README.md)
+**Estado em 26/11/2026.** A adoção da C05 foi implementada na C06. O núcleo do domínio continua no monólito modular Rails. O serviço Python privado hospeda os dois especialistas e aplica a política R1 qualificada. O atendente simulado continua respondendo via Kafka. O [aceite integrado](../../evidencias/c06/aceite-integrado/README.md) comprovou o fluxo na aplicação. A [reprodução C07](../../c07.md) partiu de clone novo, verificou os três canais, o isolamento de marcas e os mesmos históricos após reiniciar. [Decisão e hashes](sf2/decisao-adocao-r1.md) · [Contrato HTTP normativo](../../contratos/classification-http/README.md) · [Resultado final](../../evidencias/c05/sf2/final-r1-01/README.md)
 
 ## Ordem e interface compartilhada
 

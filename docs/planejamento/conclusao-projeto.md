@@ -308,3 +308,7 @@ fixture continua aceita; E01 e a escala exploratória ficam fora desta rodada.
 ### Adoção SetFit R1 para C06 — 26/11/2026
 
 O teste independente dos 120 casos e cinco controles passou nos dez critérios congelados e teve auditoria reproduzida byte a byte. A autorização para integrar após aprovação de todos os critérios passa a valer para o pacote e a política R1 registrados. C06 integra o complemento real ao Rails. C07/F09 final depende da C06 e comprova a instalação limpa. [Decisão de adoção](classificacao-comparativa/sf2/decisao-adocao-r1.md) · [Plano e aceites](classificacao-comparativa/c06-setfit-integracao.md).
+
+### Aceite local do complemento real — 26/11/2026
+
+A C06 comprovou o fluxo da aplicação com SetFit e mock via Kafka. A C07/F09 final reproduziu o pacote portátil em clone novo nas duas marcas e nos três canais, com revisão humana, handoff e persistência após reinício. A atualização HTTPS do modo SetFit tem verificação própria. [Aceite integrado C06](../evidencias/c06/aceite-integrado/README.md) · [Guia C07](../c07.md).

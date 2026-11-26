@@ -7,7 +7,7 @@ A SF2 concluiu contratos, dados, código e a validação dos dois especialistas
 treinados. Nenhuma das 225 políticas de revisão atingiu todos os critérios.
 Na extensão offline SF2-R1, nove regras adicionais atingiram as metas de
 validação. A selecionada concluiu corretamente 51/72 classificáveis e
-revisou todos os 18 casos que exigiam revisão. No teste independente final, a R1 passou nos dez critérios, com 120 casos e cinco controles. O responsável adotou o SetFit R1 para C06 pela autorização condicionada ao resultado. O fluxo real no Rails e sua reprodução em instalação limpa ainda aguardam implementação e aceite. [Decisão](planejamento/classificacao-comparativa/sf2/decisao-adocao-r1.md) · [Plano de integração](planejamento/classificacao-comparativa/c06-setfit-integracao.md).
+revisou todos os 18 casos que exigiam revisão. No teste independente final, a R1 passou nos dez critérios, com 120 casos e cinco controles. O responsável adotou o SetFit R1 para C06 pela autorização condicionada ao resultado. A C06 comprovou a integração no Rails e a C07 reproduziu o fluxo em clone limpo com o pacote portátil. [Decisão](planejamento/classificacao-comparativa/sf2/decisao-adocao-r1.md) · [Plano de integração](planejamento/classificacao-comparativa/c06-setfit-integracao.md).
 
 ## Plataforma e demonstração
 
@@ -16,6 +16,7 @@ revisou todos os 18 casos que exigiam revisão. No teste independente final, a R
 | F01–F07 | Implementadas e aceitas localmente. A operação percorre três canais e duas marcas, com classificação fixture, revisão humana, atendente simulado via Kafka, handoff, isolamento e reentrega. A qualificação real do classificador passou ao CLASS-001. [Plano de execução](planejamento/plano-de-execucao.md) · [F04/F05](integracao-f04-f05.md) · [F06/F07](integracao-f06-f07.md). |
 | F08, R01 e R02 | O experimento de referência teve cinco rodadas aprovadas e uma reprovada por falha de recuperação após a parada do Kafka. A R01 foi aceita com recuperação em ensaio controlado posterior. A R02 foi aceita com a correção do analisador e a conferência dos dados arquivados. A matriz de referência preserva a reprovação e segue sem nova execução após as correções. [F08](f08.md) · [R01](r01.md) · [R02](r02.md). |
 | F09-A | A instalação limpa com fixture comprovou dois turnos, reentrega, três canais, duas marcas, handoff, revisão humana e persistência. O trecho com complemento real pertence à C07/F09 final. [Roteiro e evidências F09](f09.md). |
+| C06 e C07/F09 final | O serviço SetFit CPU complementou campos ausentes em instalação local. A reprodução em clone novo verificou três canais, duas marcas, revisão humana e históricos após reinício. [Aceite C06](evidencias/c06/aceite-integrado/README.md) · [Instalar e percorrer a C07](c07.md). |
 | F10 e UX02 | A publicação temporária em HTTPS usa fixture e atendente simulado. Reinício com persistência e restauração em instalação isolada foram verificados. A F10-A passou com conversa simulada e histórico por dados móveis na URL anterior e com handoff, resposta e resolução na URL atual. A F10-B passou com o contraste entre Bia e Cris por dados móveis. A matriz pública passou em 36 de 36 verificações de acesso por marca no computador de origem. [Aceite integrado](f10-aceite-integrado.md) · [Histórico da publicação](f10-resultado.md) · [Aceite UX02](ux02.md). |
 
 A [URL temporária](https://jason-dollar-lcd-bought.trycloudflare.com/) foi
@@ -43,7 +44,7 @@ de inferência por texto foi de 21,078 ms (n=16). O resultado é histórico e
 não substitui o ensaio SF2 de categoria e prioridade abaixo.
 [Plano do piloto SetFit](planejamento/classificacao-comparativa/setfit-piloto.md).
 
-A demonstração continua com fixture. No histórico da R5, a candidata foi
+A publicação temporária verificada na F10 usou fixture. No histórico da R5, a candidata foi
 descartada para adoção e a reserva
 da tentativa interrompida segue pendente. [Resultado R5](c05-luna-r5-resultado.md).
 
@@ -70,6 +71,6 @@ SF2-FINAL-R1 após a correção dos três P1 da revisão ampla. O QA registrou
 32 testes aprovados em 7,736 s e o revisor reproduziu o recibo revisado em
 7,53 s. Os tempos do replay medem fixture e cálculo da decisão. [Evidências da preparação pública](evidencias/c05/sf2/final-r1-preparacao-02/README.md).
 
-O teste independente único passou nos dez critérios, com duas auditorias idênticas em bytes. Houve 68 conclusões corretas entre 96 classificáveis, uma conclusão com prioridade incorreta e 51 revisões em 120 casos. O p95 de 71,96 ms mede a latência do adaptador nos casos. O tempo do cliente até a resposta no help desk será medido após a integração. [Resultado final e recursos observados](evidencias/c05/sf2/final-r1-01/README.md).
+O teste independente único passou nos dez critérios, com duas auditorias idênticas em bytes. Houve 68 conclusões corretas entre 96 classificáveis, uma conclusão com prioridade incorreta e 51 revisões em 120 casos. O p95 de 71,96 ms mede a latência do adaptador nos casos. A C06 mediu o fluxo no help desk separadamente. Na C07, transcorreram 1.084,955 ms da criação do caso de complemento até o resultado Kafka persistido. [Resultado final e recursos observados](evidencias/c05/sf2/final-r1-01/README.md).
 
-A C06 está liberada para integrar o pacote e a política aprovados, com proveniência por campo, revisão humana e Kafka. A C07/F09 final depende desse aceite e de uma instalação limpa com o pacote qualificado. E01, o atendente conversacional real, permanece opcional após o fechamento. [Plano de C06/C07](planejamento/classificacao-comparativa/c06-setfit-integracao.md).
+A C06 e a C07/F09 final verificaram o pacote e a política adotados, a origem de cada campo e a resposta via Kafka. O pacote portátil deve ser obtido junto ao custodiante. A C07 é local. A publicação HTTPS com SetFit depende de atualização e verificação próprias. E01, o atendente conversacional real, permanece opcional após o fechamento. [Plano de C06/C07](planejamento/classificacao-comparativa/c06-setfit-integracao.md).
