@@ -11,6 +11,7 @@ from http.cookiejar import CookieJar
 import json
 import os
 from pathlib import Path
+import pwd
 import re
 import signal
 import stat
@@ -28,6 +29,9 @@ MODEL = "openai/gpt-5.6-luna"
 QUESTION = "O procedimento resolveu o problema?"
 HANDOFF = "Vou encaminhar seu atendimento para a equipe."
 RESOLVE = "Certo, vou encerrar este atendimento."
+ADDITIONAL = "e01-q1"
+BEFORE_Q1 = "abaa5d515c4a565308a59025f81e51d302cf33cf"
+PARENT_KEYS = ("P1.1", "P2.1", "P2.2", "P3.1", "P3.2")
 FROZEN = {
     "ontology.json": "93a52a7d3196a7e8ce6a41a7d0d88a6285aefed8deb31fc88a61f94b7521440c",
     "brands/aurora.json": "875f1b33b9fae2386c64075b727ec9919cad28ea7f687629effed6beb9ee6444",
@@ -56,6 +60,7 @@ MATRIX = {
         ("Onde consulto o status do repasse?", "status-repasse"),
         ("Ainda não resolveu, quero falar com uma pessoa.", "human_requested"))),
 }
+MATRIX_TURNS = sum(len(scenario.turns) for scenario in MATRIX.values())
 
 
 class Stop(RuntimeError):
@@ -81,21 +86,28 @@ def digest(raw):
     return hashlib.sha256(raw).hexdigest()
 
 
+def document_digest(data):
+    return digest(json.dumps(data, sort_keys=True, separators=(",", ":")).encode())
+
+
 def frozen(path):
     raw = (ROOT / "integration/knowledge" / path).read_bytes()
     check(digest(raw) == FROZEN[path], "base_congelada_divergente")
     return json.loads(raw)
 
 
-def write_json(path, data):
-    # O rename protege o leitor. Os dois fsync protegem a intenção antes do POST.
+def write_json(path, data, *, create_only=False):
+    # O original aparece inteiro. Os dois fsync protegem a intenção antes do POST.
     with tempfile.NamedTemporaryFile(mode="w", dir=path.parent, delete=False) as temp:
         try:
             json.dump(data, temp, ensure_ascii=False, indent=2, allow_nan=False)
             temp.write("\n")
             temp.flush()
             os.fsync(temp.fileno())
-            os.replace(temp.name, path)
+            if create_only:
+                os.link(temp.name, path)
+            else:
+                os.replace(temp.name, path)
         finally:
             Path(temp.name).unlink(missing_ok=True)
     fd = os.open(path.parent, os.O_DIRECTORY)
@@ -185,7 +197,8 @@ SELECT json_build_object('case_id',c.id,'correlation_id',c.correlation_id,'brand
     'result_ok',e.result_sha256=encode(sha256(e.result_bytes),'hex') AND e.result_sha256=r.body_sha256,
     'result_sha256',e.result_sha256,'disposition',r.disposition,'metadata',e.result_metadata,
     'proposal',convert_from(e.result_bytes,'UTF8')::jsonb,'usage',e.usage,
-    'mode',e.snapshot->>'mode','account_ref',e.snapshot->>'account_ref','accounted_usd',e.cost_usd::text,'reserved_usd',e.reserved_usd::text,
+    'tariff',e.snapshot,'pilot_id',e.pilot_id,'mode',e.snapshot->>'mode','account_ref',e.snapshot->>'account_ref',
+    'accounted_usd',e.cost_usd::text,'reserved_usd',e.reserved_usd::text,
     'started_at',e.started_at,'published_at',e.published_at,'completed_at',t.completed_at)
 FROM support_cases c LEFT JOIN agent_turns t ON t.support_case_id=c.id AND t.through_sequence=:'seq'::integer
 LEFT JOIN agent_outboxes o ON o.agent_turn_id=t.id LEFT JOIN e01_executions e ON e.request_event_id=o.event_id
@@ -212,8 +225,8 @@ class LocalProject:
         check(mode == "luna", "backend_real_necessario")
 
     @staticmethod
-    def docker(*args, data=None):
-        proc = subprocess.run(["docker", *args], input=data, capture_output=True, text=True, timeout=8)
+    def docker(*args, data=None, timeout=8):
+        proc = subprocess.run(["docker", *args], input=data, capture_output=True, text=True, timeout=timeout)
         check(proc.returncode == 0, "docker_falhou")
         return proc.stdout.strip()
 
@@ -224,8 +237,32 @@ class LocalProject:
         self.docker("start", self.ids["mock"])
 
     def stop(self):
-        self.docker("stop", "-t", "1", self.ids["mock"])
+        self.docker("stop", "-t", "10", self.ids["mock"], timeout=18)
         check(self.stopped(), "consumer_ainda_ativo")
+        check(self.docker("inspect", "-f", "{{.State.ExitCode}}", self.ids["mock"]) != "137", "parada_forcada_do_consumer")
+
+    def tariff(self):
+        return json.loads(self.docker("exec", self.ids["api"], "cat", "/run/e01/preflight.json"))
+
+    def candidate(self):
+        check(self.stopped(), "parar_consumer_antes_da_rodada")
+        mock = self.ids["mock"]
+        check(self.docker("inspect", "-f", "{{.Config.StopSignal}}", mock) == "SIGINT", "consumer_sem_sigint")
+        def git(*args):
+            return subprocess.check_output(["git", "-C", str(ROOT), *args], timeout=8)
+        commit = git("rev-parse", "HEAD").decode().strip()
+        check(git("diff", "--name-only", BEFORE_Q1, commit, "--", "integration/agent_flow.py", "integration/e01_*.py").strip(),
+              "candidata_sem_ajuste_q1")
+        files = git("ls-tree", "-r", "--name-only", commit, "integration").decode().splitlines()
+        # A imagem pode ter sido construída antes da integração de Q1.
+        with tempfile.TemporaryDirectory() as temp:
+            for file in files:
+                name = Path(file).name
+                if name == "agent_flow.py" or (name.startswith("e01_") and name.endswith(".py")):
+                    copy = Path(temp) / name
+                    self.docker("cp", mock + ":/app/" + name, str(copy))
+                    check(copy.read_bytes() == git("show", commit + ":" + file), "codigo_do_consumer_divergente")
+        return {"source_commit": commit, "image": self.docker("inspect", "-f", "{{.Image}}", mock)}
 
     def copy_receipts(self, directory):
         check(self.stopped(), "consumer_ainda_ativo")
@@ -251,7 +288,10 @@ class LocalProject:
         return self.query(BUDGET_SQL)
 
     def turn(self, case, seq):
-        return self.query(TURN_SQL, "-v", "case=" + str(uuid.UUID(case)), "-v", "seq=" + str(seq))
+        row = self.query(TURN_SQL, "-v", "case=" + str(uuid.UUID(case)), "-v", "seq=" + str(seq))
+        if row:
+            row["tariff_sha256"] = document_digest(row.pop("tariff"))
+        return row
 
 
 def expectation(spec, number):
@@ -475,11 +515,14 @@ def reconcile(entry, approval_file, binding):
     if kind == "provider_api_receipt" and statement["precision"] != "exact":
         terms.setdefault("capture_precision", {})[selected] = {
             k: statement[k] for k in ("precision", "quantum", "precision_source")}
+    orientation = {}
+    if "prior_orientation_approval_sha256" in approval:
+        orientation["prior_orientation_approval_sha256"] = approval["prior_orientation_approval_sha256"]
     return {**observation(kind, original["sha256"], cached, started, finished, statement["unit"],
                           statement["precision"], amount, low, high),
             "capture_sha256": cap_ref["sha256"], "record_sha256": record_ref["sha256"],
             "reviewed_at": reviewed.isoformat(), "approval_sha256": digest(approval_bytes),
-            "capture_terms": terms}
+            "capture_terms": terms, **orientation}
 
 
 def observation(kind, original_sha256, cached, started, finished, unit, precision, amount, low, high):
@@ -503,8 +546,16 @@ def provider_counts(entries):
     return Counter(key for item in entries.values() if (key := provider_identity(item)) is not None)
 
 
-def public_report(journal):
+def all_provider_counts(journal):
     counts = provider_counts(journal["turns"])
+    baseline = journal.get("baseline")
+    if baseline:
+        counts.update((baseline["account_ref"], row["provider_id"]) for row in baseline["turns"].values())
+    return counts
+
+
+def public_report(journal):
+    counts = all_provider_counts(journal)
     rows = []
     for label, spec in MATRIX.items():
         for number in range(1, len(spec.turns) + 1):
@@ -526,7 +577,9 @@ def public_report(journal):
                          "handoff_reason": rule["reason"] if rule else None,
                          "linked_handoff_messages": len(ledger["handoff"]["message_ids"]) if action == "handoff" else None,
                          "financially_reconciled": bool(finance),
-                         "human_reviewed": verified and bool(finance.get("approval_sha256")),
+                         "human_reviewed": verified and bool(finance.get("approval_sha256")) and
+                                           "prior_orientation_approval_sha256" not in finance,
+                         "prior_identical_orientation_approved": "prior_orientation_approval_sha256" in finance,
                          "provider_id_in_ledger_usage": key is not None, "ambiguous_provider_id": ambiguous,
                          "cache_capture_reviewed": bool(finance),
                          "cached_tokens_observed": finance.get("cached_tokens_observed"),
@@ -544,7 +597,7 @@ def public_report(journal):
                          "provider_usd_min": finance.get("provider_usd_min"), "provider_usd_max": finance.get("provider_usd_max"),
                          "provider_observed_usd": finance.get("provider_observed_usd")})
     observed = [r["provider_observed_usd"] for r in rows if r["provider_observed_usd"] is not None]
-    return {"updated_at": now(), "rows": rows, "ledger_last_read": journal.get("budget"),
+    report = {"updated_at": now(), "rows": rows, "ledger_last_read": journal.get("budget"),
             "dispatch_authorizations": (journal.get("budget") or {}).get("dispatches"),
             "distinct_provider_ids_in_ledger_usage": len(counts),
             "ambiguous_provider_ids": sum(n > 1 for n in counts.values()),
@@ -557,16 +610,130 @@ def public_report(journal):
             "sum_of_reconciled_max_usd": str(sum(Decimal(r["provider_usd_max"]) for r in rows
                                                  if r["provider_usd_max"] is not None)) if observed else None,
             "sum_of_reconciled_receipts_usd": str(sum(map(Decimal, observed))) if observed else None}
+    if baseline := journal.get("baseline"):
+        previous = baseline["turns"]
+        report.update(attempt=ADDITIONAL, source_commit=baseline["candidate"]["source_commit"],
+                      parent_journal_sha256=baseline["parent_sha256"],
+                      previous_attempt={"dispatches": len(previous), "accounted_usd": baseline["accounted_usd"],
+                                        "statuses": {k: v["status"] for k, v in previous.items()},
+                                        "receipts_reconciled": len(previous),
+                                        "provider_observed_usd": baseline["provider_observed_usd"]},
+                      attempt_dispatches=sum(row["dispatch_authorized"] is True for row in rows),
+                      attempt_accounted_usd=str(sum(exact_money(row["accounted_usd"]) for row in rows
+                                                    if row["accounted_usd"] is not None)),
+                      cumulative_provider_observed_usd=None if report["ambiguous_provider_ids"] else
+                      str(Decimal(baseline["provider_observed_usd"]) + sum(map(Decimal, observed))),
+                      cumulative_receipts_reconciled=None if report["ambiguous_provider_ids"] else len(previous) + len(observed))
+    return report
 
 
 class Pilot:
-    def __init__(self, project, sim, directory, timeout=60):
+    def __init__(self, project, sim, directory, timeout=60, attempt=None, parent_approval=None):
         self.project = project
         self.sim = sim
-        self.dir = directory
         self.timeout = timeout
-        self.path = directory / "journal.json"
+        self.parent_path = directory / "journal.json"
+        self.marker = directory / (ADDITIONAL + ".intent.json")
+        child = directory / ADDITIONAL
+        check(attempt in (None, ADDITIONAL), "ensaio_desconhecido")
+        check(not child.is_symlink(), "diretorio_do_ensaio_invalido")
+        self.dir = child if attempt else directory
+        if attempt:
+            check(not self.marker.exists() or (child / "journal.json").is_file(), "intencao_adicional_ja_registrada")
+            self.dir.mkdir(mode=0o700, exist_ok=True)
+            check(self.dir.stat().st_mode & 0o077 == 0, "diretorio_privado_necessario")
+        else:
+            check(not self.marker.exists() and not (child / "journal.json").exists(), "ensaio_original_congelado")
+        self.path = self.dir / "journal.json"
         self.journal = json.loads(self.path.read_bytes()) if self.path.exists() else {"turns": {}}
+        self.parent = {}
+        if attempt:
+            first = self.journal["turns"].get("P1.1")
+            if self.marker.exists():
+                check(first and json.loads(self.marker.read_bytes()) == self.marker_data(first),
+                      "intencao_adicional_ja_registrada")
+            self.bind_parent(parent_approval)
+            if first and not self.marker.exists():
+                self.mark_first_intent(first)
+
+    def marker_data(self, first):
+        return {"parent_sha256": self.journal["baseline"]["parent_sha256"], "p1_key": first["key"]}
+
+    def mark_first_intent(self, first):
+        try:
+            write_json(self.marker, self.marker_data(first), create_only=True)
+        except FileExistsError:
+            raise Stop("intencao_adicional_ja_registrada") from None
+
+    def bind_parent(self, approval):
+        raw = self.parent_path.read_bytes()
+        parent = json.loads(raw)
+        previous = self.journal.get("baseline")
+        if self.path.exists():
+            check(previous and previous["parent_sha256"] == digest(raw), "journal_original_divergente")
+            approval = Path(previous["approval_file"]) if approval is None else approval
+        check(approval is not None, "indique_aprovacao_original")
+        entries = parent["turns"]
+        check(set(entries) == set(PARENT_KEYS) and parent["budget"]["dispatches"] == len(PARENT_KEYS)
+              and parent["budget"]["holds"] == 0, "historico_original_incompleto")
+        self.parent = entries
+        budget = self.snapshot()
+        check(parent["binding"] == self.journal["binding"], "projeto_ou_banco_divergente")
+        check(self.project.stopped(), "parar_consumer_antes_da_rodada")
+        if not previous:
+            check(budget["dispatches"] == budget["entries"] == len(entries) and
+                  budget["holds"] == budget["open_turns"] == 0, "atividade_nao_conciliada")
+            check(exact_money(budget["accounted_usd"]) == exact_money(parent["budget"]["accounted_usd"]),
+                  "provisao_acumulada_divergente")
+            check(24 - budget["dispatches"] >= MATRIX_TURNS, "limite_do_piloto")
+        first = entries["P1.1"]
+        check(reconcile(first, approval, parent["binding"]) == first["reconciliation"], "aprovacao_original_divergente")
+        tariff = self.project.tariff()
+        tariff_sha256 = document_digest(tariff)
+        account = first["ledger"]["account_ref"]
+        check(tariff["account_ref"] == account and tariff["model"] == MODEL, "tarifario_divergente")
+        turns = {}
+        for key in PARENT_KEYS:
+            label, number = key.split(".")
+            item = entries[key]
+            ledger = item["ledger"]
+            finance = item["reconciliation"]
+            row = self.project.turn(item["receipt"]["case_id"], 2 * int(number) - 1)
+            # O estado atual do caso muda em turnos posteriores. O registro do despacho é imutável.
+            check(row and row["pilot_id"] == 1 and row["tariff_sha256"] == tariff_sha256 and row["account_ref"] == account,
+                  "tarifario_ou_piloto_divergente")
+            for field in ("case_id", "channel_id", "correlation_id", "brand_id", "request_id", "request_sha256",
+                          "request_ok", "state", "reason", "result_id", "result_sha256", "result_ok", "on_time",
+                          "disposition", "proposal", "metadata", "usage", "mode", "accounted_usd", "reserved_usd",
+                          "started_at", "published_at", "completed_at"):
+                check(row.get(field) == ledger.get(field), "rodada_duravel_divergente")
+            identity = provider_identity(item)
+            check(row["request_ok"] and row["started_at"] and identity and identity[0] == account and
+                  row["reserved_usd"] == first["ledger"]["reserved_usd"], "despacho_original_divergente")
+            if key == "P3.2":
+                check(item["status"] == row["state"] == "failed" and row["reason"] == "invalid_decision" and
+                      row["result_id"] is None and row["proposal"] is None, "falha_original_divergente")
+            else:
+                check(item["status"] == "checked" and row["state"] == "published" and
+                      evaluate(label, int(number), item["receipt"], item["history"], ledger) == item["end_to_end_ms"],
+                      "resultado_original_divergente")
+            if file := finance.get("capture_file"):
+                check(digest((self.parent_path.parent / file).read_bytes()) == finance["capture_sha256"],
+                      "captura_original_local_divergente")
+            turns[key] = {"status": item["status"], "request_id": row["request_id"], "provider_id": identity[1],
+                          "case_id": row["case_id"], "capture_sha256": finance["capture_sha256"]}
+        check(all(len({row[k] for row in turns.values()}) == len(turns)
+                  for k in ("provider_id", "request_id", "capture_sha256")), "despacho_original_duplicado")
+        accounted = sum(exact_money(item["ledger"]["accounted_usd"]) for item in entries.values())
+        check(accounted == exact_money(parent["budget"]["accounted_usd"]), "provisao_original_divergente")
+        baseline = {"parent_sha256": digest(raw), "approval_file": str(approval.resolve()), "turns": turns,
+                    "dispatches": len(entries), "entries": len(entries), "open_turns": 0, "holds": 0,
+                    "account_ref": account, "accounted_usd": str(accounted), "tariff_sha256": tariff_sha256,
+                    "reserved_usd": first["ledger"]["reserved_usd"], "candidate": self.project.candidate(),
+                    "provider_observed_usd": str(sum(exact_money(item["reconciliation"]["provider_observed_usd"])
+                                                     for item in entries.values()))}
+        check(previous is None or previous == baseline, "baseline_ou_candidata_divergente")
+        self.journal.setdefault("baseline", baseline)
 
     def save(self):
         write_json(self.path, self.journal)
@@ -601,8 +768,22 @@ class Pilot:
                   current["disposition"] == "applied", "resultado_aprovado_divergente")
         candidate = {**item, "ledger": current}
         entries = {**self.journal["turns"], key: candidate}
-        check(provider_counts(entries)[provider_identity(candidate)] == 1, "id_do_provedor_ausente_ou_duplicado")
+        check(all_provider_counts({**self.journal, "turns": entries})[provider_identity(candidate)] == 1,
+              "id_do_provedor_ausente_ou_duplicado")
         finance = reconcile(candidate, approval, self.journal["binding"])
+        if self.parent and key == "P1.1":
+            prior_terms = self.parent["P1.1"]["reconciliation"]["capture_terms"]
+            terms = finance["capture_terms"]
+            if "usd_per_credit" in prior_terms and "usd_per_credit" in terms:
+                check(exact_money(terms["usd_per_credit"]) == exact_money(prior_terms["usd_per_credit"]),
+                      "conversao_do_piloto_divergente")
+        if "prior_orientation_approval_sha256" in finance:
+            check(self.parent and key == "P1.1" and item["status"] == "checked", "referencia_de_orientacao_invalida")
+            first = self.parent["P1.1"]
+            check(finance["prior_orientation_approval_sha256"] == first["reconciliation"]["approval_sha256"]
+                  and evaluate("P1", 1, item["receipt"], item["history"], current) == item["end_to_end_ms"]
+                  and current["proposal"]["payload"]["text"] == first["ledger"]["proposal"]["payload"]["text"],
+                  "orientacao_original_divergente")
         item.update(ledger=current, reconciliation=finance)
         self.save()
 
@@ -610,10 +791,12 @@ class Pilot:
         # Cada autorização desta matriz precisa de um único original, inclusive P1.
         entries = self.journal["turns"]
         known = {entry["reconciliation"]["capture_sha256"] for entry in entries.values() if entry is not current}
+        known.update(entry["reconciliation"]["capture_sha256"] for entry in self.parent.values())
+        count = len(self.parent) + len(entries)
         with tempfile.TemporaryDirectory(dir=self.dir) as directory:
             self.project.copy_receipts(directory)
             paths = list(Path(directory).iterdir())
-            check(len(paths) == len(entries), "quantidade_de_capturas_divergente")
+            check(len(paths) == count, "quantidade_de_capturas_divergente")
             originals = {}
             for path in paths:
                 mode = path.lstat().st_mode
@@ -621,7 +804,25 @@ class Pilot:
                       and stat.S_IMODE(mode) == 0o600, "arquivo_de_captura_invalido")
                 raw = path.read_bytes()
                 originals[digest(raw)] = (path, raw)
-            check(len(originals) == len(entries) and known <= originals.keys(), "capturas_do_piloto_divergentes")
+            check(len(originals) == count and len(known) == count - (current is not None) and
+                  known <= originals.keys(), "capturas_do_piloto_divergentes")
+            if self.parent and not entries:
+                terms = self.parent["P1.1"]["reconciliation"]["capture_terms"]
+                for item in self.parent.values():
+                    finance = item["reconciliation"]
+                    raw = originals[finance["capture_sha256"]][1]
+                    capture = json.loads(raw, parse_float=Decimal)
+                    verify_capture(item, capture, datetime.now(timezone.utc))
+                    fields = receipt_money(capture["usage"], terms, item["ledger"]["account_ref"])
+                    low, high = (exact_money(finance[k]) for k in ("provider_usd_min", "provider_usd_max"))
+                    check(low <= exact_money(finance["provider_observed_usd"]) <= high <=
+                          exact_money(item["ledger"]["accounted_usd"]) and
+                          intervals_overlap([(low, high, True), *(interval for _, _, interval in fields.values())]),
+                          "valor_original_divergente")
+                    check(fields or finance["source_type"] == "provider_portal", "valor_ausente_no_recibo_da_api")
+                    if finance["source_type"] == "provider_api_receipt":
+                        check(any((unit, value) == (finance["provider_unit"], exact_money(finance["provider_observed_usd"]))
+                                  for unit, value, _ in fields.values()), "valor_original_divergente")
             if current is None:
                 return
             unseen, = originals.keys() - known
@@ -656,10 +857,7 @@ class Pilot:
                   "canario_sem_conciliacao_ou_lote_ja_iniciado")
             self.reconcile_turn("P1.1", approval)
             labels = list(MATRIX)[1:]
-        b = self.snapshot()
-        check(self.project.stopped(), "parar_consumer_antes_da_rodada")
-        check(b["entries"] == len(entries) == b["dispatches"] and b["open_turns"] == b["holds"] == 0,
-              "atividade_nao_conciliada")
+        self.snapshot_before_turn()
         self.check_receipts()
         self.save()
         self.sim.prepare()
@@ -669,13 +867,17 @@ class Pilot:
             brand = frozen(f"brands/{spec.brand}.json")
             channel = self.sim.channel(brand["brand_id"], spec.channel)
             for index, (text, _) in enumerate(spec.turns, start=1):
-                self.snapshot_before_turn()
+                self.snapshot_before_turn(before_send=True)
+                if self.parent:
+                    self.check_receipts()
                 body = {"text": text, "priority": "basic", "category": spec.category}
                 if previous:
                     body["external_conversation_id"] = previous["external_conversation_id"]
                 key = f"{label}.{index}"
                 item = {"status": "intent", "intent_at": now(), "key": str(uuid.uuid4())}
                 entries[key] = item
+                if self.parent and key == "P1.1":
+                    self.mark_first_intent(item)
                 self.save()
                 try:
                     deadline = time.monotonic() + self.timeout
@@ -686,7 +888,7 @@ class Pilot:
                           and receipt["external_conversation_id"], "recibo_invalido")
                     check(not previous or receipt == previous, "conversa_substituida")
                     check(previous or all(other.get("receipt", {}).get("case_id") != receipt["case_id"]
-                                          for other in entries.values()), "caso_reutilizado")
+                                          for other in (*self.parent.values(), *entries.values())), "caso_reutilizado")
                     previous = item["receipt"] = receipt
                     item["status"] = "accepted"
                     self.save()
@@ -712,11 +914,27 @@ class Pilot:
                 finally:
                     self.save()
 
-    def snapshot_before_turn(self):
+    def snapshot_before_turn(self, before_send=False):
         b = self.snapshot()
-        count = len(self.journal["turns"])
+        entries = self.journal["turns"]
+        count = len(self.parent) + len(entries)
         check(self.project.stopped() and b["entries"] == count == b["dispatches"] and
               b["holds"] == b["open_turns"] == 0, "atividade_nao_conciliada")
+        if baseline := self.journal.get("baseline"):
+            check(digest(self.parent_path.read_bytes()) == baseline["parent_sha256"], "journal_original_divergente")
+            check(document_digest(self.project.tariff()) == baseline["tariff_sha256"], "tarifario_divergente")
+            accounted = exact_money(baseline["accounted_usd"])
+            for entry in entries.values():
+                row = entry["ledger"]
+                check(row["pilot_id"] == 1 and row["tariff_sha256"] == baseline["tariff_sha256"] and
+                      row["account_ref"] == baseline["account_ref"] and row["reserved_usd"] == baseline["reserved_usd"],
+                      "tarifario_ou_piloto_divergente")
+                accounted += exact_money(row["accounted_usd"])
+            check(accounted == exact_money(b["accounted_usd"]), "provisao_acumulada_divergente")
+            check(len(entries) <= MATRIX_TURNS and count <= 24, "limite_do_piloto")
+            if before_send:
+                check(len(entries) < MATRIX_TURNS and count < 24 and
+                      accounted + exact_money(baseline["reserved_usd"]) <= Decimal("1"), "limite_do_piloto")
 
     def wait(self, item, receipt, index, deadline):
         while time.monotonic() < deadline:
@@ -729,7 +947,7 @@ class Pilot:
                       row["integration"] != "failed", "terminal_sem_resultado")
                 if row["state"] == "published" and row["disposition"]:
                     identity = provider_identity(item)
-                    check(identity and provider_counts(self.journal["turns"])[identity] == 1,
+                    check(identity and all_provider_counts(self.journal)[identity] == 1,
                           "id_do_provedor_ausente_ou_duplicado")
                     first = provider_identity(self.journal["turns"]["P1.1"])
                     check(first and first[0] == identity[0], "conta_do_piloto_divergente")
@@ -745,6 +963,8 @@ def main():
     parser.add_argument("--project", required=True)
     parser.add_argument("--base-url", required=True)
     parser.add_argument("--approval", type=Path)
+    parser.add_argument("--attempt", choices=(ADDITIONAL,))
+    parser.add_argument("--parent-approval", type=Path)
     parser.add_argument("--turn", choices=[f"{label}.{i}" for label, s in MATRIX.items()
                                          for i in range(1, len(s.turns)+1)])
     args = parser.parse_args()
@@ -755,16 +975,17 @@ def main():
     signal.signal(signal.SIGTERM, interrupted)
     try:
         project = LocalProject(args.project, args.base_url)
-        directory = Path.home() / ".local/state/cloudwalk-e01" / args.project
+        directory = Path(pwd.getpwuid(os.getuid()).pw_dir) / ".local/state/cloudwalk-e01" / args.project
         with exclusive(directory):
-            runner = Pilot(project, Simulator(project.base), directory)
+            check(not args.parent_approval or args.attempt, "aprovacao_original_somente_no_ensaio_adicional")
+            runner = Pilot(project, Simulator(project.base), directory, attempt=args.attempt, parent_approval=args.parent_approval)
             if args.command == "reconcile":
                 check(args.turn and args.approval, "indique_turno_e_conciliacao")
                 runner.reconcile_turn(args.turn, args.approval)
             else:
                 check(args.turn is None, "turno_somente_para_conciliacao")
                 runner.run(args.command, args.approval)
-        print(directory / "public.json")
+        print(runner.dir / "public.json")
     except (Stop, OSError, ValueError, TypeError, KeyError, IndexError, DecimalException, subprocess.SubprocessError) as error:
         # Exceções de transporte, parse ou conversão podem conter trechos privados.
         print(str(error) if isinstance(error, Stop) else type(error).__name__, file=sys.stderr)

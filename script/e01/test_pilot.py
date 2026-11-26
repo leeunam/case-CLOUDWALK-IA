@@ -1,11 +1,17 @@
 """Exercita orquestração e falhas sem conectar ao provedor."""
 import copy
+from contextlib import redirect_stderr, redirect_stdout
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import io
 import json
+import os
 from pathlib import Path
+import shutil
 import tempfile
 import threading
+from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 import uuid
 
 import pilot as p
@@ -29,6 +35,9 @@ class FakeProject:
         self.cached = 2
         self.captures = {}
         self.next_charge = {"credits": "0.01"}
+        self.rate = "0.50"
+        self.holds = 0
+        self.reservation = "0.755400000000"
 
     def stopped(self):
         return not self.active
@@ -47,8 +56,14 @@ class FakeProject:
             p.write_json(Path(directory) / filename, capture)
 
     def budget(self):
-        return {"dispatches": self.dispatches, "entries": self.sent, "accounted_usd": str(self.dispatches * .001),
-                "holds": 0, "open_turns": 0, "database": "example", "oid": "1", "cluster": "example"}
+        return {"dispatches": self.dispatches, "entries": self.sent, "accounted_usd": str(self.dispatches * p.Decimal("0.001")),
+                "holds": self.holds, "open_turns": 0, "database": "example", "oid": "1", "cluster": "example"}
+
+    def tariff(self):
+        return {"account_ref": self.account, "model": p.MODEL, "input_rate_usd_per_million": self.rate}
+
+    def candidate(self):
+        return {"source_commit": "a" * 40, "image": "sha256:" + "b" * 64}
 
     def turn(self, case, seq):
         return copy.deepcopy(self.records.get((case, seq)))
@@ -61,6 +76,8 @@ class FakeSimulator:
         self.lose_receipt = False
         self.delay = False
         self.channel_id = uid()
+        self.fail_at = None
+        self.capture_prefix = ""
 
     def prepare(self):
         pass
@@ -105,11 +122,15 @@ class FakeSimulator:
                          "policy_version": "e01-v1", "handoff_rule": {"id":rule["id"], "reason":rule["reason"]} if rule else None},
             "handoff": handoff, "integration": "idle", "status": {"reply":"ai_active","resolve":"resolved",
                                                                   "handoff":"waiting_human"}[action],
-            "account_ref": self.project.account, "mode": "feita_bounded_public", "accounted_usd":"0.001", "reserved_usd":"0.755400000000",
+            "account_ref": self.project.account, "mode": "feita_bounded_public", "accounted_usd":"0.001",
+            "reserved_usd":self.project.reservation,
             "usage":{"input_tokens":10,"cached_input_tokens":self.project.cached,"output_tokens":3,
                      "provider_response_id":self.project.fixed_response or "gen-" + uid()},
-            "started_at": p.now(),
+            "started_at": p.now(), "pilot_id": 1, "tariff_sha256": p.document_digest(self.project.tariff()),
         }
+        if self.fail_at == f"{label}.{n}":
+            self.project.record.update(state="failed", reason="invalid_decision", integration="failed",
+                                       proposal=None, result_id=None, result_sha256=None, disposition=None, metadata=None)
         self.project.records[(self.receipt["case_id"],2*n-1)] = self.project.record
         if self.project.record:
             response = self.project.record["usage"]["provider_response_id"]
@@ -117,13 +138,13 @@ class FakeSimulator:
                       "prompt_tokens_details": {"cached_tokens": self.project.cached}}
             if label != "P1":
                 counts.update(self.project.next_charge)
-            self.project.captures[f"{label}.{n}"] = ("receipt-" + uid() + ".json", {
+            self.project.captures[f"{self.capture_prefix}{label}.{n}"] = ("receipt-" + uid() + ".json", {
                 "id": response, "model": p.MODEL, "status": 200, "usage": counts, "request_sha256": "0"*64,
                 "started_at": p.now(), "finished_at": p.now()})
         return self.receipt
 
     def history(self, case):
-        return self.messages
+        return list(self.messages)
 
 
 class PilotTests(unittest.TestCase):
@@ -135,17 +156,20 @@ class PilotTests(unittest.TestCase):
         self.sim = FakeSimulator(self.project, self.dir)
         self.runner = p.Pilot(self.project, self.sim, self.dir, timeout=.03)
 
-    def approval(self, turn="P1.1", source="provider_portal"):
+    def approval(self, turn="P1.1", source="provider_portal", directory=None):
+        directory = directory or self.dir
+        directory.mkdir(mode=0o700, exist_ok=True)
         row = self.runner.journal["turns"][turn]["ledger"]
         resp = row["usage"]["provider_response_id"]
-        filename, original_capture = self.project.captures[turn]
+        capture_key = self.sim.capture_prefix + turn
+        filename, original_capture = self.project.captures[capture_key]
         capture = {**original_capture, "usage": {
             "prompt_tokens": 10, "completion_tokens": 3, "total_tokens": 13,
             "prompt_tokens_details": {"cached_tokens": row["usage"]["cached_input_tokens"]}}}
-        self.project.captures[turn] = filename, capture
+        self.project.captures[capture_key] = filename, capture
         record = {"id":resp, "source":"extrato de teste", "precision":"exact", "amount":"0.01", "unit":"credits",
                   "usd_per_credit":"0.01","conversion_source":"exemplo de teste","observed_at":p.now()}
-        original = self.dir / "portal.txt"
+        original = directory / "portal.txt"
         original.write_text("Relatório individual de teste em créditos " + resp)
         record.update(source_type=source, account_ref=row["account_ref"], conversion_account_ref=row["account_ref"],
                       original={"file":original.name,"sha256":p.digest(original.read_bytes())})
@@ -157,12 +181,236 @@ class PilotTests(unittest.TestCase):
         for name, data in (("capture", capture), ("provider_record", record)):
             if name == "provider_record" and source == "provider_api_receipt":
                 data["original"] = approval["capture"]
-            file = self.dir / (name + ".json")
+            file = directory / (name + ".json")
             p.write_json(file, data)
             approval[name] = {"file":file.name, "sha256":p.digest(file.read_bytes())}
-        dest = self.dir / "approval.json"
+        dest = directory / "approval.json"
         p.write_json(dest, approval)
         return dest
+
+    def prepare_parent(self):
+        self.runner.run("canary")
+        approval = self.approval(source="provider_api_receipt", directory=self.dir / "primeiro-p1")
+        self.sim.fail_at = "P3.2"
+        with self.assertRaisesRegex(p.Stop, "terminal_sem_resultado"):
+            self.runner.run("remaining", approval)
+        failed = self.approval("P3.2", source="provider_api_receipt", directory=self.dir / "primeiro-p32")
+        self.runner.reconcile_turn("P3.2", failed)
+        # O journal já gravado pelo runner original antecede a inclusão destes dois campos na consulta SQL.
+        parent = json.loads(self.runner.path.read_bytes())
+        for entry in parent["turns"].values():
+            del entry["ledger"]["tariff_sha256"], entry["ledger"]["pilot_id"]
+        p.write_json(self.runner.path, parent)
+        self.sim = FakeSimulator(self.project, self.dir / p.ADDITIONAL)
+        self.sim.capture_prefix = "adicional-"
+        return approval
+
+    def additional(self, approval=None):
+        return p.Pilot(self.project, self.sim, self.dir, timeout=.1, attempt=p.ADDITIONAL, parent_approval=approval)
+
+    def test_additional_five_plus_nine_preserves_failure_and_original_bytes(self):
+        parent_approval = self.prepare_parent()
+        original = self.runner.path.read_bytes()
+        self.runner = self.additional(parent_approval)
+        self.runner.run("canary")
+        with self.assertRaisesRegex(p.Stop, "conciliacao_de_outra_rodada"):
+            self.runner.run("remaining", parent_approval)
+        self.runner = self.additional()
+        approval = self.approval(source="provider_api_receipt", directory=self.dir / "novo-p1")
+        new_evidence = json.loads(approval.read_bytes())
+        p.write_json(approval, {**new_evidence, "prior_orientation_approval_sha256": "0" * 64})
+        with self.assertRaisesRegex(p.Stop, "orientacao_original_divergente"):
+            self.runner.run("remaining", approval)
+        p.write_json(approval, {**new_evidence, "prior_orientation_approval_sha256": p.digest(parent_approval.read_bytes())})
+        self.runner.run("remaining", approval)
+        report = json.loads((self.runner.dir / "public.json").read_bytes())
+        self.assertEqual((self.project.sent, self.project.dispatches, len(self.project.captures)), (14, 14, 14))
+        self.assertEqual(self.runner.parent_path.read_bytes(), original)
+        self.assertEqual(report["previous_attempt"]["statuses"]["P3.2"], "failed")
+        self.assertEqual(report["cumulative_provider_observed_usd"], "0.0014")
+        self.assertEqual((report["attempt_dispatches"], report["receipts_reconciled"],
+                          report["cumulative_receipts_reconciled"]), (9, 9, 14))
+        self.assertEqual(report["ledger_last_read"]["accounted_usd"], "0.014")
+        self.assertEqual(report["attempt_accounted_usd"], "0.009")
+        self.assertFalse(report["rows"][0]["human_reviewed"])
+        self.assertTrue(report["rows"][0]["prior_identical_orientation_approved"])
+        self.assertNotIn(self.project.account, json.dumps(report))
+        self.assertNotIn("gen-", json.dumps(report))
+        self.assertEqual(report["source_commit"], self.project.candidate()["source_commit"])
+        with self.assertRaisesRegex(p.Stop, "original_congelado"):
+            p.Pilot(self.project, self.sim, self.dir)
+        with self.assertRaisesRegex(p.Stop, "ensaio_desconhecido"):
+            p.Pilot(self.project, self.sim, self.dir, attempt="e01-q2")
+        with self.assertRaisesRegex(p.Stop, "ja_iniciado"):
+            self.additional().run("canary")
+        with self.assertRaisesRegex(p.Stop, "ja_iniciado"):
+            self.additional().run("remaining", parent_approval)
+        self.assertEqual(self.project.sent, 14)
+
+    def test_additional_requires_actual_receipts_and_original_approval(self):
+        approval = self.prepare_parent()
+        with self.assertRaisesRegex(p.Stop, "indique_aprovacao_original"):
+            self.additional()
+        approval_bytes = approval.read_bytes()
+        approval.write_bytes(approval_bytes + b" ")
+        with self.assertRaisesRegex(p.Stop, "aprovacao_original_divergente"):
+            self.additional(approval)
+        approval.write_bytes(approval_bytes)
+        name, capture = self.project.captures.pop("P2.2")
+        with self.assertRaisesRegex(p.Stop, "quantidade_de_capturas_divergente"):
+            self.additional(approval).run("canary")
+        self.project.captures["P2.2"] = name, {**capture, "id": "alterado"}
+        with self.assertRaisesRegex(p.Stop, "capturas_do_piloto_divergentes"):
+            self.additional(approval).run("canary")
+        self.assertEqual(self.project.sent, 5)
+
+    def test_additional_validates_database_global_balance_holds_rows_and_tariff(self):
+        approval = self.prepare_parent()
+        budget = self.project.budget
+        for changed, reason in [({"cluster":"other"}, "banco"), ({"entries":6}, "atividade"),
+                                ({"holds":1}, "atividade"), ({"accounted_usd":"0.1"}, "provisao")]:
+            with self.subTest(changed=changed):
+                self.project.budget = lambda: {**budget(), **changed}
+                with self.assertRaisesRegex(p.Stop, reason):
+                    self.additional(approval).run("canary")
+        self.project.budget = budget
+        self.project.rate = "1.00"
+        with self.assertRaisesRegex(p.Stop, "tarifario"):
+            self.additional(approval).run("canary")
+        self.project.rate = "0.50"
+        last = list(self.project.records.values())[-1]
+        last["reason"] = "outro"
+        with self.assertRaisesRegex(p.Stop, "rodada_duravel_divergente"):
+            self.additional(approval).run("canary")
+        self.assertEqual(self.project.sent, 5)
+
+    def test_additional_lost_202_never_reposts_even_in_another_directory(self):
+        approval = self.prepare_parent()
+        self.sim.lose_receipt = True
+        self.runner = self.additional(approval)
+        with self.assertRaises(OSError):
+            self.runner.run("canary")
+        self.assertEqual(self.runner.journal["turns"]["P1.1"]["status"], "inconclusive")
+        with self.assertRaisesRegex(p.Stop, "ja_iniciado"):
+            self.additional().run("canary")
+        other = self.dir / "outra-saida"
+        other.mkdir()
+        (other / "journal.json").write_bytes(self.runner.parent_path.read_bytes())
+        for path in self.dir.glob("receipt-*.json"):
+            (other / path.name).write_bytes(path.read_bytes())
+        with self.assertRaisesRegex(p.Stop, "atividade_nao_conciliada"):
+            p.Pilot(self.project, self.sim, other, attempt=p.ADDITIONAL, parent_approval=approval).run("canary")
+        self.assertEqual((self.project.sent, self.project.dispatches), (6, 5))
+
+    def test_archived_child_pre_ingress_intent_still_blocks_purchase(self):
+        approval = self.prepare_parent()
+        self.runner = self.additional(approval)
+        with patch.object(self.sim, "send", side_effect=OSError("sem confirmação de ingresso")) as send:
+            with self.assertRaises(OSError):
+                self.runner.run("canary")
+            send.assert_called_once()
+        first = self.runner.journal["turns"]["P1.1"]
+        self.assertEqual(first["status"], "inconclusive")
+        self.runner.dir.rename(self.dir / "filho-arquivado")
+        with self.assertRaisesRegex(p.Stop, "intencao_adicional_ja_registrada"):
+            self.additional(approval).run("canary")
+        self.assertEqual((self.project.sent, self.project.dispatches), (5, 5))
+        marker = self.runner.marker
+        self.assertEqual(marker.stat().st_mode & 0o777, 0o600)
+        self.assertEqual(json.loads(marker.read_bytes())["p1_key"], first["key"])
+        with self.assertRaisesRegex(p.Stop, "ensaio_original_congelado"):
+            p.Pilot(self.project, self.sim, self.dir)
+
+    def test_cli_serializes_same_uid_with_different_home_environments(self):
+        tmp = self.dir
+        system_home, other_home = tmp / "usuario", tmp / "outro-home"
+        state = Path(".local/state/cloudwalk-e01") / self.project.project
+        self.dir = system_home / state
+        self.dir.mkdir(mode=0o700, parents=True)
+        self.sim = FakeSimulator(self.project, self.dir)
+        self.runner = p.Pilot(self.project, self.sim, self.dir)
+        approval = self.prepare_parent()
+        other_dir = other_home / state
+        shutil.copytree(self.dir, other_dir)
+        other_sim = FakeSimulator(self.project, other_dir / p.ADDITIONAL)
+        other_sim.capture_prefix = "outro-"
+        original_send = self.sim.send
+        second = []
+
+        def interleave(channel, body, key):
+            errors = io.StringIO()
+            with patch.dict(os.environ, HOME=str(other_home)), redirect_stderr(errors):
+                second.append((p.main(), errors.getvalue().strip()))
+            return original_send(channel, body, key)
+
+        argv = ["pilot.py", "canary", "--attempt", p.ADDITIONAL, "--project", self.project.project,
+                "--base-url", self.project.base, "--parent-approval", str(approval)]
+        with (patch.dict(os.environ, HOME=str(system_home)), patch.object(p.sys, "argv", argv),
+              patch("pwd.getpwuid", return_value=SimpleNamespace(pw_dir=str(system_home))) as user,
+              patch.object(p.signal, "signal"), patch.object(p, "LocalProject", return_value=self.project),
+              patch.object(p, "Simulator", side_effect=[self.sim, other_sim]),
+              patch.object(self.sim, "send", side_effect=interleave), redirect_stdout(io.StringIO())):
+            result = p.main()
+        self.assertEqual((self.project.sent, self.project.dispatches), (6, 6))
+        self.assertEqual(result, 0)
+        self.assertEqual(second, [(1, "piloto_em_uso")])
+        self.assertEqual([args.args for args in user.call_args_list], [(os.getuid(),), (os.getuid(),)])
+        self.assertFalse((other_dir / p.ADDITIONAL).exists())
+
+    def test_additional_reentry_checks_parent_digest_and_candidate(self):
+        approval = self.prepare_parent()
+        self.runner = self.additional(approval)
+        self.runner.run("canary")
+        original = self.runner.parent_path.read_bytes()
+        self.runner.parent_path.write_bytes(original + b" ")
+        with self.assertRaisesRegex(p.Stop, "journal_original_divergente"):
+            self.additional()
+        self.runner.parent_path.write_bytes(original)
+        self.project.candidate = lambda: {"source_commit":"other", "image":"other"}
+        with self.assertRaisesRegex(p.Stop, "baseline_ou_candidata_divergente"):
+            self.additional()
+        self.assertEqual(self.project.sent, 6)
+
+    def test_additional_rejects_old_provider_id(self):
+        approval = self.prepare_parent()
+        self.runner = self.additional(approval)
+        self.runner.run("canary")
+        original_id = self.project.captures["P2.2"][1]["id"]
+        self.project.fixed_response = original_id
+        with self.assertRaisesRegex(p.Stop, "id_do_provedor_ausente_ou_duplicado"):
+            self.runner.run("remaining", self.approval(directory=self.dir / "novo-p1"))
+        report = p.public_report(self.runner.journal)
+        self.assertEqual(report["ambiguous_provider_ids"], 1)
+        self.assertIsNone(report["cumulative_provider_observed_usd"])
+        self.assertEqual(self.project.sent, 7)
+
+    def test_additional_financial_conflict_stops_before_p22(self):
+        approval = self.prepare_parent()
+        self.runner = self.additional(approval)
+        self.runner.run("canary")
+        self.project.next_charge = {"credits": "0.01", "cost":"0.50", "cost_unit":"USD"}
+        with self.assertRaisesRegex(p.Stop, "valores_da_captura_divergentes"):
+            self.runner.run("remaining", self.approval(directory=self.dir / "novo-p1"))
+        self.assertEqual(self.project.sent, 7)
+        self.assertNotIn("P2.2", self.runner.journal["turns"])
+
+    def test_additional_checks_money_before_post_and_uses_the_same_project_lock(self):
+        self.project.reservation = "0.999"
+        approval = self.prepare_parent()
+        with p.exclusive(self.dir):
+            with self.assertRaisesRegex(p.Stop, "piloto_em_uso"), p.exclusive(self.dir):
+                pass
+            with self.assertRaisesRegex(p.Stop, "limite_do_piloto"):
+                self.additional(approval).run("canary")
+        self.assertEqual(self.project.sent, 5)
+
+    def test_additional_checks_active_tariff_again_immediately_before_post(self):
+        approval = self.prepare_parent()
+        self.runner = self.additional(approval)
+        self.sim.prepare = lambda: setattr(self.project, "rate", "0.80")
+        with self.assertRaisesRegex(p.Stop, "tarifario_divergente"):
+            self.runner.run("canary")
+        self.assertEqual(self.project.sent, 5)
 
     def test_canary_stops_reentry_and_missing_approval(self):
         self.runner.run("canary")
@@ -517,6 +765,42 @@ class PilotTests(unittest.TestCase):
                 label, number = key.split(".")
                 with self.assertRaises(p.Stop):
                     p.evaluate(label, int(number), item["receipt"], item["history"], item["ledger"])
+
+
+class CandidateTests(unittest.TestCase):
+    def test_consumer_must_contain_committed_q1_code_and_graceful_signal(self):
+        project = p.LocalProject.__new__(p.LocalProject)
+        project.ids = {"mock": "fixture"}
+        project.stopped = lambda: True
+        name = "integration/e01_backend.py"
+        commit = "b" * 40
+        changed = b""
+        image_source = b"codigo antigo"
+        signal = "SIGINT"
+
+        def git(argv, timeout):
+            command = argv[3]
+            return {"rev-parse": commit.encode(), "diff": changed, "ls-tree": name.encode(),
+                    "show": b"codigo revisado"}[command]
+
+        def docker(*args):
+            if args[0] == "cp":
+                Path(args[-1]).write_bytes(image_source)
+                return ""
+            return signal if args[2] == "{{.Config.StopSignal}}" else "imagem-de-teste"
+
+        project.docker = docker
+        with patch.object(p.subprocess, "check_output", side_effect=git):
+            with self.assertRaisesRegex(p.Stop, "candidata_sem_ajuste_q1"):
+                project.candidate()
+            changed = name.encode()
+            with self.assertRaisesRegex(p.Stop, "codigo_do_consumer_divergente"):
+                project.candidate()
+            image_source = b"codigo revisado"
+            self.assertEqual(project.candidate(), {"source_commit":commit, "image":"imagem-de-teste"})
+            signal = "SIGTERM"
+            with self.assertRaisesRegex(p.Stop, "consumer_sem_sigint"):
+                project.candidate()
 
 
 class HttpSessionTests(unittest.TestCase):

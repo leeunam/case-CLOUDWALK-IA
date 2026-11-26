@@ -27,6 +27,7 @@ services:
   outbox:
     environment: *e01-rails
   mock:
+    stop_signal: SIGINT
     environment:
       RAILS_ENV: ${E01_RAILS_ENV:-development}
       CLOUDWALK_AGENT_BACKEND: ${E01_BACKEND:-mock}
