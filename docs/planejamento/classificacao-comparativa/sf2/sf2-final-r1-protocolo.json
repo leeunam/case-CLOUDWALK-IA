@@ -1,0 +1,80 @@
+{
+  "id": "C05-SF2-FINAL-R1",
+  "version": "1.0.0",
+  "base": "444a47625043176a1a141aa8e7458e40afa8ed5c",
+  "authorization": {
+    "public_preparation": true,
+    "real_model_load_or_inference": false,
+    "training": false,
+    "provider_api": false,
+    "private_final_access": false,
+    "adoption": false,
+    "publication": false
+  },
+  "anchors_sha256": {
+    "protocol_original": "c0efd6d42ee50fd7775ff9db5ffcb9119db5861fd19c9b198b73ca01ce0eecaf",
+    "schema_original": "114d25188c4ab7ab5522ee9e9c3a22eddac7dc386ec5df40886ac8cedcd5c1d5",
+    "amendment_offline": "c3a6db8134f71491c1e743ddf6d57a400bba6449017b336e0a311c02f4eb07b3",
+    "schema_offline": "86140495c9842d30acbcb62c2bae53ed15bda4f96371e5354655ecd19e5c7494",
+    "offline_preflight": "e2e0440a78d6a0ee5f20f673fd4af7c576b381fdc3817581af9f2c8ff7018d69",
+    "offline_execution": "074bade92e072da0ca768f3bb4f3c9b7539582cebf6786f8cc2f2ac762306454",
+    "offline_result_gzip": "9fccc6f624ca477ef1b5bd3800c0c7b6a62cec774175d2e6ec65a7a788fbe702",
+    "offline_global_review": "831aaf212aea9d58d9872b40e1e951047acf7446ca8cbbf35baa004b756d5552",
+    "public_final_seal": "71bea26395321246ef00c4374465c6cd8bd3320252a7729429cfad5e3c2263a4"
+  },
+  "candidate": {
+    "capture": {"namespace":"sf2-ipc/1.0","policy_sha256":"09de8c13fa56bcddb8006982b0016e3452bb15de89a72a6eae6c42847cedc21f","category":{"tau":0.5,"delta":0},"priority":{"tau":0.5,"delta":0}},
+    "selected": {"namespace":"sf2-r1-offline/1.0","policy_sha256":"127eb227ac174384700a60390272a48abdca9a81592086dde5bc132727338473","category":{"tau":0.95,"delta":0},"priority":{"tau":0.70,"delta":0}},
+    "runtime_namespace": "sf2-final-r1/1.0",
+    "package_sha256": "224c572b0a2c6ce93b1dd1b90317df131cbb47b897b4de38e97659fbc7e57872",
+    "model_sha256": {"category":"b989492b3623dc6015e97c5d8af975950a48ce72f489d467062e07fe6996a6c5","priority":"8a0224ad38fa45a902a58bc25c8dbcc4c9e9aff96ec50024dfe4a01c304bcab1"},
+    "class_order": {"category":["informacao_insuficiente","payouts","pix","terminal"],"priority":["advanced","basic","informacao_insuficiente","intermediate","urgent"]}
+  },
+  "runtime_api": {
+    "module": "script.classification_comparison.setfit_sf2.runtime_r1",
+    "context": "load_context(capture_policy: bytes, selected_policy: bytes, package_manifest: bytes) -> dict",
+    "derive": "derive(item: dict, raw_frame: bytes, context: dict) -> dict",
+    "verify": "verify(item: dict, raw_frame: bytes, decision: dict, context: dict) -> None",
+    "failure": "ValueError",
+    "context_keys": ["capture_policy","selected_policy","capture_policy_sha256","selected_policy_sha256","package_sha256","model_sha256","class_order"],
+    "item_keys": ["contract_version","id","text","received","catalog","missing_fields"],
+    "raw_frame": "one original UTF-8 JSONL decision including its terminating LF; sha256 over exact bytes",
+    "decision_keys": ["contract_version","id","raw_sha256","capture_policy_sha256","selected_policy_sha256","package_sha256","model_sha256","received","outcome","applied","calls","fields"],
+    "field_keys": ["vector","raw","margin","cut","decision","reason"],
+    "example_public": {"id":"sf2-validation-001","raw_sha256":"7c726acb330fb217da734d62cf7d919d09439b9f0ba5126a5a36f387c4a70bf7","received":{"category":"payouts"},"outcome":"review","applied":{},"priority_reason":"below_tau","calls":{"category":0,"priority":1}}
+  },
+  "qualification_api": {
+    "entrypoint": "script/classification_comparison/setfit_sf2/qualification_r1/cli.py",
+    "runner": "supervise(records, argv, context, destination, startup_seconds, *, derive, verify, catalog, timeout_ms=5000)",
+    "preparation_commands": ["freeze --config PATH --out RELEASE","check --release RELEASE --expect SHA256"],
+    "conditional_commands": ["execute --release RELEASE --expect SHA256 --custody INVENTORY --out RUN","audit --release RELEASE --expect SHA256 --custody INVENTORY --run RUN --execution-sha256 SHA256"],
+    "concurrency": 1,
+    "attempts": 1,
+    "warmup": false,
+    "timeout_ms": 5000,
+    "clock_starts_before": "projection",
+    "clock_ends_after": "raw verification, R1 derivation and R1 verification",
+    "controls_after_cases": 5,
+    "artifacts": ["raw.jsonl","decisions.jsonl","controls-raw.jsonl","controls-r1.jsonl","timings.jsonl","stderr.log","seal.json"],
+    "resource_processes": ["worker","supervisor"],
+    "resource_keys_per_process": ["peak_ram_bytes","peak_cpu_percent"],
+    "reservation": {"key":"sha256(public final-seal.json bytes)","shared_directory_from_main_checkout":".superpowers/sdd/conclusao-projeto/sf2-exposures","basename":"<seal-sha256>.json","persistent_on_failure":true,"legacy_validation_marker":"evaluation-02/validation/final-exposure.json"}
+  },
+  "validation_reference": {
+    "original_eligible": [0,225], "additional_eligible": [9,45],
+    "correct_coverage": [51,72], "automatic_coverage": [51,72], "review_by_case": [39,90],
+    "wrong_expected_review": [0,18], "nonurgent_on_urgent": 0, "partial_applications": 0,
+    "applied_accuracy": {"category":[32,32],"priority":[33,33]},
+    "raw_urgent": [12,13], "applied_urgent":[10,13], "preservation":[60,60], "control_calls":0
+  },
+  "final": {
+    "quotas_from": "protocolo.json#/data/final",
+    "gates_from": "protocolo.json#/gates",
+    "planned":120, "classifiable":96, "expected_review":24, "urgent_targets":17, "target_fields":{"category":80,"priority":80},
+    "min_auto_completions":68, "min_raw_urgent":14, "min_applied_accuracy_each_field":0.90,
+    "max_wrong_expected_review":0, "max_urgent_downgrades":0, "max_partial_applications":0, "preservation_ratio":1, "complete_invalid_model_calls":0,
+    "required_real_case_decisions":120, "required_real_case_timings":120, "p95_method":"nearest_rank","p95_rank":114,"p95_ms_max":3000,
+    "statuses":["eligible","failed","inconclusive"],
+    "stop_after_preparation":"reviewed_release_digest_and_exact_command_final_unopened"
+  }
+}
