@@ -11,6 +11,11 @@ import sys
 import tempfile
 from pathlib import Path
 
+if __package__:
+    from .setfit_config import classifier_options, classifier_overlay
+else:
+    from setfit_config import classifier_options, classifier_overlay
+
 
 ROOT = Path(__file__).resolve().parents[1]
 ENV_FILE = ROOT / ".env.demo.local"
@@ -88,7 +93,8 @@ class Compose:
         self.env.update(DEMO_API_PORT=str(args.api_port), DEMO_WEB_PORT=str(args.web_port),
                         DEMO_CLASSIFIER_MODE=args.classifier)
         self.prefix = ["docker", "compose", "--project-name", args.project, "--env-file", str(ENV_FILE)]
-        for file in COMPOSE_FILES:
+        self.files = [*COMPOSE_FILES, *classifier_overlay(args, ROOT, self.env)]
+        for file in self.files:
             self.prefix.extend(["-f", str(file)])
 
     def run(self, *arguments, capture=False):
@@ -110,7 +116,7 @@ def check_demo(args, compose, values):
         raise SystemExit("O canal Chat da Aurora não está disponível no seed.")
     check_env = {
         **compose.env,
-        "COMPOSE_FILE": os.pathsep.join(map(str, COMPOSE_FILES)),
+        "COMPOSE_FILE": os.pathsep.join(map(str, compose.files)),
         "COMPOSE_ENV_FILES": str(ENV_FILE),
         "CLOUDWALK_CHANNEL_SECRET": values["DEMO_CHANNEL_SECRET"],
         "CLOUDWALK_AGENT_EVENTS_SECRET": values["DEMO_AGENT_EVENTS_SECRET"],
@@ -136,7 +142,7 @@ def main():
     parser.add_argument("--project", default="cloudwalk_demo", help="nome do projeto Compose da demo")
     parser.add_argument("--api-port", type=port, default=43109)
     parser.add_argument("--web-port", type=port, default=45179)
-    parser.add_argument("--classifier", choices=("fixture", "disabled"), default="fixture")
+    classifier_options(parser, ("fixture", "disabled"))
     commands = parser.add_subparsers(dest="action", required=True)
     commands.add_parser("init", help="criar o arquivo privado de credenciais")
     commands.add_parser("config", help="validar a configuração sem exibir seu conteúdo")

@@ -16,6 +16,11 @@ import time
 from contextlib import contextmanager
 from pathlib import Path
 
+if __package__:
+    from .setfit_config import classifier_options, classifier_overlay
+else:
+    from setfit_config import classifier_options, classifier_overlay
+
 
 ROOT = Path(__file__).resolve().parents[1]
 ENV_FILE = ROOT / ".env.publish.local"
@@ -106,6 +111,10 @@ class Stack:
             "docker", "compose", "--project-name", args.project, "--env-file", os.devnull,
             "--file", str(ROOT / "compose.publish.yml"),
         ]
+        self.services = SERVICES
+        for overlay in classifier_overlay(args, ROOT, self.env):
+            self.command.extend(["--file", str(overlay)])
+            self.services += ("setfit",)
 
     def compose(self, *args, tunnel=False, capture=False, origin=None, timeout=None):
         profile = ["--profile", "tunnel"] if tunnel else []
@@ -138,7 +147,7 @@ class Stack:
 
     def check(self):
         running = set(self.compose("ps", "--status", "running", "--services", capture=True).splitlines())
-        if missing := set(SERVICES) - running:
+        if missing := set(self.services) - running:
             raise PublishError("Serviços ausentes: " + ", ".join(sorted(missing)) + ".")
         context = ssl.create_default_context(cadata=self.ca())
         if not ready(self.local_url, context):
@@ -200,8 +209,9 @@ def main():
     parser.add_argument("--project", default="cloudwalk_publish")
     parser.add_argument("--http-port", type=int, default=18080)
     parser.add_argument("--https-port", type=int, default=18443)
+    classifier_options(parser, ("fixture",))
     parser.add_argument("action", choices=(
-        "init", "credentials", "up", "check", "status", "down", "logs", "ca", "prepare", "publish", "unpublish",
+        "init", "credentials", "config", "up", "check", "status", "down", "logs", "ca", "prepare", "publish", "unpublish",
     ))
     args = parser.parse_args()
     if not PROJECT.fullmatch(args.project):
@@ -227,12 +237,14 @@ def main():
                     raise PublishError("Abra credentials em um terminal privado para ver as senhas sintéticas.")
                 for email, password in json.loads(settings[PASSWORD_KEY]).items():
                     print(f"{email}  {password}")
+            elif args.action == "config":
+                stack.compose("config", "--quiet", tunnel=True)
             elif args.action == "status":
                 stack.compose("ps", "--all", tunnel=True)
             elif args.action == "down":
                 stack.compose("down", tunnel=True)
             elif args.action == "logs":
-                stack.compose("logs", "--tail", "80", "db_setup", "kafka_setup", *SERVICES)
+                stack.compose("logs", "--tail", "80", "db_setup", "kafka_setup", *stack.services)
             elif args.action == "ca":
                 print(stack.ca(), end="")
             else:

@@ -1,0 +1,53 @@
+# Overlay opcional para compose.demo.yml ou compose.publish.yml.
+x-classification: &classification
+  CLASSIFICATION_PROVIDER: setfit
+  CLASSIFICATION_CONTRACT_DIR: /workspace/docs/contratos/classification-http
+
+services:
+  api:
+    environment: *classification
+    volumes:
+      - ./docs/contratos/classification-http:/workspace/docs/contratos/classification-http:ro
+  worker:
+    environment:
+      <<: *classification
+      SETFIT_URL: http://setfit:8080
+      CLOUDWALK_JEV_MODE: disabled
+    command: [bundle, exec, ruby, bin/jobs]
+    networks: [default, inference]
+    volumes:
+      - ./docs/contratos/classification-http:/workspace/docs/contratos/classification-http:ro
+    depends_on:
+      setfit:
+        condition: service_healthy
+  setfit:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: script/classification_comparison/setfit_sf2/serving/Dockerfile
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+    environment:
+      CLASSIFICATION_CONTRACT_DIR: /app/docs/contratos/classification-http
+      SETFIT_PACKAGE_DIR: /model
+    volumes:
+      - type: bind
+        source: ${SETFIT_MODEL_PATH:?informe --model-dir}
+        target: /model
+        read_only: true
+        bind:
+          create_host_path: false
+      - ./docs/contratos/classification-http:/app/docs/contratos/classification-http:ro
+    networks: [inference]
+    healthcheck:
+      test: [CMD, python, -c, "from urllib.request import urlopen; urlopen('http://127.0.0.1:8080/ready', timeout=2).close()"]
+      start_period: 60s
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+networks:
+  inference:
+    internal: true
