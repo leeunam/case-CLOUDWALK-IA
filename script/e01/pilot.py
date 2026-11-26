@@ -338,13 +338,19 @@ def money_interval(amount, precision):
     rule = precision["precision"]
     check(rule in {"exact", "nearest", "truncated"}, "precisao_do_extrato_invalida")
     if rule == "exact":
-        return amount, amount
+        return amount, amount, True
     quantum = exact_money(precision["quantum"])
     check(quantum > 0 and amount % quantum == 0 and precision["precision_source"].strip(),
           "precisao_do_extrato_invalida")
     if rule == "nearest":
-        return max(Decimal(0), amount - quantum / 2), amount + quantum / 2
-    return amount, amount + quantum
+        return max(Decimal(0), amount - quantum / 2), amount + quantum / 2, True
+    return amount, amount + quantum, False
+
+
+def intervals_overlap(intervals):
+    # Todos os limites inferiores são inclusivos.
+    lower = max(low for low, _, _ in intervals)
+    return all(lower < high or (lower == high and inclusive) for _, high, inclusive in intervals)
 
 
 def receipt_money(counts, statement, account):
@@ -363,11 +369,11 @@ def receipt_money(counts, statement, account):
             unit = "USD" if unit.lower() == "usd" else "credits"
         precision = statement.get("capture_precision", {}).get(field, {"precision": "exact"})
         value = raw_money(counts[field])
-        low, high = money_interval(value, precision)
+        low, high, inclusive = money_interval(value, precision)
         fields[field] = (unit, as_usd(value, unit, statement, account),
-                         as_usd(low, unit, statement, account), as_usd(high, unit, statement, account))
+                         (as_usd(low, unit, statement, account), as_usd(high, unit, statement, account), inclusive))
     if fields:
-        check(max(x[2] for x in fields.values()) <= min(x[3] for x in fields.values()),
+        check(intervals_overlap([interval for _, _, interval in fields.values()]),
               "valores_da_captura_divergentes")
     return fields
 
@@ -425,17 +431,18 @@ def reconcile(entry, approval_file, binding):
           instant(statement["observed_at"]) <= reviewed and instant(statement["observed_at"]) >= started,
           "extrato_sem_precisao_ou_origem")
     amount = exact_money(statement["amount"])
-    low, high = money_interval(amount, statement)
+    low, high, inclusive = money_interval(amount, statement)
     fields = receipt_money(counts, statement, account)
     amount, low, high = (as_usd(x, statement["unit"], statement, account) for x in (amount, low, high))
     check(high <= exact_money(ledger["accounted_usd"]), "gasto_supera_valor_contabilizado")
-    check(all(low <= field_high and field_low <= high for _, _, field_low, field_high in fields.values()),
+    check(intervals_overlap([(low, high, inclusive), *(interval for _, _, interval in fields.values())]),
           "valor_do_provedor_divergente")
     if kind == "provider_api_receipt":
         selected = statement["field"]
         check(selected in fields and fields[selected][:2] == (statement["unit"], amount), "valor_ausente_no_recibo_da_api")
         # A extração também deve conservar, no mínimo, a incerteza do campo original.
-        check(low <= fields[selected][2] and fields[selected][3] <= high, "precisao_superestimada")
+        selected_low, selected_high, selected_inclusive = fields[selected][2]
+        check(low <= selected_low and (selected_high, selected_inclusive) <= (high, inclusive), "precisao_superestimada")
     return {"source_type": kind, "original_sha256": original["sha256"], "cached_tokens_observed": cached,
             "provider_observed_usd": str(amount), "provider_unit": statement["unit"], "precision": statement["precision"],
             "provider_usd_min": str(low), "provider_usd_max": str(high),

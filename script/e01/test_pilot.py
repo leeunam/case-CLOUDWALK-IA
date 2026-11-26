@@ -274,6 +274,31 @@ class PilotTests(unittest.TestCase):
         self.runner.reconcile_turn("P1.1", path)
         self.assertEqual(p.public_report(self.runner.journal)["rows"][0]["provider_observed_usd"],"0.0001")
 
+    def test_truncation_excludes_upper_endpoint_for_portal_and_capture(self):
+        self.runner.run("canary")
+        truncated = {"precision": "truncated", "quantum": "0.0001", "precision_source": "regra de teste"}
+        for location, reason in (("portal", "valor_do_provedor_divergente"), ("capture", "valores_da_captura_divergentes")):
+            with self.subTest(location=location):
+                path = self.approval()
+                raw = {"cost": "0.0001", "cost_unit": "USD"}
+                if location == "capture":
+                    raw["credits"] = "0.02"
+                self.edit_evidence(path, "capture", lambda cap: cap["usage"].update(raw))
+                self.edit_evidence(path, "provider_record", lambda row: row.update(
+                    unit="USD", amount="0.0002", capture_precision={"cost": truncated}))
+                with self.assertRaisesRegex(p.Stop, reason):
+                    self.runner.run("remaining", path)
+                self.assertEqual(self.project.sent, 1)
+                self.assertNotIn("P2.1", self.runner.journal["turns"])
+
+        path = self.approval()
+        self.edit_evidence(path, "capture", lambda cap: cap["usage"].update(cost="0.0001", cost_unit="USD"))
+        for compatible in ("0.0001", "0.00019999"):
+            self.edit_evidence(path, "provider_record", lambda row: row.update(
+                unit="USD", amount=compatible, capture_precision={"cost": truncated}))
+            self.runner.reconcile_turn("P1.1", path)
+            self.assertEqual(p.public_report(self.runner.journal)["rows"][0]["provider_observed_usd"], compatible)
+
     def test_api_receipt_validates_actual_monetary_field(self):
         self.runner.run("canary")
         path = self.approval(source="provider_api_receipt")
