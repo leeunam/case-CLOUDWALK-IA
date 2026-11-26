@@ -158,6 +158,12 @@ passou por revisão independente; os 120 finais permanecem fechados, sem
 congelamento ou adoção. C06/C07 continuam bloqueadas. A demonstração fixture
 foi preservada e não houve chamadas pagas nessa execução.
 [Resultado e evidências](../evidencias/c05/sf2/qualificacao-01/README.md).
+Na extensão offline SF2-R1 posterior, nove das 45 combinações adicionais
+passaram na validação. A candidata tem cobertura correta de 51/72 e
+zero conclusões indevidas nos 18 casos que exigiam revisão.
+[Política, execução e revisão global](../evidencias/c05/sf2/revisao-01/README.md).
+Esse resultado permite preparar o contrato do teste independente; não
+substitui o teste de 120 casos nem libera adoção ou C06/C07.
 
 ### Evolução futura depois da publicação — E01
 

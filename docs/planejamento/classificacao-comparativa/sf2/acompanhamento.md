@@ -124,7 +124,7 @@ Qualquer extensão da grade ou novo treino exige proposta separada. A receita,
 o protocolo e os dados desta execução permanecem inalterados. A próxima
 decisão não autoriza antecipar o final nem reduzir os critérios de qualidade.
 
-## SF2-R1 — extensão offline aprovada
+## SF2-R1 — candidata elegível na validação
 
 Após o resultado negativo, o responsável aprovou uma extensão única da grade:
 tau 0,95 só em categoria, com 45 combinações adicionais sobre os mesmos
@@ -133,5 +133,19 @@ preservam os 225 resultados, contratos e protocolo originais. As metas e os
 dados não mudam. Há duas passagens: código por fixtures e depois uma execução
 offline, ambas com revisão independente. Não autoriza novo treino, inferência,
 API, abertura do final ou adoção. O risco de sobreajuste na validação é
-explicitado. Nenhum resultado das 45 novas políticas foi calculado nesta
-preparação.
+explicitado. A execução posterior concluiu uma rodada das 45 políticas, sem nova
+inferência. A paridade dos 225 resultados originais foi confirmada por
+objetos e bytes. Nove das 45 extras passaram. O desempate selecionou
+categoria tau 0,95 e prioridade tau 0,70, com deltas zero. A candidata
+concluiu corretamente 51/72 classificáveis e revisou 39/90 relatos,
+incluindo os 18 que exigiam revisão; houve zero urgentes rebaixados.
+Acertos aplicados: categoria 32/32, prioridade 33/33.
+
+A [execução](../../../evidencias/c05/sf2/revisao-01/README.md) foi aceita
+com [revisão global independente](../../../evidencias/c05/sf2/revisao-01/revisoes/revisao-final.md),
+integração local em `53e3e87`. A cobertura ficou exatamente no mínimo
+planejado. O ganho custa mais revisões humanas e ainda não prova
+generalização. O teste independente de 120 casos, a adoção e C06/C07
+continuam bloqueados. A próxima preparação é um contrato de execução
+compatível com a política R1, preservando modelos e critérios; a abertura
+do final será uma liberação separada após esse preparo.

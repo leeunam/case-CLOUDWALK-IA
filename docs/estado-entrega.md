@@ -5,7 +5,10 @@ classificação fixture e atendente simulado. O responsável retomou a classific
 com SetFit e aprovou 360 relatos novos (150 de treino, 90 de validação, 120 finais).
 A SF2 concluiu contratos, dados, código e a validação dos dois especialistas
 treinados. Nenhuma das 225 políticas de revisão atingiu todos os critérios.
-Os 120 casos finais permanecem fechados e nenhum modelo foi adotado.
+Na extensão offline SF2-R1, nove regras adicionais atingiram as metas de
+validação. A selecionada concluiu corretamente 51/72 classificáveis e
+revisou todos os 18 casos que exigiam revisão. Os 120 casos finais
+permanecem fechados e nenhum modelo foi adotado.
 [Plano de execução e critérios de aceite](planejamento/plano-de-execucao.md).
 
 ## Plataforma e demonstração
@@ -57,6 +60,13 @@ concluíram pelo menos dois casos que exigiam revisão, impedindo a qualificaç�
 A [evidência revisada](evidencias/c05/sf2/qualificacao-01/README.md) foi
 integrada localmente. Sem política elegível, não houve congelamento, avaliação
 dos 120 finais ou liberação de C06.
+
+A extensão [SF2-R1](evidencias/c05/sf2/revisao-01/README.md) reutilizou os
+mesmos vetores sem treino ou inferência adicional. Das 45 políticas novas,
+nove passaram; a selecionada usa categoria tau 0,95 e prioridade tau 0,70.
+A cobertura correta foi 51/72, com zero conclusões indevidas nos 18 casos
+de revisão esperada, zero urgentes rebaixados e 39/90 revisões. O teste
+independente e seu contrato de execução ainda estão pendentes.
 
 A integração (C06) e a reprodução do complemento real (C07/F09 final) continuam
 bloqueadas. O fechamento completo ainda requer qualificação conforme
