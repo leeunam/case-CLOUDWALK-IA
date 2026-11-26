@@ -19,7 +19,7 @@ import uuid
 
 from agent_flow import Contracts, DEFAULT_SCHEMA, EVENTS, json_bytes
 from e01_backend import CONTEXT_LIMIT, InferenceFailure, LunaBackend, prepare_request
-from e01_contracts import read_private_schema
+from e01_contracts import read_private_schema, validator
 from e01_executor import Executor, ExecutorError
 from e01_knowledge import Knowledge
 from e01_ledger import LedgerClient
@@ -254,6 +254,46 @@ class ExecutorTest(unittest.TestCase):
             self.assertEqual(server.state, "reserved")
         self.backend.infer.assert_not_called()
         self.publisher.publish.assert_not_called()
+
+    def test_uncitable_latest_customer_stops_before_start_and_post(self):
+        history = self.request["payload"]["history"]
+        history[0]["id"] = "AAAAAAAA-BBBB-4CCC-8DDD-EEEEEEEEEEEE"
+        history.append(message(2, "Observação posterior", "system"))
+        original = record(self.request)
+        server = LedgerStore(original, now=self.clock.wall)
+        transport = Transport((200, b"{}"))
+        self.backend = LunaBackend(CREDENTIAL, transport=transport)
+        with self.assertRaisesRegex(ExecutorError, "invalid_e01_context"):
+            self.executor(server).handle(original, self.publisher)
+        self.assertEqual([op for op, _ in server.calls], ["claim"])
+        self.assertEqual(server.calls[0][1]["request_sha256"], hashlib.sha256(original.value()).hexdigest())
+        self.assertEqual(transport.calls, [])
+        self.publisher.publish.assert_not_called()
+
+    def test_uncitable_earlier_id_remains_in_history_and_out_of_generation(self):
+        first = message(1, "Preciso de ajuda.")
+        first["id"] = "AAAAAAAA-BBBB-4CCC-8DDD-EEEEEEEEEEEE"
+        previous = message(2, "Em que posso ajudar?", "ai")
+        last = message(3, "Quero falar com uma pessoa.")
+        request = requested(first, previous, last)
+        original = record(request)
+        decision = proposed_handoff(request, self.knowledge.select(request), "human_requested")
+        decision["message_ids"] = [previous["id"], last["id"]]
+        transport = Transport((200, json_bytes(completion(decision))))
+        self.backend = LunaBackend(CREDENTIAL, transport=transport)
+        server = LedgerStore(original, now=self.clock.wall)
+        self.executor(server).handle(original, self.publisher)
+        [(_, _, raw_body, _)] = transport.calls
+        body = json.loads(raw_body)
+        self.assertEqual(json.loads(body["messages"][1]["content"])["history"], request["payload"]["history"])
+        schema = body["response_format"]["json_schema"]["schema"]
+        self.assertEqual(schema["$defs"]["message_id"]["enum"], decision["message_ids"])
+        check = validator(schema)
+        check.validate({"decision": decision})
+        for invalid in (first["id"], first["id"].lower()):
+            self.assertFalse(check.is_valid({"decision": {**decision, "message_ids": [invalid, last["id"]]}}))
+        self.assertEqual(server.calls[0][1]["request_sha256"], hashlib.sha256(original.value()).hexdigest())
+        self.assertEqual(server.state, "published")
 
     def test_no_options_and_oversized_materialized_body_stop_before_start(self):
         for mode in ("no_options", "large_body"):

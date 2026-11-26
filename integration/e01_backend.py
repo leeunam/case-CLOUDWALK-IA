@@ -7,11 +7,13 @@ if __package__:
     from .agent_flow import json_bytes
     from .e01_contracts import read_json_object, read_private_schema, validator
     from .e01_http import DeadlinePost
+    from .e01_ledger import canonical_uuid
     from .e01_knowledge import HANDOFF_TEXT, RESOLUTION_QUESTION, RESOLVE_TEXT, latest_customer
 else:
     from agent_flow import json_bytes
     from e01_contracts import read_json_object, read_private_schema, validator
     from e01_http import DeadlinePost
+    from e01_ledger import canonical_uuid
     from e01_knowledge import HANDOFF_TEXT, RESOLUTION_QUESTION, RESOLVE_TEXT, latest_customer
 
 
@@ -74,7 +76,10 @@ def prepare_request(request, candidates, options):
     payload = request["payload"]
     history = payload["history"]
     latest_id = latest_customer(history)["id"]
-    ids = [row["id"] for row in history]
+    # O pedido público aceita UUIDs em maiúsculas; a decisão privada exige a grafia canônica.
+    ids = [row["id"] for row in history if canonical_uuid(row["id"])]
+    if latest_id not in ids:
+        raise ValueError("uncitable_latest_customer")
     branches = []
     for option in options:
         fields = {key: _literal(value) for key, value in option.items() if key != "source_refs"}
