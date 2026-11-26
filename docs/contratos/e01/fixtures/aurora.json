@@ -30,6 +30,11 @@
       "id": "aurora.humano",
       "reason": "human_requested",
       "source_id": "aurora.manual"
+    },
+    {
+      "id": "aurora.sem-orientacao",
+      "reason": "no_guidance",
+      "source_id": "aurora.manual"
     }
   ]
 }

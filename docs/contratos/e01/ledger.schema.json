@@ -122,7 +122,8 @@
         "policy_version",
         "source_refs",
         "result_b64",
-        "result_sha256"
+        "result_sha256",
+        "handoff_rule"
       ],
       "properties": {
         "owner_id": {
@@ -198,6 +199,36 @@
           "minLength": 1,
           "maxLength": 64,
           "pattern": "^[a-f0-9]{64}$"
+        },
+        "handoff_rule": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80,
+                  "pattern": "^[a-z][a-z0-9._-]*$"
+                },
+                "reason": {
+                  "enum": [
+                    "human_requested",
+                    "no_guidance",
+                    "sensitive_operation"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          ]
         }
       },
       "additionalProperties": false
@@ -409,7 +440,19 @@
           "$ref": "#/$defs/saved"
         },
         {
-          "$ref": "#/$defs/terminal"
+          "type": "object",
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "failed",
+                "discarded"
+              ]
+            }
+          },
+          "additionalProperties": false
         }
       ]
     },
@@ -463,6 +506,43 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "billing_terms": {
+      "description": "Condições documentais obrigatórias do snapshot privado Rails. Nenhuma operação aceita estes campos do worker.",
+      "type": "object",
+      "properties": {
+        "billing_basis": {
+          "const": "tokens_only"
+        },
+        "tariff_tiers": {
+          "const": "single_for_entire_proven_range"
+        },
+        "per_request_minimum_usd": {
+          "const": "0"
+        },
+        "fixed_fee_usd": {
+          "const": "0"
+        },
+        "cache_write_surcharge": {
+          "const": false
+        },
+        "provider_rounding": {
+          "const": "none"
+        },
+        "other_charges": {
+          "const": false
+        }
+      },
+      "required": [
+        "billing_basis",
+        "tariff_tiers",
+        "per_request_minimum_usd",
+        "fixed_fee_usd",
+        "cache_write_surcharge",
+        "provider_rounding",
+        "other_charges"
+      ],
       "additionalProperties": false
     }
   },

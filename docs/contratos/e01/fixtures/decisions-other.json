@@ -25,6 +25,22 @@
       "message_ids": [
         "00000000-0000-4000-8000-000000000501"
       ]
+    },
+    "name": "human",
+    "handoff_rule": {
+      "id": "aurora.humano",
+      "reason": "human_requested"
+    },
+    "result": {
+      "event_type": "agent.handoff.proposed",
+      "payload": {
+        "request_event_id": "00000000-0000-4000-8000-000000000601",
+        "text": "Vou encaminhar seu atendimento para a equipe.",
+        "message_ids": [
+          "00000000-0000-4000-8000-000000000501"
+        ],
+        "summary": "Preciso falar com uma pessoa."
+      }
     }
   },
   {
@@ -67,6 +83,15 @@
       "message_ids": [
         "00000000-0000-4000-8000-000000000503"
       ]
+    },
+    "name": "resolve",
+    "handoff_rule": null,
+    "result": {
+      "event_type": "agent.resolve.proposed",
+      "payload": {
+        "request_event_id": "00000000-0000-4000-8000-000000000601",
+        "text": "Certo, vou encerrar este atendimento."
+      }
     }
   },
   {
@@ -116,6 +141,81 @@
       "message_ids": [
         "00000000-0000-4000-8000-000000000503"
       ]
+    },
+    "name": "procedure",
+    "handoff_rule": null,
+    "result": {
+      "event_type": "agent.reply.proposed",
+      "payload": {
+        "request_event_id": "00000000-0000-4000-8000-000000000601",
+        "text": "Consulte o menu de suporte. O procedimento resolveu o problema?"
+      }
+    }
+  },
+  {
+    "history": [
+      {
+        "id": "00000000-0000-4000-8000-000000000501",
+        "sequence": 1,
+        "author": {
+          "type": "customer",
+          "id": "00000000-0000-4000-8000-000000000102"
+        },
+        "text": "Minha maquininha está com a tela diferente.",
+        "created_at": "2026-11-17T13:30:00Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000502",
+        "sequence": 2,
+        "author": {
+          "type": "ai",
+          "id": "00000000-0000-4000-8000-000000000102"
+        },
+        "text": "O menu está visível no visor?",
+        "created_at": "2026-11-17T13:30:00Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000503",
+        "sequence": 3,
+        "author": {
+          "type": "customer",
+          "id": "00000000-0000-4000-8000-000000000102"
+        },
+        "text": "Ainda não tenho certeza.",
+        "created_at": "2026-11-17T13:30:00Z"
+      }
+    ],
+    "decision": {
+      "action": "handoff",
+      "rule_id": "aurora.sem-orientacao",
+      "text": "Vou encaminhar seu atendimento para a equipe.",
+      "source_refs": [
+        {
+          "id": "aurora.manual",
+          "version": "1.0.0"
+        }
+      ],
+      "message_ids": [
+        "00000000-0000-4000-8000-000000000501",
+        "00000000-0000-4000-8000-000000000503"
+      ]
+    },
+    "name": "ambiguous",
+    "handoff_rule": {
+      "id": "aurora.sem-orientacao",
+      "reason": "no_guidance"
+    },
+    "result": {
+      "event_type": "agent.handoff.proposed",
+      "payload": {
+        "request_event_id": "00000000-0000-4000-8000-000000000601",
+        "text": "Vou encaminhar seu atendimento para a equipe.",
+        "message_ids": [
+          "00000000-0000-4000-8000-000000000501",
+          "00000000-0000-4000-8000-000000000503"
+        ],
+        "summary": "Minha maquininha está com a tela diferente.\nAinda não tenho certeza."
+      }
     }
   }
 ]

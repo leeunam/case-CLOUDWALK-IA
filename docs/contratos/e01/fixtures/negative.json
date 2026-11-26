@@ -244,7 +244,8 @@
           "id": "aurora.manual",
           "version": "1.0.0"
         }
-      ]
+      ],
+      "handoff_rule": null
     },
     "expected": "result_origin"
   },
@@ -292,5 +293,160 @@
       "source_refs": []
     },
     "expected": "resolution_evidence"
+  },
+  {
+    "name": "clareamento convertido em resolução com digests válidos",
+    "path": "/event_type",
+    "value": "agent.resolve.proposed",
+    "expected": "result_projection",
+    "target": "result"
+  },
+  {
+    "name": "texto público diferente da pergunta privada",
+    "path": "/payload/text",
+    "value": "Sua conta foi alterada.",
+    "expected": "result_projection",
+    "target": "result"
+  },
+  {
+    "name": "handoff ignora referência real da decisão",
+    "path": "/payload/message_ids",
+    "value": [
+      "00000000-0000-4000-8000-000000000503"
+    ],
+    "expected": "result_projection",
+    "target": "result",
+    "scenario": "ambiguous"
+  },
+  {
+    "name": "resumo incorreto com referências válidas",
+    "path": "/payload/summary",
+    "value": "Sem mais dúvidas.",
+    "expected": "result_projection",
+    "target": "result",
+    "scenario": "ambiguous"
+  },
+  {
+    "name": "pergunta repetida após ambiguidade em P3",
+    "path": "/decision",
+    "value": {
+      "action": "reply",
+      "kind": "clarify",
+      "procedure_id": "aurora.visor",
+      "text": "O menu está visível no visor?",
+      "source_refs": [
+        {
+          "id": "aurora.manual",
+          "version": "1.0.0"
+        }
+      ],
+      "message_ids": [
+        "00000000-0000-4000-8000-000000000503"
+      ]
+    },
+    "expected": "condition_already_asked",
+    "scenario": "ambiguous"
+  },
+  {
+    "name": "token de start diferente da reserva",
+    "path": "/ledger/start/lease_token",
+    "value": "00000000-0000-4000-8000-000000000901",
+    "expected": "lease_binding"
+  },
+  {
+    "name": "owner da conclusão diferente do claim",
+    "path": "/ledger/complete_result/owner_id",
+    "value": "00000000-0000-4000-8000-000000000902",
+    "expected": "lease_binding"
+  },
+  {
+    "name": "token de conclusão de outro lease",
+    "path": "/ledger/complete_failed/lease_token",
+    "value": "00000000-0000-4000-8000-000000000901",
+    "expected": "lease_binding"
+  },
+  {
+    "name": "segundo start volta a autorizar com resposta bem formada",
+    "path": "/ledger/retry_start_response",
+    "value": {
+      "state": "started",
+      "dispatch": true,
+      "lease_expires_at": "2026-11-17T13:30:45Z"
+    },
+    "expected": "repeat_dispatch"
+  },
+  {
+    "name": "complete devolve unknown",
+    "path": "/ledger/complete_response/state",
+    "value": "unknown",
+    "expected": "schema"
+  },
+  {
+    "name": "complete devolve published",
+    "path": "/ledger/complete_response/state",
+    "value": "published",
+    "expected": "schema"
+  },
+  {
+    "name": "mesma fonte omite a regra original",
+    "path": "/ledger/complete_result/handoff_rule",
+    "value": null,
+    "expected": "audit_rule",
+    "scenario": "ambiguous"
+  },
+  {
+    "name": "mesma fonte muda a regra escolhida",
+    "path": "/ledger/complete_result/handoff_rule",
+    "value": {
+      "id": "aurora.humano",
+      "reason": "human_requested"
+    },
+    "expected": "audit_rule",
+    "scenario": "ambiguous"
+  },
+  {
+    "name": "perfil tarifário sem suporte: per_request_minimum_usd",
+    "path": "/billing_terms/per_request_minimum_usd",
+    "value": "0.01",
+    "expected": "schema"
+  },
+  {
+    "name": "perfil tarifário sem suporte: fixed_fee_usd",
+    "path": "/billing_terms/fixed_fee_usd",
+    "value": "0.001",
+    "expected": "schema"
+  },
+  {
+    "name": "perfil tarifário sem suporte: tariff_tiers",
+    "path": "/billing_terms/tariff_tiers",
+    "value": "long_context",
+    "expected": "schema"
+  },
+  {
+    "name": "perfil tarifário sem suporte: cache_write_surcharge",
+    "path": "/billing_terms/cache_write_surcharge",
+    "value": true,
+    "expected": "schema"
+  },
+  {
+    "name": "perfil tarifário sem suporte: provider_rounding",
+    "path": "/billing_terms/provider_rounding",
+    "value": "cent",
+    "expected": "schema"
+  },
+  {
+    "name": "perfil tarifário sem suporte: other_charges",
+    "path": "/billing_terms/other_charges",
+    "value": true,
+    "expected": "schema"
+  },
+  {
+    "name": "primeiro start omite a autorização mesmo com reserva e posse válidas",
+    "path": "/ledger/dispatch",
+    "value": {
+      "state": "started",
+      "dispatch": false
+    },
+    "expected": "first_dispatch"
   }
 ]

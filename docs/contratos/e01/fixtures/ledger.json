@@ -43,7 +43,8 @@
         "id": "aurora.manual",
         "version": "1.0.0"
       }
-    ]
+    ],
+    "handoff_rule": null
   },
   "complete_failed": {
     "owner_id": "00000000-0000-4000-8000-000000000901",
@@ -75,5 +76,16 @@
   },
   "error": {
     "error": "lease_lost"
+  },
+  "retry_start": {
+    "owner_id": "00000000-0000-4000-8000-000000000901",
+    "lease_token": "00000000-0000-4000-8000-000000000902"
+  },
+  "retry_start_response": {
+    "state": "started",
+    "dispatch": false
+  },
+  "complete_response": {
+    "state": "failed"
   }
 }

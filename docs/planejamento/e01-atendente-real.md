@@ -108,11 +108,9 @@ A consulta pública da Feita em 26/11 informou Luna
 leitura de cache US$ 0,02/Mtoken. Reconfirmar as tarifas no pré-voo. A reserva usa tarifa integral de entrada.
 [Modelo e tarifa pública](https://feita.ai/models/openai/gpt-5.6-luna).
 
-O pré-voo deve arquivar evidência datada de limites **exatos** faturáveis para o modelo, incluindo framing da requisição, raciocínio, cache e eventual tarifa mínima, e uma reserva
-conservadora. Um limite local de tamanho do texto, sozinho, não comprova
-o total de tokens cobráveis. Os indicadores arredondados de contexto e saída no catálogo público também são insuficientes. Na ausência de prova para o teto, a decisão é manter o piloto offline. A primeira chamada real só ocorre depois dos
-testes sem rede e da revisão do controle financeiro. O teto de US$ 1 já
-está autorizado; não pedir essa autorização novamente.
+O pré-voo deve arquivar a prova da Feita para as tarifas e limites faturáveis exatos desta rota, incluindo o contexto completo e tokens de raciocínio. Os cálculos da E01 exigem cobrança exclusivamente linear no intervalo comprovado. Uma faixa de contexto longo alcançável, sobretaxa de escrita de cache, taxa fixa, cobrança mínima ou arredondamento comercial adicional impede o piloto sob este contrato. Comprovar também a tarifa de leitura do cache e a ausência de outros componentes. A página do modelo original orienta as perguntas sobre faixas e cache. A prova financeira precisa se aplicar à cobrança da Feita. [Documentação do modelo de origem](https://developers.openai.com/api/docs/models/gpt-5.6-luna) · [Termos que a E01 aceita](../contratos/e01/README.md#tarifário-aceito-nesta-versão).
+
+O limite local de texto e os números arredondados do catálogo público são insuficientes para provar o teto. Sem comprovação, a E01 continua offline. A primeira chamada real depende ainda dos testes de integração e da revisão do controle financeiro. O teto acumulado de US$ 1 já está autorizado.
 
 ## Comportamento a validar
 
