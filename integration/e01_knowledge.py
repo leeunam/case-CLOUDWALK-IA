@@ -31,13 +31,16 @@ _HUMAN_REQUEST = re.compile(
     r" (?:um |uma |o |a )?(?:pessoa|atendente|humano|humana|analista|time humano|equipe humana)\b"
 )
 _SENSITIVE_REQUEST = re.compile(
-    r"\b(?:estorne|reembolse|cancele o pix|alter[ae] (?:os |meus )?dados bancarios)\b"
+    r"\b(?:estorne|reembolse|cancel(?:e|ar) (?:o |um )?pix)\b"
+    r"|\b(?:alter(?:e|ar)|troc(?:a|ar|que)) (?:os |meus |a |minha )?(?:dados bancarios|conta bancaria|chave pix)\b"
+    r"|\btransfer(?:e|ir) (?:o |meu )?(?:saldo|dinheiro|valores)\b"
     r"|\b(?:faz(?:er|a)|solicitar|realiz(?:ar|e)|execut(?:ar|e)|process(?:ar|e)"
     r"|efetu(?:ar|e)|quero|preciso de) (?:um |uma |o |a |meu )?"
     r"(?:estorno|reembolso|pagamento|transferencia|cancelamento (?:do|de) pix)\b"
 )
 _NEGATION_OR_QUOTE = re.compile(r'["“”«»]|\b(?:ignore|fingir|suponha|hipoteticamente|apenas um exemplo)\b',
                                 re.IGNORECASE)
+_CONTRADICTION = re.compile(r"\b(?:mas nao|porem nao|nao quero|nao e sobre|nao era sobre|talvez|se por acaso)\b")
 
 
 def _tokens(text):
@@ -173,6 +176,8 @@ class Knowledge:
         if not _author(latest, "customer") or _NEGATION_OR_QUOTE.search(latest["text"]):
             return {}
         normalized = _tokens(latest["text"])
+        if _CONTRADICTION.search(normalized):
+            return {}
         latest_intents = self._match(latest["text"])
         previous_customer = next((row for row in reversed(history[:-2]) if _author(row, "customer")), None)
         previous_intents = self._match(previous_customer["text"]) if previous_customer else set()

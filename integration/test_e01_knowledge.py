@@ -82,6 +82,19 @@ class KnowledgeTest(unittest.TestCase):
             self.knowledge.validate_decision(request, context, proposed_reply(request, context))
         self.knowledge.validate_decision(request, context, proposed_handoff(request, context, "no_guidance"))
 
+    def test_relato_contraditorio_ou_acao_na_conta_impede_resposta_de_consulta(self):
+        cases = [
+            ("Onde consulto o comprovante de Pix? Mas não quero consultar o comprovante.", "no_guidance"),
+            ("Onde consulto o comprovante de Pix? Quero transferir meu saldo.", "sensitive_operation"),
+        ]
+        for text, reason in cases:
+            with self.subTest(reason=reason):
+                request = requested(message(1, text), category="pix")
+                context = self.knowledge.select(request)
+                with self.assertRaisesRegex(ValueError, "reply_evidence"):
+                    self.knowledge.validate_decision(request, context, proposed_reply(request, context))
+                self.knowledge.validate_decision(request, context, proposed_handoff(request, context, reason))
+
     def test_tela_recupera_sem_provar_condicao(self):
         request = requested(message(1, "A tela da minha maquininha está estranha."))
         context = self.knowledge.select(request)
