@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0",
+  "version": "1.0.0",
+  "subjects": [
+    {
+      "id": "pix",
+      "category": "pix"
+    },
+    {
+      "id": "repasse",
+      "category": "payouts"
+    },
+    {
+      "id": "terminal",
+      "category": "terminal"
+    }
+  ],
+  "intents": [
+    {
+      "id": "consultar-comprovante-pix",
+      "subject_id": "pix",
+      "synonyms": [
+        "comprovante de Pix",
+        "comprovante do Pix",
+        "comprovante Pix",
+        "recibo de Pix",
+        "recibo do Pix",
+        "recibo Pix"
+      ]
+    },
+    {
+      "id": "consultar-status-repasse",
+      "subject_id": "repasse",
+      "synonyms": [
+        "status do repasse",
+        "andamento do repasse",
+        "situação do repasse",
+        "data do repasse",
+        "previsão do repasse"
+      ]
+    },
+    {
+      "id": "consultar-visor-terminal",
+      "subject_id": "terminal",
+      "synonyms": [
+        "tela",
+        "visor",
+        "display",
+        "menu da maquininha",
+        "menu do terminal",
+        "menu da máquina de cartão"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "id": "menu-visivel",
+      "question": "O menu da maquininha está visível na tela?"
+    }
+  ]
+}

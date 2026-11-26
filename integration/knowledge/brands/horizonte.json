@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0",
+  "ontology_version": "1.0.0",
+  "version": "1.0.0",
+  "brand_id": "22222222-2222-4222-8222-222222222222",
+  "slug": "horizonte",
+  "sources": [
+    {
+      "id": "horizonte.manual",
+      "version": "1.0.0",
+      "title": "Guia operacional fictício Horizonte",
+      "fictional": true
+    }
+  ],
+  "procedures": [
+    {
+      "id": "horizonte.comprovante-pix",
+      "intent_id": "consultar-comprovante-pix",
+      "requires": [],
+      "source_id": "horizonte.manual",
+      "steps": [
+        "No aplicativo Horizonte, abra Central Pix.",
+        "Selecione Movimentações, toque no Pix desejado e abra Recibo."
+      ]
+    },
+    {
+      "id": "horizonte.status-repasse",
+      "intent_id": "consultar-status-repasse",
+      "requires": [],
+      "source_id": "horizonte.manual",
+      "steps": [
+        "No aplicativo Horizonte, abra Financeiro e selecione Extrato de repasses.",
+        "Toque no repasse para visualizar a previsão e o andamento."
+      ]
+    },
+    {
+      "id": "horizonte.visor-terminal",
+      "intent_id": "consultar-visor-terminal",
+      "requires": [
+        "menu-visivel"
+      ],
+      "source_id": "horizonte.manual",
+      "steps": [
+        "Na maquininha Horizonte, abra Suporte no menu visível.",
+        "Selecione Guia do visor para consultar os símbolos da tela."
+      ]
+    }
+  ],
+  "handoff_rules": [
+    {
+      "id": "horizonte.humano",
+      "reason": "human_requested",
+      "source_id": "horizonte.manual"
+    },
+    {
+      "id": "horizonte.sem-orientacao",
+      "reason": "no_guidance",
+      "source_id": "horizonte.manual"
+    },
+    {
+      "id": "horizonte.operacao-sensivel",
+      "reason": "sensitive_operation",
+      "source_id": "horizonte.manual"
+    }
+  ]
+}
