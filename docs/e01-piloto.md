@@ -91,6 +91,27 @@ python3 -B script/e01/pilot.py reconcile --project cloudwalk_e01_piloto --base-u
 
 Os ensaios históricos Luna R3/R5 publicaram extratos filtrados com ID `gateway:gen-…`, créditos e conversão para USD. Nos arquivos examinados faltam os campos brutos de cache do envelope de resposta. Esse material explica quais campos procurar. A primeira cobrança E01 e sua unidade precisam de verificação própria. [Extrato R3](evidencias/c05/luna-ensaio-real-01/financial-receipts.json) · [Extrato R5](evidencias/c05/luna-r5-ensaio-real-01/financial-receipts.json)
 
+## Ensaio adicional da candidata E01-Q1
+
+O primeiro ensaio de 26/11/2026 chegou a cinco despachos. P1.1, P2.1, P2.2 e P3.1 passaram. P3.2 terminou em `invalid_decision`, com uso e custo conciliados. A opção `--attempt e01-q1` abre uma única rodada adicional da matriz no mesmo projeto, banco e piloto 1. A execução completa acrescenta nove despachos e totaliza 14 das 24 autorizações originais. O limite acumulado continua em US$ 1. [Decisão do ensaio](planejamento/e01-atendente-real.md#ajuste-após-a-primeira-execução-real--e01-q1-e-e01-q2)
+
+1. Após o aceite de Q1, use o checkout integrado para construir a imagem e recriar somente o consumidor, deixando-o parado. Preserve previamente os cinco arquivos originais do diretório indicado por `CLOUDWALK_E01_AUDIT_DIR`, os nomes e modos 0600 e a permissão de escrita do usuário do consumidor. Se as capturas estiverem na camada gravável do contêiner, copie-as para armazenamento privado antes de recriá-lo e restaure-as no diretório de auditoria do novo contêiner. Mantenha os volumes de PostgreSQL e Kafka, o pré-voo, a conta e a porta da API do projeto.
+2. Separe o mesmo arquivo de aprovação de P1 usado no lote original e conserve as evidências que ele referencia. No primeiro comando do ensaio adicional, forneça esse arquivo com `--parent-approval`. O runner confere os registros duráveis das cinco execuções, a falha conhecida, o tarifário e as capturas. Ele compara o código Python do consumidor parado com os módulos do commit do checkout e registra o commit e a imagem no journal filho.
+3. Defina a variável de shell `E01_BASE_URL` com a URL exata registrada em `binding.api` do journal original e execute o novo canário. O diretório privado do projeto guarda o journal e o relatório adicionais em `e01-q1/`. As duas execuções compartilham o lock do projeto. O filho registra o hash dos bytes do journal original, a conta, o tarifário, os pedidos, os IDs do provedor e os hashes das cinco capturas. Cada novo POST exige contagem de ingressos e despachos compatível, ausência de reserva pendente e saldo para reservar o próximo despacho. A autorização final de gasto continua a cargo do Rails.
+
+```sh
+python3 -B script/e01/pilot.py canary --attempt e01-q1 --project cloudwalk_e01_pilot_20261126 --base-url "$E01_BASE_URL" --parent-approval /caminho/privado/primeiro-p1-aprovado.json
+```
+
+4. Concilie o **novo P1** usando o novo ID de pedido, hash do resultado, captura de uso e recibo monetário. Se o responsável aprovou anteriormente essa mesma orientação e o integrador verificou sua identidade, o novo arquivo de conciliação pode incluir `prior_orientation_approval_sha256` com o hash do primeiro arquivo de aprovação. Registre em `reviewer` quem conferiu o novo registro. O runner valida o conteúdo e a fonte. O relatório marca `prior_identical_orientation_approved` e preserva `human_reviewed: false` nessa modalidade. Uma revisão humana direta do novo P1 segue o formato normal.
+5. Execute o restante com o mesmo commit integrado e a mesma imagem. O comando `reconcile` também aceita `--attempt e01-q1` para conferir um despacho individual. A cada compra, as capturas anteriores devem reaparecer com os mesmos hashes. Qualquer intenção sem recibo, falha ou divergência financeira interrompe o ensaio. Reabrir o runner preserva essa intenção.
+
+```sh
+python3 -B script/e01/pilot.py remaining --attempt e01-q1 --project cloudwalk_e01_pilot_20261126 --base-url "$E01_BASE_URL" --approval /caminho/privado/novo-p1-conciliado.json
+```
+
+No relatório do filho, `previous_attempt` identifica as cinco execuções originais e seus estados. As nove linhas da matriz, os despachos identificados no ledger em `attempt_dispatches`, a respectiva provisão em `attempt_accounted_usd`, `receipts_reconciled` e `sum_of_reconciled_receipts_usd` dizem respeito à candidata. `dispatch_authorizations` e `ledger_last_read.accounted_usd` vêm do orçamento global. A contagem `distinct_provider_ids_in_ledger_usage` também considera os IDs de ambos os ensaios. `cumulative_provider_observed_usd` e `cumulative_receipts_reconciled` somam as cobranças conciliadas dos dois ensaios. Uma colisão de IDs do provedor torna essa soma indeterminada. O overlay E01 envia SIGINT ao consumidor para que ele feche a conexão e libere o grupo Kafka. O runner aguarda até dez segundos pela parada e informa falha se houver encerramento forçado.
+
 ## Exercício offline
 
 Rode os testes e observe o caso de perda do recibo: existe um único envio, a intenção permanece no journal e a segunda tentativa é recusada.
