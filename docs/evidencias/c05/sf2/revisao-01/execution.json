@@ -1,0 +1,67 @@
+{
+  "task": "SF2-R1 Task 2",
+  "accepted_commit": "99cf2f33e1803838e33813d5c4ff46971181ce4e",
+  "branch": "feat/sf2-replay-r1",
+  "cwd": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-replay-r1",
+  "started_utc": "2026-11-26T01:15:58.665466871Z",
+  "ended_utc": "2026-11-26T01:15:59.869860876Z",
+  "exit_code": 0,
+  "rounds_executed": 1,
+  "command": [
+    "rtk",
+    "proxy",
+    "env",
+    "-i",
+    "PATH=/usr/bin:/bin",
+    "LANG=C.UTF-8",
+    "LC_ALL=C.UTF-8",
+    "TZ=UTC",
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-treinamento/script/classification_comparison/setfit_sf2/.cache/verification/.venv/bin/python",
+    "-I",
+    "-B",
+    "script/classification_comparison/setfit_sf2/revision_r1/cli.py",
+    "--historical-root",
+    "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao",
+    "--amendment-sha256",
+    "c3a6db8134f71491c1e743ddf6d57a400bba6449017b336e0a311c02f4eb07b3",
+    "--inventory-sha256",
+    "f9199e3535f5504df2a1c9f11b317b526920d643a2653328fd5012f61eb8739e"
+  ],
+  "stdout": "eligible_validation_only | /home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-replay-r1/script/classification_comparison/setfit_sf2/.cache/revisao-01/result.json\n",
+  "stderr": "",
+  "original_result_path": "script/classification_comparison/setfit_sf2/.cache/revisao-01/result.json",
+  "original_result_sha256": "87be09aa73749c2c3ecf48e34e5584f703956476f88d67b818cf99fca59eb74a",
+  "original_result_size_bytes": 1302449,
+  "archived_result_sha256": "9fccc6f624ca477ef1b5bd3800c0c7b6a62cec774175d2e6ec65a7a788fbe702",
+  "archived_result_size_bytes": 33868,
+  "extension_compute_seconds": 0.14655299200239824,
+  "verification": {
+    "compared_public_result_after_cli_without_another_round": true,
+    "original_rows_equal_by_object": 225,
+    "original_baseline_selection_and_archived_bytes_equal": true,
+    "union_policies_unique": 270,
+    "extension_policies_passing_offline_schema": 45,
+    "recomputed_gates_and_vetoes": 270,
+    "verified_wilson_intervals_and_class_statistics": true,
+    "recomputed_original_selection_order": true,
+    "vetoes_by_original_extra_union": {
+      "original": {
+        "wrong_expected_review": 225,
+        "nonurgent_on_urgent": 90,
+        "priority_accuracy": 15,
+        "automatic_coverage": 45
+      },
+      "additional": {
+        "wrong_expected_review": 18,
+        "nonurgent_on_urgent": 18,
+        "automatic_coverage": 18
+      },
+      "union": {
+        "wrong_expected_review": 243,
+        "nonurgent_on_urgent": 108,
+        "priority_accuracy": 15,
+        "automatic_coverage": 63
+      }
+    }
+  }
+}

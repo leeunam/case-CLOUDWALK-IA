@@ -1,0 +1,271 @@
+{
+  "accepted_commit": "99cf2f33e1803838e33813d5c4ff46971181ce4e",
+  "additional_policies_evaluated": 0,
+  "branch": "feat/sf2-replay-r1",
+  "bytecode_writes": false,
+  "checks": {
+    "all_amendment_parent_files_match_accepted_git": true,
+    "all_current_sources_match_accepted_git": true,
+    "all_historical_capture_and_adapter_sources_match_historical_git": true,
+    "controls_complete_or_invalid_model_calls": 0,
+    "historical_baseline_selection_and_archived_bytes_equal": true,
+    "historical_eligible_count": 0,
+    "historical_policies_equal_by_object": 225,
+    "original_grid_sha256": "d5315f425ed9e94e1680b99619a45ae7894c45c358fb819d0bc7bf2a3742c537",
+    "original_grid_size_bytes": 1058678,
+    "scores03_scores04_equal_frames_by_object": true,
+    "valid_attempts": 95,
+    "valid_cases": 90,
+    "valid_controls": 5
+  },
+  "clean_worktree": true,
+  "destination_absent_before_and_after": true,
+  "ended_utc": "2026-11-26T01:15:46.985886+00:00",
+  "historical_commit": "4eb86a3282f94f32119042a0f6aa075e9f72960a",
+  "historical_worktree": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-qualificacao",
+  "interpreter": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-treinamento/script/classification_comparison/setfit_sf2/.cache/verification/.venv/bin/python",
+  "interpreter_version": "3.11.13",
+  "isolated_interpreter": true,
+  "provenance": {
+    "amendment_sha256": "c3a6db8134f71491c1e743ddf6d57a400bba6449017b336e0a311c02f4eb07b3",
+    "current_sources": {
+      "docs/planejamento/classificacao-comparativa/sf2/contratos/sf2.schema.json": "114d25188c4ab7ab5522ee9e9c3a22eddac7dc386ec5df40886ac8cedcd5c1d5",
+      "docs/planejamento/classificacao-comparativa/sf2/protocolo.json": "c0efd6d42ee50fd7775ff9db5ffcb9119db5861fd19c9b198b73ca01ce0eecaf",
+      "docs/planejamento/classificacao-comparativa/sf2/sf2-r1.schema.json": "86140495c9842d30acbcb62c2bae53ed15bda4f96371e5354655ecd19e5c7494",
+      "script/classification_comparison/requirements.txt": "7c6580fef88b041c371d415c00d72217714742dd9a1e3059c512cc9090e162ee",
+      "script/classification_comparison/setfit_pilot/provision.py": "37a239c64024d4385bcc797f3f9dd51d3805c3f32d8b421c3f8b5383adba53cc",
+      "script/classification_comparison/setfit_pilot/requirements.txt": "14bf9aeefaf8e8275de3b014ea63b10dea42246a0e80736220098fa546091b97",
+      "script/classification_comparison/setfit_sf2/adapter/__main__.py": "ef4a9da8e08f935886c2b46669d626de758a72f19231053891136fa0b134ec54",
+      "script/classification_comparison/setfit_sf2/adapter/decide.py": "6578db6a804d4dcd0bc9f43e5b469b81526ab96a99dcc51cdeda9a92f7970b0d",
+      "script/classification_comparison/setfit_sf2/contracts/__init__.py": "01e4ca572a847cc20f7130abb625898c0a28f8daa0f914cd4f13cde30cd8bc32",
+      "script/classification_comparison/setfit_sf2/contracts/artifacts.py": "f2272db7a11b3f1d129bdd4564ec6cd952d057e02350a6d963ff16f1373b65ec",
+      "script/classification_comparison/setfit_sf2/contracts/core.py": "3a8d307becdc15f3306ab77396055b9f0a35f4f106f465e2d3628132d235e5ea",
+      "script/classification_comparison/setfit_sf2/contracts/data.py": "e918a5b5606051d8ded78733d1a95b245a5559cd4c0dc8679556596b20d7cd4b",
+      "script/classification_comparison/setfit_sf2/contracts/ipc.py": "d272c56cb4dfaf9738a8e1faa704773fda85bf47260b0e5b0b2b0556367d1e0f",
+      "script/classification_comparison/setfit_sf2/evaluation/__init__.py": "09d616613e32bb83a907fb19f7d0fffa1942706f5e265b98ee6a26bedbce84f5",
+      "script/classification_comparison/setfit_sf2/evaluation/__main__.py": "763880ff3e792d6d52c86fd5c9c269b32f38638f1c73ff6c3112fef21c991b1e",
+      "script/classification_comparison/setfit_sf2/evaluation/audit.py": "a327466751e76f35c490fa5772792278b03fdc4b11379bb86047d9dde86a9df9",
+      "script/classification_comparison/setfit_sf2/evaluation/metrics.py": "6ec5adc0ed90e8daf58a127a6eaa2381005672c1963fa7427604385e72b62cc4",
+      "script/classification_comparison/setfit_sf2/evaluation/runner.py": "fcd25a9e817d7e8b87496420751764eaab6a8dd3bfe7e48a0cef47adabf18aa1",
+      "script/classification_comparison/setfit_sf2/evaluation/selection.py": "5c1897603be2c7aa423137bfef650d72de6b194ffacb59c3326502008cd8cc92",
+      "script/classification_comparison/setfit_sf2/evaluation/workflow.py": "951feaf647ba124c3559f3b46da9da559bfc4d2cfa8fc139fa60d0d3e35e3f09",
+      "script/classification_comparison/setfit_sf2/revision_r1/cli.py": "ef8a233923e01c7e7ad6ddb40c80e7c75de38530f5d85d882d9b949583ae1b81",
+      "script/classification_comparison/setfit_sf2/revision_r1/engine.py": "cf3ef1837a92bdd5c47331f8f589d6fa8f60cd344559c63581dbb2345a01a21e",
+      "script/classification_comparison/setfit_sf2/training/__main__.py": "06c09b43e11b43da06a26f7655e6d19da6e1c3188abbb0558ee24f9aa73b2760",
+      "script/classification_comparison/setfit_sf2/training/environment.py": "3039e2a8c54b7eeac677ad111c5ddf33bd54cb9cc28c942aac22f321bb9690a2",
+      "script/classification_comparison/setfit_sf2/training/fit.py": "b53915395051baad60818db550a961c7bd36083e084f09110dcebebbf9d06215",
+      "script/classification_comparison/setfit_sf2/training/package.py": "db4af26b02e55ab38c570cd48734e46d857c467ba62e86cb0abe7bcfd15e15c5",
+      "script/classification_comparison/setfit_sf2/training/requirements.txt": "223978463b717b847df460499001eb9800eb5f8657326a73506b0fa5677aca66",
+      "script/classification_comparison/setfit_sf2/training/scores.py": "6fac00ccf902477489467a136ae2ae09af6a5449ef97322b1c7e3576445cdc5d",
+      "script/classification_comparison/setfit_sf2/training/supervise.py": "631ed8958e61c362dce6e341fae7396b46075bf6b61b2f7d0897f38877b7048b",
+      "script/f08/jev/catalog.json": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271"
+    },
+    "historical_adapter": {
+      "script/classification_comparison/requirements.txt": "7c6580fef88b041c371d415c00d72217714742dd9a1e3059c512cc9090e162ee",
+      "script/classification_comparison/setfit_pilot/provision.py": "37a239c64024d4385bcc797f3f9dd51d3805c3f32d8b421c3f8b5383adba53cc",
+      "script/classification_comparison/setfit_pilot/requirements.txt": "14bf9aeefaf8e8275de3b014ea63b10dea42246a0e80736220098fa546091b97",
+      "script/classification_comparison/setfit_sf2/adapter/__main__.py": "ef4a9da8e08f935886c2b46669d626de758a72f19231053891136fa0b134ec54",
+      "script/classification_comparison/setfit_sf2/adapter/decide.py": "6578db6a804d4dcd0bc9f43e5b469b81526ab96a99dcc51cdeda9a92f7970b0d",
+      "script/classification_comparison/setfit_sf2/contracts/__init__.py": "01e4ca572a847cc20f7130abb625898c0a28f8daa0f914cd4f13cde30cd8bc32",
+      "script/classification_comparison/setfit_sf2/contracts/artifacts.py": "f2272db7a11b3f1d129bdd4564ec6cd952d057e02350a6d963ff16f1373b65ec",
+      "script/classification_comparison/setfit_sf2/contracts/core.py": "3a8d307becdc15f3306ab77396055b9f0a35f4f106f465e2d3628132d235e5ea",
+      "script/classification_comparison/setfit_sf2/contracts/data.py": "e918a5b5606051d8ded78733d1a95b245a5559cd4c0dc8679556596b20d7cd4b",
+      "script/classification_comparison/setfit_sf2/contracts/ipc.py": "d272c56cb4dfaf9738a8e1faa704773fda85bf47260b0e5b0b2b0556367d1e0f",
+      "script/classification_comparison/setfit_sf2/training/__main__.py": "06c09b43e11b43da06a26f7655e6d19da6e1c3188abbb0558ee24f9aa73b2760",
+      "script/classification_comparison/setfit_sf2/training/environment.py": "3039e2a8c54b7eeac677ad111c5ddf33bd54cb9cc28c942aac22f321bb9690a2",
+      "script/classification_comparison/setfit_sf2/training/fit.py": "b53915395051baad60818db550a961c7bd36083e084f09110dcebebbf9d06215",
+      "script/classification_comparison/setfit_sf2/training/package.py": "db4af26b02e55ab38c570cd48734e46d857c467ba62e86cb0abe7bcfd15e15c5",
+      "script/classification_comparison/setfit_sf2/training/requirements.txt": "223978463b717b847df460499001eb9800eb5f8657326a73506b0fa5677aca66",
+      "script/classification_comparison/setfit_sf2/training/scores.py": "6fac00ccf902477489467a136ae2ae09af6a5449ef97322b1c7e3576445cdc5d",
+      "script/classification_comparison/setfit_sf2/training/supervise.py": "631ed8958e61c362dce6e341fae7396b46075bf6b61b2f7d0897f38877b7048b"
+    },
+    "historical_capture": {
+      "adapter": "60b16a6772f648055f572c9a8f96ca8e654972ae6bddee2ec4050304bc18ae69",
+      "argv": "a52df9bc7cd9db1c90150eb74d92919047ab51145b22179bb51a03d6906beda7",
+      "catalog": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271",
+      "contract_catalog": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271",
+      "contracts/artifacts.py": "f2272db7a11b3f1d129bdd4564ec6cd952d057e02350a6d963ff16f1373b65ec",
+      "contracts/core.py": "3a8d307becdc15f3306ab77396055b9f0a35f4f106f465e2d3628132d235e5ea",
+      "contracts/data.py": "e918a5b5606051d8ded78733d1a95b245a5559cd4c0dc8679556596b20d7cd4b",
+      "contracts/ipc.py": "d272c56cb4dfaf9738a8e1faa704773fda85bf47260b0e5b0b2b0556367d1e0f",
+      "evaluation/__main__.py": "763880ff3e792d6d52c86fd5c9c269b32f38638f1c73ff6c3112fef21c991b1e",
+      "evaluation/audit.py": "a327466751e76f35c490fa5772792278b03fdc4b11379bb86047d9dde86a9df9",
+      "evaluation/metrics.py": "6ec5adc0ed90e8daf58a127a6eaa2381005672c1963fa7427604385e72b62cc4",
+      "evaluation/runner.py": "fcd25a9e817d7e8b87496420751764eaab6a8dd3bfe7e48a0cef47adabf18aa1",
+      "evaluation/selection.py": "634d5d8994fc0c5178cbc7f00dc7c68a7640560a6609c144bc97f54147c95e42",
+      "evaluation/workflow.py": "951feaf647ba124c3559f3b46da9da559bfc4d2cfa8fc139fa60d0d3e35e3f09",
+      "package": "224c572b0a2c6ce93b1dd1b90317df131cbb47b897b4de38e97659fbc7e57872",
+      "policy": "09de8c13fa56bcddb8006982b0016e3452bb15de89a72a6eae6c42847cedc21f",
+      "protocol": "c0efd6d42ee50fd7775ff9db5ffcb9119db5861fd19c9b198b73ca01ce0eecaf",
+      "schema": "114d25188c4ab7ab5522ee9e9c3a22eddac7dc386ec5df40886ac8cedcd5c1d5",
+      "validation": "b7d78a8adca44b1165cbadb804cbd879a3573a5c73d6311a592887d70ef68fc9"
+    },
+    "inventory_sha256": "f9199e3535f5504df2a1c9f11b317b526920d643a2653328fd5012f61eb8739e",
+    "parent_files": {
+      "adapter_index": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/adapter.json",
+        "sha256": "60b16a6772f648055f572c9a8f96ca8e654972ae6bddee2ec4050304bc18ae69"
+      },
+      "capture": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/capture.json",
+        "sha256": "cdf9b0cc1ea2a645a66bb9f1f59d234077a43ef7ad6fb96543d6a2fb6eca9736"
+      },
+      "capture_argv": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/capture-argv.json",
+        "sha256": "a52df9bc7cd9db1c90150eb74d92919047ab51145b22179bb51a03d6906beda7"
+      },
+      "capture_costs": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/costs.json",
+        "sha256": "b18a8d51647ce333d0e24751f819120fd1ef261f4435a350aa07375df88433ae"
+      },
+      "capture_policy": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/capture-policy.json",
+        "sha256": "09de8c13fa56bcddb8006982b0016e3452bb15de89a72a6eae6c42847cedc21f"
+      },
+      "capture_versions": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/versions.json",
+        "sha256": "3026ed2cc8d0449965a9ccfed8e043bf72d423dbc3af8eaa87e33f1f6069a3b4"
+      },
+      "catalog": {
+        "path": "script/f08/jev/catalog.json",
+        "sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271"
+      },
+      "controls": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/run/controls.jsonl",
+        "sha256": "40ecfd8c3ae18457e659182365bea9581cad693c41c7c6b5d261c4de365a8a62"
+      },
+      "final_seal": {
+        "path": "docs/planejamento/classificacao-comparativa/sf2/dados/final-seal.json",
+        "sha256": "71bea26395321246ef00c4374465c6cd8bd3320252a7729429cfad5e3c2263a4"
+      },
+      "journal": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/run/timings.jsonl",
+        "sha256": "bfadaaf7b853f54f150d2d406dcac7fc5727f90672573c07350a92448d78a61e"
+      },
+      "package_manifest": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/pacote/manifest.json",
+        "sha256": "224c572b0a2c6ce93b1dd1b90317df131cbb47b897b4de38e97659fbc7e57872"
+      },
+      "parent_config": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/config.json",
+        "sha256": "d59c7e18b3ff7d8e4eb6a662568897b1522855aae153feca3dae1f9316460832"
+      },
+      "parent_grid_gzip": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/grid.json.gz",
+        "sha256": "bf2459d6d9d32d05110a8853faa260e6189b93fb1ceda6d2067fc57aa954846c"
+      },
+      "parent_grid_original": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/grid-original.json",
+        "sha256": "d4e4014c7e00a04a7fa690e215b6966fe233badf0072462f36adec6a1cb73b35"
+      },
+      "parent_report": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/report.json",
+        "sha256": "3dabedbf31424ea8820d2a5ebd54943b9f8b7e923459ee336483f4f830ab5ac5"
+      },
+      "parent_selection": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/selection.json",
+        "sha256": "27afda01d79d866fb53c390d0e976d1e96f30d3b55565afc100a803cd5fd7b59"
+      },
+      "pre_validation": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/pre-validation.json",
+        "sha256": "5e93263f24c686fc803a4e7b213a077a52e679f500dfcd733edda6521dab6b7f"
+      },
+      "predictions": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/run/predictions.jsonl",
+        "sha256": "d70ce59a1579a282f238dd37bdb154f1fa6500bc61e92299f49577255a1cbdab"
+      },
+      "protocol": {
+        "path": "docs/planejamento/classificacao-comparativa/sf2/protocolo.json",
+        "sha256": "c0efd6d42ee50fd7775ff9db5ffcb9119db5861fd19c9b198b73ca01ce0eecaf"
+      },
+      "public_manifest": {
+        "path": "docs/planejamento/classificacao-comparativa/sf2/dados/manifest-public.json",
+        "sha256": "36cbb5dab996775391a0c59802892a2b30d558fbf35b13e2620f0e7950d01ec9"
+      },
+      "schema": {
+        "path": "docs/planejamento/classificacao-comparativa/sf2/contratos/sf2.schema.json",
+        "sha256": "114d25188c4ab7ab5522ee9e9c3a22eddac7dc386ec5df40886ac8cedcd5c1d5"
+      },
+      "scores03": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/scores-sf2-03.json",
+        "sha256": "bccbfeb5e1ad9985a1a35ac05392dd215f91eedaa72e7adcf7309f969587051d"
+      },
+      "scores04": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/scores.json",
+        "sha256": "59ae17e97256c55603d77a9d1850fdac56708a7fde7a4cf050136c4a3cb78c06"
+      },
+      "seal": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/validation/run/seal.json",
+        "sha256": "cb5d6bad2f0a7bb58492fc13710fef2102b283e34820cc9cd930c99bc2e8c985"
+      },
+      "training_arguments": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/arguments.json",
+        "sha256": "27d1ed81103598cedb32118c824d0f6b6bdfca2deccf449754cc1e52c222b7f5"
+      },
+      "training_code": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/training-code.json",
+        "sha256": "599cda69dd60125dc5c55840dde7c4db3927b4029e9a417fc834f7ce254fb67b"
+      },
+      "training_freeze": {
+        "path": "docs/evidencias/c05/sf2/qualificacao-01/training-freeze.json",
+        "sha256": "1a3a3baa405cf2cd45a15cc3e4ca3a0a654e6ac978f4d280c8b5cb301113112a"
+      },
+      "validation": {
+        "path": "docs/planejamento/classificacao-comparativa/sf2/dados/validation.jsonl",
+        "sha256": "b7d78a8adca44b1165cbadb804cbd879a3573a5c73d6311a592887d70ef68fc9"
+      }
+    },
+    "public_package_members": {
+      "arguments": "27d1ed81103598cedb32118c824d0f6b6bdfca2deccf449754cc1e52c222b7f5",
+      "category.base_encoder": "de45c80735eff3553ec9245ecd42a78c9a042cdecf9ca013bda1416b859f2caf",
+      "category.base_encoder/snapshot.json": "c37d6113296ae9394fe03fe23a4879a8bec0e61483346ef6f8401d9f449ea3f7",
+      "category.encoder": "2bc20c277d633a7cb111f3f234ea84fd26bdc9a9afbec78f0fcbfc5fecdcd07f",
+      "category.encoder/1_Pooling/config.json": "4fef0a7e8c8ee36e74c0fad89bab60ade72324442d43f559ea219bb7c2580710",
+      "category.encoder/config.json": "7e09ec8cdb726e1a7ec34e3800b19147d504c837ba7aa266da1bcf42d197321d",
+      "category.encoder/config_sentence_transformers.json": "f45effd3cb87dd25df11075bf81eec0b39225b14f51bdca7073f0475a9828be7",
+      "category.encoder/model.safetensors": "21474caf9fdb4d7f4145ff1aa2aecc131e73baa235545bcc910bebefcfd77c5a",
+      "category.encoder/modules.json": "e4068aab8a95663636c4c28044a95eafdb6492387397ec8283d8f8b31078d645",
+      "category.encoder/sentence_bert_config.json": "3084164002c0bca01b0259c5327123803fce32e660a57feb93184ffead186fc8",
+      "category.head": "fc651dd10a1120ba19a2ede567a6d93f06cc73595e2141806602e742cbc34afe",
+      "category.head/logistic.joblib": "dfe395d06ea5d50baf3c349596bfdf3716b42bcd5c3ccea326578fa4ccb6769d",
+      "category.manifest": "b989492b3623dc6015e97c5d8af975950a48ce72f489d467062e07fe6996a6c5",
+      "category.tokenizer": "277db9a471d7a1e96fbcbed918c953adc14c9a7c122f1be4ed24424fb942792f",
+      "category.tokenizer/tokenizer.json": "cad551d5600a84242d0973327029452a1e3672ba6313c2a3c3d69c4310e12719",
+      "category.tokenizer/tokenizer_config.json": "fef843bf59edbcf8ad641683938953603c3fee0b6d99bd3d9f808d3a566a8a5a",
+      "category.training_evidence": "fc6adb3b9f3907664118ba64be0d16ca7c4a4b5ccf87b8fb730d392b0dbe8c87",
+      "category.training_evidence/run.json": "08fb0a0ab17d322fd19b9f8f6ddf5cf0dbfca68213d8163e61a02deda2ddca2c",
+      "priority.base_encoder": "de45c80735eff3553ec9245ecd42a78c9a042cdecf9ca013bda1416b859f2caf",
+      "priority.base_encoder/snapshot.json": "c37d6113296ae9394fe03fe23a4879a8bec0e61483346ef6f8401d9f449ea3f7",
+      "priority.encoder": "359218fe6efcc010868d7caf13e2e4f62211c58df279285efd3cd765d6fbd78f",
+      "priority.encoder/1_Pooling/config.json": "4fef0a7e8c8ee36e74c0fad89bab60ade72324442d43f559ea219bb7c2580710",
+      "priority.encoder/config.json": "7e09ec8cdb726e1a7ec34e3800b19147d504c837ba7aa266da1bcf42d197321d",
+      "priority.encoder/config_sentence_transformers.json": "f45effd3cb87dd25df11075bf81eec0b39225b14f51bdca7073f0475a9828be7",
+      "priority.encoder/model.safetensors": "5ab6115e779f6cea70e1166d0f724ef44dc9deb5f01a337a3b94eecc2ac09768",
+      "priority.encoder/modules.json": "e4068aab8a95663636c4c28044a95eafdb6492387397ec8283d8f8b31078d645",
+      "priority.encoder/sentence_bert_config.json": "3084164002c0bca01b0259c5327123803fce32e660a57feb93184ffead186fc8",
+      "priority.head": "ab8cd4586e2316ed8bd65dcf72e70f7cb69e5adb6e665522e40d5832dca8a89a",
+      "priority.head/logistic.joblib": "1f82eec45d489939a4d748ae24328e993179e1b00499588fb1d39024ade22a93",
+      "priority.manifest": "8a0224ad38fa45a902a58bc25c8dbcc4c9e9aff96ec50024dfe4a01c304bcab1",
+      "priority.tokenizer": "277db9a471d7a1e96fbcbed918c953adc14c9a7c122f1be4ed24424fb942792f",
+      "priority.tokenizer/tokenizer.json": "cad551d5600a84242d0973327029452a1e3672ba6313c2a3c3d69c4310e12719",
+      "priority.tokenizer/tokenizer_config.json": "fef843bf59edbcf8ad641683938953603c3fee0b6d99bd3d9f808d3a566a8a5a",
+      "priority.training_evidence": "5d154dd60df7bd41ae10dc812a008df09e518c60a2493ed06ebb24d7b28b70b2",
+      "priority.training_evidence/run.json": "2231dbc99948c0f3a6a1d342f6f9c6dfef1380c2cc8ad922a3e134bd0987dc40",
+      "training_freeze": "1a3a3baa405cf2cd45a15cc3e4ca3a0a654e6ac978f4d280c8b5cb301113112a"
+    },
+    "sealed_files": {
+      "controls.jsonl": "40ecfd8c3ae18457e659182365bea9581cad693c41c7c6b5d261c4de365a8a62",
+      "predictions.jsonl": "d70ce59a1579a282f238dd37bdb154f1fa6500bc61e92299f49577255a1cbdab",
+      "stderr.log": "7395b3dcd8a879421345a8dc8a91a41c33a202b8a4b6bb9ad650e068153c691b",
+      "timings.jsonl": "bfadaaf7b853f54f150d2d406dcac7fc5727f90672573c07350a92448d78a61e"
+    },
+    "weights_verified_in_replay": false
+  },
+  "setup_observations": [
+    "O primeiro utilitário de pré-voo encerrou antes de ler os insumos, pois o RTK não constava do PATH mínimo. O utilitário foi corrigido para invocar o caminho absoluto do RTK."
+  ],
+  "started_utc": "2026-11-26T01:15:44.686680+00:00",
+  "status": "passed",
+  "task": "SF2-R1 Task 2",
+  "worktree": "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-replay-r1"
+}

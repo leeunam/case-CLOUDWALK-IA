@@ -1,0 +1,11 @@
+{
+  "contract_version": "sf2-r1-offline/1.0",
+  "category": {
+    "tau": 0.95,
+    "delta": 0.0
+  },
+  "priority": {
+    "tau": 0.7,
+    "delta": 0.0
+  }
+}
