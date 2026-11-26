@@ -5,7 +5,7 @@
 Iniciada em 26/11/2026, sobre a main publicada
 `343d073caa447d467209977ae5d464329658d128`.
 Branch `feat/atendente-real`, worktree `.worktrees/e01-atendente`.
-A E01-00 partiu de `64cc769`. Na base de preparação `9f37ffc`, passaram por revisão os contratos (00), o conhecimento por marca (01), o ledger Rails (02), o executor Luna (03), o perfil financeiro e o roteiro executável da E01-05. A integração Kafka da E01-04 aguarda comprovação dos ajustes da revisão offline. P1, o restante da matriz real e o aceite da interface da E01-06 seguem pendentes. [Operação do piloto](../e01-piloto.md).
+A E01-00 partiu de `64cc769`. Na base de preparação `9f37ffc`, passaram por revisão os contratos (00), o conhecimento por marca (01), o ledger Rails (02), o executor Luna (03), o perfil financeiro e o roteiro executável da E01-05. A integração Kafka da E01-04 recebeu aceite offline em `7765ff0` e foi integrada à branch E01 em `406920d`. A E01-05 aguarda P1 e os demais turnos para medir custo e qualidade reais. O aceite de interface da E01-06 também está pendente. [Operação do piloto](../e01-piloto.md).
 
 O responsável aprovou GPT-5.6 Luna pela Feita, conhecimento fictício por marca
 e teto **acumulado de US$ 1 para o piloto E01**. A autorização cobre o piloto;
@@ -160,7 +160,7 @@ A matriz prevê **nove despachos** se todos os turnos chegarem à Luna. Cada aut
 | Continuidade | Conferir mensagens e sequências de P2, P3 e P6. Resolução exige confirmação explícita do cliente. Repetição, perda de contexto ou encerramento incorreto reprovam o cenário. |
 | Handoff | Conferir motivo, resumo, IDs de mensagens e estado humano dos quatro cenários P3–P6. Todos devem encaminhar quando previsto e preservar o conteúdo de origem. |
 | Isolamento | Comparar P1 e P2 e auditar P5. Zero candidatos, fontes ou passos de outra marca no contexto e na resposta. Violação interrompe o piloto. |
-| Custo | Publicar por cenário e no acumulado as autorizações, chamadas observadas, tokens, reservas, limite contabilizado por uso e valor monetário reportado pela Feita, com fonte, unidade e cobertura dos recibos. O Rails mantém teto local de US$ 1, até 24 autorizações, uma execução por vez e um despacho por evento. Incerteza após possível POST retém a reserva e pausa o piloto. |
+| Custo | Publicar por cenário e no acumulado as autorizações, os IDs distintos de resposta presentes no uso do ledger, os tokens, reservas, limite contabilizado por uso e valor monetário reportado pela Feita, com fonte, unidade e cobertura dos recibos. O Rails mantém teto local de US$ 1, até 24 autorizações, uma execução por vez e um despacho por evento. Incerteza após possível POST retém a reserva e pausa o piloto. |
 | Tempo e entrega | Por turno registrar entrada do cliente e persistência da resposta/proposta no Rails, além de início e fim do provedor. Publicar milissegundos por turno, máximo, quantidade de timeouts e mensagens sem resultado. A proposta deve chegar enquanto a rodada ainda estiver vigente. Lease de start é de até 40 s, limitado também a 5 s antes do vencimento da rodada de 60 s. |
 
 Primeiro executar, sem rede externa, testes de contrato, isolamento, disputa e último saldo, start repetido, crash de started, uso ausente, conclusão obsoleta e republicação após falha. A E01-05 exige esses aceites e o pré-voo financeiro documentado para a rota e a conta. Este conjunto verifica comportamentos do piloto. A qualidade em produção requer uma avaliação própria.
@@ -171,4 +171,3 @@ Dados reais, operações financeiras, integrações reais de WhatsApp/e-mail,
 edição da ontologia pela supervisão e motor formal de inferência não fazem
 parte do piloto aprovado. Publicação permanente, nova matriz F08 e dez mil
 conexões seguem evoluções separadas, sem capacidade presumida.
-

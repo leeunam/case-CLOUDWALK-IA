@@ -190,7 +190,10 @@ GPT-5.6 Luna pela Feita, conhecimento fictício por marca e teto acumulado de
 US$ 1 no piloto E01. A preparação começou isolada da demonstração publicada.
 A representação do conhecimento e a proposta de ontologia estão na
 [especificação E01](e01-atendente-real.md), com as confirmações e propostas
-separadas. O atendente real ainda não está implementado nem qualificado.
+separadas. A implementação do atendente e a integração Kafka receberam aceite
+offline na E01-04 em `7765ff0`, incorporado à branch E01 em `406920d`.
+As conversas reais e a medição de custo e qualidade da E01-05, além do aceite
+da interface da E01-06, aguardam execução.
 
 ## 1. Ordem de trabalho
 
