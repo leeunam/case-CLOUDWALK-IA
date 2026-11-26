@@ -1,0 +1,77 @@
+{
+  "contract_version": "classification-http/1.0",
+  "ipc_catalog_version": "1.0.0",
+  "decision_namespace": "sf2-final-r1/1.0",
+  "package_sha256": "224c572b0a2c6ce93b1dd1b90317df131cbb47b897b4de38e97659fbc7e57872",
+  "model_sha256": {
+    "category": "b989492b3623dc6015e97c5d8af975950a48ce72f489d467062e07fe6996a6c5",
+    "priority": "8a0224ad38fa45a902a58bc25c8dbcc4c9e9aff96ec50024dfe4a01c304bcab1"
+  },
+  "capture_policy_sha256": "09de8c13fa56bcddb8006982b0016e3452bb15de89a72a6eae6c42847cedc21f",
+  "decision_policy_sha256": "127eb227ac174384700a60390272a48abdca9a81592086dde5bc132727338473",
+  "capture_policy": {
+    "category": {
+      "delta": 0.0,
+      "tau": 0.5
+    },
+    "contract_version": "sf2-ipc/1.0",
+    "priority": {
+      "delta": 0.0,
+      "tau": 0.5
+    }
+  },
+  "decision_policy": {
+    "contract_version": "sf2-r1-offline/1.0",
+    "category": {
+      "tau": 0.95,
+      "delta": 0.0
+    },
+    "priority": {
+      "tau": 0.7,
+      "delta": 0.0
+    }
+  },
+  "class_order": {
+    "category": [
+      "informacao_insuficiente",
+      "payouts",
+      "pix",
+      "terminal"
+    ],
+    "priority": [
+      "advanced",
+      "basic",
+      "informacao_insuficiente",
+      "intermediate",
+      "urgent"
+    ]
+  },
+  "catalog_file_sha256": "14bbf6298ee8c6d5c9002128cd596e5250e71cbb0077e49a18fde49c265d2271",
+  "release_sha256": "1d4396aa3ea665f6ed6c8d2743cabdc3f1e9f0f966d405c070f65f06862fd52a",
+  "freeze_sha256": "41c25a53b46f9928fd92252caf6249a545336c9b4d1e5da49787b35a906fff5a",
+  "worker_inventory_sha256": "60b16a6772f648055f572c9a8f96ca8e654972ae6bddee2ec4050304bc18ae69",
+  "worker_files": {
+    "script/classification_comparison/requirements.txt": "7c6580fef88b041c371d415c00d72217714742dd9a1e3059c512cc9090e162ee",
+    "script/classification_comparison/setfit_pilot/provision.py": "37a239c64024d4385bcc797f3f9dd51d3805c3f32d8b421c3f8b5383adba53cc",
+    "script/classification_comparison/setfit_pilot/requirements.txt": "14bf9aeefaf8e8275de3b014ea63b10dea42246a0e80736220098fa546091b97",
+    "script/classification_comparison/setfit_sf2/adapter/__main__.py": "ef4a9da8e08f935886c2b46669d626de758a72f19231053891136fa0b134ec54",
+    "script/classification_comparison/setfit_sf2/adapter/decide.py": "6578db6a804d4dcd0bc9f43e5b469b81526ab96a99dcc51cdeda9a92f7970b0d",
+    "script/classification_comparison/setfit_sf2/contracts/__init__.py": "01e4ca572a847cc20f7130abb625898c0a28f8daa0f914cd4f13cde30cd8bc32",
+    "script/classification_comparison/setfit_sf2/contracts/artifacts.py": "f2272db7a11b3f1d129bdd4564ec6cd952d057e02350a6d963ff16f1373b65ec",
+    "script/classification_comparison/setfit_sf2/contracts/core.py": "3a8d307becdc15f3306ab77396055b9f0a35f4f106f465e2d3628132d235e5ea",
+    "script/classification_comparison/setfit_sf2/contracts/data.py": "e918a5b5606051d8ded78733d1a95b245a5559cd4c0dc8679556596b20d7cd4b",
+    "script/classification_comparison/setfit_sf2/contracts/ipc.py": "d272c56cb4dfaf9738a8e1faa704773fda85bf47260b0e5b0b2b0556367d1e0f",
+    "script/classification_comparison/setfit_sf2/training/__main__.py": "06c09b43e11b43da06a26f7655e6d19da6e1c3188abbb0558ee24f9aa73b2760",
+    "script/classification_comparison/setfit_sf2/training/environment.py": "3039e2a8c54b7eeac677ad111c5ddf33bd54cb9cc28c942aac22f321bb9690a2",
+    "script/classification_comparison/setfit_sf2/training/fit.py": "b53915395051baad60818db550a961c7bd36083e084f09110dcebebbf9d06215",
+    "script/classification_comparison/setfit_sf2/training/package.py": "db4af26b02e55ab38c570cd48734e46d857c467ba62e86cb0abe7bcfd15e15c5",
+    "script/classification_comparison/setfit_sf2/training/requirements.txt": "223978463b717b847df460499001eb9800eb5f8657326a73506b0fa5677aca66",
+    "script/classification_comparison/setfit_sf2/training/scores.py": "6fac00ccf902477489467a136ae2ae09af6a5449ef97322b1c7e3576445cdc5d",
+    "script/classification_comparison/setfit_sf2/training/supervise.py": "631ed8958e61c362dce6e341fae7396b46075bf6b61b2f7d0897f38877b7048b"
+  },
+  "runtime_files": {
+    "script/classification_comparison/setfit_sf2/runtime_r1/__init__.py": "2184de73af3c09fd3814133595af758e844d8cadac0f3170ea694dd4b99209e5",
+    "script/classification_comparison/setfit_sf2/runtime_r1/context.py": "3ff94d81446f502ebe419c7bacbe1ac94e766a34b61be15f0d3a83894b254c9c",
+    "script/classification_comparison/setfit_sf2/runtime_r1/decision.py": "2816733b28d3b2e1b923c5081662de1500c0f1180f42a973f02dbd448d0cf5a4"
+  }
+}

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Help desk CloudWalk
-  version: 1.0.0
+  version: 1.1.0
   description: Referência contratual do MVP. A F01 implementa somente a operação de saúde. As fases seguintes indicam
     o contrato-alvo.
 servers:
@@ -314,7 +314,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: ./schemas/v1.json#/$defs/CaseList
+                $ref: ./schemas/v1.json#/$defs/CaseListV11
         '401':
           $ref: '#/components/responses/Error401'
         '403':
@@ -343,7 +343,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: ./schemas/v1.json#/$defs/Case
+                $ref: ./schemas/v1.json#/$defs/CaseV11
         '401':
           $ref: '#/components/responses/Error401'
         '403':
@@ -416,7 +416,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: ./schemas/v1.json#/$defs/CaseMessageResult
+                $ref: ./schemas/v1.json#/$defs/CaseMessageResultV11
         '401':
           $ref: '#/components/responses/Error401'
         '403':
@@ -460,7 +460,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: ./schemas/v1.json#/$defs/Case
+                $ref: ./schemas/v1.json#/$defs/CaseV11
         '401':
           $ref: '#/components/responses/Error401'
         '403':
@@ -504,7 +504,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: ./schemas/v1.json#/$defs/Case
+                $ref: ./schemas/v1.json#/$defs/CaseV11
         '401':
           $ref: '#/components/responses/Error401'
         '403':

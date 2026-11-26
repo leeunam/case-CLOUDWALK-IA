@@ -3,7 +3,7 @@ import type { Brand, Message } from '../simulator/contract'
 import { categoryLabels, formatTimestamp, priorityLabels } from '../simulator/presentation'
 import { blockingMessage } from './blockingReason'
 
-const sourceNames = { channel: 'Canal', jev: 'Classificador', supervisor: 'Supervisão' }
+const sourceNames = { channel: 'Canal', jev: 'Classificador Jev', setfit: 'Classificador SetFit', supervisor: 'Supervisão' }
 const integrationLabels = { idle: 'Sem tentativa em andamento', pending_delivery: 'Aguardando entrega', awaiting_result: 'Aguardando resposta', failed: 'Falha na integração' }
 
 export function CaseContext({ detail, brand, queue, owned, messages, onOpen, onReference }: {

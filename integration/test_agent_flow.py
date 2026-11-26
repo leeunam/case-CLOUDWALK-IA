@@ -110,7 +110,12 @@ class AgentFlowTest(unittest.TestCase):
             self.assertEqual(forward.call_args.args[2:], (url, secret))
 
     def test_request_returns_202_after_publish_and_503_on_ambiguous_confirmation(self):
-        raw = json_bytes(self.request)
+        for name in ("agent-turn-1-request", "agent-setfit-request", "agent-setfit-invalid-version"):
+            with self.subTest(name=name):
+                self.check_bridge(self.fixture(name), valid=name != "agent-setfit-invalid-version")
+
+    def check_bridge(self, request, *, valid):
+        raw = json_bytes(request)
         trace = Mock()
         handler = object.__new__(request_handler(trace, self.contracts, "secret"))
         handler.respond = trace.respond
@@ -123,7 +128,10 @@ class AgentFlowTest(unittest.TestCase):
         handler.rfile = BytesIO(raw)
 
         handler.do_POST()
-        self.assertEqual(trace.mock_calls, [call.publish(REQUESTS, self.request["case_id"], raw), call.respond(202)])
+        if not valid:
+            self.assertEqual(trace.mock_calls, [call.respond(422, "invalid_AgentTurnRequested")])
+            return
+        self.assertEqual(trace.mock_calls, [call.publish(REQUESTS, request["case_id"], raw), call.respond(202)])
 
         trace.reset_mock()
         trace.publish.side_effect = TimeoutError
@@ -132,17 +140,27 @@ class AgentFlowTest(unittest.TestCase):
         self.assertEqual(trace.mock_calls[-1], call.respond(503, "publication_unconfirmed"))
 
     def test_mock_produces_identical_bytes_for_replay_and_resolves_the_second_turn(self):
-        record = self.record(self.request, REQUESTS)
+        for name in ("agent-turn-1-request", "agent-setfit-request"):
+            with self.subTest(name=name):
+                self.check_mock_replay(self.fixture(name))
+
+        invalid = self.record(self.fixture("agent-setfit-invalid-version"), REQUESTS)
+        with self.assertRaisesRegex(InvalidEvent, "invalid_AgentTurnRequested"):
+            run_mock(invalid, self.contracts, Mock())
+
+    def check_mock_replay(self, request):
+        record = self.record(request, REQUESTS)
         publisher = Mock()
         run_mock(record, self.contracts, publisher)
         run_mock(record, self.contracts, publisher)
         calls = publisher.publish.call_args_list
         self.assertEqual(calls[0], calls[1])
         topic, key, body = calls[0].args
-        self.assertEqual((topic, key), (EVENTS, self.request["case_id"]))
+        self.assertEqual((topic, key), (EVENTS, request["case_id"]))
         result = self.contracts.read("AgentResult", body)
+        self.assertEqual(result["schema_version"], "1.0")
         self.assertEqual(result["event_type"], "agent.reply.proposed")
-        self.assertEqual(result["payload"]["request_event_id"], self.request["event_id"])
+        self.assertEqual(result["payload"]["request_event_id"], request["event_id"])
 
         second = self.fixture("agent-turn-2-request")
         self.assertEqual(propose_result(second)["event_type"], "agent.resolve.proposed")

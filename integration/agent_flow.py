@@ -117,6 +117,7 @@ def propose_result(request):
         )
     return {
         **request,
+        "schema_version": "1.0",
         "event_id": str(uuid.uuid5(uuid.NAMESPACE_URL, "cloudwalk:mock-agent-v1:" + request["event_id"])),
         "event_type": event_type,
         "payload": payload,

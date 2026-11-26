@@ -1,0 +1,625 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cloudwalk:classification-http:1.0",
+  "$defs": {
+    "Version": {
+      "const": "classification-http/1.0"
+    },
+    "Hash": {
+      "type": "string",
+      "minLength": 64,
+      "maxLength": 64,
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "Id": {
+      "type": "string",
+      "minLength": 36,
+      "maxLength": 36,
+      "pattern": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$"
+    },
+    "CatalogVersion": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "Code": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "not": {
+        "pattern": "[^a-z0-9_]"
+      }
+    },
+    "CatalogMap": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/Code"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "\\S"
+      }
+    },
+    "Request": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "$ref": "#/$defs/Version"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "catalog_version": {
+          "$ref": "#/$defs/CatalogVersion"
+        },
+        "text": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "received": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Code"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "priority": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Code"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "category",
+            "priority"
+          ],
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "properties": {
+                "category": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "properties": {
+                "priority": {
+                  "type": "null"
+                }
+              }
+            }
+          ]
+        },
+        "catalog": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "$ref": "#/$defs/CatalogMap"
+            },
+            "priority": {
+              "$ref": "#/$defs/CatalogMap"
+            }
+          },
+          "required": [
+            "category",
+            "priority"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "contract_version",
+        "id",
+        "catalog_version",
+        "text",
+        "received",
+        "catalog"
+      ],
+      "additionalProperties": false
+    },
+    "Field": {
+      "type": "object",
+      "properties": {
+        "vector": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "raw": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "margin": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "cut": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "decision": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "vector",
+        "raw",
+        "margin",
+        "cut",
+        "decision",
+        "reason"
+      ],
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "vector": {
+              "type": "null"
+            },
+            "raw": {
+              "type": "null"
+            },
+            "margin": {
+              "type": "null"
+            },
+            "decision": {
+              "const": "provided"
+            },
+            "reason": {
+              "const": "provided"
+            },
+            "cut": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "properties": {
+            "vector": {
+              "type": "null"
+            },
+            "raw": {
+              "type": "null"
+            },
+            "margin": {
+              "type": "null"
+            },
+            "decision": {
+              "const": "error"
+            },
+            "reason": {
+              "enum": [
+                "error",
+                "timeout",
+                "invalid_score"
+              ]
+            },
+            "cut": {
+              "type": "object"
+            }
+          }
+        },
+        {
+          "properties": {
+            "vector": {
+              "type": "object"
+            },
+            "raw": {
+              "type": "string"
+            },
+            "margin": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "cut": {
+              "type": "object"
+            }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "decision": {
+                  "const": "accept"
+                },
+                "reason": {
+                  "const": "accepted"
+                }
+              }
+            },
+            {
+              "properties": {
+                "decision": {
+                  "const": "review"
+                },
+                "reason": {
+                  "enum": [
+                    "raw_review",
+                    "inactive_label",
+                    "below_tau",
+                    "low_margin"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "CategoryField": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Field"
+        },
+        {
+          "properties": {
+            "vector": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "classes": {
+                      "const": [
+                        "informacao_insuficiente",
+                        "payouts",
+                        "pix",
+                        "terminal"
+                      ]
+                    },
+                    "scores": {
+                      "type": "array",
+                      "minItems": 4,
+                      "maxItems": 4,
+                      "items": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      }
+                    }
+                  },
+                  "required": [
+                    "classes",
+                    "scores"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "raw": {
+              "enum": [
+                null,
+                "informacao_insuficiente",
+                "payouts",
+                "pix",
+                "terminal"
+              ]
+            },
+            "cut": {
+              "enum": [
+                null,
+                {
+                  "tau": 0.95,
+                  "delta": 0.0
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "PriorityField": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Field"
+        },
+        {
+          "properties": {
+            "vector": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "classes": {
+                      "const": [
+                        "advanced",
+                        "basic",
+                        "informacao_insuficiente",
+                        "intermediate",
+                        "urgent"
+                      ]
+                    },
+                    "scores": {
+                      "type": "array",
+                      "minItems": 5,
+                      "maxItems": 5,
+                      "items": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      }
+                    }
+                  },
+                  "required": [
+                    "classes",
+                    "scores"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "raw": {
+              "enum": [
+                null,
+                "advanced",
+                "basic",
+                "informacao_insuficiente",
+                "intermediate",
+                "urgent"
+              ]
+            },
+            "cut": {
+              "enum": [
+                null,
+                {
+                  "tau": 0.7,
+                  "delta": 0.0
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "Response": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "$ref": "#/$defs/Version"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "catalog_version": {
+          "$ref": "#/$defs/CatalogVersion"
+        },
+        "catalog_sha256": {
+          "$ref": "#/$defs/Hash"
+        },
+        "outcome": {
+          "enum": [
+            "complete",
+            "review",
+            "error"
+          ]
+        },
+        "applied": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "$ref": "#/$defs/Code"
+            },
+            "priority": {
+              "$ref": "#/$defs/Code"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "fields": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "$ref": "#/$defs/CategoryField"
+            },
+            "priority": {
+              "$ref": "#/$defs/PriorityField"
+            }
+          },
+          "required": [
+            "category",
+            "priority"
+          ],
+          "additionalProperties": false
+        },
+        "calls": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "enum": [
+                0,
+                1
+              ]
+            },
+            "priority": {
+              "enum": [
+                0,
+                1
+              ]
+            }
+          },
+          "required": [
+            "category",
+            "priority"
+          ],
+          "additionalProperties": false
+        },
+        "package_sha256": {
+          "$ref": "#/$defs/Hash"
+        },
+        "model_sha256": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "$ref": "#/$defs/Hash"
+            },
+            "priority": {
+              "$ref": "#/$defs/Hash"
+            }
+          },
+          "required": [
+            "category",
+            "priority"
+          ],
+          "additionalProperties": false
+        },
+        "capture_policy_sha256": {
+          "$ref": "#/$defs/Hash"
+        },
+        "decision_policy_sha256": {
+          "$ref": "#/$defs/Hash"
+        },
+        "raw_frame_sha256": {
+          "$ref": "#/$defs/Hash"
+        },
+        "elapsed_ms": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5000
+        }
+      },
+      "required": [
+        "contract_version",
+        "id",
+        "catalog_version",
+        "catalog_sha256",
+        "outcome",
+        "applied",
+        "fields",
+        "calls",
+        "package_sha256",
+        "model_sha256",
+        "capture_policy_sha256",
+        "decision_policy_sha256",
+        "raw_frame_sha256",
+        "elapsed_ms"
+      ],
+      "additionalProperties": false,
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "complete"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "applied": {
+            "minProperties": 1
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "applied": {
+            "maxProperties": 0
+          }
+        }
+      }
+    },
+    "Error422": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "$ref": "#/$defs/Version"
+        },
+        "error": {
+          "enum": [
+            "invalid_request",
+            "unsupported_catalog",
+            "text_out_of_scope"
+          ]
+        }
+      },
+      "required": [
+        "contract_version",
+        "error"
+      ],
+      "additionalProperties": false
+    },
+    "Error503": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "$ref": "#/$defs/Version"
+        },
+        "error": {
+          "enum": [
+            "busy",
+            "not_ready"
+          ]
+        }
+      },
+      "required": [
+        "contract_version",
+        "error"
+      ],
+      "additionalProperties": false
+    },
+    "Error502": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "$ref": "#/$defs/Version"
+        },
+        "error": {
+          "enum": [
+            "invalid_worker_frame",
+            "worker_failure"
+          ]
+        }
+      },
+      "required": [
+        "contract_version",
+        "error"
+      ],
+      "additionalProperties": false
+    },
+    "Error504": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "$ref": "#/$defs/Version"
+        },
+        "error": {
+          "enum": [
+            "processing_timeout"
+          ]
+        }
+      },
+      "required": [
+        "contract_version",
+        "error"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

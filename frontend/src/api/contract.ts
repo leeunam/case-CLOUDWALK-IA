@@ -21,6 +21,8 @@ export type Session = {
 }
 export type OperationUpdate = { available?: boolean; switch_target_brand_id?: string | null }
 
+type ClassificationSource = 'channel' | 'jev' | 'setfit' | 'supervisor'
+
 export type StaffCase = {
   id: string
   brand_id: string
@@ -32,8 +34,8 @@ export type StaffCase = {
   classification: {
     category: string | null
     priority: Priority | null
-    category_source: 'channel' | 'jev' | 'supervisor' | null
-    priority_source: 'channel' | 'jev' | 'supervisor' | null
+    category_source: ClassificationSource | null
+    priority_source: ClassificationSource | null
   }
   assignee: { type: 'human' | 'ai'; id: string } | null
   handoff: { summary: string; message_ids: string[] } | null

@@ -4,6 +4,7 @@ require "json"
 require "pathname"
 require "yaml"
 require "json_schemer"
+require_relative "../docs/contratos/classification-http/check_fixtures"
 
 contracts = Pathname.new(__dir__).join("../docs/contratos").realpath
 api_path = contracts.join("openapi.yaml")
@@ -158,6 +159,16 @@ example = ->(name) { examples.fetch(name) { abort "Fixture obrigatória para os 
 check_simulator(example)
 check_analyst_controls(example)
 check_configuration_audit(example)
+check_scenario(api.dig("info", "version") == "1.1.0", "versão REST staff")
+mixed_case = example.call("case-setfit-mixed")
+check_scenario(!validator.ref("#/$defs/Case").valid?(mixed_case) &&
+               validator.ref("#/$defs/CaseV11").valid?(example.call("case-human-owned")),
+               "leitura histórica e discriminação das origens por campo")
+check_scenario(!validator.ref("#/$defs/AgentTurnRequestedV10").valid?(example.call("agent-setfit-request")) &&
+               validator.ref("#/$defs/AgentTurnRequestedV11").valid?(example.call("agent-setfit-request")),
+               "versões Kafka da origem SetFit")
+ClassificationHttpFixtures.new(contracts.join("classification-http")).check
+puts "Contrato HTTP privado, pins, vetor Ruby, respostas R1 e recusas por status verificados."
 
 puts "OpenAPI 3.1, JSON Schema 2020-12 e #{fixtures.size} fixtures verificados (#{invalid_examples} inválidas esperadas)."
 puts "Cenários de retomada do simulador, controles do analista e auditoria de configuração verificados."

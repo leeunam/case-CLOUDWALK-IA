@@ -117,6 +117,14 @@
         }
       ]
     },
+    "ClassificationSourceV11": {
+      "enum": [
+        "channel",
+        "jev",
+        "setfit",
+        "supervisor"
+      ]
+    },
     "ClassificationSource": {
       "type": "string",
       "enum": [
@@ -125,7 +133,7 @@
         "supervisor"
       ]
     },
-    "Classification": {
+    "ClassificationV11": {
       "type": "object",
       "required": [
         "category",
@@ -147,7 +155,7 @@
         "category_source": {
           "oneOf": [
             {
-              "$ref": "#/$defs/ClassificationSource"
+              "$ref": "#/$defs/ClassificationSourceV11"
             },
             {
               "type": "null"
@@ -167,7 +175,7 @@
         "priority_source": {
           "oneOf": [
             {
-              "$ref": "#/$defs/ClassificationSource"
+              "$ref": "#/$defs/ClassificationSourceV11"
             },
             {
               "type": "null"
@@ -196,7 +204,7 @@
           "else": {
             "properties": {
               "category_source": {
-                "$ref": "#/$defs/ClassificationSource"
+                "$ref": "#/$defs/ClassificationSourceV11"
               }
             }
           }
@@ -219,17 +227,48 @@
           "else": {
             "properties": {
               "priority_source": {
-                "$ref": "#/$defs/ClassificationSource"
+                "$ref": "#/$defs/ClassificationSourceV11"
               }
             }
           }
         }
       ]
     },
-    "ValidatedClassification": {
+    "Classification": {
       "allOf": [
         {
-          "$ref": "#/$defs/Classification"
+          "$ref": "#/$defs/ClassificationV11"
+        },
+        {
+          "properties": {
+            "category_source": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/ClassificationSource"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "priority_source": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/ClassificationSource"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "ValidatedClassificationV11": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ClassificationV11"
         },
         {
           "properties": {
@@ -238,6 +277,23 @@
             },
             "priority": {
               "$ref": "#/$defs/Priority"
+            }
+          }
+        }
+      ]
+    },
+    "ValidatedClassification": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ValidatedClassificationV11"
+        },
+        {
+          "properties": {
+            "category_source": {
+              "$ref": "#/$defs/ClassificationSource"
+            },
+            "priority_source": {
+              "$ref": "#/$defs/ClassificationSource"
             }
           }
         }
@@ -339,7 +395,7 @@
       },
       "additionalProperties": false
     },
-    "AgentRequestPayload": {
+    "AgentRequestPayloadV11": {
       "type": "object",
       "required": [
         "classification",
@@ -347,7 +403,7 @@
       ],
       "properties": {
         "classification": {
-          "$ref": "#/$defs/ValidatedClassification"
+          "$ref": "#/$defs/ValidatedClassificationV11"
         },
         "history": {
           "type": "array",
@@ -359,6 +415,20 @@
       },
       "additionalProperties": false,
       "description": "Histórico em sequence crescente. A aplicação verifica a ordem e IDs únicos."
+    },
+    "AgentRequestPayload": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/AgentRequestPayloadV11"
+        },
+        {
+          "properties": {
+            "classification": {
+              "$ref": "#/$defs/ValidatedClassification"
+            }
+          }
+        }
+      ]
     },
     "AgentHandoffPayload": {
       "type": "object",
@@ -388,7 +458,7 @@
       },
       "additionalProperties": false
     },
-    "AgentEnvelope": {
+    "AgentEnvelopeFields": {
       "type": "object",
       "required": [
         "schema_version",
@@ -404,7 +474,10 @@
       ],
       "properties": {
         "schema_version": {
-          "const": "1.0"
+          "enum": [
+            "1.0",
+            "1.1"
+          ]
         },
         "event_id": {
           "$ref": "#/$defs/Uuid"
@@ -437,7 +510,41 @@
       },
       "additionalProperties": false
     },
-    "AgentTurnRequested": {
+    "AgentEnvelope": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/AgentEnvelopeFields"
+        },
+        {
+          "properties": {
+            "schema_version": {
+              "const": "1.0"
+            }
+          }
+        }
+      ]
+    },
+    "AgentTurnRequestedV11": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/AgentEnvelopeFields"
+        },
+        {
+          "properties": {
+            "schema_version": {
+              "const": "1.1"
+            },
+            "event_type": {
+              "const": "agent.turn.requested"
+            },
+            "payload": {
+              "$ref": "#/$defs/AgentRequestPayloadV11"
+            }
+          }
+        }
+      ]
+    },
+    "AgentTurnRequestedV10": {
       "allOf": [
         {
           "$ref": "#/$defs/AgentEnvelope"
@@ -451,6 +558,16 @@
               "$ref": "#/$defs/AgentRequestPayload"
             }
           }
+        }
+      ]
+    },
+    "AgentTurnRequested": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/AgentTurnRequestedV10"
+        },
+        {
+          "$ref": "#/$defs/AgentTurnRequestedV11"
         }
       ]
     },
@@ -764,7 +881,7 @@
       "additionalProperties": false,
       "minProperties": 1
     },
-    "Case": {
+    "CaseV11": {
       "type": "object",
       "required": [
         "id",
@@ -803,7 +920,7 @@
           "$ref": "#/$defs/Assignee"
         },
         "classification": {
-          "$ref": "#/$defs/Classification"
+          "$ref": "#/$defs/ClassificationV11"
         },
         "integration_status": {
           "$ref": "#/$defs/IntegrationStatus"
@@ -878,7 +995,21 @@
       },
       "additionalProperties": false
     },
-    "CaseList": {
+    "Case": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/CaseV11"
+        },
+        {
+          "properties": {
+            "classification": {
+              "$ref": "#/$defs/Classification"
+            }
+          }
+        }
+      ]
+    },
+    "CaseListV11": {
       "type": "object",
       "required": [
         "items",
@@ -888,7 +1019,7 @@
         "items": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/Case"
+            "$ref": "#/$defs/CaseV11"
           }
         },
         "next_cursor": {
@@ -903,6 +1034,22 @@
         }
       },
       "additionalProperties": false
+    },
+    "CaseList": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/CaseListV11"
+        },
+        {
+          "properties": {
+            "items": {
+              "items": {
+                "$ref": "#/$defs/Case"
+              }
+            }
+          }
+        }
+      ]
     },
     "MessageList": {
       "type": "object",
@@ -948,7 +1095,7 @@
       },
       "additionalProperties": false
     },
-    "CaseMessageResult": {
+    "CaseMessageResultV11": {
       "type": "object",
       "required": [
         "case",
@@ -956,13 +1103,27 @@
       ],
       "properties": {
         "case": {
-          "$ref": "#/$defs/Case"
+          "$ref": "#/$defs/CaseV11"
         },
         "message": {
           "$ref": "#/$defs/Message"
         }
       },
       "additionalProperties": false
+    },
+    "CaseMessageResult": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/CaseMessageResultV11"
+        },
+        {
+          "properties": {
+            "case": {
+              "$ref": "#/$defs/Case"
+            }
+          }
+        }
+      ]
     },
     "CaseActionBase": {
       "type": "object",

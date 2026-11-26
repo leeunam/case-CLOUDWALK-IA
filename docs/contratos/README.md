@@ -6,6 +6,8 @@ operação indica a fase em `x-implementation-phase`. Os [schemas JSON 2020-12](
 são compartilhados pelo OpenAPI e pelas fixtures. Mudanças em um contrato exigem
 atualização dos exemplos e coordenação com os consumidores.
 
+O OpenAPI 1.1.0 referencia `CaseV11`, `CaseListV11` e `CaseMessageResultV11` nas mesmas rotas staff. As definições anteriores permanecem disponíveis para validar os exemplos históricos. O arquivo montado pelos consumidores Kafka contém `AgentTurnRequestedV10`, `AgentTurnRequestedV11` e a união discriminada `AgentTurnRequested`. Implante a ponte e o mock com leitura de ambas as versões antes da emissão 1.1. Um campo com origem SetFit em qualquer rodada exige 1.1. Na reversão do provedor, mantenha os leitores duplos enquanto existirem casos ou mensagens capazes de produzir ou carregar 1.1. O mock emite resultados 1.0 e referencia o pedido original. O recibo conserva `event_id` e `disposition`.
+
 ## Entrada dos canais e integração
 
 - O Rails usa o canal da rota e a credencial validada para determinar a marca.
@@ -16,14 +18,14 @@ atualização dos exemplos e coordenação com os consumidores.
   `409`.
 - Ausência, `null` e string vazia em categoria ou prioridade representam campo
   faltante. Quando os valores presentes são válidos, o Rails encaminha apenas
-  os campos faltantes ao Jev. Valor fora do catálogo ativo da marca ou tipo
+  os campos faltantes ao provedor configurado. Valor fora do catálogo ativo da marca ou tipo
   incorreto encaminha a entrada persistida para revisão. Em ambos os caminhos
   o envelope pode receber `202`. A ausência de um campo obrigatório, como
   `text`, recebe `422`.
 - O seed usa as categorias `pix`, `payouts` e `terminal`. A precedência da
   demonstração é `urgent`, `advanced`, `intermediate`, `basic`. O Rails registra
   a origem de cada campo aplicado em separado. Um campo pode vir de `channel`,
-  `jev` ou `supervisor`. A correção auditada altera a origem dos campos
+  `jev`, `setfit` ou `supervisor` nos recursos staff da versão 1.1. A correção auditada altera a origem dos campos
   corrigidos e invalida o complemento que ainda estiver em voo.
 - Os três webhooks exigem assinatura por credencial específica do canal ou da
   integração. `X-Webhook-Timestamp` é o epoch Unix em segundos decimais.

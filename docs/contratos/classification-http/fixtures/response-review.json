@@ -1,0 +1,57 @@
+{
+  "contract_version": "classification-http/1.0",
+  "id": "00000000-0000-4000-8000-000000000831",
+  "capture_policy_sha256": "09de8c13fa56bcddb8006982b0016e3452bb15de89a72a6eae6c42847cedc21f",
+  "package_sha256": "224c572b0a2c6ce93b1dd1b90317df131cbb47b897b4de38e97659fbc7e57872",
+  "model_sha256": {
+    "category": "b989492b3623dc6015e97c5d8af975950a48ce72f489d467062e07fe6996a6c5",
+    "priority": "8a0224ad38fa45a902a58bc25c8dbcc4c9e9aff96ec50024dfe4a01c304bcab1"
+  },
+  "calls": {
+    "category": 0,
+    "priority": 1
+  },
+  "fields": {
+    "category": {
+      "decision": "provided",
+      "reason": "provided",
+      "cut": null,
+      "vector": null,
+      "raw": null,
+      "margin": null
+    },
+    "priority": {
+      "decision": "review",
+      "reason": "below_tau",
+      "cut": {
+        "tau": 0.7,
+        "delta": 0.0
+      },
+      "vector": {
+        "classes": [
+          "advanced",
+          "basic",
+          "informacao_insuficiente",
+          "intermediate",
+          "urgent"
+        ],
+        "scores": [
+          0.1,
+          0.2,
+          0.05,
+          0.1,
+          0.55
+        ]
+      },
+      "raw": "urgent",
+      "margin": 0.35
+    }
+  },
+  "outcome": "review",
+  "applied": {},
+  "catalog_version": 7,
+  "catalog_sha256": "0cadca6fc5e2291b3e471df649d098123bf01cb8b422803c45b6cb9f22d63807",
+  "decision_policy_sha256": "127eb227ac174384700a60390272a48abdca9a81592086dde5bc132727338473",
+  "raw_frame_sha256": "273d334e4cfc997d1ab51d1f35ae6b1c8e2ce766f85ab583758c65e7c0b4fb1c",
+  "elapsed_ms": 2.5
+}
