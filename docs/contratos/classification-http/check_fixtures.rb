@@ -35,6 +35,7 @@ class ClassificationHttpFixtures
       ensure_valid(response["outcome"] == outcome && valid_response?(request, response, frame), "resposta #{outcome}")
       check_mutations(request, response, frame) if outcome == "complete"
     end
+    check_partial_application
     ERRORS.each do |status, codes|
       codes.each do |code|
         error = read(@fixtures.join("#{status}-#{code.tr('_', '-')}.json"))
@@ -156,6 +157,19 @@ class ClassificationHttpFixtures
     %w[accept accepted]
   end
 
+  def check_partial_application
+    request = read(@fixtures.join("request-both.json"))
+    response = read(@fixtures.join("response-complete-both.json"))
+    frame = @fixtures.join("complete-both.jsonl").binread
+    ensure_valid(request.fetch("received") == { "category" => nil, "priority" => nil } &&
+                 response.fetch("applied") == { "category" => "pix", "priority" => "urgent" } &&
+                 valid_response?(request, response, frame), "complemento integral de dois ausentes")
+
+    partial = response.merge("applied" => response.fetch("applied").except("priority"))
+    ensure_valid(valid?("Response", partial), "aplicação parcial estruturalmente válida")
+    ensure_valid(!valid_response?(request, partial, frame), "aplicação parcial de dois aceites")
+  end
+
   def check_mutations(request, response, frame)
     [
       response.merge("id" => "00000000-0000-4000-8000-000000000000"),
@@ -168,8 +182,6 @@ class ClassificationHttpFixtures
       response.merge("applied" => {}),
       response.merge("outcome" => "review", "applied" => {})
     ].each { |bad| ensure_valid(!valid_response?(request, bad, frame), "mutação do retorno") }
-    both_missing = request.merge("received" => { "category" => nil, "priority" => nil })
-    ensure_valid(!valid_response?(both_missing, response, frame), "aplicação parcial de dois ausentes")
     ensure_valid(!valid_request?(request.merge("received" => { "category" => "pix", "priority" => "basic" })), "pedido completo")
     ensure_valid(!valid_request?(request.merge("received" => { "category" => "terminal", "priority" => nil })), "código ausente no snapshot")
     changed_catalog = request["catalog"].merge("category" => request["catalog"]["category"].merge("pix" => "Outra descrição."))

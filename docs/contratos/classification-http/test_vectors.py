@@ -81,22 +81,26 @@ class HttpVectorsTest(unittest.TestCase):
                          dict(contract_version=self.pins["contract_version"], error="text_out_of_scope"))
 
     def test_verified_http_projection(self):
-        for outcome in ("complete", "review", "error"):
-            with self.subTest(outcome=outcome):
-                frame = (FIXTURES / f"{outcome}.jsonl").read_bytes()
-                decision = derive(self.item, frame, self.context)
-                verify(self.item, frame, decision, self.context)
-                response = read(FIXTURES / f"response-{outcome}.json")
+        for scenario, outcome, request in (
+            ("complete", "complete", self.request), ("review", "review", self.request),
+            ("error", "error", self.request), ("complete-both", "complete", read(FIXTURES / "request-both.json")),
+        ):
+            with self.subTest(scenario=scenario):
+                item = ipc.project(request, {"version": self.pins["ipc_catalog_version"], **request["catalog"]})
+                frame = (FIXTURES / f"{scenario}.jsonl").read_bytes()
+                decision = derive(item, frame, self.context)
+                verify(item, frame, decision, self.context)
+                response = read(FIXTURES / f"response-{scenario}.json")
                 self.assertEqual(decision["outcome"], outcome)
                 self.assertEqual(decision["contract_version"], self.pins["decision_namespace"])
-                self.assertEqual(decision["received"], self.request["received"])
+                self.assertEqual(decision["received"], request["received"])
                 projection = {
                     key: decision[key] for key in ("id", "outcome", "applied", "calls", "fields",
                                                    "package_sha256", "model_sha256", "capture_policy_sha256")
                 }
                 projection.update(
-                    contract_version=self.request["contract_version"], catalog_version=self.request["catalog_version"],
-                    catalog_sha256=digest(catalog_bytes(self.request["catalog"])),
+                    contract_version=request["contract_version"], catalog_version=request["catalog_version"],
+                    catalog_sha256=digest(catalog_bytes(request["catalog"])),
                     decision_policy_sha256=decision["selected_policy_sha256"], raw_frame_sha256=decision["raw_sha256"],
                 )
                 self.assertGreaterEqual(response.pop("elapsed_ms"), 0)

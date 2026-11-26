@@ -1,0 +1,22 @@
+{
+  "contract_version": "classification-http/1.0",
+  "id": "00000000-0000-4000-8000-000000000832",
+  "text": "  O pagamento por Pix está parado.  ",
+  "received": {
+    "category": null,
+    "priority": null
+  },
+  "catalog": {
+    "priority": {
+      "urgent": "Necessidade de ação imediata, como operação totalmente interrompida.",
+      "intermediate": "Impacto moderado com operação ainda disponível.",
+      "basic": "Orientação de rotina, sem operação prejudicada.",
+      "advanced": "Impacto relevante sem necessidade de ação imediata."
+    },
+    "category": {
+      "pix": "Transferência ou pagamento por Pix, prazo, estorno ou falha.",
+      "payouts": "Repasse, recebimento ou liquidação de valores de vendas."
+    }
+  },
+  "catalog_version": 7
+}
