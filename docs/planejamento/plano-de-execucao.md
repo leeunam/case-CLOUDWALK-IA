@@ -185,6 +185,13 @@ humano demonstráveis. Essa função é distinta do classificador do CLASS-001.
 Modelo, provedor, desenho, critérios de aceite e limites de uso/custo serão
 definidos na retomada; o mock determinístico permanece disponível para testes.
 
+**Retomada em 26/11/2026.** Após a publicação do MVP, o responsável aprovou
+GPT-5.6 Luna pela Feita, conhecimento fictício por marca e teto acumulado de
+US$ 1 no piloto E01. A preparação começou isolada da demonstração publicada.
+A representação do conhecimento e a proposta de ontologia estão na
+[especificação E01](e01-atendente-real.md), com as confirmações e propostas
+separadas. O atendente real ainda não está implementado nem qualificado.
+
 ## 1. Ordem de trabalho
 
 | Etapa | Entregas internas | Evidência para avançar |
