@@ -8,7 +8,7 @@ treinados. Nenhuma das 225 políticas de revisão atingiu todos os critérios.
 Na extensão offline SF2-R1, nove regras adicionais atingiram as metas de
 validação. A selecionada concluiu corretamente 51/72 classificáveis e
 revisou todos os 18 casos que exigiam revisão. A
-[preparação pública da SF2-FINAL-R1](evidencias/c05/sf2/final-r1-preparacao-01/README.md)
+[preparação pública revisada da SF2-FINAL-R1](evidencias/c05/sf2/final-r1-preparacao-02/README.md)
 teve aceite independente. Os 120 casos finais permanecem fechados e nenhum
 modelo foi adotado.
 [Plano de execução e critérios de aceite](planejamento/plano-de-execucao.md).
@@ -69,12 +69,14 @@ nove passaram; a selecionada usa categoria tau 0,95 e prioridade tau 0,70.
 A cobertura correta foi 51/72, com zero conclusões indevidas nos 18 casos
 de revisão esperada, zero urgentes rebaixados e 39/90 revisões.
 
-Em 26/11/2026, a Task 3 da SF2-FINAL-R1 teve aceite da preparação pública,
-com cinco testes aprovados e reprodução independente do recibo. Os tempos
-do replay medem fixture e cálculo da decisão. O teste final e a medição de
-inferência aguardam a confirmação do nome do inventário e dos quatro papéis
-previstos no protocolo e a autorização específica.
-[Evidências da preparação pública](evidencias/c05/sf2/final-r1-preparacao-01/README.md).
+Em 26/11/2026, a revisão independente aceitou a preparação pública da
+SF2-FINAL-R1 após a correção dos três P1 da revisão ampla. O QA registrou
+32 testes aprovados em 7,736 s e o revisor reproduziu o recibo revisado em
+7,53 s. Os tempos do replay medem fixture e cálculo da decisão. O teste
+final e a medição de inferência aguardam a confirmação do nome do
+inventário e dos quatro papéis previstos no protocolo e a autorização
+específica vinculada ao recibo revisado.
+[Evidências da preparação pública](evidencias/c05/sf2/final-r1-preparacao-02/README.md).
 
 A integração (C06) e a reprodução do complemento real (C07/F09 final) continuam
 bloqueadas. O fechamento completo ainda requer qualificação conforme

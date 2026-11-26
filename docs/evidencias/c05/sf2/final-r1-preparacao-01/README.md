@@ -1,5 +1,9 @@
 # SF2-FINAL-R1 · preparação pública
 
+**Registro histórico.** A [preparação pública revisada](../final-r1-preparacao-02/README.md)
+incorpora as correções dos três P1 e substitui este recibo como referência
+para uma eventual autorização.
+
 Em 26/11/2026, a revisão independente aceitou a preparação pública da Task 3.
 A candidata fixa τ = 0,95 para categoria, τ = 0,70 para prioridade e δ = 0
 para ambos. O SHA-256 de [release.json](release.json) é
