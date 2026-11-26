@@ -1,6 +1,7 @@
 """Copia somente fontes e recursos públicos do commit aceito antes de importar código SF2."""
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -33,6 +34,67 @@ def check(value, message):
 
 def sha(raw):
     return hashlib.sha256(raw).hexdigest()
+
+
+def public_layout(root):
+    directory = root / SF / ".cache/qualificacao-r1-01"
+    return dict(config=directory / "config.json", release=directory / "release", run=directory / "final-run")
+
+
+def public_argument(layout, role, value):
+    check(Path(value) == layout[role], "papel fora do caminho público autorizado: " + role)
+
+
+def arguments(root, commit, args):
+    layout = public_layout(root)
+    for role in ("config", "release", "run"):
+        if hasattr(args, role):
+            public_argument(layout, role, getattr(args, role))
+    if hasattr(args, "out"):
+        public_argument(layout, "release" if args.action == "freeze" else "run", args.out)
+    if hasattr(args, "expect"):
+        check(re.fullmatch("[0-9a-f]{64}", args.expect), "digest externo inválido")
+    if hasattr(args, "execution_sha256"):
+        check(re.fullmatch("[0-9a-f]{64}", args.execution_sha256), "digest externo de execução inválido")
+    if hasattr(args, "custody"):
+        check(args.custody.parent == CUSTODY, "inventário fora da custódia autorizável")
+    if args.action == "_worker":
+        check(args.commit == commit and args.package == str(PACKAGE) and args.package_sha256 == PACKAGE_SHA and
+              args.policy == str(root / CAPTURE_POLICY), "argumentos internos divergentes")
+    return layout
+
+
+CUSTODY = MAIN / ".superpowers/sdd/conclusao-projeto/sf2-final/accepted"
+PACKAGE = HISTORY / SF / ".cache/qualificacao-01/training-02/package"
+PACKAGE_SHA = "224c572b0a2c6ce93b1dd1b90317df131cbb47b897b4de38e97659fbc7e57872"
+CAPTURE_POLICY = "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/capture-policy.json"
+
+
+def interpreter(invocation=PYTHON, process=Path("/proc/self/exe"), *, allowed=None):
+    allowed = allowed or (PYTHON.parent, Path("/home/inteli/.pyenv/versions/3.11.13/bin"))
+    def trusted_parent(path):
+        check(path.parent in allowed, "cadeia do Python fora das raízes públicas")
+        for directory in reversed(path.parents):
+            check(not directory.is_symlink(), "diretório do Python redirecionado")
+    trusted_parent(invocation)
+    path = invocation
+    chain = []
+    while path.is_symlink():
+        target = os.readlink(path)
+        check(len(chain) < 16, "cadeia de links do Python inválida")
+        chain.append([str(path), target])
+        path = Path(os.path.normpath(path.parent / target))
+        trusted_parent(path)
+    actual = Path(os.readlink(process)) if process.is_symlink() else process
+    check(actual == path, "executável do processo diverge da invocação do venv")
+    with path.open("rb") as command, process.open("rb") as loaded:
+        a, b = os.fstat(command.fileno()), os.fstat(loaded.fileno())
+        check((a.st_dev, a.st_ino) == (b.st_dev, b.st_ino), "identidade do Python carregado divergente")
+        binary = hashlib.file_digest(loaded, "sha256").hexdigest()
+    cfg = invocation.parents[1] / "pyvenv.cfg"
+    check(not cfg.is_symlink(), "configuração do venv redirecionada")
+    return dict(path=str(invocation), links=chain, target=str(actual), sha256=binary,
+                venv_config_sha256=sha(cfg.read_bytes()))
 
 
 def git(root, *args):
@@ -93,8 +155,8 @@ def resources(root, commit):
 
 
 def entry_environment():
-    check(sys.flags.isolated and sys.dont_write_bytecode and sys.version.split()[0] == "3.11.13"
-          and Path(sys.executable) == PYTHON, "use o Python pinado com -I -B")
+    check(sys.flags.isolated and sys.dont_write_bytecode and sys.flags.no_site and sys.version.split()[0] == "3.11.13"
+          and Path(sys.executable) == PYTHON, "use o Python pinado com -I -B -S")
     check(not any(m == "script" or m.startswith("script.") for m in sys.modules),
           "processo exige imports locais novos")
 

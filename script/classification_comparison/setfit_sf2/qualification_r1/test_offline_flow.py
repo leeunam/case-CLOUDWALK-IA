@@ -53,10 +53,10 @@ class EndToEnd(unittest.TestCase):
             dest, rel = root / "run", root / "release"
             argv, context = worker(root, rows)
             config = root / "config"
-            config.write_bytes(encoded(dict(release=str(rel), command=dict(argv=argv, cwd=str(root), environment={}))))
+            config.write_bytes(encoded(dict(release=str(rel), run=str(dest), command=dict(argv=argv, cwd=str(root), environment={}))))
             def inspect(_):
                 return {"final_seal_sha256": seal_sha}, context, final_seal
-            guard = Guard(root/"shared", root/"legacy-validation", root/"old-release", root/"auth")
+            guard = Guard(root/"shared", root/"legacy-validation", root/"old-release", root/"auth", custody)
             guard.authorizations.mkdir()
             def protected(func):
                 def wrapped(path, *args, **kwargs):
@@ -64,23 +64,25 @@ class EndToEnd(unittest.TestCase):
                         self.assertFalse(Path(path).is_relative_to(custody), "operação de custódia antes da reserva")
                     return func(path, *args, **kwargs)
                 return wrapped
+            layout = dict(config=config, release=rel, run=dest)
             with ExitStack() as checks:
                 for name in ("open", "stat", "lstat", "scandir", "listdir", "readlink"):
                     checks.enter_context(patch.object(os, name, protected(getattr(os, name))))
                 checks.enter_context(patch.object(Path, "open", protected(Path.open)))
-                expected = release.freeze(config, rel, inspect)
-                checked = release.check(rel, expected, inspect)
+                expected = release.freeze(config, rel, inspect, layout=layout)
+                checked = release.check(rel, expected, inspect, layout=layout)
                 with self.assertRaises(FileNotFoundError):
                     execution.execute(checked, rel, expected, inventory, dest, guard,
                                       load_records=execution.records_from_custody, supervise=execution._supervise,
                                       derive=dummy_derive, verify=dummy_verify)
             (guard.authorizations / (expected + ".json")).write_bytes(encoded(
-                dict(action="execute_once", release_sha256=expected, final_seal_sha256=seal_sha)))
+                dict(action="execute_once", release_sha256=expected, final_seal_sha256=seal_sha,
+                     custody=dict(inventory=str(inventory), members=decode(read(inventory))))))
             calls = []
-            def confirmed(path, spec):
+            def confirmed(path, spec, scope):
                 guard.verify(rel, expected, seal_sha, dest, path)
                 calls.append(path)
-                return execution.records_from_custody(path, spec)
+                return execution.records_from_custody(path, spec, scope)
             execution_sha = execution.execute(checked, rel, expected, inventory, dest, guard,
                                                load_records=confirmed, supervise=execution._supervise,
                                                derive=dummy_derive, verify=dummy_verify)

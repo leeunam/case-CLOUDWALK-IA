@@ -78,7 +78,7 @@ def supervise(records, argv, context, destination, startup_seconds, *, derive, v
 
 
 def _supervise(records, argv, context, destination, startup_seconds, *, derive, verify, catalog,
-               timeout_ms, cwd, environment):
+               timeout_ms, cwd, environment, binding=None):
     check_command(argv)
     require(startup_seconds > 0 and 0 < timeout_ms <= 5000, "prazo inválido")
     planned = schedule(records)
@@ -162,7 +162,7 @@ def _supervise(records, argv, context, destination, startup_seconds, *, derive, 
         files, journal, latency = materialize(root, units, planned)
     if interrupted and failure is None:
         failure = dict(type="KeyboardInterrupt", message="SIGINT durante materialização", attempt=None)
-    seal = dict(contract_version="sf2-final-r1/1.0", files=files, startup_ms=startup_ms, failure=failure,
+    seal = dict(contract_version="sf2-final-r1/1.0", reservation_sha256=binding, files=files, startup_ms=startup_ms, failure=failure,
                 resources={"worker": resource(process.pid if process else None, worker),
                            "supervisor": resource(os.getpid(), supervisor)},
                 case_latency_ms=latency, historical_capture_costs=costs,

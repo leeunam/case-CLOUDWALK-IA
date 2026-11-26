@@ -53,7 +53,7 @@ def parse(argv):
     return parser.parse_args(argv)
 
 
-def active_worker(args, pre, release, guard, b, commit, source_hashes, snapshot):
+def active_worker(args, pre, release, guard, b, commit, source_hashes, snapshot, layout, dependencies):
     import os
     from importlib import import_module
     storage = import_module(MODULE + ".qualification_r1.storage")
@@ -63,13 +63,13 @@ def active_worker(args, pre, release, guard, b, commit, source_hashes, snapshot)
     expected = reserved["release_sha256"]
     guard.authorization(expected, seal)
     guard.verify(args.release, expected, seal, args.run)
-    config, frozen, command = release.chain(args.release, expected)
+    config, frozen, command = release.chain(args.release, expected, layout=layout)
     require = storage.require
     require(args.commit == commit and config == pre.configuration(ROOT, commit, args.release, args.run)
-            and frozen["current_sources"] == source_hashes and command["argv"] == [sys.executable, "-I", "-B", *sys.argv]
+            and frozen["current_sources"] == source_hashes and command["argv"] == [sys.executable, "-I", "-B", "-S", *sys.argv]
             and command["cwd"] == os.getcwd() and command["environment"] == dict(os.environ), "worker fora da liberação")
-    dependencies = import_module(MODULE + ".qualification_r1.dependencies")
-    require(dependencies.inventory(frozen["versions"]) == frozen["dependencies"], "dependências do worker divergentes")
+    require(dependencies == frozen["dependencies"], "dependências do worker divergentes")
+    verify_interpreter(frozen, b.interpreter())
     # O próprio adaptador original só inicia após vincular este processo à reserva única.
     storage.exclusive(args.run / "worker-started.json", storage.encoded(dict(release_sha256=expected, pid=os.getpid())))
     raw = storage.read(snapshot / pre.PUBLIC["package_manifest"], args.package_sha256)
@@ -81,36 +81,51 @@ def active_worker(args, pre, release, guard, b, commit, source_hashes, snapshot)
         return adapter.main()
 
 
+def verify_interpreter(frozen, actual):
+    if frozen["python_executable"] != actual:
+        raise ValueError("Python efetivamente carregado diverge da liberação")
+
+
 def dispatch(args):
     b, commit = bootstrap()
+    layout = b.arguments(ROOT, commit, args)
     with b.snapshot(ROOT, commit) as (snapshot, sources):
-        pre = importlib.import_module(MODULE + ".qualification_r1.preflight")
-        release = importlib.import_module(MODULE + ".qualification_r1.release")
-        flow = importlib.import_module(MODULE + ".qualification_r1.execution")
-        exposure = importlib.import_module(MODULE + ".qualification_r1.exposure")
-        guard = exposure.Guard.production()
-        def inspect(config):
-            return pre.inspect_public(ROOT, commit, snapshot, sources, config)
+        dep = importlib.import_module(MODULE + ".qualification_r1.dependencies")
+        origin = snapshot / "docs/evidencias/c05/sf2/qualificacao-01/execucao-02/pacote/manifest.json"
+        raw = origin.read_bytes()
+        b.check(b.sha(raw) == b.PACKAGE_SHA, "manifesto do ambiente divergente")
+        with dep.environment(json.loads(raw)["versions"]) as dependencies:
+            return dispatch_verified(args, b, commit, snapshot, sources, layout, dependencies)
 
-        if args.action == "template":
-            return pre.configuration(ROOT, commit, args.release, args.run)
-        if args.action == "freeze":
-            return release.freeze(args.config, args.out, inspect)
-        if args.action == "_worker":
-            return active_worker(args, pre, release, guard, b, commit, sources, snapshot)
-        checked = release.check(args.release, args.expect, inspect)
-        if args.action == "check":
-            return args.expect
-        config, _, _ = release.chain(args.release, args.expect)
-        dest = args.out if args.action == "execute" else args.run
-        b.check(str(dest) == config["run"], "destino diferente do planejado")
-        runtime = importlib.import_module(MODULE + ".runtime_r1")
-        if args.action == "execute":
-            return flow.execute(checked, args.release, args.expect, args.custody, dest, guard,
-                                load_records=flow.records_from_custody, supervise=flow._supervise,
-                                derive=runtime.derive, verify=runtime.verify)
-        return flow.audit(checked, args.release, args.expect, args.custody, dest, args.execution_sha256, guard,
-                          load_records=flow.records_from_custody, verify=runtime.verify)
+
+def dispatch_verified(args, b, commit, snapshot, sources, layout, dependencies):
+    pre = importlib.import_module(MODULE + ".qualification_r1.preflight")
+    release = importlib.import_module(MODULE + ".qualification_r1.release")
+    flow = importlib.import_module(MODULE + ".qualification_r1.execution")
+    exposure = importlib.import_module(MODULE + ".qualification_r1.exposure")
+    guard = exposure.Guard.production()
+    def inspect(config):
+        return pre.inspect_public(ROOT, commit, snapshot, sources, config, dependencies)
+
+    if args.action == "template":
+        return pre.configuration(ROOT, commit, args.release, args.run)
+    if args.action == "freeze":
+        return release.freeze(args.config, args.out, inspect, layout=layout)
+    if args.action == "_worker":
+        return active_worker(args, pre, release, guard, b, commit, sources, snapshot, layout, dependencies)
+    checked = release.check(args.release, args.expect, inspect, layout=layout)
+    if args.action == "check":
+        return args.expect
+    config, _, _ = release.chain(args.release, args.expect, layout=layout)
+    dest = args.out if args.action == "execute" else args.run
+    b.check(str(dest) == config["run"], "destino diferente do planejado")
+    runtime = importlib.import_module(MODULE + ".runtime_r1")
+    if args.action == "execute":
+        return flow.execute(checked, args.release, args.expect, args.custody, dest, guard,
+                            load_records=flow.records_from_custody, supervise=flow._supervise,
+                            derive=runtime.derive, verify=runtime.verify)
+    return flow.audit(checked, args.release, args.expect, args.custody, dest, args.execution_sha256, guard,
+                      load_records=flow.records_from_custody, verify=runtime.verify)
 
 
 if __name__ == "__main__":

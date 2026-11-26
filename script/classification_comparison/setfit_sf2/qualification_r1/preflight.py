@@ -11,10 +11,9 @@ from ..revision_r1 import cli as replay
 from ..training.environment import check_pins
 from . import bootstrap as b
 from .package import verified_package
-from .dependencies import inventory as dependency_inventory
 from .storage import canonical, digest, encoded, read, require
 
-PACKAGE = b.HISTORY / b.SF / ".cache/qualificacao-01/training-02/package"
+PACKAGE = b.PACKAGE
 HISTORICAL_COMMIT = "4eb86a3282f94f32119042a0f6aa075e9f72960a"
 OFFLINE = "99cf2f33e1803838e33813d5c4ff46971181ce4e"
 PUBLIC = {"final_protocol": b.FINAL_PROTOCOL, "offline_protocol": replay.AMENDMENT,
@@ -24,7 +23,7 @@ PUBLIC = {"final_protocol": b.FINAL_PROTOCOL, "offline_protocol": replay.AMENDME
 
 
 def command(root, commit, release, run):
-    argv = [str(b.PYTHON), "-I", "-B", str(root / b.SF / "qualification_r1/cli.py"), "_worker",
+    argv = [str(b.PYTHON), "-I", "-B", "-S", str(root / b.SF / "qualification_r1/cli.py"), "_worker",
             "--commit", commit, "--release", str(release), "--run", str(run), "--package", str(PACKAGE),
             "--package-sha256", "224c572b0a2c6ce93b1dd1b90317df131cbb47b897b4de38e97659fbc7e57872",
             "--policy", str(root / PUBLIC["policy"])]
@@ -37,7 +36,14 @@ def configuration(root, commit, release, run):
                 command=command(root, commit, release, run), release=str(release), run=str(run))
 
 
+def validate_bindings():
+    from . import execution, runner
+    require(runner.project is ipc.project and execution.project is ipc.project and execution.CATALOG is core.CATALOG
+            and execution._supervise is runner._supervise, "alias em memória do caminho de execução substituído")
+
+
 def validate_state(snapshot, data, runtime):
+    validate_bindings()
     require(core.ROOT == snapshot and encoded(core.PROTOCOL) == encoded(core.decode(data["protocol"]))
             and encoded(core.CATALOG) == encoded(core.decode(data["catalog"]))
             and core.LABELS == {f: core.PROTOCOL["labels"][f] for f in core.FIELDS}
@@ -79,7 +85,7 @@ def parity(data, report, context, runtime):
                 first_id=cases[0]["id"], first_raw_sha256=cases[0]["raw_sha256"])
 
 
-def inspect_public(root, commit, snapshot, sources, config):
+def inspect_public(root, commit, snapshot, sources, config, dependencies=None):
     release, run = (Path(config[k]) for k in ("release", "run"))
     projected = root / b.SF / ".cache/qualificacao-r1-01"
     require(all(path.parent == projected for path in (release, run)), "diretório fora da área projetada")
@@ -127,7 +133,7 @@ def inspect_public(root, commit, snapshot, sources, config):
         require(manifest["versions"] == versions and manifest["class_order"] == spec["candidate"]["class_order"]
                 and manifest["model_sha256"] == spec["candidate"]["model_sha256"]
                 and manifest["files"] == origin["public_package_members"], "pacote, classes ou pins divergentes")
-    dependencies = dependency_inventory(versions)
+    require(dependencies, "dependências do processo sem atestação")
     checked_parity = parity(data, report, context, runtime)
     protocol_seal = read(snapshot / PUBLIC["final_seal"], anchors["public_final_seal"])
     freeze = dict(accepted_commit=commit, offline_commit=OFFLINE, capture_commit=HISTORICAL_COMMIT,
@@ -135,8 +141,6 @@ def inspect_public(root, commit, snapshot, sources, config):
                   selection_counts=report["counts"], parity=checked_parity, final_seal_sha256=digest(protocol_seal),
                   package_sha256=context["package_sha256"], package_members=manifest["files"],
                   class_order=manifest["class_order"], model_sha256=manifest["model_sha256"], versions=versions, dependencies=dependencies,
-                  python_executable=dict(path=str(b.PYTHON), target=str(b.PYTHON.resolve()),
-                                         sha256=digest(b.PYTHON.read_bytes()),
-                                         venv_config_sha256=digest(read(b.PYTHON.parents[1] / "pyvenv.cfg"))), historical_capture_costs=core.decode(data["capture_costs"]))
+                  python_executable=b.interpreter(), historical_capture_costs=core.decode(data["capture_costs"]))
     return freeze, context, core.decode(protocol_seal)
 

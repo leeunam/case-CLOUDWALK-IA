@@ -8,10 +8,10 @@ from . import execution, exposure, release
 from .storage import digest, encoded, exclusive, read
 
 
-def competitor(layout, rel, dest, expected, seal, gate, log):
+def competitor(layout, rel, dest, expected, seal, gate, log, custody):
     gate.wait(5)
     try:
-        layout.reserve(rel, expected, seal, dest, log)
+        layout.reserve(rel, expected, seal, dest, custody)
         with log.open("ab") as output:
             output.write(read(log.parent / "custody-fixture") + b"\n")
     except (OSError, ValueError):
@@ -32,8 +32,9 @@ class Exposure(unittest.TestCase):
         old = self.root / "old"
         old.mkdir()
         self.guard = exposure.Guard(self.root / "guards", old / "final-exposure.json", old / "exposure.json",
-                                   self.root / "auth")
+                                   self.root / "auth", self.root)
         self.guard.authorizations.mkdir()
+        self.layouts = {}
         self.seal = digest(b"fictional final seal")
         self.custody = self.root / "custody-fixture"
         self.custody.write_bytes(b"fake data")
@@ -45,11 +46,14 @@ class Exposure(unittest.TestCase):
         cmd = dict(argv=["fixture"], cwd=str(self.root), environment={})
         config.write_bytes(encoded(dict(command=cmd, release=str(rel), run=str(dest))))
         inspect = Mock(return_value=(self.frozen, {}, {}))
-        expected = release.freeze(config, rel, inspect)
-        checked = release.check(rel, expected, inspect)
+        layout = self.layouts[rel] = dict(config=config, release=rel, run=dest)
+        expected = release.freeze(config, rel, inspect, layout=layout)
+        checked = release.check(rel, expected, inspect, layout=layout)
         self.assertFalse((self.guard.shared / (self.seal + ".json")).exists())
         self.assertFalse(self.guard.legacy_validation.exists())
         auth = {"action": "execute_once", "release_sha256": expected, "final_seal_sha256": self.seal}
+        auth["custody"] = dict(inventory=str(self.custody), members={k: str(self.root / (k + ".fictional"))
+                                for k in ("final", "annotations", "review_receipt", "token_lengths")})
         (self.guard.authorizations / (expected + ".json")).write_bytes(encoded(auth))
         return rel, dest, expected, checked
 
@@ -64,7 +68,7 @@ class Exposure(unittest.TestCase):
         ctx = multiprocessing.get_context("fork")
         go = ctx.Event()
         log = self.root / "first-reads"
-        procs = [ctx.Process(target=competitor, args=(self.guard, rel, dest, sha, self.seal, go, log))
+        procs = [ctx.Process(target=competitor, args=(self.guard, rel, dest, sha, self.seal, go, log, self.custody))
                  for rel, dest, sha, _ in values]
         for p in procs:
             p.start()
@@ -169,10 +173,10 @@ class Exposure(unittest.TestCase):
                 original = read(path)
                 path.write_bytes(original + b" ")
                 with self.assertRaisesRegex(ValueError, "SHA-256"):
-                    release.check(rel, expected, opened)
+                    release.check(rel, expected, opened, layout=self.layouts[rel])
                 path.write_bytes(original)
         with self.assertRaisesRegex(ValueError, "inventário"):
-            release.check(rel, expected, lambda cfg: ({"changed": True}, {}, {}))
+            release.check(rel, expected, lambda cfg: ({"changed": True}, {}, {}), layout=self.layouts[rel])
         opened.assert_not_called()
         self.assertFalse(self.guard.shared.exists())
 

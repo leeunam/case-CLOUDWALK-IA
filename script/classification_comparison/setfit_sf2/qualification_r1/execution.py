@@ -1,5 +1,6 @@
 """Exposição única e auditoria dos artefatos confirmados por dois digests externos."""
 import base64
+import signal
 from math import isfinite
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -8,21 +9,28 @@ from ..contracts.artifacts import validate_manifest
 from ..contracts.core import CATALOG, PROTOCOL, decode
 from ..contracts.ipc import project
 from ..evaluation.metrics import metrics, percentiles, quality_gates
-from .runner import FILES, _supervise, schedule
-from .storage import canonical, digest, encoded, publish, read, require
+from .runner import FILES, _supervise, schedule, record_interrupt
+from .storage import canonical, digest, encoded, mkdir, publish, read, require, sync_directory
 
 
-def records_from_custody(inventory, seal):
+def records_from_custody(inventory, seal, scope):
+    require(str(inventory) == scope["custody"], "inventário diferente da reserva")
     paths = decode(read(inventory))
+    require(paths == scope["members"], "papéis diferentes da autorização")
     require(set(paths) == {"final", "annotations", "review_receipt", "token_lengths"}, "inventário privado divergente")
+    for role, location in paths.items():
+        spec = seal["files"].get(role)
+        require(Path(location).parent == inventory.parent and (not spec or Path(location).name == spec["path"]),
+                "arquivo fora do escopo reservado")
+    for location in paths.values():
+        canonical(Path(location))
     with TemporaryDirectory(prefix="sf2-custody-") as tmp:
         files, blobs = {}, {}
         for role, location in paths.items():
             spec = seal["files"].get(role)
             expected = spec["sha256"] if spec else seal[role + "_sha256"]
-            src = canonical(Path(location))
+            src = Path(location)
             name = spec["path"] if spec else role + ".json"
-            require(not spec or src.name == name, "arquivo de outra partição")
             files[role] = Path(tmp) / name
             blobs[role] = read(src, expected)
             files[role].write_bytes(blobs[role])
@@ -33,18 +41,61 @@ def records_from_custody(inventory, seal):
 def execute(checked, release, expected, custody, dest, guard, *, load_records, supervise, derive, verify):
     frozen, context, final_seal, cmd = checked
     receipt = guard.reserve(release, expected, frozen["final_seal_sha256"], dest, custody)
-    dest.mkdir()
-    seal_sha = failure = None
+    mkdir(dest)
+    failure = None
+    with record_interrupt() as interrupts:
+        try:
+            # Somente a coleta é preemptiva. Durante todo o fechamento SIGINT é conservado no recibo.
+            previous = signal.signal(signal.SIGINT, signal.default_int_handler)
+            try:
+                records = load_records(custody, final_seal, receipt)
+                supervise(records, cmd["argv"], context, dest / "run", 60, derive=derive, verify=verify,
+                          catalog=CATALOG, timeout_ms=5000, cwd=cmd["cwd"], environment=cmd["environment"],
+                          binding=digest(encoded(receipt)))
+            finally:
+                signal.signal(signal.SIGINT, previous)
+        except (Exception, KeyboardInterrupt) as exc:
+            failure = {"type": type(exc).__name__, "message": str(exc)}
+        return finish_execution(dest, receipt, expected, failure, interrupts)
+
+
+def finish_execution(dest, receipt, expected, failure, interrupts):
+    """Só o dono do destino novo fecha este recibo. Uma interrupção nunca relança o worker."""
+    path = dest / "execution.json"
+    previous = None
     try:
-        records = load_records(custody, final_seal)
-        supervise(records, cmd["argv"], context, dest / "run", 60, derive=derive, verify=verify,
-                  catalog=CATALOG, timeout_ms=5000, cwd=cmd["cwd"], environment=cmd["environment"])
-        seal_sha = digest(read(dest / "run/seal.json"))
-    except (Exception, KeyboardInterrupt) as exc:
-        failure = {"type": type(exc).__name__, "message": str(exc)}
-    raw = encoded(dict(exposure=receipt, release_sha256=expected, seal_sha256=seal_sha, interruption=failure))
-    publish(dest / "execution.json", raw)
-    return digest(raw)
+        sealed = read(dest / "run/seal.json")
+    except FileNotFoundError:
+        seal_sha = None
+        require(failure or interrupts, "worker retornou sem selo")
+    else:
+        require(decode(sealed)["reservation_sha256"] == digest(encoded(receipt)), "selo de outra reserva")
+        seal_sha = digest(sealed)
+        sync_directory(dest / "run")
+    while True:
+        if interrupts and failure is None:
+            failure = dict(type="KeyboardInterrupt", message="SIGINT durante fechamento da execução")
+        raw = encoded(dict(exposure=receipt, release_sha256=expected, seal_sha256=seal_sha, interruption=failure))
+        if previous is not None:
+            try:
+                existing = read(path)
+            except FileNotFoundError:
+                existing = None
+            require(existing in (None, previous), "recibo externo diferente durante fechamento")
+        else:
+            existing = None
+        try:
+            if existing != raw:
+                publish(path, raw, replace=existing is not None)
+        except KeyboardInterrupt:
+            interrupts.append(True)
+            previous = raw
+            continue
+        sync_directory(dest)
+        if interrupts and failure is None:
+            previous = raw
+            continue
+        return digest(raw)
 
 
 def audit_run(root, seal_digest, records, context, verify):
@@ -124,7 +175,13 @@ def audit(checked, release, expected, custody, dest, execution_sha, guard, *, lo
     if execution["seal_sha256"] is None:
         require(execution["interruption"], "recibo sem selo ou interrupção")
         return {"status": "inconclusive", "failure": execution["interruption"]}
-    require(execution["interruption"] is None, "recibo de execução contraditório")
-    read(dest / "run/seal.json", execution["seal_sha256"])
-    return audit_run(dest / "run", execution["seal_sha256"], load_records(custody, final_seal), context, verify)
-
+    try:
+        sealed = decode(read(dest / "run/seal.json", execution["seal_sha256"]))
+        require(sealed["reservation_sha256"] == digest(encoded(receipt)), "selo de outra reserva")
+        report = audit_run(dest / "run", execution["seal_sha256"], load_records(custody, final_seal, receipt), context, verify)
+    except (OSError, ValueError, LookupError, TypeError, AttributeError, RecursionError) as exc:
+        return dict(status="inconclusive", reason="integridade da execução", verified_cases=0, verified_controls=0,
+                    integrity_error={"type": type(exc).__name__, "message": str(exc)}, execution_sha256=execution_sha)
+    if execution["interruption"]:
+        report.update(status="inconclusive", execution_interruption=execution["interruption"])
+    return report
