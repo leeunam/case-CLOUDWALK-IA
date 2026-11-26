@@ -170,6 +170,23 @@ class Stack:
             self.compose("up", "--no-deps", "--no-build", "--wait", "--wait-timeout", "90",
                          service, origin=origin)
 
+    def check_running_classifier(self):
+        # Consulte somente os seletores dos contêineres ativos, inclusive em imagens fixture legadas.
+        probe = """
+            if [ "${CLASSIFICATION_PROVIDER-jev}" = setfit ]; then
+                echo setfit
+            elif [ "${CLASSIFICATION_PROVIDER-jev}" = jev ] && [ "${CLOUDWALK_JEV_MODE-disabled}" = fixture ]; then
+                echo fixture
+            else
+                echo desconhecido
+            fi
+        """
+        for service in ("api", "worker"):
+            mode = self.compose("exec", "-T", service, "sh", "-c", probe, capture=True, timeout=5).strip()
+            if mode != self.args.classifier:
+                raise PublishError(f"O modo de classificação em execução no serviço {service} diverge do solicitado. "
+                                   "Use unpublish no modo vigente antes de atualizar a pilha.")
+
     def unpublish(self):
         self.compose("rm", "--stop", "--force", "cloudflared", tunnel=True, capture=True)
         running = self.compose("ps", "--status", "running", "--services", capture=True)
@@ -179,7 +196,10 @@ class Stack:
 
     def publish(self):
         running = self.tunnel_running()
-        if not running:
+        if running:
+            self.check_running_classifier()
+            self.check()
+        else:
             self.up()
             self.prepare()
 

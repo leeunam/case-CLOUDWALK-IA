@@ -1,6 +1,8 @@
 import io
 import json
+import subprocess
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
@@ -81,6 +83,68 @@ class PublishConfigurationTest(unittest.TestCase):
             with patch.object(stack, "compose", side_effect=compose), patch.object(stack, "ca", return_value=None), \
                  patch("publish.ready", return_value=True), self.assertRaisesRegex(PublishError, "SetFit"):
                 stack.check()
+
+    def test_repeat_publish_checks_both_live_selectors_and_readiness_before_changes(self):
+        origin = "https://teste.trycloudflare.com"
+        modes = {
+            "fixture": {"CLOUDWALK_JEV_MODE": "fixture"},
+            "setfit": {"CLASSIFICATION_PROVIDER": "setfit", "CLOUDWALK_JEV_MODE": "disabled"},
+            "disabled": {"CLASSIFICATION_PROVIDER": "jev", "CLOUDWALK_JEV_MODE": "disabled"},
+        }
+        cases = [
+            ("setfit", "setfit", "setfit", False, "indisponível"),
+            ("setfit", "fixture", "fixture", True, "unpublish no modo vigente"),
+            ("fixture", "setfit", "setfit", True, "unpublish no modo vigente"),
+            ("setfit", "setfit", "fixture", True, "worker"),
+            ("fixture", "disabled", "fixture", True, "api"),
+            ("setfit", "setfit", "setfit", True, None),
+            ("fixture", "fixture", "fixture", True, None),
+        ]
+        with TemporaryDirectory() as temp:
+            model = Path(temp)
+            (model / "manifest.json").write_text("{}")
+            for classifier, api, worker, available, error in cases:
+                with self.subTest(classifier=classifier, api=api, worker=worker, available=available):
+                    args = SimpleNamespace(project="cloudwalk_publish_test", http_port=18080, https_port=18443,
+                                           classifier=classifier, model_dir=model if classifier == "setfit" else None)
+                    stack = Stack(args, {})
+                    probes, changes = [], []
+
+                    def compose(*command, **kwargs):
+                        if command[0] == "ps":
+                            return "cloudflared" if kwargs.get("tunnel") else "\n".join(stack.services)
+                        if command[:2] == ("exec", "-T"):
+                            _, _, service, *cmd = command
+                            probes.append(service)
+                            if service in ("api", "worker"):
+                                env = modes[api if service == "api" else worker]
+                                return subprocess.check_output(cmd, env=env, text=True)
+                            self.assertEqual(service, "setfit")
+                            self.assertIn("/ready", cmd[-1])
+                            if not available:
+                                raise PublishError("HTTP 503")
+                            return ""
+                        if command[0] == "logs":
+                            return f"| {origin} |"
+                        changes.append(command)
+                        return ""
+
+                    output = io.StringIO()
+                    with patch.object(stack, "compose", side_effect=compose), patch.object(stack, "ca", return_value=None), \
+                         patch("publish.ready", return_value=True), redirect_stdout(output):
+                        if error:
+                            with self.assertRaisesRegex(PublishError, error):
+                                stack.publish()
+                            self.assertEqual(changes, [])
+                            self.assertNotIn("Demonstração publicada", output.getvalue())
+                        else:
+                            stack.publish()
+                            self.assertEqual([c[-1] for c in changes], ["api", "web"])
+                            self.assertIn(f"Demonstração publicada em {origin}", output.getvalue())
+                    if available and error:
+                        self.assertEqual(probes, ["api", "worker"] if api == classifier else ["api"])
+                    else:
+                        self.assertEqual(probes, ["api", "worker"] + (["setfit"] if classifier == "setfit" else []))
 
 
 if __name__ == "__main__":
