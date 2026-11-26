@@ -362,12 +362,52 @@ class E01LedgerTest < ActionDispatch::IntegrationTest
       body.merge(encoded(event.deep_merge("payload" => { "message_ids" => [SecureRandom.uuid] })))
     ].each { |bad| assert_equal [409, { "error" => "result_mismatch" }], send_op(outbox, "complete", bad) }
     assert_equal [422, { "error" => "invalid_body" }], send_op(outbox, "complete", body.merge("result_b64" => "AB=="))
-    assert_equal [413, { "error" => "too_large" }], send_op(outbox, "complete", body.merge(encoded_bytes("x" * (64.kilobytes + 1))))
     assert_equal [422, { "error" => "invalid_body" }], send_op(outbox, "complete", body.merge("knowledge_version" => "1.0"))
     assert_equal [422, { "error" => "invalid_body" }], send_op(outbox, "complete", body.merge("handoff_rule" => { "id" => "aurora.test", "reason" => "other" }))
     assert_nil execution(outbox).cost_usd
     assert_equal "result_saved", assert_success(send_op(outbox, "complete", body), "complete_response").fetch("state")
     assert_equal body.fetch("handoff_rule"), execution(outbox).result_metadata.fetch("handoff_rule")
+  end
+
+  test "aceita 64 KiB e distingue excesso de tamanho de base64 malformado" do
+    outbox = prepare_round
+    lease = start_round(outbox)
+    body = completed(outbox, lease)
+    event_bytes = Base64.strict_decode64(body.fetch("result_b64"))
+    at_limit = event_bytes.ljust(65_536, " ")
+
+    [65_537, 65_539].each do |size|
+      over_limit = body.merge(encoded_bytes(at_limit.ljust(size, " ")))
+      assert_equal [413, { "error" => "too_large" }], send_op(outbox, "complete", over_limit)
+      malformed = over_limit.fetch("result_b64").sub(/[A-Za-z0-9+\/]={1,2}\z/, "B==")
+      assert_equal [422, { "error" => "invalid_body" }], send_op(outbox, "complete", over_limit.merge("result_b64" => malformed))
+    end
+    assert_nil execution(outbox).cost_usd
+
+    # Preenche o JSON externo com espaços para atingir também o limite HTTP.
+    at_http_limit = JSON.generate(body.merge(encoded_bytes(at_limit))).ljust(128.kilobytes, " ")
+    assert_equal [413, { "error" => "too_large" }], send_op(outbox, "complete", at_http_limit + " ")
+    saved = assert_success(send_op(outbox, "complete", at_http_limit), "complete_response")
+    assert_equal at_limit, Base64.strict_decode64(saved.fetch("result_b64"))
+  end
+
+  test "texto com NUL é rejeitado antes da publicação e ainda permite conciliar o uso conhecido" do
+    outbox = prepare_round
+    lease = start_round(outbox)
+    %w[reply resolve handoff].each do |action|
+      body = completed(outbox, lease, action)
+      event = JSON.parse(Base64.strict_decode64(body.fetch("result_b64")))
+      event.fetch("payload")["text"] = "Texto\0inválido"
+      assert WebhookV1::Contract.valid?("AgentResult", event)
+      assert_equal [409, { "error" => "result_mismatch" }], send_op(outbox, "complete", body.merge(encoded(event)))
+    end
+    assert_equal ["started", nil, nil], execution(outbox).attributes.values_at("state", "cost_usd", "result_bytes")
+    assert_equal BigDecimal("0"), E01::Pilot.find(1).spent_usd
+
+    failed = lease.merge("outcome" => "failed", "reason" => "invalid_result", "usage" => usage)
+    assert_equal({ "state" => "failed" }, assert_success(send_op(outbox, "complete", failed), "complete_response"))
+    assert_equal BigDecimal("0.0061"), E01::Pilot.find(1).spent_usd
+    assert_failure(outbox, "invalid_result")
   end
 
   test "falha de decisão com uso conhecido libera reserva e permite supervisão" do

@@ -38,6 +38,10 @@ module AgentIntegration
 
       def self.parse_operation!(operation, bytes)
         data = parse_object(bytes)
+        result_b64 = data["result_b64"]
+        if operation == "complete" && data["outcome"] == "result" && result_b64.is_a?(String)
+          Result.check_encoded_size!(result_b64)
+        end
         raise Error, "invalid_body" unless valid?(operation, data)
         %w[owner_id lease_token].each do |field|
           raise Error, "invalid_body" if data.key?(field) && !UUID.match?(data.fetch(field))

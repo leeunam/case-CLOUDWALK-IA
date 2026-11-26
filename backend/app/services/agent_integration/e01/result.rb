@@ -5,33 +5,49 @@ module AgentIntegration
   module E01
     class Result
       MAX_BYTES = 64.kilobytes
+      BASE64_BOUNDARY = ((MAX_BYTES + 2) / 3) * 4
       IMMUTABLE_FIELDS = %w[occurred_at correlation_id case_id brand_id assignment_generation turn_id].freeze
       METADATA_FIELDS = %w[knowledge_version ontology_version policy_version source_refs handoff_rule].freeze
 
       attr_reader :bytes, :sha256, :metadata
 
-      def initialize(body, request_data, snapshot)
-        @bytes = Base64.strict_decode64(body.fetch("result_b64"))
-        raise Error, "too_large" if @bytes.bytesize > MAX_BYTES
+      # No limite do schema, o padding decide se o resultado cabe em 64 KiB.
+      # Acima dele, verificar a forma canônica antes de classificar o excesso.
+      def self.check_encoded_size!(encoded)
+        decode!(encoded) if encoded.bytesize >= BASE64_BOUNDARY
+      end
 
+      def self.decode!(encoded)
+        bytes = Base64.strict_decode64(encoded)
+        raise Error, "invalid_body" unless Base64.strict_encode64(bytes) == encoded
+        raise Error, "too_large" if bytes.bytesize > MAX_BYTES
+
+        bytes
+      rescue ArgumentError
+        raise Error, "invalid_body"
+      end
+      def initialize(body, request_data, snapshot)
+        @bytes = self.class.decode!(body.fetch("result_b64"))
         @sha256 = Digest::SHA256.hexdigest(@bytes)
-        unless @sha256 == body.fetch("result_sha256") && Base64.strict_encode64(@bytes) == body.fetch("result_b64")
-          raise Error, "result_mismatch"
-        end
+        raise Error, "result_mismatch" unless @sha256 == body.fetch("result_sha256")
 
         event = Contract.parse_object(@bytes)
         unless WebhookV1::Contract.valid?("AgentResult", event) && same_request?(event, request_data) &&
-               body.fetch("policy_version") == snapshot.data.fetch("policy_version")
+               body.fetch("policy_version") == snapshot.data.fetch("policy_version") && persistable_text?(event)
           raise Error, "result_mismatch"
         end
 
         validate_handoff!(event, body.fetch("handoff_rule"), request_data)
         @metadata = body.slice(*METADATA_FIELDS)
-      rescue ArgumentError, JSON::ParserError, EncodingError
+      rescue JSON::ParserError, EncodingError
         raise Error, "invalid_body"
       end
 
       private
+
+      def persistable_text?(event)
+        event.fetch("payload").values_at("text", "summary").compact.none? { |text| text.include?("\0") }
+      end
 
       def same_request?(event, request_data)
         request_id = request_data.fetch("event_id")
