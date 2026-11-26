@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "version": "1.0.0",
+  "subjects": [
+    {
+      "id": "terminal",
+      "category": "terminal"
+    }
+  ],
+  "intents": [
+    {
+      "id": "consultar-visor",
+      "subject_id": "terminal",
+      "synonyms": [
+        "visor",
+        "tela"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "id": "menu-visivel",
+      "question": "O menu está visível no visor?"
+    }
+  ]
+}

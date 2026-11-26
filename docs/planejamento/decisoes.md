@@ -725,3 +725,9 @@ cenários de aceite e metodologia experimental.
   mensagens. Capacidade e ambiente do ensaio serão registrados na execução.
 - As anotações azuis do PDF foram feitas pelo responsável e representam dúvidas,
   não requisitos adicionais do parceiro.
+
+## E01 — conhecimento do atendente experimental
+
+Em 26/11/2026, o responsável confirmou um catálogo comum de assuntos, intenções e condições em JSON versionado, com procedimentos e fontes fictícios exclusivos de Aurora e Horizonte. A equipe revisa as versões no repositório. O executor seleciona a base pelo ID de marca vinculado ao pedido e depois busca a orientação para a intenção do cliente.
+
+O piloto usa GPT-5.6 Luna pela Feita, com teto acumulado de US$ 1. O Rails mantém a autoridade sobre o atendimento, a reserva e o resultado imutável de cada pedido. O mock continua sendo a opção da demonstração publicada. A habilitação contínua depende de uma decisão futura. [Especificação do piloto](e01-atendente-real.md) · [Contratos e regras](../contratos/e01/README.md).

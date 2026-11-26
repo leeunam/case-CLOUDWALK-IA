@@ -1,0 +1,9 @@
+{
+  "method": "POST",
+  "path": "/internal/v1/e01/executions/00000000-0000-4000-8000-000000000601/claim",
+  "timestamp": "1795687200",
+  "nonce": "00000000-0000-4000-8000-000000000903",
+  "fixture_key": "public-contract-example",
+  "body_utf8": "{\"owner_id\":\"00000000-0000-4000-8000-000000000901\",\"request_sha256\":\"d7553400091a8214e72b5385c2c300218d3f8e95c4af3be2bfea202f2eb105b5\"}",
+  "signature": "1a34f4ec40d7a6a4f7179b764c2e6ebbbb55b8df18a8f9594f41ee7122d16955"
+}
