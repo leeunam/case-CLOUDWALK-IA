@@ -189,6 +189,7 @@ def fixture_posts(stack):
 
 
 def check(stack):
+    stack.require_api_binding()
     before = pilot(stack)
     require(not before["active_reservations"] and before["dispatch_count"] <= 15, "Projeto sem saldo para a matriz offline.")
     browser = Browser(stack.api)

@@ -23,6 +23,7 @@ REQUEST_PATH = "/webhooks/v1/agent/requests"
 HERE = Path(__file__).resolve().parent
 DEFAULT_SCHEMA = HERE.parent / "docs/contratos/schemas/v1.json"
 REQUEST_GROUP = "mock-agent-v1"
+EVENT_GROUP = "platform-agent-events-v1"
 
 
 class InvalidEvent(ValueError):
@@ -236,6 +237,8 @@ def load_agent_backend(name, contracts, environ):
         return lambda record, publisher: run_mock(record, contracts, publisher)
     if name not in {"luna", "luna_fixture"}:
         raise ValueError("CLOUDWALK_AGENT_BACKEND deve ser mock, luna ou luna_fixture.")
+    if name == "luna" and environ.get("RAILS_ENV") == "test":
+        raise ValueError("luna real não pode executar com RAILS_ENV=test.")
 
     if __package__:
         from .e01_backend import LunaBackend
@@ -488,7 +491,7 @@ def main():
             server.serve_forever()
     elif args.role == "events":
         url = os.environ["CLOUDWALK_AGENT_EVENTS_URL"]
-        consume(EVENTS, "platform-agent-events-v1", lambda record: forward_result(record, contracts, url, secret),
+        consume(EVENTS, EVENT_GROUP, lambda record: forward_result(record, contracts, url, secret),
                 publisher, brokers)
     else:
         consume(REQUESTS, REQUEST_GROUP, lambda record: backend(record, publisher), publisher, brokers)

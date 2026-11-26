@@ -21,7 +21,8 @@ class Offline:
         if not re.fullmatch(r"cloudwalk_e01_offline(?:_[a-z0-9]+)*", args.project):
             raise ValueError("O projeto precisa ter prefixo cloudwalk_e01_offline.")
         self.project = args.project
-        self.api = f"http://127.0.0.1:{args.api_port}"
+        self.api_binding = f"127.0.0.1:{args.api_port}"
+        self.api = f"http://{self.api_binding}"
         self.command = ["docker", "compose", "--env-file", "/dev/null", "-p", self.project,
                         "-f", "compose.yml", "-f", "compose.demo.yml", "-f", "compose.e01.yml"]
         self.env = {key: os.environ[key] for key in ("PATH", "HOME", "XDG_RUNTIME_DIR") if key in os.environ}
@@ -51,6 +52,14 @@ class Offline:
         result = self.run("exec", "-T", "db", "psql", "-XAt", "-v", "ON_ERROR_STOP=1", "-U", "cloudwalk",
                           "-d", "cloudwalk_test", "-c", query, capture=True, timeout=20)
         return [json.loads(line) for line in result.splitlines()]
+
+    def require_api_binding(self):
+        try:
+            binding = self.run("port", "--protocol", "tcp", "api", "3000", capture=True, timeout=10).strip()
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            raise SystemExit(f"Não foi possível confirmar a porta da API do projeto {self.project}.") from None
+        if binding != self.api_binding:
+            raise SystemExit(f"A porta HTTP indicada não corresponde à API do projeto {self.project}.")
 
 
 def port(value):

@@ -30,10 +30,11 @@ pode baixar imagens e dependências quando não houver cache local.
 `check` executa nove turnos nas duas marcas e três canais. O relatório
 mostra IDs, correlação, latência e estado, além dos hashes que ligam os
 bytes da outbox, do ledger e do recibo. `faults` usa o relatório da matriz
-do mesmo projeto, interrompe o consumidor de forma controlada e deixa o
-piloto pausado com uma reserva incerta. Use `--correlation-id UUID status`
+do mesmo projeto e deixa o piloto pausado com uma reserva incerta. Antes
+de abrir sessões, os dois comandos conferem a porta HTTP publicada pelo
+projeto informado. Use `--correlation-id UUID status`
 para consultar a trilha de um caso. `down` preserva banco e tópicos.
-Para repetir desde zero, use outro `--project cloudwalk_e01_offline_NOME`
+Para repetir desde zero, use outro `--project cloudwalk_e01_offline_segunda`
 em todos os comandos e escolha portas livres com `--api-port` e `--web-port`.
 Use um caminho novo para cada relatório.
 
@@ -43,7 +44,8 @@ Use um caminho novo para cada relatório.
 `mock` continua sendo o consumidor único de pedidos. Ele usa o grupo Kafka
 `mock-agent-v1` em todos os modos. `CLOUDWALK_AGENT_BACKEND` escolhe `mock`,
 `luna_fixture` ou `luna`. Pelo overlay, a variável de entrada é `E01_BACKEND` e
-o valor padrão é `mock`. `luna_fixture` requer `E01_RAILS_ENV=test`.
+o valor padrão é `mock`. A fixture requer `E01_RAILS_ENV=test`. A Luna usa o
+ambiente Rails do canário, fora de `test`.
 
 Para o canário E01-05, a operação escolhe um projeto isolado, configura o
 `E01_LEDGER_SECRET` dedicado à API e ao consumidor e informa
@@ -68,7 +70,9 @@ ledger preserva a reserva durante a pausa para conciliação.
 
 No relatório de `faults`, abra `publication[1]`. Siga o `request_event_id`
 em `broker_before_restart` e `broker_after_replay`. Compare o hash de
-`case.result_sha256` com cada cópia do evento no Kafka. A contagem
-`fixture_posts` permanece em um e os IDs de mensagem registram uma única
+`case.result_sha256` com cada cópia do evento no Kafka. Em
+`bridge_after_last_event`, confira que o offset confirmado pela ponte de
+retorno é maior que o da última cópia. O Rails é consultado depois desse
+marco. A contagem `fixture_posts` permanece em um e os IDs registram uma única
 resposta da IA. Compare esse recibo `offline-fixture-*` com o formato do
 recibo de uso do canário E01-05 para identificar qual transporte foi usado.

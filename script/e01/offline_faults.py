@@ -11,7 +11,8 @@ from urllib.error import HTTPError
 from urllib.request import ProxyHandler, Request, build_opener
 
 from offline import LABEL, LEDGER_SECRET
-from offline_check import Browser, PIX, case_executions, fixture_posts, pilot, poll, public_evidence, require, settled
+from offline_check import (Browser, PIX, case_executions, fixture_posts, pilot, poll, public_evidence, require, settled,
+                           verify_turn)
 
 
 KAFKA_CODE = Path(__file__).with_name("offline_kafka.py").read_text(encoding="utf-8")
@@ -63,6 +64,16 @@ def confirmed(stack, case_id, request_offset=None):
     return None
 
 
+def bridge_confirmed(records, expected_events):
+    events = records["agent.events"]
+    if not events or events != expected_events:
+        return None
+    offsets = records["event_offsets"]
+    if all(offsets.get(str(record["partition"]), -1) > record["offset"] for record in events):
+        return records
+    return None
+
+
 def test_publish_recovery(stack, browser, channel, mode):
     receipt, interrupted, before, process = interrupts(stack, browser, channel, mode)
     case_id = receipt["case_id"]
@@ -77,17 +88,30 @@ def test_publish_recovery(stack, browser, channel, mode):
     require(original_posts == 1 and fixture_posts(stack)[provider] == 0, "O replay despachou inferência novamente.")
     recovered = poll(lambda: confirmed(stack, case_id), "offset posterior à publicação recuperada")
     events = recovered["agent.events"]
-    require(len(events) == 1 + len(before_events) and {e["sha256"] for e in events} == {row["result_sha256"]},
+    require(len(events) == 1 + len(before_events) and {e["sha256"] for e in events} == {row["result_sha256"]}
+            and {e["event_id"] for e in events} == {row["result_event_id"]},
             "Kafka não contém somente cópias idênticas do resultado salvo.")
-    require(not recovered["agent.failures"] and len(row["messages"]) == 2,
-            "A reentrega gerou falha ou segunda aplicação do resultado.")
     original_offset = max(record["offset"] for record in recovered["agent.requests"])
     replay = kafka(stack, "replay_request", case_id, request_id)
     duplicate = poll(lambda: confirmed(stack, case_id, original_offset), "offset do mesmo request_event_id reentregue")
     require(replay["sha256"] == row["outbox_sha256"] and duplicate["agent.events"] == events
             and fixture_posts(stack)[provider] == 0, "Pedido já publicado gerou nova execução ou publicação.")
-    return {"interruption": mode, "fixture_posts": original_posts, "case": public_evidence(row),
-            "broker_before_restart": before, "broker_after_replay": duplicate}
+
+    bridge = poll(lambda: bridge_confirmed(kafka(stack, "inspect", case_id), events),
+                  "commit da ponte de retorno após a última cópia em agent.events", seconds=25)
+    current = settled(stack, case_id, 1)
+    require(current == row and not bridge["agent.failures"], "A ponte alterou o recibo ou registrou falha após a reentrega.")
+    event_id = str(uuid.UUID(row["result_event_id"]))
+    receipts = stack.sql(f"""SELECT jsonb_build_object('event_id', event_id, 'digest', body_sha256,
+        'disposition', disposition) FROM agent_receipts WHERE event_id = '{event_id}'""")
+    require(receipts == [{"event_id": event_id, "digest": row["result_sha256"], "disposition": "applied"}],
+            "As cópias devem manter um único recibo aplicado com o digest original.")
+    path = f"/api/v1/simulator/cases/{case_id}"
+    verify_turn(current, browser.call(path + "/messages")["items"], browser.call(path),
+                "aurora", "chat", "comprovante-pix", 1)
+    return {"interruption": mode, "fixture_posts": original_posts, "case": public_evidence(current),
+            "broker_before_restart": before, "broker_after_replay": duplicate,
+            "bridge_after_last_event": bridge, "receipts_after_bridge": receipts}
 
 
 def test_lost_start_ack(stack, browser, channel):
@@ -173,6 +197,7 @@ def test_nonce(stack, row):
 
 
 def verify_faults(stack, report):
+    stack.require_api_binding()
     require(report["mode"] == LABEL and report["project"] == stack.project and len(report["matrix"]) == 9,
             "Relatório deve ser a matriz fictícia deste mesmo projeto.")
     before = pilot(stack)

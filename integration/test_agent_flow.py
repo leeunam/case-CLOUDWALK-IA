@@ -116,6 +116,8 @@ class AgentFlowTest(unittest.TestCase):
         for env, expected in (
             ({"CLOUDWALK_AGENT_BACKEND": "bad"}, "CLOUDWALK_AGENT_BACKEND"),
             ({"CLOUDWALK_AGENT_BACKEND": "luna"}, "CLOUDWALK_E01_FEITA_KEY_FILE"),
+            ({"CLOUDWALK_AGENT_BACKEND": "luna", "RAILS_ENV": "test",
+              "CLOUDWALK_E01_FEITA_KEY_FILE": "/tmp/e01-fake-key"}, "luna real não pode executar com RAILS_ENV=test"),
             ({"CLOUDWALK_AGENT_BACKEND": "luna_fixture", "RAILS_ENV": "development"}, "RAILS_ENV=test"),
             ({"CLOUDWALK_AGENT_BACKEND": "luna_fixture", "RAILS_ENV": "test"}, "invalid_ledger_url"),
         ):

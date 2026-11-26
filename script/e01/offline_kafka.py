@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 import confluent_kafka
 
-from agent_flow import (EVENTS, FAILURES, REQUESTS, REQUEST_GROUP, Contracts, Publisher, consume,
+from agent_flow import (EVENTS, EVENT_GROUP, FAILURES, REQUESTS, REQUEST_GROUP, Contracts, Publisher, consume,
                         json_bytes, load_agent_backend)
 from e01_ledger import LedgerClient
 
@@ -62,13 +62,13 @@ def receipt(topic, record):
             "sha256": hashlib.sha256(record.value()).hexdigest()}
 
 
-def group_offsets():
-    client = confluent_kafka.Consumer({"bootstrap.servers": BROKERS, "group.id": REQUEST_GROUP,
+def group_offsets(group, topic):
+    client = confluent_kafka.Consumer({"bootstrap.servers": BROKERS, "group.id": group,
                                        "enable.auto.commit": False, "enable.auto.offset.store": False})
     try:
-        partitions = client.list_topics(REQUESTS, timeout=5).topics[REQUESTS].partitions
+        partitions = client.list_topics(topic, timeout=5).topics[topic].partitions
         return {part.partition: part.offset for part in client.committed(
-            [confluent_kafka.TopicPartition(REQUESTS, part) for part in partitions], timeout=5)}
+            [confluent_kafka.TopicPartition(topic, part) for part in partitions], timeout=5)}
     finally:
         client.close()
 
@@ -116,7 +116,8 @@ def main():
         return
     uuid.UUID(key)
     if mode == "inspect":
-        print(json.dumps({"offsets": group_offsets(), **{
+        print(json.dumps({"offsets": group_offsets(REQUEST_GROUP, REQUESTS),
+                          "event_offsets": group_offsets(EVENT_GROUP, EVENTS), **{
             topic: [receipt(topic, row) for row in read_topic(topic, key)] for topic in (REQUESTS, EVENTS, FAILURES)
         }}))
         return
