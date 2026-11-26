@@ -1,0 +1,38 @@
+# Overlay local. A operação real exige um overlay adicional com a chave e a rota externa.
+x-e01-rails: &e01-rails
+  RAILS_ENV: ${E01_RAILS_ENV:-development}
+
+services:
+  db_setup:
+    environment: *e01-rails
+  api:
+    environment:
+      <<: *e01-rails
+      CLOUDWALK_E01_LEDGER_SECRET: ${E01_LEDGER_SECRET:?defina um segredo dedicado ao piloto E01}
+      CLOUDWALK_E01_PREFLIGHT_PATH: /run/e01/preflight.json
+    volumes:
+      - type: bind
+        source: ${E01_PREFLIGHT_FILE:?defina o arquivo local de preflight E01}
+        target: /run/e01/preflight.json
+        read_only: true
+        bind:
+          create_host_path: false
+    ports: !override
+      - "127.0.0.1:${E01_API_PORT:-43309}:3000"
+  worker:
+    environment: *e01-rails
+  web:
+    ports: !override
+      - "127.0.0.1:${E01_WEB_PORT:-45379}:5173"
+  outbox:
+    environment: *e01-rails
+  mock:
+    environment:
+      RAILS_ENV: ${E01_RAILS_ENV:-development}
+      CLOUDWALK_AGENT_BACKEND: ${E01_BACKEND:-mock}
+      CLOUDWALK_E01_LEDGER_URL: http://api:3000
+      CLOUDWALK_E01_LEDGER_SECRET: ${E01_LEDGER_SECRET:?defina um segredo dedicado ao piloto E01}
+      E01_CONTRACT_DIR: /workspace/docs/contratos/e01
+    depends_on:
+      api:
+        condition: service_healthy

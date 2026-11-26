@@ -88,6 +88,9 @@ services:
     command: [events]
   mock:
     <<: *integration
+    environment:
+      <<: *integration-env
+      CLOUDWALK_AGENT_BACKEND: mock
     command: [mock]
 
 networks:

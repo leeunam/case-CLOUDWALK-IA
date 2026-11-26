@@ -1,0 +1,32 @@
+{
+  "mode": "offline_test",
+  "provider": "feita",
+  "model": "openai/gpt-5.6-luna",
+  "route": "https://api.feita.ai/gateway/v1/chat/completions",
+  "account_ref": "offline fixture, no provider account",
+  "documented_on": "2026-01-01",
+  "policy_version": "e01-v1",
+  "input_cap": 1000,
+  "output_cap": 500,
+  "input_rate_usd_per_million": "10",
+  "cache_rate_usd_per_million": "1",
+  "output_rate_usd_per_million": "20",
+  "billing_terms": {
+    "billing_basis": "tokens_only",
+    "tariff_tiers": "single_for_entire_proven_range",
+    "per_request_minimum_usd": "0",
+    "fixed_fee_usd": "0",
+    "cache_write_surcharge": false,
+    "provider_rounding": "none",
+    "other_charges": false
+  },
+  "evidence": {
+    "input_cap": "offline synthetic input cap",
+    "output_cap": "offline synthetic output cap",
+    "input_rate": "offline synthetic input rate",
+    "cache_rate": "offline synthetic cache rate",
+    "output_rate": "offline synthetic output rate",
+    "billing_terms": "offline synthetic billing terms",
+    "billable_failures": "offline synthetic failed-dispatch rule"
+  }
+}

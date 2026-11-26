@@ -85,6 +85,15 @@ class BackendTest(unittest.TestCase):
         self.assertNotIn("horizonte.manual", envelope["content"])
         self.assertNotIn(CREDENTIAL, system["content"])
 
+    def test_documented_usage_without_cache_details_charges_full_input(self):
+        document = completion(self.decision)
+        document["usage"] = {"prompt_tokens": 123, "completion_tokens": 23, "total_tokens": 146}
+        transport = Transport((200, json_bytes(document)))
+        decision, usage = LunaBackend(CREDENTIAL, transport=transport).infer(self.request, self.candidates, timeout_s=1)
+        self.assertEqual(decision, self.decision)
+        self.assertEqual(usage, {**USAGE, "cached_input_tokens": 0, "output_tokens": 23})
+        self.assertEqual(len(transport.calls), 1)
+
     def test_ambiguous_transport_or_usage_never_retries(self):
         good = completion(self.decision)
         cases = [
@@ -100,7 +109,8 @@ class BackendTest(unittest.TestCase):
             ("usage_invalid", (200, json_bytes(dict(good, id=" ")))),
         ]
         for changes in ({"prompt_tokens": True}, {"completion_tokens": 21.0}, {"total_tokens": 12},
-                        {"prompt_tokens_details": None}, {"prompt_tokens_details": {"cached_tokens": 124}},
+                        {"total_tokens": None}, {"prompt_tokens_details": None}, {"prompt_tokens_details": "3"},
+                        {"prompt_tokens_details": {}}, {"prompt_tokens_details": {"cached_tokens": 124}},
                         {"completion_tokens_details": {"reasoning_tokens": 24}}):
             cases.append(("usage_invalid", (200, json_bytes(dict(good, usage={**good["usage"], **changes})))))
         messages = StringIO()

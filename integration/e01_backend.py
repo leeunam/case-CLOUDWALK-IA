@@ -117,14 +117,18 @@ def _usage(response):
     response_id = response.get("id")
     details = raw.get("prompt_tokens_details")
     billed_input = raw.get("prompt_tokens")
-    cached = details.get("cached_tokens") if isinstance(details, dict) else None
+    if "prompt_tokens_details" not in raw:
+        # Sem metadados, toda a entrada é conciliada pela tarifa cheia.
+        cached = 0
+    else:
+        cached = details.get("cached_tokens") if isinstance(details, dict) else None
     billed_output = raw.get("completion_tokens")
     normalized = {"provider_response_id": response_id, "input_tokens": billed_input,
                   "cached_input_tokens": cached, "output_tokens": billed_output}
     if not valid_usage(normalized):
         raise InferenceFailure("usage_invalid")
-    if "total_tokens" in raw and (type(raw["total_tokens"]) is not int
-                                  or raw["total_tokens"] != billed_input + billed_output):
+    total = raw.get("total_tokens")
+    if type(total) is not int or total != billed_input + billed_output:
         raise InferenceFailure("usage_invalid")
     output_details = raw.get("completion_tokens_details")
     if isinstance(output_details, dict) and "reasoning_tokens" in output_details:

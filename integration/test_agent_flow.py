@@ -4,7 +4,7 @@ from contextlib import redirect_stderr
 from email.message import Message
 from io import BytesIO, StringIO
 from types import SimpleNamespace
-from unittest.mock import Mock, call, patch
+from unittest.mock import ANY, Mock, call, patch
 
 from agent_flow import (
     DEFAULT_SCHEMA,
@@ -15,9 +15,12 @@ from agent_flow import (
     Contracts,
     InvalidEvent,
     Publisher,
+    RecordPending,
+    REQUEST_GROUP,
     authenticate,
     forward_result,
     json_bytes,
+    load_agent_backend,
     main,
     process_record,
     propose_result,
@@ -108,6 +111,75 @@ class AgentFlowTest(unittest.TestCase):
             handle = consume.call_args.args[2]
             handle(record)
             self.assertEqual(forward.call_args.args[2:], (url, secret))
+
+    def test_invalid_backend_configuration_fails_before_constructing_producer(self):
+        for env, expected in (
+            ({"CLOUDWALK_AGENT_BACKEND": "bad"}, "CLOUDWALK_AGENT_BACKEND"),
+            ({"CLOUDWALK_AGENT_BACKEND": "luna"}, "CLOUDWALK_E01_FEITA_KEY_FILE"),
+            ({"CLOUDWALK_AGENT_BACKEND": "luna", "RAILS_ENV": "test",
+              "CLOUDWALK_E01_FEITA_KEY_FILE": "/tmp/e01-fake-key"}, "luna real não pode executar com RAILS_ENV=test"),
+            ({"CLOUDWALK_AGENT_BACKEND": "luna_fixture", "RAILS_ENV": "development"}, "RAILS_ENV=test"),
+            ({"CLOUDWALK_AGENT_BACKEND": "luna_fixture", "RAILS_ENV": "test"}, "invalid_ledger_url"),
+        ):
+            with (
+                self.subTest(env=env),
+                patch("sys.argv", ["agent_flow.py", "mock"]),
+                patch.dict("os.environ", env, clear=True),
+                patch("confluent_kafka.Producer") as producer,
+                patch("agent_flow.consume") as consume,
+                redirect_stderr(StringIO()) as stderr,
+            ):
+                with self.assertRaises(SystemExit):
+                    main()
+                producer.assert_not_called()
+                consume.assert_not_called()
+                self.assertIn(expected, stderr.getvalue())
+
+    def test_default_backend_keeps_existing_kafka_group_and_mock(self):
+        record = self.record(self.request, REQUESTS)
+        with (
+            patch("sys.argv", ["agent_flow.py", "mock"]),
+            patch.dict("os.environ", {}, clear=True),
+            patch("confluent_kafka.Producer"),
+            patch("agent_flow.consume") as consume,
+            patch("agent_flow.run_mock") as mock,
+        ):
+            main()
+            topic, group, handle, publisher, _brokers = consume.call_args.args
+            self.assertEqual((topic, group), (REQUESTS, REQUEST_GROUP))
+            handle(record)
+            mock.assert_called_once_with(record, ANY, publisher)
+
+    def test_executor_pending_state_neither_emits_failure_nor_commits(self):
+        from e01_executor import ExecutorError
+
+        environment = {"RAILS_ENV": "test", "CLOUDWALK_E01_LEDGER_URL": "http://rails.test",
+                       "CLOUDWALK_E01_LEDGER_SECRET": "dummy"}
+        trace = Mock()
+        trace.consumer.assignment.return_value = [SimpleNamespace(topic=REQUESTS, partition=1)]
+        trace.consumer.commit.return_value = []
+        record = self.record(self.request, REQUESTS)
+        with patch("e01_executor.Executor") as executor:
+            handle = load_agent_backend("luna_fixture", self.contracts, environment)
+            executor.return_value.handle.side_effect = ExecutorError("ledger_still_pending", retryable=True)
+            for _attempt in range(4):
+                with self.assertRaisesRegex(RecordPending, "ledger_still_pending"):
+                    process_record(trace.consumer, trace.publisher, record, REQUEST_GROUP,
+                                   lambda message: handle(message, trace.publisher), pause=trace.pause)
+                trace.consumer.commit.assert_not_called()
+                trace.publisher.publish.assert_not_called()
+            trace.pause.assert_not_called()
+
+            executor.return_value.handle.side_effect = ExecutorError("invalid_e01_context")
+            process_record(trace.consumer, trace.publisher, record, REQUEST_GROUP,
+                           lambda message: handle(message, trace.publisher), pause=trace.pause)
+        topic, key, raw = trace.publisher.publish.call_args.args
+        self.assertEqual((topic, key), (FAILURES, record.key()))
+        failure = json.loads(raw)
+        self.assertEqual(failure["reason"], "invalid_e01_context")
+        self.assertEqual(failure["event_id"], self.request["event_id"])
+        self.assertNotIn(self.request["payload"]["history"][0]["text"].encode(), raw)
+        self.assertEqual(trace.mock_calls[-1], call.consumer.commit(message=record, asynchronous=False))
 
     def test_request_returns_202_after_publish_and_503_on_ambiguous_confirmation(self):
         for name in ("agent-turn-1-request", "agent-setfit-request", "agent-setfit-invalid-version"):

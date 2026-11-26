@@ -186,7 +186,11 @@ o atendimento nos três canais e a releitura dos casos após reiniciar.
 [Aceite da aplicação](docs/evidencias/c06/aceite-integrado/README.md) ·
 [Roteiro de reprodução](docs/c07.md).
 
-O atendente conversacional real (E01) fica como evolução posterior e opcional.
+O piloto conversacional E01 pode ser exercitado localmente com transporte
+Feita fictício. O consumidor do piloto usa o ledger do Rails e os mesmos
+tópicos Kafka da demonstração. O canário com a Luna é uma operação separada.
+[Roteiro offline E01](docs/e01-offline.md).
+
 [Resultado real R5](docs/c05-luna-r5-resultado.md) ·
 [Candidata R5](docs/c05-luna-r5-candidata.md) ·
 [Preparação R5](docs/planejamento/classificacao-comparativa/rodada-5-implementacao.md) ·

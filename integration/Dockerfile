@@ -5,6 +5,8 @@ RUN pip install --no-cache-dir -r requirements.txt \
     && pip check \
     && useradd --create-home --uid 10001 bridge
 COPY agent_flow.py .
+COPY e01_*.py ./
+COPY knowledge ./knowledge
 ENV PYTHONUNBUFFERED=1
 USER bridge
 ENTRYPOINT ["python", "/app/agent_flow.py"]
