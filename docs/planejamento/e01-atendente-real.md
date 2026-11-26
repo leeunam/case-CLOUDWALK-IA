@@ -171,3 +171,16 @@ Dados reais, operações financeiras, integrações reais de WhatsApp/e-mail,
 edição da ontologia pela supervisão e motor formal de inferência não fazem
 parte do piloto aprovado. Publicação permanente, nova matriz F08 e dez mil
 conexões seguem evoluções separadas, sem capacidade presumida.
+
+## Ajuste após a primeira execução real — E01-Q1 e E01-Q2
+
+Em 26/11/2026, o primeiro ensaio real executou cinco despachos: P1, P2/1, P2/2 e P3/1 passaram; P3/2 foi rejeitado como `invalid_decision`. O atendimento não recebeu uma proposta inválida. O registro original permanece falho. A chamada tem uso e recibo monetário conhecidos; o lote parou antes de P4. Nenhum evento pode receber um segundo POST para repetir sua inferência.
+
+O diagnóstico offline aceitou o encaminhamento correto com a requisição original. A decisão rejeitada não foi preservada; não atribuir a falha a um campo específico por suposição. Reforçar a geração com escolhas que o validador já admite para aquele histórico, amarrando ação, procedimento ou regra, texto e fonte. O schema normativo continua o mesmo e o modelo continua Luna. IDs históricos ficam restritos à origem, e a validação posterior permanece. Registrar submotivos fechados de rejeição, sem texto ou credenciais. Essa mudança de implementação não muda a semântica `e01-v1`; o novo commit identifica a candidata.
+
+| Etapa | Entrega | Aceite |
+| --- | --- | --- |
+| E01-Q1 | Geração estruturada restrita às escolhas aplicáveis e diagnóstico sanitizado. | Mesma requisição P3/2 admite o handoff esperado e exclui esclarecer outra vez, orientar sem condição ou resolver. Cobrir formas válidas da matriz e negativas, sem chamada paga. |
+| E01-Q2 | Ensaio adicional explícito no mesmo projeto e orçamento, sem apagar o primeiro. | Novo journal de revisão Q1 ligado ao original e ao mesmo banco/piloto, base de cinco despachos e cinco recibos preservados. Nove novos turnos da matriz após Q1 revisada; total máximo previsto 14, dentro do limite original de 24 e US$1. Reentrada não compra outra tentativa. |
+
+A parada do consumidor entre turnos do primeiro lote causou esperas de aproximadamente 45 segundos pelo abandono da associação Kafka. O ensaio adicional deverá usar encerramento gracioso para liberar o grupo. Medir novamente os tempos reais e manter os tempos anteriores no registro. Não reduzir nem omitir o relógio do cliente. A primeira orientação continua sujeita à conferência e ao recibo; a aprovação de conteúdo idêntico já concedida pelo responsável fica referenciada explicitamente.

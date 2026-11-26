@@ -316,3 +316,7 @@ O roteiro de aceite da publicação previu os seguintes passos.
 - Configurar os serviços de aplicação e a origem HTTPS para React, API e WebSocket. Manter PostgreSQL, Kafka e a ponte na rede interna, com volumes persistentes e segredos no ambiente do servidor.
 - Documentar inicialização, migrações, carga de dados, atualização, reinício, consulta de logs e restauração da demonstração. Verificar que a aplicação se recupera de um reinício com casos e histórico preservados.
 - Entregar URL e acesso de demonstração ao responsável, com perfis de cliente e analista. Validar de outra rede a conversa com a IA, o handoff, o acesso por marca e a atualização do chat. Se o roteiro incluir o classificador real, validar sua configuração após a adoção em C06 e registrar o resultado antes da apresentação.
+
+### E01-Q1 e E01-Q2 — ajuste observado no piloto real
+
+A primeira execução parou na quinta chamada por proposta inválida; os registros permanecem preservados. A [especificação da E01](e01-atendente-real.md#ajuste-após-a-primeira-execução-real--e01-q1-e-e01-q2) define geração restrita às escolhas aplicáveis e ensaio adicional no mesmo orçamento acumulado. Não reiniciar saldo, apagar a falha ou repetir o POST do evento original.
