@@ -90,6 +90,27 @@ class RuntimeTests(TestCase):
             self.assertEqual(decision["calls"][field], 0)
             self.assertIsNone(decision["fields"][field]["cut"])
 
+    def test_valor_aninhado_preservado_na_revisao_sem_chamadas(self):
+        value = {"dados": [True, 7]}
+        for _ in range(520):
+            value = [value]
+        item, frame = self.capture({"category": value})
+        decision = derive(item, frame, self.context)
+        verify(item, frame, decision, self.context)
+        self.assertEqual(decision["outcome"], "review")
+        self.assertEqual(decision["fields"]["category"]["reason"], "invalid_input")
+        self.assertEqual(decision["fields"]["priority"]["reason"], "not_requested")
+        self.assertEqual(decision["calls"], {"category": 0, "priority": 0})
+        self.assertEqual(decision["applied"], {})
+        self.assertEqual(encoded(decision["received"]), encoded(item["received"]))
+        leaf = decision["received"]["category"]
+        for _ in range(520):
+            leaf = leaf[0]
+        for changed in ([1, 7], [7, True], [True, 8]):
+            leaf["dados"] = changed
+            with self.subTest(changed=changed), self.assertRaisesRegex(ValueError, "received"):
+                verify(item, frame, decision, self.context)
+
     def test_precedencia_insuficiente_inativo_empate_e_sem_parcial(self):
         catalog = deepcopy(core.CATALOG)
         del catalog["category"]["terminal"]

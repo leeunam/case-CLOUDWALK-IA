@@ -47,14 +47,23 @@ def encoded(value):
 
 def same_json(left, right):
     """Recusa conversões implícitas de Python, inclusive em valores livres do canal."""
-    if type(left) is not type(right):
-        return False
-    if type(left) is dict:
-        return (left.keys() == right.keys()
-                and all(type(k) is str and same_json(left[k], right[k]) for k in left))
-    if type(left) is list:
-        return len(left) == len(right) and all(same_json(a, b) for a, b in zip(left, right))
-    return type(left) in (str, int, float, bool, type(None)) and encoded(left) == encoded(right)
+    pending = [(left, right)]
+    while pending:
+        left, right = pending.pop()
+        kind = type(left)
+        if kind is not type(right):
+            return False
+        if kind is dict:
+            if left.keys() != right.keys() or any(type(key) is not str for key in left):
+                return False
+            pending.extend((left[key], right[key]) for key in left)
+        elif kind is list:
+            if len(left) != len(right):
+                return False
+            pending.extend(zip(left, right))
+        elif kind not in (str, int, float, bool, type(None)) or encoded(left) != encoded(right):
+            return False
+    return True
 
 
 def check_originals(kinds):
