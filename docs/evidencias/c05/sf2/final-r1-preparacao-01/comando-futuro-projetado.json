@@ -1,0 +1,16 @@
+[
+  "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-treinamento/script/classification_comparison/setfit_sf2/.cache/verification/.venv/bin/python",
+  "-I",
+  "-B",
+  "-S",
+  "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-final-integracao/script/classification_comparison/setfit_sf2/qualification_r1/cli.py",
+  "execute",
+  "--release",
+  "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-final-integracao/script/classification_comparison/setfit_sf2/.cache/qualificacao-r1-01/release",
+  "--expect",
+  "5c5aac6e1dcf00facadb2eafdd86adf97875ad8e9cdcc0e5169a51ce2eeade2b",
+  "--custody",
+  "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.superpowers/sdd/conclusao-projeto/sf2-final/accepted/private-inventory.json",
+  "--out",
+  "/home/inteli/Documents/projetos/case-CLOUDWALK-IA/.worktrees/sf2-final-integracao/script/classification_comparison/setfit_sf2/.cache/qualificacao-r1-01/final-run"
+]

@@ -165,6 +165,14 @@ zero conclusões indevidas nos 18 casos que exigiam revisão.
 Esse resultado permite preparar o contrato do teste independente; não
 substitui o teste de 120 casos nem libera adoção ou C06/C07.
 
+Em 26/11/2026, a Task 3 da SF2-FINAL-R1 recebeu aceite independente da
+preparação pública. O QA registrou cinco testes aprovados e o revisor
+reproduziu o recibo público. O conjunto final de 120 casos permanece fechado.
+A abertura depende da confirmação do nome exato do inventário e dos quatro
+papéis previstos no protocolo e da autorização para execução única.
+C06/C07 continuam bloqueadas.
+[Evidências da preparação pública](../evidencias/c05/sf2/final-r1-preparacao-01/README.md).
+
 ### Evolução futura depois da publicação — E01
 
 Em 2026-11-23, o responsável pediu registrar o [E01 — atendente experimental

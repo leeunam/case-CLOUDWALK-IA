@@ -1,4 +1,4 @@
-# Estado da entrega em 25/11/2026
+# Estado da entrega em 26/11/2026
 
 A publicação temporária da plataforma passou no aceite externo da F10 com
 classificação fixture e atendente simulado. O responsável retomou a classificação
@@ -7,8 +7,10 @@ A SF2 concluiu contratos, dados, código e a validação dos dois especialistas
 treinados. Nenhuma das 225 políticas de revisão atingiu todos os critérios.
 Na extensão offline SF2-R1, nove regras adicionais atingiram as metas de
 validação. A selecionada concluiu corretamente 51/72 classificáveis e
-revisou todos os 18 casos que exigiam revisão. Os 120 casos finais
-permanecem fechados e nenhum modelo foi adotado.
+revisou todos os 18 casos que exigiam revisão. A
+[preparação pública da SF2-FINAL-R1](evidencias/c05/sf2/final-r1-preparacao-01/README.md)
+teve aceite independente. Os 120 casos finais permanecem fechados e nenhum
+modelo foi adotado.
 [Plano de execução e critérios de aceite](planejamento/plano-de-execucao.md).
 
 ## Plataforma e demonstração
@@ -65,8 +67,14 @@ A extensão [SF2-R1](evidencias/c05/sf2/revisao-01/README.md) reutilizou os
 mesmos vetores sem treino ou inferência adicional. Das 45 políticas novas,
 nove passaram; a selecionada usa categoria tau 0,95 e prioridade tau 0,70.
 A cobertura correta foi 51/72, com zero conclusões indevidas nos 18 casos
-de revisão esperada, zero urgentes rebaixados e 39/90 revisões. O teste
-independente e seu contrato de execução ainda estão pendentes.
+de revisão esperada, zero urgentes rebaixados e 39/90 revisões.
+
+Em 26/11/2026, a Task 3 da SF2-FINAL-R1 teve aceite da preparação pública,
+com cinco testes aprovados e reprodução independente do recibo. Os tempos
+do replay medem fixture e cálculo da decisão. O teste final e a medição de
+inferência aguardam a confirmação do nome do inventário e dos quatro papéis
+previstos no protocolo e a autorização específica.
+[Evidências da preparação pública](evidencias/c05/sf2/final-r1-preparacao-01/README.md).
 
 A integração (C06) e a reprodução do complemento real (C07/F09 final) continuam
 bloqueadas. O fechamento completo ainda requer qualificação conforme
