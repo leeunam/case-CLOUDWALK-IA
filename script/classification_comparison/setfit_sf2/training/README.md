@@ -2,7 +2,7 @@
 
 Execute da raiz da worktree. O módulo usa o [protocolo
 aprovado](../../../../docs/planejamento/classificacao-comparativa/sf2/protocolo.json)
-e os [contratos SF2](../../../../docs/planejamento/classificacao-comparativa/sf2/contratos/README.md).
+e os [contratos SF2](../../../../docs/planejamento/classificacao-comparativa/sf2/contratos/sf2.schema.json).
 
 ## Instalação e conferência
 

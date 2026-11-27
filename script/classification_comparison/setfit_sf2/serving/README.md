@@ -33,14 +33,14 @@ Em modo SetFit, `publish.py check` consulta a prontidão atual do classificador 
 
 Antes do READY, o processo confere os hashes dos 17 arquivos do worker, três do núcleo R1, o contrato, as políticas, o manifesto e todos os membros do pacote. O carregador original ainda confere as versões, as classes e o hash dos bytes que entrega ao Joblib. O supervisor carrega somente os tokenizadores dos dois especialistas. Cada medição usa exclusivamente as cabeças pedidas e o mesmo cálculo congelado, com tokens especiais e sem truncamento.
 
-O serviço reserva um único slot, sem fila de espera interna. O processo principal controla o pipe e interrompe a operação quando o prazo vence, inclusive na verificação R1. Um cliente desconectado perde a resposta, mas o supervisor conclui ou interrompe sua operação antes de liberar o slot. Uma sessão defeituosa perde o READY e seu processo é encerrado e colhido. Duas partidas consecutivas sem uma resposta verificada esgotam o orçamento automático. O operador pode reiniciar o serviço após corrigir a causa. Consulte o [contrato HTTP](../../../../docs/contratos/classification-http/README.md) para os códigos de retorno.
+O serviço reserva um único slot, sem fila de espera interna. O processo principal controla o pipe e interrompe a operação quando o prazo vence, inclusive na verificação R1. Um cliente desconectado perde a resposta, mas o supervisor conclui ou interrompe sua operação antes de liberar o slot. Uma sessão defeituosa perde o READY e seu processo é encerrado e colhido. Duas partidas consecutivas sem uma resposta verificada esgotam o orçamento automático. O operador pode reiniciar o serviço após corrigir a causa. Consulte o [contrato HTTP](../../../../contracts/classification-http/v1.json) para os códigos de retorno.
 
 ## Verificar
 
 ```sh
 python3 -B -m unittest script.classification_comparison.setfit_sf2.serving.test_serving
 python3 -B -m unittest discover -s script -p test_setfit_config.py
-python3 -B -m unittest discover -s docs/contratos/classification-http -p test_vectors.py
+python3 -B -m unittest discover -s contracts/classification-http -p test_vectors.py
 ```
 
 Na demo SetFit já pronta, este exercício compara 128 e 129 tokens nas duas cabeças e classifica quatro mensagens sintéticas de produto. A saída mostra o PID residente, as escritas no pipe e as decisões atômicas.
