@@ -10,7 +10,7 @@ from script.classification_comparison.setfit_sf2.runtime_r1 import derive, load_
 
 DIRECTORY = Path(__file__).resolve().parent
 FIXTURES = DIRECTORY / "fixtures"
-ROOT = DIRECTORY.parents[2]
+ROOT = DIRECTORY.parents[1]
 EVIDENCE = ROOT / "docs/evidencias/c05/sf2"
 QUALIFIED = EVIDENCE / "qualificacao-01/execucao-02"
 

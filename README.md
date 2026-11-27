@@ -56,6 +56,7 @@ essa instalação.
 | [`integration/`](integration/) | Ponte Python com Kafka, atendente simulado e piloto conversacional com conhecimento por marca. |
 | [`contracts/`](contracts/) | OpenAPI, JSON Schemas e fixtures de API, eventos Kafka, SetFit e piloto conversacional. |
 | [`script/`](script/) | Comandos de demonstração, publicação e verificações organizadas por função. |
+| [`audit/`](audit/) | Dados versionados usados para reproduzir verificações. |
 | [`assets/architecture/`](assets/architecture/) | Diagrama da arquitetura e fonte Mermaid. |
 
 Consulte as [regras de atendimento e os contratos](ARQUITETURA.md) antes de
@@ -74,9 +75,10 @@ docker compose run --rm --no-deps web npm run build
 docker compose up -d --wait db
 docker compose run --build --rm --no-deps -e RAILS_ENV=test api bundle exec rails db:prepare test
 docker compose run --rm --no-deps api bundle exec ruby /workspace/script/check_contracts.rb
+python3 -m unittest discover -s contracts/classification-http
 ```
 
-Os arquivos remanescentes em `docs/` são insumos versionados de avaliações
+A suíte Python de contratos usa `jsonschema`. Os arquivos remanescentes em `docs/` são insumos versionados de avaliações
 anteriores. Alguns scripts de classificação mantêm caminhos e hashes
 fixados pela avaliação do SetFit. O [guia de validação](VALIDACAO.md) aponta
 para os relatórios históricos.

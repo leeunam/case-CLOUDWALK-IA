@@ -15,7 +15,7 @@ class ClassificationHttpFixtures
   }.freeze
 
   def initialize(directory)
-    @root = directory.join("../../..").realpath
+    @root = directory.join("../..").realpath
     @fixtures = directory.join("fixtures")
     @pins = read(directory.join("pins.json"))
     schema = read(directory.join("v1.json"))

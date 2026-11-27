@@ -10,7 +10,7 @@ from script.classification_acceptance.aceite_integrado import verify_direct_clas
 
 
 ROOT = Path(__file__).resolve().parents[2]
-ARCHIVE = ROOT / "docs/evidencias/c06/aceite-integrado"
+ARCHIVE = ROOT / "audit/classification-acceptance"
 
 
 class AcceptanceControlsTest(unittest.TestCase):

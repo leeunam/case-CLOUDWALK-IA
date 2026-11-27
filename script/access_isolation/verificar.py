@@ -17,7 +17,7 @@ WORKTREE = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(WORKTREE / "script"))
 from publish import ORIGIN as TUNNEL_ORIGIN, PASSWORD_KEY, PublishError, private_env
 
-MANIFEST = "docs/evidencias/f10/fluxo-publico/cases.json"
+MANIFEST = "audit/access-isolation/cases.json"
 PUBLIC_ORIGIN = re.compile(TUNNEL_ORIGIN)
 AURORA = "11111111-1111-4111-8111-111111111111"
 HORIZONTE = "22222222-2222-4222-8222-222222222222"
