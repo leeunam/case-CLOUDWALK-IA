@@ -22,7 +22,7 @@ usa a API e recebe atualizações do chat pelo Action Cable.
 
 Uma classificação válida segue ao atendente simulado. Se categoria ou
 prioridade estiver ausente, o Rails agenda o complemento pelo serviço SetFit
-local. Campos fornecidos são preservados; entradas inválidas ou incertas vão
+local. Campos válidos do canal são preservados; entradas inválidas ou incertas vão
 para revisão humana. O serviço de classificação não decide acesso nem
 encaminhamento.
 
@@ -73,5 +73,6 @@ desenvolvimento, consulte [frontend](frontend/README.md),
   fora do escopo.
 
 Consulte o [estado detalhado da entrega](docs/estado-entrega.md), a
-[especificação e decisões](docs/planejamento/especificacao-mvp.md) e as
+[especificação](docs/planejamento/especificacao-mvp.md), as
+[decisões](docs/planejamento/decisoes.md) e as
 [evidências do piloto E01](docs/evidencias/e01/README.md).
