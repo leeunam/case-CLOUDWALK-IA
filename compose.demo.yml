@@ -62,7 +62,7 @@ services:
       CLOUDWALK_AGENT_REQUEST_URL: http://requests:8080/webhooks/v1/agent/requests
       CLOUDWALK_AGENT_REQUESTS_SECRET: ${DEMO_AGENT_REQUESTS_SECRET:?execute python3 script/demo.py init}
     volumes: *demo-volumes
-    command: [bundle, exec, rails, runner, script/f02_outbox.rb]
+    command: [bundle, exec, rails, runner, script/check_outbox.rb]
     depends_on:
       db_setup:
         condition: service_completed_successfully

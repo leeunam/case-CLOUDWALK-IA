@@ -125,7 +125,7 @@ def check_demo(args, compose, values):
         "NO_PROXY": "127.0.0.1",
     }
     subprocess.run([
-        sys.executable, "-B", str(ROOT / "script/check_f02.py"), "--api", f"http://{api}",
+        sys.executable, "-B", str(ROOT / "script/check_agent_flow.py"), "--api", f"http://{api}",
         "--project", args.project, "--channel-id", channel_id,
     ], cwd=ROOT, env=check_env, check=True)
 

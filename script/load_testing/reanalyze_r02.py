@@ -58,7 +58,7 @@ def compare(directory):
 
 
 def main():
-    source = Path(__file__).resolve().parents[3] / "docs/evidencias/f08"
+    source = Path(__file__).resolve().parents[2] / "docs/evidencias/f08"
     result = {"sha256_report_py": digest(Path(__file__).with_name("report.py").read_bytes()), "lotes": {}}
     for name in ("referencia-inicial", "referencia-complemento"):
         folder = source / name

@@ -5,5 +5,5 @@ services:
       CLOUDWALK_AGENT_EVENTS_URL: http://api:3000/webhooks/v1/agent/events
       CLOUDWALK_CONTRACT_SCHEMA: /contracts/schemas/v1.json
     volumes:
-      - ./script/r01:/r01:ro
+      - ./script/kafka_recovery:/r01:ro
       - ./contracts:/contracts:ro

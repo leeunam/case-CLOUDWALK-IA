@@ -16,7 +16,7 @@ from protocol import DIRECTORY, append, now_ms, plan, utc, write_json
 from report import publish, render_matrix
 
 
-ROOT = DIRECTORY.parents[2]
+ROOT = DIRECTORY.parents[1]
 PROJECT = "cloudwalk_f08_load"
 BASE = "f23b21e53357f926e8ca1ba3c3a11da7242daf9a"
 SERVICES = ("api", "worker", "outbox", "requests", "events", "mock", "observe")

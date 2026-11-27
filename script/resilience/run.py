@@ -18,8 +18,8 @@ BASE = "2b17a2f45753e39825b8316c31781f0be51f2c25"
 CATALOG = json.loads(Path(__file__).with_name("catalog.json").read_text())
 ROOT = Path(__file__).resolve().parents[2]
 COMPOSE = [
-    "docker", "compose", "--project-name", PROJECT, "--env-file", "script/f07/stack.env",
-    "-f", "compose.yml", "-f", "script/f07/compose.yml",
+    "docker", "compose", "--project-name", PROJECT, "--env-file", "script/resilience/stack.env",
+    "-f", "compose.yml", "-f", "script/resilience/compose.yml",
 ]
 CONTROLLED_SERVICES = {"kafka", "outbox", "events"}
 

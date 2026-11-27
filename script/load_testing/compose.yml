@@ -52,7 +52,7 @@ services:
     depends_on:
       db_setup:
         condition: service_completed_successfully
-    command: [bundle, exec, rails, runner, script/f02_outbox.rb]
+    command: [bundle, exec, rails, runner, script/check_outbox.rb]
   requests:
     <<: *integration
     command: [requests]
@@ -69,7 +69,7 @@ services:
     profiles: [unused]
     ports: !reset []
   observe:
-    build: ./script/f08/load
+    build: ./script/load_testing
     depends_on:
       api:
         condition: service_healthy
@@ -90,7 +90,7 @@ services:
       CLOUDWALK_CHANNEL_SECRET: ${CLOUDWALK_CHANNEL_SECRET:?}
       CLOUDWALK_DEMO_PASSWORDS: ${CLOUDWALK_DEMO_PASSWORDS:?}
     volumes: &mounts
-      - ./script/f08/load:/load:ro
+      - ./script/load_testing:/load:ro
       - ${F08_OUTPUT:?}:/results
     command: [python, -B, /load/observe.py]
   generator:

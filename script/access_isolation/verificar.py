@@ -13,7 +13,7 @@ from uuid import UUID
 
 from playwright.sync_api import Error as BrowserError, sync_playwright
 
-WORKTREE = Path(__file__).resolve().parents[3]
+WORKTREE = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(WORKTREE / "script"))
 from publish import ORIGIN as TUNNEL_ORIGIN, PASSWORD_KEY, PublishError, private_env
 

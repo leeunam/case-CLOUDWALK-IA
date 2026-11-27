@@ -15,7 +15,7 @@ from collections import Counter
 from urllib.error import HTTPError
 from urllib.request import Request
 
-from check_f02 import Demo, body, kafka_events, require
+from check_agent_flow import Demo, body, kafka_events, require
 
 
 class HumanDemo(Demo):

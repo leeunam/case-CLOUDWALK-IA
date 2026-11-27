@@ -23,7 +23,7 @@ if find_spec("psycopg") is None:
     fallback["psycopg"] = Mock()
 
 with (patch.dict(sys.modules, fallback),
-      patch.object(sys, "path", [*sys.path, str(ROOT / "integration"), str(ROOT / "script/f07")])):
+      patch.object(sys, "path", [*sys.path, str(ROOT / "integration"), str(ROOT / "script/resilience")])):
     import trial
     import observe
     import scenarios

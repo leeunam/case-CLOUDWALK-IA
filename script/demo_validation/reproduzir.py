@@ -11,7 +11,7 @@ from uuid import uuid4
 from playwright.sync_api import sync_playwright
 
 from script import demo
-from script.c06.aceite_integrado import Actor, readiness, records, resources, snapshot
+from script.classification_acceptance.aceite_integrado import Actor, readiness, records, resources, snapshot
 
 CASES = (
     (

@@ -6,7 +6,7 @@ import sys
 from tempfile import TemporaryDirectory
 import unittest
 
-from script.c06.aceite_integrado import verify_direct_classification, verify_requests
+from script.classification_acceptance.aceite_integrado import verify_direct_classification, verify_requests
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -52,7 +52,7 @@ class AcceptanceControlsTest(unittest.TestCase):
                 with self.subTest(flags=flags, env=optimization):
                     env = {**os.environ, "PYTHONPATH": temp, "PYTHONOPTIMIZE": optimization}
                     completed = subprocess.run(
-                        [sys.executable, "-B", *flags, "-m", "script.c06.aceite_integrado",
+                        [sys.executable, "-B", *flags, "-m", "script.classification_acceptance.aceite_integrado",
                          "--classifier", "setfit", "--project", "cloudwalk_demo_teste",
                          "--origin", "http://127.0.0.1:1", "--credentials", str(directory / "ausente"),
                          "--output", str(result)],

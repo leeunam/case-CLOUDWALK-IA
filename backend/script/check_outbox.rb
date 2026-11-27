@@ -1,4 +1,4 @@
-# Executar com bin/rails runner script/f02_outbox.rb.
+# Executar com bin/rails runner script/check_outbox.rb.
 stop = false
 %w[INT TERM].each { |signal| Signal.trap(signal) { stop = true } }
 

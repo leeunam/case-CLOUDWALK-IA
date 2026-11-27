@@ -6,14 +6,14 @@ import uuid
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "script/f07"))
+sys.path.insert(0, str(ROOT / "script/resilience"))
 from run import environment  # noqa: E402
 
 
 def main():
     project = "cloudwalk_r01_" + uuid.uuid4().hex[:12]
-    args = ["docker", "compose", "-p", project, "--env-file", "script/f07/stack.env",
-            "-f", "compose.yml", "-f", "script/f07/compose.yml", "-f", "script/r01/compose.yml"]
+    args = ["docker", "compose", "-p", project, "--env-file", "script/resilience/stack.env",
+            "-f", "compose.yml", "-f", "script/resilience/compose.yml", "-f", "script/kafka_recovery/compose.yml"]
     env = environment()
 
     def compose(*command, timeout=600, output=sys.stderr):

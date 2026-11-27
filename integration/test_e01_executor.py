@@ -222,7 +222,7 @@ class ExecutorTest(unittest.TestCase):
         complete = server.completion
         self.assertEqual(complete["handoff_rule"], {"id": "horizonte.humano", "reason": "human_requested"})
         self.assertEqual(complete["source_refs"], [{"id": "horizonte.manual", "version": "1.0.0"}])
-        check = runpy.run_path(str(ROOT.parent / "script/e01/check_contracts.py"))
+        check = runpy.run_path(str(ROOT.parent / "script/agent_pilot/check_contracts.py"))
         check["schema_check"](json.loads(DEFAULT_SCHEMA.read_bytes()), result, "AgentResult")
         check["schema_check"](read_private_schema("ledger"), complete, "complete_result")
         check["validate_projection"](request, decision, result)

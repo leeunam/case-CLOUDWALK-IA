@@ -34,7 +34,7 @@ services:
     image: python:3.13-slim
     command: [python, -B, /f07/ack_gate.py]
     volumes:
-      - ./script/f07:/f07:ro
+      - ./script/resilience:/f07:ro
   api:
     environment: *rails-env
     ports: !reset []
@@ -57,7 +57,7 @@ services:
     depends_on:
       db_setup:
         condition: service_completed_successfully
-    command: [bundle, exec, rails, runner, script/f02_outbox.rb]
+    command: [bundle, exec, rails, runner, script/check_outbox.rb]
   requests:
     <<: *integration
     command: [requests]
@@ -77,17 +77,17 @@ services:
     image: python:3.13-slim
     command: [python, -B, /f07/fault.py]
     volumes:
-      - ./script/f07:/f07:ro
+      - ./script/resilience:/f07:ro
   web:
     ports: !reset []
     command: [node, -e, "setInterval(() => {}, 3600000)"]
     healthcheck:
       disable: true
     volumes:
-      - ./script/f07:/f07:ro
+      - ./script/resilience:/f07:ro
   probe:
     build:
-      context: ./script/f07
+      context: ./script/resilience
       additional_contexts:
         product: ./integration
     environment:
@@ -98,7 +98,7 @@ services:
       CLOUDWALK_AGENT_EVENTS_SECRET: ${CLOUDWALK_AGENT_EVENTS_SECRET:?}
       CLOUDWALK_DEMO_PASSWORDS: ${CLOUDWALK_DEMO_PASSWORDS:?}
     volumes:
-      - ./script/f07:/f07:ro
+      - ./script/resilience:/f07:ro
       - ./integration/agent_flow.py:/product/agent_flow.py:ro
 
 networks:
