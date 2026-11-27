@@ -77,6 +77,6 @@ Horizonte, `32ab943b-2bea-428f-adb7-a802fe53bfaf`, e registre a origem da
 conexão, o horário com fuso e o resultado para cada perfil.
 [Conferência por dados móveis no guia B](f10-isolamento-marcas.md#conferência-por-dados-móveis).
 
-A classificação real (C05, C06 e C07/F09 final) segue em espera até retomada
-explícita. O atendente real (E01) fica como evolução posterior e opcional.
+Este aceite de 25/11 usou a classificação fixture. A integração do SetFit R1
+e o piloto isolado do atendente real foram verificados em 26/11.
 [Estado da entrega](estado-entrega.md).

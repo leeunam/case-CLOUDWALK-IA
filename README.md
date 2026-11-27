@@ -14,31 +14,31 @@ chat. Veja [estado, evidências e próximos passos](docs/estado-entrega.md).
 
 ![Fluxo e componentes do help desk](docs/arquitetura/arquitetura.png)
 
-Rails é a API e a autoridade sobre atendimentos, permissões, filas e auditoria.
-PostgreSQL persiste o estado e o outbox. O worker Rails executa jobs internos
-com Solid Queue. A ponte Python publica pedidos no Kafka e consome os
-resultados. O mock determinístico responde pelo mesmo fluxo de eventos. React
-usa a API e recebe atualizações do chat pelo Action Cable.
+O monólito modular em Rails controla atendimentos, permissões, filas e
+auditoria. A API confirma a entrada após gravá-la no PostgreSQL. O outbox
+grava os pedidos de atendimento na mesma transação que abre a rodada. Solid
+Queue executa os jobs internos. A ponte Python publica pedidos no Kafka e
+devolve as respostas do atendente simulado ao Rails. O Action Cable sinaliza
+as mudanças ao React após a gravação.
 
 Uma classificação válida segue ao atendente simulado. Se categoria ou
 prioridade estiver ausente, o Rails agenda o complemento pelo serviço SetFit
-local. Campos válidos do canal são preservados; entradas inválidas ou incertas vão
-para revisão humana. O serviço de classificação não decide acesso nem
-encaminhamento.
+local. O fluxo preserva campos válidos do canal e encaminha classificações
+inválidas ou incertas para a supervisão.
 
 ## Rodar a demonstração
 
-Requisitos: Python 3.10+, Docker com Compose 2.24.4+ e acesso ao daemon Docker.
-Na primeira execução, o Compose baixa e constrói as imagens necessárias.
+Use Python 3.10+ e Docker com Compose 2.24.4+. Na primeira execução, o Compose
+baixa e constrói as imagens. Rode na raiz do repositório.
 
 ```sh
 python3 script/demo.py up
 python3 script/demo.py check
 ```
 
-Abra o simulador em `http://127.0.0.1:45179/` e a área de operação em
-`http://127.0.0.1:45179/analista`. Para entrar como supervisor, obtenha a senha
-sintética no terminal com:
+Abra o [simulador](http://127.0.0.1:45179/) ou a
+[área de operação](http://127.0.0.1:45179/analista). Obtenha a senha do
+supervisor no terminal.
 
 ```sh
 python3 script/demo.py login supervisor@example.test
@@ -60,17 +60,13 @@ desenvolvimento, consulte [frontend](frontend/README.md),
 
 ## Resultados e limites
 
-- **F08:** a recuperação do Kafka e o teste de escala do chat precisam de
-  novos ajustes e medições. Os resultados e comandos de reprodução estão em
-  [docs/f08.md](docs/f08.md).
-- **SetFit R1:** adotado após avaliação independente e integrado à aplicação.
-  Os pesos são distribuídos em pacote separado do Git. A classificação pode
-  ser reproduzida em modo fixture sem esse pacote.
-- **Atendimento real:** E01 avaliou um modelo de linguagem com conhecimento
-  sintético por marca. A demo publicada usa o atendente simulado.
-- **Publicação:** a URL de demonstração é temporária e depende do computador e
-  do túnel ativos. Integrações bancárias e canais externos de produção estão
-  fora do escopo.
+- **Carga.** 208 turnos aceitos expiraram nas rodadas com parada do Kafka.
+  O teste de chat confirmou 486 conexões no alvo de
+  mil. Veja [resultados e reprodução da F08](docs/f08.md).
+- **Atendimento.** O piloto E01 testou Luna com conhecimento sintético por
+  marca em ambiente isolado. A demonstração usa o atendente simulado.
+- **Publicação.** A URL é temporária e depende do computador e do túnel
+  ativos. O projeto usa canais simulados e dados fictícios.
 
 Consulte o [estado detalhado da entrega](docs/estado-entrega.md), a
 [especificação](docs/planejamento/especificacao-mvp.md), as
