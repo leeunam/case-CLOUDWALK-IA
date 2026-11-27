@@ -97,10 +97,9 @@ Os passos de cópia, restauração e parada de emergência estão no
 
 A URL é temporária e depende do computador e do túnel ativos. O endereço
 pode mudar ao reabrir o túnel. O aceite público foi funcional e usou
-inferência local, sem chamadas pagas. Na carga de referência F08, cinco
-rodadas passaram e uma reprovou. R01 e R02 passaram em reprodução
-independente. O ensaio de dez mil conexões permanece sem medição.
-[F08](f08.md) · [R01](r01.md) · [R02](r02.md).
+inferência local, sem chamadas pagas. Os ensaios F08 ocorreram em ambiente
+isolado e têm seus próprios limites de recuperação sob carga e escala.
+[Resultados F08](f08.md) · [R01](r01.md) · [R02](r02.md).
 
 O aceite por dados móveis do responsável ocorreu na F10 em fixture, nas
 URLs de então. O primeiro endereço SetFit foi verificado por HTTPS, WSS e

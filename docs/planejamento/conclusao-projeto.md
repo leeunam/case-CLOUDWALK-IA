@@ -332,9 +332,10 @@ túnel ativos. O modelo rodou localmente, sem chamadas pagas nesta etapa.
 [Revisão final](../evidencias/c06/revisao-final/README.md) ·
 [Aceite e operação da publicação](../c07-publicacao-setfit.md).
 
-R01 e R02 passaram em reprodução independente. A matriz de referência F08
-conserva a rodada reprovada e segue sem repetição após os ajustes. Os ensaios
-de maior escala, incluindo dez mil conexões, seguem sem medição. Hospedagem
-permanente fica fora do recorte. O piloto E01 foi retomado depois deste
-fechamento e tem seu próprio [registro de aceite](../evidencias/e01/README.md).
-[F08](../f08.md) · [Reprodução R01/R02](../evidencias/c07/README.md).
+R01 e R02 passaram em reprodução independente. A matriz histórica conserva
+a rodada reprovada. A reexecução após as correções e o ensaio de chat
+registraram limites e critérios de repetição no [relatório F08](../f08.md).
+Hospedagem permanente fica fora do recorte. O piloto E01 foi retomado
+depois deste fechamento e tem seu próprio
+[registro de aceite](../evidencias/e01/README.md).
+[Reprodução R01/R02](../evidencias/c07/README.md).

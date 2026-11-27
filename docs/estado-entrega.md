@@ -17,20 +17,27 @@ revisou todos os 18 casos que exigiam revisão. No teste independente final, a R
 | Frente | Evidência registrada |
 | --- | --- |
 | F01–F07 | Implementadas e aceitas localmente. A operação percorre três canais e duas marcas, com classificação fixture, revisão humana, atendente simulado via Kafka, handoff, isolamento e reentrega. A qualificação real do classificador passou ao CLASS-001. [Plano de execução](planejamento/plano-de-execucao.md) · [F04/F05](integracao-f04-f05.md) · [F06/F07](integracao-f06-f07.md). |
-| F08, R01 e R02 | O experimento de referência teve cinco rodadas aprovadas e uma reprovada por falha de recuperação após a parada do Kafka. R01 passou em ensaio controlado de recuperação e R02 passou na reanálise dos dados arquivados, ambas em reprodução independente. A matriz F08 preserva a reprovação e segue sem nova execução. [F08](f08.md) · [R01](r01.md) · [R02](r02.md) · [Reprodução](evidencias/c07/README.md). |
+| F08, R01 e R02 | A referência histórica conserva cinco rodadas aprovadas e uma reprovada. R01 passou em recuperação controlada e R02 passou na reanálise dos dados. Na reexecução de 26/11, as três rodadas com Kafka disponível passaram. As três com interrupção reprovaram, com 208 turnos aceitos que expiraram somados. [F08](f08.md) · [R01](r01.md) · [R02](r02.md) · [Reprodução](evidencias/c07/README.md). |
 | F09-A | A instalação limpa com fixture comprovou dois turnos, reentrega, três canais, duas marcas, handoff, revisão humana e persistência. O trecho com complemento real pertence à C07/F09 final. [Roteiro e evidências F09](f09.md). |
 | C06 e C07/F09 final | O serviço SetFit CPU complementou campos ausentes em instalação local. A reprodução em clone novo verificou três canais, duas marcas, revisão humana e históricos após reinício. [Aceite C06](evidencias/c06/aceite-integrado/README.md) · [Instalar e percorrer a C07](c07.md). |
 | F10 e UX02 | A publicação histórica em fixture passou por reinício, restauração em instalação isolada e aceite por dados móveis em 25/11. O responsável conferiu dois turnos automáticos, handoff, resposta humana, resolução, persistência após recarga e acesso de Bia e Cris por marca. A matriz pública passou em 36 de 36 verificações de acesso por marca no computador de origem. [Aceite integrado](f10-aceite-integrado.md) · [Histórico da publicação](f10-resultado.md) · [Aceite UX02](ux02.md). |
 | Publicação SetFit | Em dois casos enviados pelo HTTPS, o SetFit completou os campos ausentes e o mock respondeu via Kafka. A prova pública cobriu REST e WSS por marca, dois turnos no navegador e reabertura do histórico. A revisão focal fechou os cinco achados do parecer amplo. A atualização preservou os 15 casos e 46 mensagens anteriores. [Aceite público](c07-publicacao-setfit.md) · [Revisão final](evidencias/c06/revisao-final/README.md). |
 
-A [URL verificada em 26/11](https://mortality-windsor-weed-watt.trycloudflare.com)
-depende do computador e do túnel ativos. O teste do responsável por dados
+A URL temporária depende do computador e do túnel ativos. A documentação
+da publicação registra o último endereço verificado. O teste por dados
 móveis permanece registrado na F10 de 25/11, com fixture.
+[Acesso à demonstração](c07-publicacao-setfit.md).
 
-Repetir a matriz F08 nas mesmas condições reforçaria a evidência sob carga
-após as correções. Aumento progressivo de taxa, carga de atendimento humano
-e até dez mil conexões de chat são cenários exploratórios ainda sem medição.
-[Método e resultados F08](f08.md).
+### Limitações e próximos passos
+
+Os ensaios complementares registram limites operacionais do MVP entregue.
+Após interrupções do Kafka, a retomada e a drenagem precisam cumprir o prazo
+das respostas. No chat, o fluxo passou com 100 assinaturas simultâneas, o
+alvo de 1.000 chegou a 486 e a tentativa de 10 mil foi interrompida. O
+worker atingiu a cota local de memória nos dois primeiros patamares.
+Medir a recuperação por etapa, revisar recursos da aplicação e do gerador
+e repetir os testes com metas explícitas são os próximos passos de validação.
+[Resultados e critérios de repetição](f08.md#reexecução-pós-correção-em-26112026).
 
 ## Classificação real
 

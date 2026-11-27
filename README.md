@@ -156,10 +156,23 @@ Cinco rodadas passaram. Das 9.000 entradas aceitas, 7.801 tiveram primeira
 resposta persistida. As 1.199 sem resposta pertencem à rodada que reprovou na
 recuperação após a interrupção. A R01 demonstrou a recuperação em um ensaio
 controlado posterior, e a R02 corrigiu o analisador e conferiu os dados
-arquivados. A matriz de referência preserva a falha e segue sem repetição
-após a correção. O ensaio exploratório de dez mil conexões de chat ainda está
-sem medição.
-[Resultados F08](docs/f08.md) · [R01](docs/r01.md) · [R02](docs/r02.md).
+arquivados.
+
+### Limitações e próximos passos
+
+- **Recuperação após parada do Kafka.** Na reexecução de 26/11/2026 com R01 e
+  R02, as três rodadas sem parada passaram. Nas três com parada, o consumo
+  retomou e as filas escoaram, mas 208 turnos aceitos expiraram sem resposta.
+  O próximo passo é medir as etapas da retomada e repetir a matriz após
+  ajustar a recuperação.
+- **Escala do chat.** Com cotas locais, o fluxo passou com 100 assinaturas
+  simultâneas confirmadas. O alvo de 1.000 chegou a 486, com timeouts na
+  abertura de sessão. O worker atingiu a cota de memória nos dois patamares,
+  e a tentativa de 10 mil foi interrompida no início da rampa. O próximo
+  passo é separar os recursos do gerador e da aplicação, revisar a cota do
+  worker e repetir os patamares para medir capacidade sustentada.
+
+[Resultados, limites e critérios de repetição](docs/f08.md#reexecução-pós-correção-em-26112026) · [R01](docs/r01.md) · [R02](docs/r02.md).
 
 ### Classificação
 

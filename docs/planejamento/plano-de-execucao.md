@@ -33,7 +33,10 @@ A R01 foi aceita e integrada localmente após revisão e ensaio real controlado:
 os dois consumidores retomaram em cerca de 12 segundos, com lag zero e
 recuperação canônica aprovada. O [relatório R01](../r01.md) conserva as evidências.
 O ensaio controlado é posterior à referência. A matriz histórica preserva
-a reprovação e segue sem repetição após a correção.
+a reprovação. Em 26/11, a referência completa foi repetida com R01 e R02,
+e as três interrupções ainda causaram turnos expirados. O teste separado
+de chat também registrou limites de capacidade.
+[Reexecução e próximos passos](../f08.md#reexecução-pós-correção-em-26112026).
 
 A [passagem da F08](passagem-f08.md) separa o gerador/observador de carga
 do dataset/avaliador Jev, com arquivos próprios e a mesma base Git. A execução
@@ -290,10 +293,11 @@ Evidências mínimas incluem testes automatizados do domínio e integração, ro
 - README com problema, escopo, arquitetura, instalação, execução, modelos e configuração, método experimental, resultados, limitações e evolução.
 
 A aplicação local admite complemento com SetFit R1 e com fixture. O ensaio de carga de
-referência usou campos válidos na entrada e atendente simulado. Os cenários
-exploratórios de aumento de taxa, atendimento humano e dez mil conexões
-continuam sem medição. A avaliação com Jev na F08 foi offline. A qualificação
-real seguiu para CLASS-001. [Resultados de carga](../f08.md) · [Plano de conclusão](conclusao-projeto.md).
+referência usou campos válidos na entrada e atendente simulado. O cenário
+de chat foi iniciado nos três patamares e o alvo de dez mil ficou
+incompleto. Aumento de taxa e carga de atendimento humano continuam sem
+medição. A avaliação com Jev na F08 foi offline. A qualificação real
+seguiu para CLASS-001. [Resultados de carga](../f08.md) · [Plano de conclusão](conclusao-projeto.md).
 
 ### Publicação da demonstração por URL
 
