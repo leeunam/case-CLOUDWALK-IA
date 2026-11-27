@@ -21,7 +21,7 @@ def authenticated(path, expected):
 
 
 def sources():
-    contracts = Path(os.environ.get("CLASSIFICATION_CONTRACT_DIR", ROOT / "docs/contratos/classification-http"))
+    contracts = Path(os.environ.get("CLASSIFICATION_CONTRACT_DIR", ROOT / "contracts/classification-http"))
     pins = json.loads(authenticated(contracts / "pins.json", PINS_SHA))
     schema = json.loads(authenticated(contracts / "v1.json", SCHEMA_SHA))
     for group in ("worker_files", "runtime_files"):

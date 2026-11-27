@@ -1,6 +1,6 @@
 import type { Session } from '../api/contract'
-import { Icon, type IconName } from '../Icon'
-import { Identity } from '../Topbar'
+import { Icon, type IconName } from '../components/Icon'
+import { Identity } from '../components/Topbar'
 import { viewLabels, type StaffView } from './navigation'
 
 type Destination = { id: StaffView; icon: IconName }

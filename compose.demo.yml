@@ -8,9 +8,9 @@ x-integration: &integration
   build: ./integration
   environment: &integration-env
     KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    CLOUDWALK_CONTRACT_SCHEMA: /workspace/docs/contratos/schemas/v1.json
+    CLOUDWALK_CONTRACT_SCHEMA: /workspace/contracts/schemas/v1.json
   volumes:
-    - ./docs/contratos:/workspace/docs/contratos:ro
+    - ./contracts:/workspace/contracts:ro
   depends_on:
     kafka_setup:
       condition: service_completed_successfully
@@ -23,7 +23,7 @@ services:
     environment: *demo-rails
     volumes: !override &demo-volumes
       - ./script:/workspace/script:ro
-      - ./docs/contratos:/workspace/docs/contratos:ro
+      - ./contracts:/workspace/contracts:ro
   api:
     environment:
       <<: *demo-rails

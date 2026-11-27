@@ -18,11 +18,11 @@ x-integration: &integration
   build: ./integration
   environment: &integration-env
     KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    CLOUDWALK_CONTRACT_SCHEMA: /workspace/docs/contratos/schemas/v1.json
+    CLOUDWALK_CONTRACT_SCHEMA: /workspace/contracts/schemas/v1.json
     CLOUDWALK_AGENT_REQUESTS_SECRET: ${CLOUDWALK_AGENT_REQUESTS_SECRET:?}
     CLOUDWALK_AGENT_EVENTS_SECRET: ${CLOUDWALK_AGENT_EVENTS_SECRET:?}
   volumes:
-    - ./docs/contratos:/workspace/docs/contratos:ro
+    - ./contracts:/workspace/contracts:ro
 
 services:
   kafka:
@@ -42,7 +42,7 @@ services:
     build: ./backend
     environment: *rails-env
     volumes:
-      - ./docs/contratos:/workspace/docs/contratos:ro
+      - ./contracts:/workspace/contracts:ro
     depends_on:
       db_setup:
         condition: service_completed_successfully

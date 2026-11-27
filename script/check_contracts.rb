@@ -4,9 +4,9 @@ require "json"
 require "pathname"
 require "yaml"
 require "json_schemer"
-require_relative "../docs/contratos/classification-http/check_fixtures"
+require_relative "../contracts/classification-http/check_fixtures"
 
-contracts = Pathname.new(__dir__).join("../docs/contratos").realpath
+contracts = Pathname.new(__dir__).join("../contracts").realpath
 api_path = contracts.join("openapi.yaml")
 schema_path = contracts.join("schemas/v1.json")
 api = YAML.safe_load_file(api_path)

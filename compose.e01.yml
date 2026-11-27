@@ -33,7 +33,7 @@ services:
       CLOUDWALK_AGENT_BACKEND: ${E01_BACKEND:-mock}
       CLOUDWALK_E01_LEDGER_URL: http://api:3000
       CLOUDWALK_E01_LEDGER_SECRET: ${E01_LEDGER_SECRET:?defina um segredo dedicado ao piloto E01}
-      E01_CONTRACT_DIR: /workspace/docs/contratos/e01
+      E01_CONTRACT_DIR: /workspace/contracts/agent-pilot
     depends_on:
       api:
         condition: service_healthy

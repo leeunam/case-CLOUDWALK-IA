@@ -6,8 +6,8 @@ import { staff } from '../api/staff'
 import { ConfigurationForm } from '../configuration/ConfigurationForm'
 import type { Priority } from '../simulator/contract'
 import { categoryLabels, formatTimestamp, priorityLabels } from '../simulator/presentation'
-import { useResource } from '../simulator/useResource'
-import { usePagedCases } from '../usePagedCases'
+import { useResource } from '../hooks/useResource'
+import { usePagedCases } from '../hooks/usePagedCases'
 
 type RunCommand = (command: StaffCommand) => Promise<unknown>
 

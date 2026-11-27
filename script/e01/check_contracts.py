@@ -12,8 +12,8 @@ from pathlib import Path
 from jsonschema import Draft202012Validator, FormatChecker, ValidationError
 
 ROOT = Path(__file__).resolve().parents[2]
-CONTRACTS = ROOT / "docs/contratos"
-E01 = CONTRACTS / "e01"
+CONTRACTS = ROOT / "contracts"
+E01 = CONTRACTS / "agent-pilot"
 FIXTURES = E01 / "fixtures"
 BRANDS = {
     "aurora": "11111111-1111-4111-8111-111111111111",

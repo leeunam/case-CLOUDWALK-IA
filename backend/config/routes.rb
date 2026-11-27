@@ -2,7 +2,7 @@ Rails.application.routes.draw do
   get "up", to: "rails/health#show", as: :rails_health_check
 
   post "internal/v1/e01/executions/:request_event_id/:operation",
-       to: Internal::V1::E01::ExecutionsController,
+       to: Internal::V1::AgentPilot::ExecutionsController,
        constraints: { operation: /claim|start|complete|unknown|published/ }, format: false
 
   namespace :api do

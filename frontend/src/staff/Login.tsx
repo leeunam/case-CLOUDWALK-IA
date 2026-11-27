@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import type { Session } from '../api/contract'
 import { staff } from '../api/staff'
-import { Icon } from '../Icon'
-import { errorMessage } from '../simulator/useResource'
+import { Icon } from '../components/Icon'
+import { errorMessage } from '../hooks/useResource'
 
 export function Login({ session, onSession }: { session: Session; onSession: (session: Session) => void }) {
   const [error, setError] = useState<string | null>(null)

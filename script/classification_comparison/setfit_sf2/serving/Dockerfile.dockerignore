@@ -27,8 +27,8 @@
 !docs/planejamento/classificacao-comparativa/sf2/contratos/sf2.schema.json
 !docs/planejamento/classificacao-comparativa/sf2/sf2-final-r1-protocolo.json
 !docs/planejamento/classificacao-comparativa/sf2/sf2-final-r1.schema.json
-!docs/contratos/classification-http/pins.json
-!docs/contratos/classification-http/v1.json
+!contracts/classification-http/pins.json
+!contracts/classification-http/v1.json
 !docs/evidencias/c05/sf2/qualificacao-01/execucao-02/avaliacao/capture-policy.json
 !docs/evidencias/c05/sf2/revisao-01/selected-policy.json
 !script/classification_comparison/setfit_sf2/serving/*.py

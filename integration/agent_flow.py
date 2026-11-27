@@ -21,7 +21,7 @@ FAILURES = "agent.failures"
 DISPOSITIONS = {"applied", "duplicate", "discarded"}
 REQUEST_PATH = "/webhooks/v1/agent/requests"
 HERE = Path(__file__).resolve().parent
-DEFAULT_SCHEMA = HERE.parent / "docs/contratos/schemas/v1.json"
+DEFAULT_SCHEMA = HERE.parent / "contracts/schemas/v1.json"
 REQUEST_GROUP = "mock-agent-v1"
 EVENT_GROUP = "platform-agent-events-v1"
 

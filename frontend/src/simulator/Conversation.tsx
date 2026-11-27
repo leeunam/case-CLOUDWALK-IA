@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState, type Ref } from 'react'
 import type { Brand, Channel, SimulatorReceipt, SimulatorRepository } from './contract'
-import { Transcript } from '../Transcript'
-import { useCaseRefresh } from '../useCaseRefresh'
+import { Transcript } from '../components/Transcript'
+import { useCaseRefresh } from '../hooks/useCaseRefresh'
 import { Composer } from './Composer'
 import { caseLabels, channelLabels } from './presentation'
-import { useResource } from './useResource'
+import { useResource } from '../hooks/useResource'
 
 export function Conversation({
   id, latestCaseId, brands, channels, repository, demo, headingRef, onHistoryChanged, onOpen, onReceipt,

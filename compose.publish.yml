@@ -20,16 +20,16 @@ x-backend: &backend
     CLOUDWALK_PUBLISH_BEHIND_PROXY: "1"
     CLOUDWALK_PUBLISH_HTTPS_PORT: ${PUBLISH_HTTPS_PORT:-18443}
   volumes:
-    - ./docs/contratos/schemas/v1.json:/workspace/docs/contratos/schemas/v1.json:ro
+    - ./contracts/schemas/v1.json:/workspace/contracts/schemas/v1.json:ro
 
 x-bridge: &bridge
   build: ./integration
   image: ${PUBLISH_PROJECT:-cloudwalk_publish}-bridge
   environment: &bridge-environment
     KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    CLOUDWALK_CONTRACT_SCHEMA: /workspace/docs/contratos/schemas/v1.json
+    CLOUDWALK_CONTRACT_SCHEMA: /workspace/contracts/schemas/v1.json
   volumes:
-    - ./docs/contratos/schemas/v1.json:/workspace/docs/contratos/schemas/v1.json:ro
+    - ./contracts/schemas/v1.json:/workspace/contracts/schemas/v1.json:ro
   depends_on:
     kafka_setup:
       condition: service_completed_successfully

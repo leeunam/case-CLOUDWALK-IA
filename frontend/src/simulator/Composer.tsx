@@ -3,7 +3,7 @@ import type { FormEvent } from 'react'
 import { ApiError, deliveryUncertain } from '../api/http'
 import type { Channel, Priority, SimulatorCase, SimulatorMessage, SimulatorReceipt, SimulatorRepository } from './contract'
 import { categoryLabels, channelExamples, priorityLabels } from './presentation'
-import { errorMessage } from './useResource'
+import { errorMessage } from '../hooks/useResource'
 
 type Attempt = { channelId: string; message: SimulatorMessage; key: string }
 

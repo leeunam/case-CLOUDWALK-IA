@@ -16,11 +16,11 @@ x-integration: &integration
   build: ./integration
   environment: &integration-env
     KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    CLOUDWALK_CONTRACT_SCHEMA: /workspace/docs/contratos/schemas/v1.json
+    CLOUDWALK_CONTRACT_SCHEMA: /workspace/contracts/schemas/v1.json
     CLOUDWALK_AGENT_REQUESTS_SECRET: ${CLOUDWALK_AGENT_REQUESTS_SECRET:?}
     CLOUDWALK_AGENT_EVENTS_SECRET: ${CLOUDWALK_AGENT_EVENTS_SECRET:?}
   volumes:
-    - ./docs/contratos:/workspace/docs/contratos:ro
+    - ./contracts:/workspace/contracts:ro
   depends_on:
     kafka_setup:
       condition: service_completed_successfully
@@ -30,20 +30,20 @@ services:
     ports: !reset []
     environment: *rails
     volumes: !override
-      - ./docs/contratos:/workspace/docs/contratos:ro
+      - ./contracts:/workspace/contracts:ro
   worker:
     environment: *rails
     volumes: !override
-      - ./docs/contratos:/workspace/docs/contratos:ro
+      - ./contracts:/workspace/contracts:ro
   db_setup:
     command: [sh, -ec, 'bundle exec rails db:prepare && bundle exec rails db:seed']
     environment: *rails
     volumes: !override
-      - ./docs/contratos:/workspace/docs/contratos:ro
+      - ./contracts:/workspace/contracts:ro
   outbox:
     build: ./backend
     volumes:
-      - ./docs/contratos:/workspace/docs/contratos:ro
+      - ./contracts:/workspace/contracts:ro
     environment:
       <<: *rails
       POSTGRES_HOST: db

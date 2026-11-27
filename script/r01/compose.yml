@@ -6,4 +6,4 @@ services:
       CLOUDWALK_CONTRACT_SCHEMA: /contracts/schemas/v1.json
     volumes:
       - ./script/r01:/r01:ro
-      - ./docs/contratos:/contracts:ro
+      - ./contracts:/contracts:ro

@@ -8,7 +8,7 @@ from e01_knowledge import BRANDS, HANDOFF_TEXT, Knowledge, RESOLUTION_QUESTION, 
 
 
 ROOT = Path(__file__).resolve().parent
-FIXTURES = ROOT.parent / "docs/contratos/e01/fixtures"
+FIXTURES = ROOT.parent / "contracts/agent-pilot/fixtures"
 AURORA, HORIZONTE = BRANDS
 QUESTION = "O menu da maquininha está visível na tela?"
 

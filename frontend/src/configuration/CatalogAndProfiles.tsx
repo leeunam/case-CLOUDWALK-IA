@@ -3,7 +3,7 @@ import { configuration } from '../api/configuration'
 import type { Analyst, Catalog, CatalogCategory, Profile, ProfileInput } from '../api/configuration'
 import type { Session } from '../api/contract'
 import { ApiError } from '../api/http'
-import { useResource } from '../simulator/useResource'
+import { useResource } from '../hooks/useResource'
 import { ConfigurationForm } from './ConfigurationForm'
 
 export function CatalogEditor({ catalog, session, onSaved }: {

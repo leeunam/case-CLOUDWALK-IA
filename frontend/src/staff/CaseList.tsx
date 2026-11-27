@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import type { CaseFilters, ListFilters } from '../api/contract'
 import { staff } from '../api/staff'
 import { categoryLabels, formatTimestamp, priorityLabels } from '../simulator/presentation'
-import { usePagedCases } from '../usePagedCases'
+import { usePagedCases } from '../hooks/usePagedCases'
 import { staffCaseLabels } from './presentation'
 
 export function CaseList({ filters, catalog, revision, caseId, onOpen }: {

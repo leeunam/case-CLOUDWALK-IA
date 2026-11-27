@@ -21,7 +21,7 @@ module JevSamples
   end
 
   def channel_input(fixture)
-    roots = [File.expand_path("../../../../../docs/contratos", __dir__), "/workspace/docs/contratos"]
+    roots = [File.expand_path("../../../../../contracts", __dir__), "/workspace/contracts"]
     path = roots.map { |root| File.join(root, "fixtures", "#{fixture}.json") }.find { |file| File.file?(file) }
     raise "Fixture contratual #{fixture}.json não encontrada em #{roots.join(' ou ')}." unless path
 

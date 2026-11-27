@@ -1,39 +1,18 @@
 # Validação e limites
 
-Resumo dos aceites registrados no snapshot [`06f5799`](https://github.com/leeunam/case-CLOUDWALK-IA/tree/06f5799b44998982af4a8dfe7fd10c2ed0955dd2). As medições descrevem ambientes e cargas específicos; não são promessa de capacidade de produção.
+Resumo dos aceites registrados no snapshot [`e422db3`](https://github.com/leeunam/case-CLOUDWALK-IA/tree/e422db3ea6efddc8835036ce2095c48143d81516). As medições descrevem a capacidade observada no ambiente de teste.
 
-## Demonstração e comandos essenciais
-
-Use Python 3.10+ e Docker Compose 2.24.4+. Na raiz do repositório:
-
-```sh
-python3 script/demo.py up
-python3 script/demo.py check
-python3 script/demo.py status
-```
-
-Abra `http://127.0.0.1:45179/` para o simulador ou `/analista` para a operação. A demo padrão usa dados fictícios, classificador fixture e atendente simulado via Kafka. Para encerrar, rode `python3 script/demo.py down`.
-
-Verificações automatizadas essenciais:
-
-```sh
-docker compose exec -T api bundle exec ruby script/check_contracts.rb
-docker compose exec -T -e RAILS_ENV=test api bundle exec rails test
-docker compose exec -T web npm test
-docker compose exec -T web npm run build
-```
-
-Para a reprodução mais ampla, consulte os comandos específicos em [`docs/c07.md`](https://github.com/leeunam/case-CLOUDWALK-IA/blob/06f5799b44998982af4a8dfe7fd10c2ed0955dd2/docs/c07.md). Ensaios de carga e de recuperação demoram vários minutos, consomem os recursos locais e devem ser executados isoladamente.
+Os comandos para rodar a demo e as suítes estão no [README](README.md).
 
 ## Carga, recuperação e chat — F08
 
 A matriz usou seis rodadas isoladas: **5 minutos a 5 novos atendimentos por segundo** em cada rodada (1.500 entradas), com dois minutos de observação posterior. Três rodadas tiveram uma parada programada de 30 segundos no Kafka. As 9.000 entradas iniciais foram aceitas com HTTP `202`; p95 de aceite variou entre 154 e 241 ms.
 
-Nas rodadas interrompidas, os consumidores voltaram e o backlog chegou a zero, mas **208 turnos aceitos expiraram sem resposta**: 200 primeiros turnos e 8 segundos turnos. Outros 37 segundos turnos planejados não foram enviados porque faltava a primeira resposta. Não se comprovou perda irreversível nem efeito duplicado; isso não remove a falha de atendimento. A matriz, após as correções R01/R02, passou nas três rodadas sem parada e reprovou nas três com parada. A conclusão é que drenagem do backlog, sozinha, não garante resposta ao cliente dentro do prazo.
+Nas rodadas interrompidas, os consumidores voltaram e o backlog chegou a zero, mas **208 turnos aceitos expiraram sem resposta**: 200 primeiros turnos e 8 segundos turnos. Outros 37 segundos turnos planejados não foram enviados porque faltava a primeira resposta. A reconciliação registrou expiração dos prazos sem perda irreversível ou efeito duplicado confirmados. A matriz, após as correções R01/R02, passou nas três rodadas sem parada e reprovou nas três com parada. A conclusão é que drenagem do backlog, sozinha, não garante resposta ao cliente dentro do prazo.
 
-O ensaio separado de Action Cable confirmou **100/100** conexões simultâneas e 300 mensagens aceitas. No alvo de 1.000, confirmou pico de **486** e aceitou 1.455/3.000 escritas previstas; houve timeouts ao abrir sessões e o worker atingiu o limite local de memória. O alvo de 10.000 foi interrompido no início da rampa, com 17 confirmações. **Dez mil conexões não foram validadas.**
+O ensaio separado de Action Cable confirmou **100/100** conexões simultâneas e 300 mensagens aceitas. No alvo de 1.000, confirmou pico de **486** e aceitou 1.455/3.000 escritas previstas; houve timeouts ao abrir sessões e o worker atingiu o limite local de memória. O alvo de 10.000 foi interrompido no início da rampa, com 17 confirmações.
 
-Evidência, denominadores, metodologia e critérios para repetir: [relatório F08](https://github.com/leeunam/case-CLOUDWALK-IA/blob/06f5799b44998982af4a8dfe7fd10c2ed0955dd2/docs/f08.md), [referência inicial](https://github.com/leeunam/case-CLOUDWALK-IA/blob/06f5799b44998982af4a8dfe7fd10c2ed0955dd2/docs/evidencias/f08/referencia-inicial/README.md) e [referência complementar](https://github.com/leeunam/case-CLOUDWALK-IA/blob/06f5799b44998982af4a8dfe7fd10c2ed0955dd2/docs/evidencias/f08/referencia-complemento/README.md). A reprodução da carga está em `script/load_testing/`; o ensaio de recuperação controlado, em `script/kafka_recovery/`.
+Evidência, denominadores, metodologia e critérios para repetir: [relatório F08](https://github.com/leeunam/case-CLOUDWALK-IA/blob/e422db3ea6efddc8835036ce2095c48143d81516/docs/f08.md), [referência inicial](https://github.com/leeunam/case-CLOUDWALK-IA/blob/e422db3ea6efddc8835036ce2095c48143d81516/docs/evidencias/f08/referencia-inicial/README.md) e [referência complementar](https://github.com/leeunam/case-CLOUDWALK-IA/blob/e422db3ea6efddc8835036ce2095c48143d81516/docs/evidencias/f08/referencia-complemento/README.md). A reprodução da carga está em `script/load_testing/`; o ensaio de recuperação controlado, em `script/kafka_recovery/`.
 
 ## Classificação SetFit R1 — SF2
 
@@ -41,19 +20,19 @@ Foram preparados **360 relatos sintéticos**: 150 para treino, 90 para escolher 
 
 O teste independente aplicou a política uma vez aos 120 casos e cinco controles. **Passou nos 10 critérios.** Entre os 96 casos classificáveis, 69 foram concluídos automaticamente: 68 corretamente e um com prioridade incorreta. A categoria aplicada acertou **40/40** e a prioridade, **47/48**. Os 24 casos que exigiam revisão foram todos revisados; não houve conclusão indevida nesses casos. Houve 51 revisões ao todo (24 esperadas e 27 entre os classificáveis). Os 17 casos urgentes foram reconhecidos pelo rótulo bruto; 13 receberam prioridade urgente e quatro foram encaminhados à revisão. O p95 do adaptador foi **71,96 ms**; esse número exclui espera na fila, HTTP Rails, Kafka e tempo visível ao cliente.
 
-O segundo auditor reconstruiu a avaliação e produziu auditoria idêntica em bytes. O pacote R1 aprovado foi integrado no fluxo local e reproduzido em clone limpo. Isso valida a política e a integração observada; não equivale a uma avaliação estatística em produção. Fontes: [protocolo e decisão](https://github.com/leeunam/case-CLOUDWALK-IA/tree/06f5799b44998982af4a8dfe7fd10c2ed0955dd2/docs/planejamento/classificacao-comparativa/sf2), [resultado final independente](https://github.com/leeunam/case-CLOUDWALK-IA/blob/06f5799b44998982af4a8dfe7fd10c2ed0955dd2/docs/evidencias/c05/sf2/final-r1-01/README.md), [aceite integrado C06](https://github.com/leeunam/case-CLOUDWALK-IA/blob/06f5799b44998982af4a8dfe7fd10c2ed0955dd2/docs/evidencias/c06/aceite-integrado/README.md) e [reprodução C07](https://github.com/leeunam/case-CLOUDWALK-IA/blob/06f5799b44998982af4a8dfe7fd10c2ed0955dd2/docs/c07.md).
+O segundo auditor reconstruiu a avaliação e produziu auditoria idêntica em bytes. O pacote R1 aprovado foi integrado no fluxo local e reproduzido em clone limpo. O ensaio usou relatos sintéticos. Fontes: [protocolo e decisão](https://github.com/leeunam/case-CLOUDWALK-IA/tree/e422db3ea6efddc8835036ce2095c48143d81516/docs/planejamento/classificacao-comparativa/sf2), [resultado final independente](https://github.com/leeunam/case-CLOUDWALK-IA/blob/e422db3ea6efddc8835036ce2095c48143d81516/docs/evidencias/c05/sf2/final-r1-01/README.md), [aceite integrado C06](https://github.com/leeunam/case-CLOUDWALK-IA/blob/e422db3ea6efddc8835036ce2095c48143d81516/docs/evidencias/c06/aceite-integrado/README.md) e [reprodução C07](https://github.com/leeunam/case-CLOUDWALK-IA/blob/e422db3ea6efddc8835036ce2095c48143d81516/docs/c07.md).
 
 ## Isolamento por marca — F10
 
 A matriz pública executou **36/36 verificações** na listagem, detalhe, histórico, painel e assinatura Action Cable. Bia acessou Aurora; o caso Horizonte ficou fora da lista dela, retornou 404 genérico no detalhe/histórico e teve a assinatura WebSocket rejeitada. Cris e Alex acessaram as duas marcas. O responsável também confirmou no celular, em dados móveis, o acesso permitido de Bia à Aurora, o bloqueio de Bia à Horizonte e o acesso de Cris ao mesmo caso Horizonte. O aceite funcional também percorreu conversa, handoff humano, resposta, resolução e recarga do histórico.
 
-Esse aceite usou fixture de classificação e atendente mock. A prova de marca e as limitações estão no [aceite integrado F10](https://github.com/leeunam/case-CLOUDWALK-IA/blob/06f5799b44998982af4a8dfe7fd10c2ed0955dd2/docs/f10-aceite-integrado.md), com [observações JSONL da matriz](https://github.com/leeunam/case-CLOUDWALK-IA/tree/06f5799b44998982af4a8dfe7fd10c2ed0955dd2/docs/evidencias/f10/aceite-integrado).
+Esse aceite usou fixture de classificação e atendente mock. A prova de marca e as limitações estão no [aceite integrado F10](https://github.com/leeunam/case-CLOUDWALK-IA/blob/e422db3ea6efddc8835036ce2095c48143d81516/docs/f10-aceite-integrado.md), com [observações JSONL da matriz](https://github.com/leeunam/case-CLOUDWALK-IA/tree/e422db3ea6efddc8835036ce2095c48143d81516/docs/evidencias/f10/aceite-integrado).
 
 ## Atendente experimental — E01
 
 E01 foi um **piloto isolado**, com GPT-5.6 Luna pela Feita e conhecimento fictício separado por marca. A matriz revisada passou em nove verificações técnicas em seis conversas, nove turnos, duas marcas e três canais simulados. A primeira candidata passou em 4/5 e foi reprovada por proposta inválida; essa falha foi mantida no histórico. A revisão da geração produziu um novo ensaio, que passou em 9/9. As 14 chamadas acumuladas reportaram US$ 0,00508345; o ledger registrou US$ 0,1500054 em provisões conservadoras e zero reservas pendentes, dentro do teto aprovado de US$ 1.
 
-O piloto não habilitou atendimento real contínuo, não mediu qualidade estatística em produção e não substituiu o mock na demonstração pública. A Luna foi desligada ao final do ensaio. Canais e conhecimento são sintéticos. Consulte [resultado e limites do E01](https://github.com/leeunam/case-CLOUDWALK-IA/blob/06f5799b44998982af4a8dfe7fd10c2ed0955dd2/docs/evidencias/e01/README.md), [conversas aprovadas](https://github.com/leeunam/case-CLOUDWALK-IA/blob/06f5799b44998982af4a8dfe7fd10c2ed0955dd2/docs/evidencias/e01/piloto-20261126/conversas.md) e [aceite final](https://github.com/leeunam/case-CLOUDWALK-IA/blob/06f5799b44998982af4a8dfe7fd10c2ed0955dd2/docs/evidencias/e01/piloto-20261126/aceite-final.json).
+A Luna foi desligada ao final do ensaio. A demonstração pública usa o mock com canais e conhecimento sintéticos. Consulte [resultado e limites do E01](https://github.com/leeunam/case-CLOUDWALK-IA/blob/e422db3ea6efddc8835036ce2095c48143d81516/docs/evidencias/e01/README.md), [conversas aprovadas](https://github.com/leeunam/case-CLOUDWALK-IA/blob/e422db3ea6efddc8835036ce2095c48143d81516/docs/evidencias/e01/piloto-20261126/conversas.md) e [aceite final](https://github.com/leeunam/case-CLOUDWALK-IA/blob/e422db3ea6efddc8835036ce2095c48143d81516/docs/evidencias/e01/piloto-20261126/aceite-final.json).
 
 ## Localização das reproduções
 

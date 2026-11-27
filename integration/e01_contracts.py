@@ -39,7 +39,7 @@ def read_json_object(raw):
 
 
 def read_private_schema(name):
-    default = Path(__file__).resolve().parents[1] / "docs/contratos/e01"
+    default = Path(__file__).resolve().parents[1] / "contracts/agent-pilot"
     directory = Path(os.environ.get("E01_CONTRACT_DIR", default))
     return read_json_object((directory / f"{name}.schema.json").read_bytes())
 

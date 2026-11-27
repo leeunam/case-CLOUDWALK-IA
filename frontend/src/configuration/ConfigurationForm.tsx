@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
-import { errorMessage } from '../simulator/useResource'
+import { errorMessage } from '../hooks/useResource'
 
 export function ConfigurationForm({ children, submit, onSave, onSaved }: {
   children: ReactNode; submit: string

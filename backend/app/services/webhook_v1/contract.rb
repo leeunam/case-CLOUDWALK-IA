@@ -21,7 +21,7 @@ module WebhookV1
       SCHEMERS.compute_if_absent(definition) do
         require "json_schemer"
 
-        paths = [Rails.root.join("../docs/contratos"), Pathname.new("/workspace/docs/contratos")]
+        paths = [Rails.root.join("../contracts"), Pathname.new("/workspace/contracts")]
         schema_path = paths.map { |path| path.join("schemas/v1.json") }.find(&:file?)
         raise "Schema v1 dos webhooks não encontrado." unless schema_path
 

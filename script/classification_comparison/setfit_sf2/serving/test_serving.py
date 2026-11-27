@@ -21,7 +21,7 @@ from script.classification_comparison.setfit_sf2.runtime_r1.context import encod
 from script.classification_comparison.setfit_sf2.serving import bootstrap
 from script.classification_comparison.setfit_sf2.serving.server import COMPLETE, Handler, Server, Supervisor
 
-FIXTURES = bootstrap.ROOT / "docs/contratos/classification-http/fixtures"
+FIXTURES = bootstrap.ROOT / "contracts/classification-http/fixtures"
 MANIFEST = bootstrap.CAPTURE.parents[1] / "pacote/manifest.json"
 
 

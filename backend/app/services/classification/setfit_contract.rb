@@ -15,7 +15,7 @@ module Classification
     FIELDS = %w[category priority].freeze
 
     def self.current
-      @current ||= new(ENV.fetch("CLASSIFICATION_CONTRACT_DIR", Rails.root.join("../docs/contratos/classification-http")))
+      @current ||= new(ENV.fetch("CLASSIFICATION_CONTRACT_DIR", Rails.root.join("../contracts/classification-http")))
     end
 
     def self.catalog_sha256(catalog)

@@ -1,5 +1,5 @@
 import type { CaseFilters, ListFilters } from '../api/contract'
-import { Icon } from '../Icon'
+import { Icon } from '../components/Icon'
 import { categoryLabels, priorityLabels } from '../simulator/presentation'
 import { staffCaseLabels } from './presentation'
 

@@ -1,14 +1,14 @@
 # Overlay opcional para compose.demo.yml ou compose.publish.yml.
 x-classification: &classification
   CLASSIFICATION_PROVIDER: setfit
-  CLASSIFICATION_CONTRACT_DIR: /workspace/docs/contratos/classification-http
+  CLASSIFICATION_CONTRACT_DIR: /workspace/contracts/classification-http
   CLOUDWALK_JEV_MODE: disabled
 
 services:
   api:
     environment: *classification
     volumes:
-      - ./docs/contratos/classification-http:/workspace/docs/contratos/classification-http:ro
+      - ./contracts/classification-http:/workspace/contracts/classification-http:ro
   worker:
     environment:
       <<: *classification
@@ -16,7 +16,7 @@ services:
     command: [bundle, exec, ruby, bin/jobs]
     networks: [default, inference]
     volumes:
-      - ./docs/contratos/classification-http:/workspace/docs/contratos/classification-http:ro
+      - ./contracts/classification-http:/workspace/contracts/classification-http:ro
     depends_on:
       setfit:
         condition: service_healthy
@@ -30,7 +30,7 @@ services:
     tmpfs:
       - /tmp
     environment:
-      CLASSIFICATION_CONTRACT_DIR: /app/docs/contratos/classification-http
+      CLASSIFICATION_CONTRACT_DIR: /app/contracts/classification-http
       SETFIT_PACKAGE_DIR: /model
     volumes:
       - type: bind
@@ -39,7 +39,7 @@ services:
         read_only: true
         bind:
           create_host_path: false
-      - ./docs/contratos/classification-http:/app/docs/contratos/classification-http:ro
+      - ./contracts/classification-http:/app/contracts/classification-http:ro
     networks: [inference]
     healthcheck:
       test: [CMD, python, -c, "from urllib.request import urlopen; urlopen('http://127.0.0.1:8080/ready', timeout=2).close()"]

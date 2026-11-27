@@ -1,51 +1,24 @@
 # Help desk multimarca
 
-MVP do TAPI Inteli/CloudWalk. A plataforma recebe atendimentos sintéticos de
-Chat, WhatsApp e E-mail, organiza filas por marca, complementa classificações
-incompletas com SetFit R1 e encaminha casos ao atendente simulado ou a um
-analista humano. Supervisores configuram filas, equipes e regras, e consultam
-as decisões registradas.
-
-**Entrega do MVP e piloto E01 concluídos em 26/11/2026.** Os testes de carga
-registraram limites na recuperação após interrupção do Kafka e na escala do
-chat. Veja [estado, evidências e próximos passos](docs/estado-entrega.md).
-
-## Arquitetura
-
-![Fluxo e componentes do help desk](docs/arquitetura/arquitetura.png)
-
-O monólito modular em Rails controla atendimentos, permissões, filas e
-auditoria. A API confirma a entrada após gravá-la no PostgreSQL. O outbox
-grava os pedidos de atendimento na mesma transação que abre a rodada. Solid
-Queue executa os jobs internos. A ponte Python publica pedidos no Kafka e
-devolve as respostas do atendente simulado ao Rails. O Action Cable sinaliza
-as mudanças ao React após a gravação.
-
-Uma classificação válida segue ao atendente simulado. Se categoria ou
-prioridade estiver ausente, o Rails agenda o complemento pelo serviço SetFit
-local. O fluxo preserva campos válidos do canal e encaminha classificações
-inválidas ou incertas para a supervisão.
+Plataforma de atendimento do TAPI Inteli/CloudWalk. Recebe solicitações em
+canais simulados de chat, WhatsApp e e-mail, aplica regras de fila por marca
+e encaminha ao atendimento automático ou humano. A supervisão configura
+marcas, equipes, filas e capacidade, acompanha revisões e consulta a auditoria.
 
 ## Rodar a demonstração
 
-Use Python 3.10+ e Docker com Compose 2.24.4+. Na primeira execução, o Compose
-baixa e constrói as imagens. Rode na raiz do repositório.
+Instale Python 3.10+ e Docker com Compose 2.24.4+. Na raiz do projeto, execute:
 
 ```sh
 python3 script/demo.py up
 python3 script/demo.py check
-```
-
-Abra o [simulador](http://127.0.0.1:45179/) ou a
-[área de operação](http://127.0.0.1:45179/analista). Obtenha a senha do
-supervisor no terminal.
-
-```sh
 python3 script/demo.py login supervisor@example.test
 ```
 
-O comando `check` envia turnos sintéticos e verifica a reentrega pelo fluxo
-Rails/Kafka. Para ver serviços, consultar logs ou encerrar a demonstração:
+Abra o [simulador](http://127.0.0.1:45179/) ou a
+[área de operação](http://127.0.0.1:45179/analista). O último comando
+mostra a credencial de demonstração criada nesta instalação. O verificador
+envia mensagens sintéticas e confere resposta e reentrega via Kafka.
 
 ```sh
 python3 script/demo.py status
@@ -53,22 +26,57 @@ python3 script/demo.py logs api worker outbox events mock
 python3 script/demo.py down
 ```
 
-O padrão usa classificação fixture e dados fictícios. Para instalar e executar
-o pacote SetFit R1, siga o [guia de reprodução local](docs/c07.md). Para
-desenvolvimento, consulte [frontend](frontend/README.md),
-[contratos](docs/contratos/README.md) e [plano de execução](docs/planejamento/plano-de-execucao.md).
+O modo padrão usa dados fictícios, classificação por fixture e um atendente
+simulado. O [guia de validação](VALIDACAO.md) reúne resultados, limites e
+comandos dos ensaios.
 
-## Resultados e limites
+### Usar SetFit R1
 
-- **Carga.** 208 turnos aceitos expiraram nas rodadas com parada do Kafka.
-  O teste de chat confirmou 486 conexões no alvo de
-  mil. Veja [resultados e reprodução da F08](docs/f08.md).
-- **Atendimento.** O piloto E01 testou Luna com conhecimento sintético por
-  marca em ambiente isolado. A demonstração usa o atendente simulado.
-- **Publicação.** A URL é temporária e depende do computador e do túnel
-  ativos. O projeto usa canais simulados e dados fictícios.
+Obtenha o pacote portátil `setfit-r1-package.tar.gz` com o responsável pela
+entrega. Os pesos ficam fora do Git. Em Linux amd64, com Python 3.11:
 
-Consulte o [estado detalhado da entrega](docs/estado-entrega.md), a
-[especificação](docs/planejamento/especificacao-mvp.md), as
-[decisões](docs/planejamento/decisoes.md) e as
-[evidências do piloto E01](docs/evidencias/e01/README.md).
+```sh
+python3 -m script.classification_comparison.setfit_sf2.serving.provision \
+  /caminho/setfit-r1-package.tar.gz /caminho/novo/setfit-r1
+python3 script/demo.py --classifier setfit --model-dir /caminho/novo/setfit-r1 up
+```
+
+Na conversa do simulador, escolha **Não informar** para categoria ou
+prioridade e envie uma mensagem. O SetFit tenta preencher o campo ausente.
+Se a decisão exige revisão, o caso aparece em **Em revisão** na supervisão.
+Use os mesmos argumentos `--classifier` e `--model-dir` ao consultar ou parar
+essa instalação.
+
+## Navegar no código
+
+| Caminho | Função |
+| --- | --- |
+| [`frontend/`](frontend/) | React e TypeScript. Em `src/`, `simulator`, `staff` e `configuration` são as áreas do produto. `api`, `components` e `hooks` são compartilhados. |
+| [`backend/`](backend/) | Rails API. Controllers recebem comandos, services executam operações, models persistem o domínio e jobs tratam tarefas assíncronas. |
+| [`integration/`](integration/) | Ponte Python com Kafka, atendente simulado e piloto conversacional com conhecimento por marca. |
+| [`contracts/`](contracts/) | OpenAPI, JSON Schemas e fixtures de API, eventos Kafka, SetFit e piloto conversacional. |
+| [`script/`](script/) | Comandos de demonstração, publicação e verificações organizadas por função. |
+| [`assets/architecture/`](assets/architecture/) | Diagrama da arquitetura e fonte Mermaid. |
+
+Consulte as [regras de atendimento e os contratos](ARQUITETURA.md) antes de
+alterar os fluxos. Em trabalhos paralelos, abra uma branch e uma worktree por
+tarefa a partir da mesma base. Preserve as alterações locais de outras
+frentes e combine alterações de contrato antes de integrá-las.
+
+## Testes de desenvolvimento
+
+Execute os comandos na raiz. O Compose fornece as versões de Node, Ruby e
+PostgreSQL definidas no projeto.
+
+```sh
+docker compose run --build --rm --no-deps web npm test
+docker compose run --rm --no-deps web npm run build
+docker compose up -d --wait db
+docker compose run --build --rm --no-deps -e RAILS_ENV=test api bundle exec rails db:prepare test
+docker compose run --rm --no-deps api bundle exec ruby /workspace/script/check_contracts.rb
+```
+
+Os arquivos remanescentes em `docs/` são insumos versionados de avaliações
+anteriores. Alguns scripts de classificação mantêm caminhos e hashes
+fixados pela avaliação do SetFit. O [guia de validação](VALIDACAO.md) aponta
+para os relatórios históricos.

@@ -8,11 +8,12 @@ x-backend: &backend
     POSTGRES_USER: ${POSTGRES_USER:-cloudwalk}
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cloudwalk_local}
     KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    CLASSIFICATION_CONTRACT_DIR: /workspace/contracts/classification-http
     CLOUDWALK_SIMULATOR_BRANDS: ${CLOUDWALK_SIMULATOR_BRANDS:-aurora,horizonte}
   volumes:
     - ./backend:/app
     - ./script:/workspace/script:ro
-    - ./docs/contratos:/workspace/docs/contratos:ro
+    - ./contracts:/workspace/contracts:ro
 
 services:
   db:

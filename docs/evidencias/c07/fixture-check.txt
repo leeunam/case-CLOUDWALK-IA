@@ -1,8 +1,0 @@
-Entrada persistida case_id=365a58ab-3214-4847-9776-d4fc39e39048 correlation_id=cf6ac136-334e-42fa-84ea-0c6f193fddc2
-Kafka pedido=28bcf54e-c92e-4a52-a5c0-87ff58cd0224 retorno=a80b88c5-c7a8-5d84-a5b6-b51c26ec6a61 rodada=e12b83ac-4fac-4fe9-99ce-207d85122058
-Kafka pedido=3a4bd705-092f-40c4-9ce1-30e26876be1e retorno=405f9ed8-6a29-52aa-925b-07638aef9ac5 rodada=de6e2275-c8dc-4f4e-af80-a5059e5aa972
-1 customer  Qual é o prazo de confirmação de um Pix?
-2 ai  Consulte o comprovante no histórico para conferir a confirmação.
-3 customer  Funcionou. Obrigado!
-4 ai  Certo. Vou encerrar este atendimento.
-Verificação F02 concluída: dois turnos, resolução e um efeito por entrada e retorno.

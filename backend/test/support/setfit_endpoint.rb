@@ -6,7 +6,7 @@ class SetfitEndpoint
   attr_accessor :reply
 
   def self.fixture(name)
-    directory = ENV.fetch("CLASSIFICATION_CONTRACT_DIR", Rails.root.join("../docs/contratos/classification-http"))
+    directory = ENV.fetch("CLASSIFICATION_CONTRACT_DIR", Rails.root.join("../contracts/classification-http"))
     JSON.parse(File.read(File.join(directory, "fixtures", "#{name}.json")))
   end
 
